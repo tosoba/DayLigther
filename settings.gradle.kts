@@ -13,4 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "DayLighter"
-include ':app'
+include(":app")
+include(":core:common")
