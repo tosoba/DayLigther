@@ -1,13 +1,9 @@
 plugins {
-    id("daylighter.android.library")
-    id("daylighter.android.library.jacoco")
-    id("daylighter.android.hilt")
+  id("daylighter.android.library")
+  id("daylighter.android.library.jacoco")
+  id("daylighter.android.hilt")
 }
 
-android {
-    namespace = "com.trm.daylighter.core.common"
-}
+android { namespace = "com.trm.daylighter.core.common" }
 
-dependencies {
-    implementation(libs.kotlinx.coroutines.android)
-}
+dependencies { implementation(libs.kotlinx.coroutines.android) }

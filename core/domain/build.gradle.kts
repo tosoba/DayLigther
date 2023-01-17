@@ -1,7 +1,3 @@
-plugins {
-    id("kotlin")
-}
+plugins { id("kotlin") }
 
-dependencies {
-    implementation(libs.kotlinx.datetime)
-}
+dependencies { implementation(libs.kotlinx.datetime) }
