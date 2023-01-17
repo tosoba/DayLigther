@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO: Remove once https://youtrack.jetbrains.com/issue/KTIJ-19369 is fixed
-plugins {
-  id("daylighter.android.library")
-  id("daylighter.android.hilt")
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
 
-android {
-  namespace = "com.trm.daylighter.core.database"
-}
-
-dependencies {
-  implementation(libs.kotlinx.coroutines.android)
-  implementation(libs.kotlinx.datetime)
-}
+rootProject.name = "build-logic"
+include(":convention")

@@ -1,6 +1,7 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("daylighter.android.application")
+    id("daylighter.android.application.compose")
+    id("daylighter.android.hilt")
 }
 
 android {
