@@ -43,6 +43,3 @@ _sandbox
 
 # Android Studio captures folder
 captures/
-
-# Main gradle folder
-gradle/

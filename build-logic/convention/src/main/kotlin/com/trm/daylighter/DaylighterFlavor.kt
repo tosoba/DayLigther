@@ -15,19 +15,19 @@ enum class FlavorDimension {
 // purposes, or from a production backend server which supplies up-to-date, real content.
 // These two product flavors reflect this behaviour.
 @Suppress("EnumEntryName")
-enum class NiaFlavor(val dimension: FlavorDimension, val applicationIdSuffix: String? = null) {
+enum class DaylighterFlavor(val dimension: FlavorDimension, val applicationIdSuffix: String? = null) {
   demo(FlavorDimension.contentType),
   prod(FlavorDimension.contentType, ".prod")
 }
 
 fun Project.configureFlavors(
   commonExtension: CommonExtension<*, *, *, *>,
-  flavorConfigurationBlock: ProductFlavor.(flavor: NiaFlavor) -> Unit = {}
+  flavorConfigurationBlock: ProductFlavor.(flavor: DaylighterFlavor) -> Unit = {}
 ) {
   commonExtension.apply {
     flavorDimensions += FlavorDimension.contentType.name
     productFlavors {
-      NiaFlavor.values().forEach {
+      DaylighterFlavor.values().forEach {
         create(it.name) {
           dimension = it.dimension.name
           flavorConfigurationBlock(this, it)

@@ -21,4 +21,10 @@ dependencies {
   implementation(libs.okhttp.logging)
   implementation(libs.retrofit.core)
   implementation(libs.retrofit.kotlin.serialization)
+
+  api(libs.junit4)
+  api(libs.kotlinx.coroutines.test)
+
+  testImplementation(libs.dagger.dagger)
+  kaptTest(libs.dagger.compiler)
 }
