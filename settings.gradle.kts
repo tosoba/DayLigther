@@ -33,10 +33,12 @@ include(":core:domain")
 
 include(":core:ui")
 
-include(":sync")
+include(":feature:about")
+
+include(":feature:day")
 
 include(":feature:intro")
 
 include(":feature:location")
 
-include(":feature:day")
+include(":sync")
