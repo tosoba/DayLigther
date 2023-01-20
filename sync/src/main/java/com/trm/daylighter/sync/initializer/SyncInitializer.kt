@@ -22,7 +22,7 @@ class SyncInitializer : Initializer<Sync> {
       enqueueUniquePeriodicWork(
         SyncWorkName,
         ExistingPeriodicWorkPolicy.KEEP,
-        SyncWorker.startUpSyncWork()
+        SyncWorker.workRequest()
       )
     }
 

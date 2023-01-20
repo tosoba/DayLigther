@@ -45,8 +45,13 @@ android {
 dependencies {
   implementation(project(":core:common"))
   implementation(project(":core:data"))
+  implementation(project(":core:datastore"))
   implementation(project(":core:domain"))
   implementation(project(":core:ui"))
+
+  implementation(project(":feature:day"))
+  implementation(project(":feature:intro"))
+  implementation(project(":feature:location"))
 
   implementation(project(":sync"))
 

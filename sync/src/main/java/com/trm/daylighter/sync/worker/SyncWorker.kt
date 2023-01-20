@@ -25,7 +25,7 @@ constructor(
     withContext(ioDispatcher) { if (repo.sync()) Result.success() else Result.retry() }
 
   companion object {
-    fun startUpSyncWork(): PeriodicWorkRequest =
+    fun workRequest(): PeriodicWorkRequest =
       PeriodicWorkRequestBuilder<DelegatingWorker>(Duration.ofDays(1L))
         .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
         .setInputData(SyncWorker::class.delegatedData())
