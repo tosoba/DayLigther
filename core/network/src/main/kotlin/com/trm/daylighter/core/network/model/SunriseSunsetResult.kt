@@ -19,7 +19,7 @@ data class SunriseSunsetResult(
   @Serializable(ZonedDateTimeSerializer::class)
   @SerialName("civil_twilight_end")
   val civilTwilightEnd: ZonedDateTime,
-  @SerialName("day_length") val dayLength: Int,
+  @SerialName("day_length") val dayLengthSeconds: Int,
   @Serializable(ZonedDateTimeSerializer::class)
   @SerialName("nautical_twilight_begin")
   val nauticalTwilightBegin: ZonedDateTime,
