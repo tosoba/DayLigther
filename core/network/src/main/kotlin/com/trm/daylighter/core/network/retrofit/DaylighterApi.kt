@@ -5,7 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface DaylighterApi {
-  @GET("/json")
+  @GET("/json?formatted=0")
   suspend fun getSunriseSunset(
     @Query("lat") lat: Double,
     @Query("lng") lng: Double,
