@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-  android { namespace = "com.trm.daylighter.core.common" }
+  android { namespace = "com.trm.daylighter.core.data" }
 
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
