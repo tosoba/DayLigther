@@ -1,12 +1,17 @@
 package com.trm.daylighter.feature.location
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -32,20 +37,29 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       }
     )
 
-  AndroidView(
-    factory = { mapView },
-    update = {
-      with(it) {
-        setTileSource(defaultTileSource)
-        isTilesScaledToDpi = true
-        controller.setZoom(zoom)
-        mapOrientation = orientation
-        setMultiTouchControls(true)
-        setExpectedCenter(GeoPoint(latitude, longitude))
-      }
-    },
-    modifier = modifier,
-  )
+  Box(modifier = modifier) {
+    AndroidView(
+      factory = { mapView },
+      update = {
+        with(it) {
+          setDefaultConfig()
+          restoreState(
+            latitude = latitude,
+            longitude = longitude,
+            zoom = zoom,
+            orientation = orientation
+          )
+        }
+      },
+      modifier = Modifier.fillMaxSize(),
+    )
+
+    Icon(
+      painter = painterResource(id = R.drawable.marker),
+      contentDescription = "center_marker",
+      modifier = Modifier.align(Alignment.Center)
+    )
+  }
 }
 
 @Composable
@@ -86,6 +100,23 @@ fun rememberMapLifecycleObserver(
       }
     }
   }
+}
+
+private fun MapView.setDefaultConfig() {
+  setTileSource(defaultTileSource)
+  isTilesScaledToDpi = true
+  setMultiTouchControls(true)
+}
+
+private fun MapView.restoreState(
+  latitude: Double,
+  longitude: Double,
+  zoom: Double,
+  orientation: Float
+) {
+  controller.setZoom(zoom)
+  mapOrientation = orientation
+  setExpectedCenter(GeoPoint(latitude, longitude))
 }
 
 private val defaultTileSource: XYTileSource
