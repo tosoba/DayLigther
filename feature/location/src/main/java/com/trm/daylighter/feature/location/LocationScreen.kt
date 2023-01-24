@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 
 @Composable
@@ -121,6 +122,19 @@ private fun MapView.setDefaultConfig() {
   setTileSource(defaultTileSource)
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
+  zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+  isHorizontalMapRepetitionEnabled = false
+  isVerticalMapRepetitionEnabled = false
+  setScrollableAreaLimitLatitude(
+    MapView.getTileSystem().maxLatitude,
+    MapView.getTileSystem().minLatitude,
+    0
+  )
+  setScrollableAreaLimitLongitude(
+    MapView.getTileSystem().minLongitude,
+    MapView.getTileSystem().maxLongitude,
+    0
+  )
 }
 
 private fun MapView.restoreState(
