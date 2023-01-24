@@ -8,12 +8,12 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -30,7 +30,11 @@ import org.osmdroid.views.MapView
 fun LocationScreen(modifier: Modifier = Modifier) {
   var latitude by rememberSaveable { mutableStateOf(0.0) }
   var longitude by rememberSaveable { mutableStateOf(0.0) }
-  var zoom by rememberSaveable { mutableStateOf(0.0) }
+  val minZoom =
+    calculateMinZoomLevel(
+      with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }.toInt()
+    )
+  var zoom by rememberSaveable { mutableStateOf(minZoom) }
   var orientation by rememberSaveable { mutableStateOf(0f) }
 
   val mapView =
@@ -48,7 +52,7 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       factory = { mapView },
       update = {
         with(it) {
-          setDefaultConfig()
+          setDefaultConfig(minZoom)
           restoreState(
             latitude = latitude,
             longitude = longitude,
@@ -118,7 +122,7 @@ fun rememberMapLifecycleObserver(
   }
 }
 
-private fun MapView.setDefaultConfig() {
+private fun MapView.setDefaultConfig(minZoom: Double) {
   setTileSource(defaultTileSource)
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
@@ -135,6 +139,7 @@ private fun MapView.setDefaultConfig() {
     MapView.getTileSystem().maxLongitude,
     0
   )
+  minZoomLevel = minZoom
 }
 
 private fun MapView.restoreState(
@@ -170,3 +175,17 @@ private val defaultTileSource: XYTileSource
           TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
       )
     )
+
+private const val EQUATOR_LENGTH = 40075004.0
+private const val MERIDIAN_LENGTH = 20003930.0
+
+private fun calculateMinZoomLevel(screenWidth: Int): Double {
+  val widthInPixels = screenWidth.toDouble()
+  var metersPerPixel = EQUATOR_LENGTH / 256
+  var zoomLevel = 0
+  while (metersPerPixel * widthInPixels > EQUATOR_LENGTH) {
+    metersPerPixel /= 2.0
+    ++zoomLevel
+  }
+  return zoomLevel.toDouble()
+}
