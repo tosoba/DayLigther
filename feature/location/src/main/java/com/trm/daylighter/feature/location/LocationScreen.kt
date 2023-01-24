@@ -2,6 +2,10 @@ package com.trm.daylighter.feature.location
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
@@ -12,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -59,6 +64,16 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       contentDescription = "center_marker",
       modifier = Modifier.align(Alignment.Center)
     )
+
+    FloatingActionButton(
+      modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
+      onClick = {},
+    ) {
+      Icon(
+        imageVector = Icons.Filled.MyLocation,
+        contentDescription = "my_location",
+      )
+    }
   }
 }
 
