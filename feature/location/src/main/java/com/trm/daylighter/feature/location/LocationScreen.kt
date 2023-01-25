@@ -1,11 +1,13 @@
 package com.trm.daylighter.feature.location
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -13,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -65,6 +69,36 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       Spacer(modifier = Modifier.height(10.dp))
       FloatingActionButton(onClick = {}) {
         Icon(imageVector = Icons.Filled.Done, contentDescription = "save_location")
+      }
+    }
+
+    var infoExpanded by rememberSaveable { mutableStateOf(false) }
+    val infoContainerColor =
+      animateColorAsState(
+        targetValue =
+          if (infoExpanded) MaterialTheme.colorScheme.background
+          else FloatingActionButtonDefaults.containerColor
+      )
+    FloatingActionButton(
+      modifier = Modifier.align(Alignment.TopEnd).padding(20.dp),
+      containerColor = infoContainerColor.value,
+      onClick = { infoExpanded = !infoExpanded }
+    ) {
+      Row(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(imageVector = Icons.Filled.Info, contentDescription = "location_info")
+        AnimatedVisibility(visible = infoExpanded) {
+          Row {
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+              text = stringResource(R.string.center_map_on_location),
+              style = MaterialTheme.typography.bodyLarge,
+              textAlign = TextAlign.Center
+            )
+          }
+        }
       }
     }
   }
