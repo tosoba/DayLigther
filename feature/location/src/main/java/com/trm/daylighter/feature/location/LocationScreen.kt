@@ -29,6 +29,8 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
 
+const val locationRoute = "location_route"
+
 @Composable
 fun LocationScreen(modifier: Modifier = Modifier) {
   var mapPosition by rememberSaveable { mutableStateOf(MapPosition()) }

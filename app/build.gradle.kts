@@ -10,8 +10,6 @@ android {
 
   defaultConfig {
     applicationId = "com.trm.daylighter"
-    minSdk = 21
-    targetSdk = 33
     versionCode = 1
     versionName = "1.0"
 
@@ -56,13 +54,19 @@ dependencies {
 
   implementation(project(":sync"))
 
+  implementation(libs.accompanist.systemuicontroller)
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.core.splashscreen)
+  implementation(libs.androidx.compose.runtime)
+  implementation(libs.androidx.lifecycle.runtimeCompose)
+  implementation(libs.androidx.compose.runtime.tracing)
+  implementation(libs.androidx.compose.material3.windowSizeClass)
+  implementation(libs.androidx.hilt.navigation.compose)
+  implementation(libs.androidx.navigation.compose)
+  implementation(libs.androidx.window.manager)
+  implementation(libs.androidx.profileinstaller)
+
   implementation(libs.osmdroid)
-
-  implementation("androidx.core:core-ktx:1.9.0")
-  implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-  implementation("androidx.activity:activity-compose:1.6.1")
-
-  implementation("androidx.compose.ui:ui:1.3.3")
-  implementation("androidx.compose.ui:ui-tooling-preview:1.3.3")
-  implementation("androidx.compose.material3:material3:1.1.0-alpha04")
 }
