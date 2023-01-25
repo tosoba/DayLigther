@@ -1,9 +1,8 @@
 package com.trm.daylighter.feature.location
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -56,14 +55,17 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       modifier = Modifier.align(Alignment.Center)
     )
 
-    FloatingActionButton(
-      modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-      onClick = {},
-    ) {
-      Icon(
-        imageVector = Icons.Filled.MyLocation,
-        contentDescription = "my_location",
-      )
+    Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
+      FloatingActionButton(onClick = {}) {
+        Icon(
+          imageVector = Icons.Filled.MyLocation,
+          contentDescription = "my_location",
+        )
+      }
+      Spacer(modifier = Modifier.height(10.dp))
+      FloatingActionButton(onClick = {}) {
+        Icon(imageVector = Icons.Filled.Done, contentDescription = "save_location")
+      }
     }
   }
 }
