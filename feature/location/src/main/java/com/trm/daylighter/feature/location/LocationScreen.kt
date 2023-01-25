@@ -24,6 +24,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
+import org.osmdroid.events.MapAdapter
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
 
 @Composable
@@ -43,12 +46,24 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       }
     )
 
+  var infoExpanded by rememberSaveable { mutableStateOf(true) }
+
   Box(modifier = modifier) {
     AndroidView(
       factory = { mapView },
       update = {
         it.setDefaultConfig()
         it.restorePosition(mapPosition)
+        it.addMapListener(
+          object : MapAdapter() {
+            override fun onScroll(event: ScrollEvent?): Boolean = collapseInfo()
+            override fun onZoom(event: ZoomEvent?): Boolean = collapseInfo()
+            private fun collapseInfo(): Boolean {
+              infoExpanded = false
+              return false
+            }
+          }
+        )
       },
       modifier = Modifier.fillMaxSize(),
     )
@@ -72,7 +87,6 @@ fun LocationScreen(modifier: Modifier = Modifier) {
       }
     }
 
-    var infoExpanded by rememberSaveable { mutableStateOf(false) }
     val infoContainerColor =
       animateColorAsState(
         targetValue =
