@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
@@ -74,6 +76,22 @@ class MainActivity : ComponentActivity() {
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onBackground,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            topBar = {
+              CenterAlignedTopAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                navigationIcon = {
+                  IconButton(
+                    onClick = {
+                      scope.launch {
+                        if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                      }
+                    }
+                  ) {
+                    Icon(imageVector = Icons.Filled.List, contentDescription = "toggle_drawer")
+                  }
+                }
+              )
+            },
             floatingActionButton = {
               FloatingActionButton(
                 onClick = {
