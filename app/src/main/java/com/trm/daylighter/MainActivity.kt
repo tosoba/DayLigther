@@ -3,12 +3,15 @@ package com.trm.daylighter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,8 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.trm.daylighter.feature.about.AboutScreen
@@ -44,7 +49,10 @@ class MainActivity : ComponentActivity() {
         val scope = rememberCoroutineScope()
         val navController = rememberNavController()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
         ModalNavigationDrawer(
+          gesturesEnabled = currentRoute == dayRoute,
           drawerState = drawerState,
           drawerContent = {
             ModalDrawerSheet {
@@ -77,20 +85,31 @@ class MainActivity : ComponentActivity() {
             contentColor = MaterialTheme.colorScheme.onBackground,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
-              CenterAlignedTopAppBar(
-                title = { Text(stringResource(id = R.string.app_name)) },
-                navigationIcon = {
-                  IconButton(
-                    onClick = {
-                      scope.launch {
-                        if (drawerState.isOpen) drawerState.close() else drawerState.open()
+              AnimatedVisibility(visible = currentRoute != locationRoute) {
+                CenterAlignedTopAppBar(
+                  title = { Text(stringResource(id = R.string.app_name)) },
+                  navigationIcon = {
+                    if (currentRoute == dayRoute) {
+                      IconButton(
+                        onClick = {
+                          scope.launch {
+                            if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                          }
+                        }
+                      ) {
+                        Icon(imageVector = Icons.Filled.Menu, contentDescription = "toggle_drawer")
+                      }
+                    } else {
+                      IconButton(onClick = navController::popBackStack) {
+                        Icon(
+                          imageVector = Icons.Filled.ArrowBack,
+                          contentDescription = "back_arrow"
+                        )
                       }
                     }
-                  ) {
-                    Icon(imageVector = Icons.Filled.List, contentDescription = "toggle_drawer")
                   }
-                }
-              )
+                )
+              }
             },
             floatingActionButton = {
               FloatingActionButton(
@@ -105,18 +124,13 @@ class MainActivity : ComponentActivity() {
               }
             }
           ) {
-            NavHost(
+            DaylighterNavHost(
               navController = navController,
-              startDestination = dayRoute,
               modifier =
                 Modifier.padding(it)
                   .consumedWindowInsets(it)
                   .windowInsetsPadding(WindowInsets.safeDrawing)
-            ) {
-              composable(dayRoute) { DayScreen() }
-              composable(locationRoute) { LocationScreen() }
-              composable(aboutRoute) { AboutScreen() }
-            }
+            )
           }
         }
       }
@@ -126,6 +140,18 @@ class MainActivity : ComponentActivity() {
   companion object {
     private val drawerDestinations =
       listOf(DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About"))
+  }
+}
+
+@Composable
+private fun DaylighterNavHost(
+  navController: NavHostController,
+  modifier: Modifier = Modifier,
+) {
+  NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
+    composable(dayRoute) { DayScreen() }
+    composable(locationRoute) { LocationScreen() }
+    composable(aboutRoute) { AboutScreen() }
   }
 }
 

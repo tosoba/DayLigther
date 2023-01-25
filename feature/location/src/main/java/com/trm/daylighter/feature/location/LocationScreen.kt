@@ -24,7 +24,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
-import org.osmdroid.events.MapAdapter
+import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
@@ -57,7 +57,7 @@ fun LocationScreen(modifier: Modifier = Modifier) {
         it.setDefaultConfig()
         it.restorePosition(mapPosition)
         it.addMapListener(
-          object : MapAdapter() {
+          object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean = collapseInfo()
             override fun onZoom(event: ZoomEvent?): Boolean = collapseInfo()
             private fun collapseInfo(): Boolean {
