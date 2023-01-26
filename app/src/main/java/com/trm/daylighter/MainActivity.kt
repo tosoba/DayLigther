@@ -6,9 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,7 +30,11 @@ import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.LocationRoute
 import com.trm.daylighter.feature.location.locationRoute
+import com.trm.daylighter.locations.LocationsScreen
+import com.trm.daylighter.locations.locationsRoute
 import com.trm.daylighter.ui.theme.DayLighterTheme
+import com.trm.daylighter.widget.WidgetsScreen
+import com.trm.daylighter.widget.widgetsRoute
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -90,7 +92,14 @@ class MainActivity : ComponentActivity() {
                 CenterAlignedTopAppBar(
                   title = { Text(stringResource(id = R.string.app_name)) },
                   navigationIcon = {
-                    if (currentRoute == dayRoute) {
+                    if (currentRoute != dayRoute) {
+                      IconButton(onClick = navController::popBackStack) {
+                        Icon(
+                          imageVector = Icons.Filled.ArrowBack,
+                          contentDescription = "back_arrow"
+                        )
+                      }
+                    } else {
                       IconButton(
                         onClick = {
                           scope.launch {
@@ -99,13 +108,6 @@ class MainActivity : ComponentActivity() {
                         }
                       ) {
                         Icon(imageVector = Icons.Filled.Menu, contentDescription = "toggle_drawer")
-                      }
-                    } else {
-                      IconButton(onClick = navController::popBackStack) {
-                        Icon(
-                          imageVector = Icons.Filled.ArrowBack,
-                          contentDescription = "back_arrow"
-                        )
                       }
                     }
                   }
@@ -128,7 +130,11 @@ class MainActivity : ComponentActivity() {
 
   companion object {
     private val drawerDestinations =
-      listOf(DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About"))
+      listOf(
+        DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, "Widgets"),
+        DrawerDestination(route = locationsRoute, icon = Icons.Filled.LocationOn, "Locations"),
+        DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About")
+      )
   }
 }
 
@@ -153,6 +159,8 @@ private fun DaylighterNavHost(
       LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
     }
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
+    composable(locationsRoute) { LocationsScreen(modifier = Modifier.fillMaxSize()) }
+    composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
 
