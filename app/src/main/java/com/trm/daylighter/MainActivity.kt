@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
@@ -112,20 +111,6 @@ class MainActivity : ComponentActivity() {
                   }
                 )
               }
-            },
-            floatingActionButton = {
-              AnimatedVisibility(visible = currentRoute != locationRoute) {
-                FloatingActionButton(
-                  onClick = {
-                    navController.navigate(
-                      route = locationRoute,
-                      navOptions = navOptions { launchSingleTop = true }
-                    )
-                  }
-                ) {
-                  Icon(imageVector = Icons.Filled.Add, "")
-                }
-              }
             }
           ) {
             DaylighterNavHost(
@@ -153,7 +138,17 @@ private fun DaylighterNavHost(
   modifier: Modifier = Modifier,
 ) {
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
-    composable(dayRoute) { DayRoute(modifier = Modifier.fillMaxSize()) }
+    composable(dayRoute) {
+      DayRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocation = {
+          navController.navigate(
+            route = locationRoute,
+            navOptions = navOptions { launchSingleTop = true }
+          )
+        }
+      )
+    }
     composable(locationRoute) {
       LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
     }

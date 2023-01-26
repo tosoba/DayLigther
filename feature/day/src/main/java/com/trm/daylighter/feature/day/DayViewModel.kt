@@ -6,7 +6,6 @@ import com.trm.daylighter.domain.repo.LocationRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class DayViewModel @Inject constructor(repo: LocationRepo) : ViewModel() {

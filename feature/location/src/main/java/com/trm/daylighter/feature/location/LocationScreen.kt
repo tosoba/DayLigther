@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MyLocation
@@ -40,12 +41,17 @@ fun LocationRoute(
   viewModel: LocationViewModel = hiltViewModel()
 ) {
   LaunchedEffect(Unit) { viewModel.savedFlow.collect { navController.popBackStack() } }
-  LocationScreen(onSaveLocationClick = viewModel::saveLocation, modifier = modifier)
+  LocationScreen(
+    onSaveLocationClick = viewModel::saveLocation,
+    modifier = modifier,
+    onBackClick = navController::popBackStack
+  )
 }
 
 @Composable
 private fun LocationScreen(
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
+  onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   var savedMapPosition by rememberSaveable { mutableStateOf(MapPosition()) }
@@ -114,30 +120,38 @@ private fun LocationScreen(
       }
     }
 
-    val infoContainerColor =
-      animateColorAsState(
-        targetValue =
-          if (infoExpanded) MaterialTheme.colorScheme.background
-          else FloatingActionButtonDefaults.containerColor
-      )
-    FloatingActionButton(
-      modifier = Modifier.align(Alignment.TopEnd).padding(20.dp),
-      containerColor = infoContainerColor.value,
-      onClick = { infoExpanded = !infoExpanded }
-    ) {
-      Row(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Row(modifier = Modifier.padding(20.dp)) {
+      SmallFloatingActionButton(onClick = onBackClick, modifier=  Modifier.padding(end = 5.dp)) {
+        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
+      }
+
+      Spacer(modifier = Modifier.weight(1f))
+
+      val infoContainerColor =
+        animateColorAsState(
+          targetValue =
+            if (infoExpanded) MaterialTheme.colorScheme.background
+            else FloatingActionButtonDefaults.containerColor
+        )
+      FloatingActionButton(
+        modifier = Modifier.padding(start = 5.dp),
+        containerColor = infoContainerColor.value,
+        onClick = { infoExpanded = !infoExpanded }
       ) {
-        Icon(imageVector = Icons.Filled.Info, contentDescription = "location_info")
-        AnimatedVisibility(visible = infoExpanded) {
-          Row {
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-              text = stringResource(R.string.center_map_on_location),
-              style = MaterialTheme.typography.bodyLarge,
-              textAlign = TextAlign.Center
-            )
+        Row(
+          modifier = Modifier.padding(horizontal = 16.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Icon(imageVector = Icons.Filled.Info, contentDescription = "location_info")
+          AnimatedVisibility(visible = infoExpanded) {
+            Row {
+              Spacer(modifier = Modifier.width(12.dp))
+              Text(
+                text = stringResource(R.string.center_map_on_location),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+              )
+            }
           }
         }
       }
