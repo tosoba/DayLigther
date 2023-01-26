@@ -41,4 +41,8 @@ include(":feature:intro")
 
 include(":feature:location")
 
+include(":feature:locations")
+
+include(":feature:widget")
+
 include(":sync")
