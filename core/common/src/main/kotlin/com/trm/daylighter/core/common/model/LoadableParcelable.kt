@@ -3,6 +3,7 @@ package com.trm.daylighter.core.common.model
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import com.trm.daylighter.domain.model.*
 
 data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : Parcelable {
   constructor(
@@ -16,7 +17,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
       FailedFirst::class.java.name -> FailedFirst(parcel.readThrowable())
       FailedNext::class.java.name -> {
         FailedNext(
-          value = parcel.readParcelableByClassName<T>(className),
+          data = parcel.readParcelableByClassName<T>(className),
           error = parcel.readThrowable(),
         )
       }
@@ -27,7 +28,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
 
   override fun writeToParcel(parcel: Parcel, flag: Int) {
     parcel.writeString(loadable::class.java.name)
-    if (loadable is WithValue) parcel.writeParcelable(loadable.value, 0)
+    if (loadable is WithData) parcel.writeParcelable(loadable.data, 0)
     if (loadable is Failed) loadable.error?.let(parcel::writeSerializable)
   }
 

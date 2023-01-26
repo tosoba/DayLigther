@@ -6,4 +6,8 @@ plugins {
 
 android { namespace = "com.trm.daylighter.core.common" }
 
-dependencies { implementation(libs.kotlinx.coroutines.android) }
+dependencies {
+  implementation(project(":core:domain"))
+
+  implementation(libs.kotlinx.coroutines.android)
+}
