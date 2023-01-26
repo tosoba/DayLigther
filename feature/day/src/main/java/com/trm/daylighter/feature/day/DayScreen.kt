@@ -25,20 +25,24 @@ fun DayRoute(
   viewModel: DayViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
-  DayScreen(locationsLoadable = locations.value, modifier = modifier, onAddLocation = onAddLocation)
+  DayScreen(
+    locationsLoadable = locations.value,
+    onAddLocationClick = onAddLocation,
+    modifier = modifier
+  )
 }
 
 @Composable
 private fun DayScreen(
   locationsLoadable: Loadable<List<Location>>,
-  onAddLocation: () -> Unit,
+  onAddLocationClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     when (locationsLoadable) {
       is WithData -> {
         if (locationsLoadable.data.isEmpty()) {
-          Button(onClick = onAddLocation, modifier = Modifier.align(Alignment.Center)) {
+          Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
             Text(text = "Add location")
           }
         } else {
