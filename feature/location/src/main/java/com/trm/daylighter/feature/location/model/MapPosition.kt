@@ -6,8 +6,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class MapPosition(
-  val lat: Double = MapDefaults.LAT,
-  val lng: Double = MapDefaults.LNG,
+  val latitude: Double = MapDefaults.LATITUDE,
+  val longitude: Double = MapDefaults.LONGITUDE,
   val zoom: Double = MapDefaults.MIN_ZOOM,
   val orientation: Float = MapDefaults.ORIENTATION
 ) : Parcelable

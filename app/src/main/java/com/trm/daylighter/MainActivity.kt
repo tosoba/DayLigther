@@ -29,11 +29,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
-import com.trm.daylighter.feature.day.DayScreen
+import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
-import com.trm.daylighter.feature.location.LocationScreen
+import com.trm.daylighter.feature.location.LocationRoute
 import com.trm.daylighter.feature.location.locationRoute
 import com.trm.daylighter.ui.theme.DayLighterTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
   ExperimentalComposeUiApi::class,
   ExperimentalLayoutApi::class
 )
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -112,15 +114,17 @@ class MainActivity : ComponentActivity() {
               }
             },
             floatingActionButton = {
-              FloatingActionButton(
-                onClick = {
-                  navController.navigate(
-                    route = locationRoute,
-                    navOptions = navOptions { launchSingleTop = true }
-                  )
+              AnimatedVisibility(visible = currentRoute != locationRoute) {
+                FloatingActionButton(
+                  onClick = {
+                    navController.navigate(
+                      route = locationRoute,
+                      navOptions = navOptions { launchSingleTop = true }
+                    )
+                  }
+                ) {
+                  Icon(imageVector = Icons.Filled.Add, "")
                 }
-              ) {
-                Icon(imageVector = Icons.Filled.Add, "")
               }
             }
           ) {
@@ -149,9 +153,11 @@ private fun DaylighterNavHost(
   modifier: Modifier = Modifier,
 ) {
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
-    composable(dayRoute) { DayScreen() }
-    composable(locationRoute) { LocationScreen() }
-    composable(aboutRoute) { AboutScreen() }
+    composable(dayRoute) { DayRoute(modifier = Modifier.fillMaxSize()) }
+    composable(locationRoute) {
+      LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
+    }
+    composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
 

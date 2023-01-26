@@ -19,5 +19,5 @@ internal fun MapView.setDefaultConfig() {
 internal fun MapView.restorePosition(position: MapPosition) {
   controller.setZoom(position.zoom)
   mapOrientation = position.orientation
-  setExpectedCenter(GeoPoint(position.lat, position.lng))
+  setExpectedCenter(GeoPoint(position.latitude, position.longitude))
 }

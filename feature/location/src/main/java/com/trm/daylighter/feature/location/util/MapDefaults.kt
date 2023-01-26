@@ -28,7 +28,7 @@ internal object MapDefaults {
       )
 
   const val MIN_ZOOM: Double = 2.0
-  const val LAT = 0.0
-  const val LNG = 0.0
+  const val LATITUDE = 0.0
+  const val LONGITUDE = 0.0
   const val ORIENTATION = 0f
 }

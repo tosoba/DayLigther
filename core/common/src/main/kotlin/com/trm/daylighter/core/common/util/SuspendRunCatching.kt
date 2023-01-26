@@ -1,9 +1,9 @@
-package com.trm.daylighter.data.util
+package com.trm.daylighter.core.common.util
 
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 
-internal suspend fun <T> suspendRunCatching(block: suspend () -> T): Result<T> =
+suspend fun <T> suspendRunCatching(block: suspend () -> T): Result<T> =
   try {
     Result.success(block())
   } catch (cancellationException: CancellationException) {

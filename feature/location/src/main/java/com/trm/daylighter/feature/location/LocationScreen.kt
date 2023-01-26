@@ -19,8 +19,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -32,36 +34,57 @@ import org.osmdroid.views.MapView
 const val locationRoute = "location_route"
 
 @Composable
-fun LocationScreen(modifier: Modifier = Modifier) {
-  var mapPosition by rememberSaveable { mutableStateOf(MapPosition()) }
+fun LocationRoute(
+  navController: NavController,
+  modifier: Modifier = Modifier,
+  viewModel: LocationViewModel = hiltViewModel()
+) {
+  LaunchedEffect(Unit) { viewModel.savedFlow.collect { navController.popBackStack() } }
+  LocationScreen(onSaveLocationClick = viewModel::saveLocation, modifier = modifier)
+}
+
+@Composable
+private fun LocationScreen(
+  onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  var savedMapPosition by rememberSaveable { mutableStateOf(MapPosition()) }
+  var currentMapPosition by remember { mutableStateOf(savedMapPosition) }
+  var infoExpanded by rememberSaveable { mutableStateOf(true) }
 
   val mapView =
     rememberMapViewWithLifecycle(
       onPause = {
-        mapPosition =
+        savedMapPosition =
           MapPosition(
-            lat = it.mapCenter.latitude,
-            lng = it.mapCenter.longitude,
+            latitude = it.mapCenter.latitude,
+            longitude = it.mapCenter.longitude,
             zoom = it.zoomLevelDouble,
             orientation = it.mapOrientation
           )
       }
     )
 
-  var infoExpanded by rememberSaveable { mutableStateOf(true) }
-
   Box(modifier = modifier) {
     AndroidView(
       factory = { mapView },
       update = {
         it.setDefaultConfig()
-        it.restorePosition(mapPosition)
+        it.restorePosition(savedMapPosition)
         it.addMapListener(
           object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean = collapseInfo()
-            override fun onZoom(event: ZoomEvent?): Boolean = collapseInfo()
-            private fun collapseInfo(): Boolean {
+            override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
+            override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
+            private fun onMapInteraction(): Boolean {
               infoExpanded = false
+              val mapCenter = it.mapCenter
+              currentMapPosition =
+                MapPosition(
+                  latitude = mapCenter.latitude,
+                  longitude = mapCenter.longitude,
+                  zoom = it.zoomLevelDouble,
+                  orientation = it.mapOrientation
+                )
               return false
             }
           }
@@ -84,7 +107,9 @@ fun LocationScreen(modifier: Modifier = Modifier) {
         )
       }
       Spacer(modifier = Modifier.height(10.dp))
-      FloatingActionButton(onClick = {}) {
+      FloatingActionButton(
+        onClick = { onSaveLocationClick(currentMapPosition.latitude, currentMapPosition.longitude) }
+      ) {
         Icon(imageVector = Icons.Filled.Done, contentDescription = "save_location")
       }
     }

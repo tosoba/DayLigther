@@ -1,9 +1,9 @@
 package com.trm.daylighter.data.repo
 
 import android.util.Log
+import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import com.trm.daylighter.data.mapper.asEntity
-import com.trm.daylighter.data.util.suspendRunCatching
 import com.trm.daylighter.database.dao.SunriseSunsetDao
 import com.trm.daylighter.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.domain.repo.SunriseSunsetRepo
