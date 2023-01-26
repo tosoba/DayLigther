@@ -3,6 +3,7 @@ package com.trm.daylighter.database.di
 import android.content.Context
 import androidx.room.Room
 import com.trm.daylighter.database.DaylighterDatabase
+import com.trm.daylighter.database.dao.LocationDao
 import com.trm.daylighter.database.dao.SunriseSunsetDao
 import dagger.Module
 import dagger.Provides
@@ -20,4 +21,6 @@ object DatabaseModule {
     Room.databaseBuilder(context, DaylighterDatabase::class.java, "daylighter.db").build()
 
   @Provides fun sunriseSunsetDao(db: DaylighterDatabase): SunriseSunsetDao = db.sunriseSunsetDao()
+
+  @Provides fun locationDao(db: DaylighterDatabase): LocationDao = db.locationDao()
 }
