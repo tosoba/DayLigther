@@ -30,7 +30,7 @@ import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.LocationRoute
 import com.trm.daylighter.feature.location.locationRoute
-import com.trm.daylighter.locations.LocationsScreen
+import com.trm.daylighter.locations.LocationsRoute
 import com.trm.daylighter.locations.locationsRoute
 import com.trm.daylighter.ui.theme.DayLighterTheme
 import com.trm.daylighter.widget.WidgetsScreen
@@ -159,7 +159,7 @@ private fun DaylighterNavHost(
       LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
     }
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
-    composable(locationsRoute) { LocationsScreen(modifier = Modifier.fillMaxSize()) }
+    composable(locationsRoute) { LocationsRoute(modifier = Modifier.fillMaxSize()) }
     composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
