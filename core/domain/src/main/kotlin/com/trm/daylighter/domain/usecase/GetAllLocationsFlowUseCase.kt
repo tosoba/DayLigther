@@ -12,5 +12,5 @@ import kotlinx.coroutines.flow.onStart
 
 class GetAllLocationsFlowUseCase @Inject constructor(private val repo: LocationRepo) {
   operator fun invoke(): Flow<Loadable<List<Location>>> =
-    repo.getAllFlow().map(List<Location>::asLoadable).onStart { emit(LoadingFirst) }
+    repo.getAllLocationsFlow().map(List<Location>::asLoadable).onStart { emit(LoadingFirst) }
 }

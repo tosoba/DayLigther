@@ -8,11 +8,14 @@ import java.time.LocalDate
 
 @Dao
 interface SunriseSunsetDao {
-  @Query("SELECT * FROM sunrise_sunset WHERE date = :date")
-  suspend fun selectByDate(date: LocalDate): SunriseSunsetEntity
+  @Query("SELECT * FROM sunrise_sunset WHERE location_id = :locationId AND date = :date")
+  suspend fun selectByLocationIdAndDate(locationId: Long, date: LocalDate): SunriseSunsetEntity
 
-  @Query("SELECT * FROM sunrise_sunset WHERE date IN (:dates)")
-  suspend fun selectByDates(dates: List<LocalDate>): List<SunriseSunsetEntity>
+  @Query("SELECT * FROM sunrise_sunset WHERE location_id IN (:locationIds) AND date IN (:dates)")
+  suspend fun selectByLocationIdsAndDates(
+    locationIds: List<Long>,
+    dates: List<LocalDate>
+  ): List<SunriseSunsetEntity>
 
   @Upsert suspend fun insert(entity: SunriseSunsetEntity)
 

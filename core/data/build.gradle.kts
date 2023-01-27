@@ -18,6 +18,7 @@ dependencies {
   implementation(project(":core:network"))
 
   implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.work.ktx)
 
   implementation(libs.kotlinx.datetime)
   implementation(libs.kotlinx.coroutines.android)

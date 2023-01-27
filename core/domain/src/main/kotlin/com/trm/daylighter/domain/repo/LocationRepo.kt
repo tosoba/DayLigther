@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface LocationRepo {
   suspend fun saveLocation(latitude: Double, longitude: Double)
 
-  fun getAllFlow(): Flow<List<Location>>
+  fun getAllLocationsFlow(): Flow<List<Location>>
 
-  fun getDefaultFlow(): Flow<Location?>
+  fun getDefaultLocationFlow(): Flow<Location?>
+
+  suspend fun deleteLocationByIdAndGetCountAll(id: Long): Long
 }

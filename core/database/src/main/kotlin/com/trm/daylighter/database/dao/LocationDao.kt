@@ -26,6 +26,16 @@ interface LocationDao {
 
   @Delete suspend fun delete(entity: LocationEntity)
 
+  @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
+
+  @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Long
+
+  @Transaction
+  suspend fun deleteByIdAndSelectCountAll(id: Long): Long {
+    deleteById(id)
+    return selectCountAll()
+  }
+
   @Query("SELECT * FROM location WHERE is_default = TRUE")
   fun selectDefaultFlow(): Flow<LocationEntity?>
 

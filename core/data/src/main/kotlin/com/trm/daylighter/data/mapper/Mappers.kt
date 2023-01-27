@@ -6,7 +6,7 @@ import com.trm.daylighter.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.domain.model.Location
 import java.time.LocalDate
 
-fun SunriseSunsetResult.asEntity(date: LocalDate): SunriseSunsetEntity =
+fun SunriseSunsetResult.asEntity(locationId: Long, date: LocalDate): SunriseSunsetEntity =
   SunriseSunsetEntity(
     astronomicalTwilightBegin = astronomicalTwilightBegin,
     astronomicalTwilightEnd = astronomicalTwilightEnd,
@@ -18,7 +18,8 @@ fun SunriseSunsetResult.asEntity(date: LocalDate): SunriseSunsetEntity =
     solarNoon = solarNoon,
     sunrise = sunrise,
     sunset = sunset,
-    date = date
+    date = date,
+    locationId = locationId,
   )
 
 fun Location.asEntity(): LocationEntity =

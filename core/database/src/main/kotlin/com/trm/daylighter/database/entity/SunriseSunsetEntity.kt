@@ -2,11 +2,23 @@ package com.trm.daylighter.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.ForeignKey
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
-@Entity(tableName = "sunrise_sunset")
+@Entity(
+  tableName = "sunrise_sunset",
+  primaryKeys = ["location_id", "date"],
+  foreignKeys =
+    [
+      ForeignKey(
+        entity = LocationEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["location_id"],
+        onDelete = ForeignKey.CASCADE
+      )
+    ]
+)
 data class SunriseSunsetEntity(
   @ColumnInfo(name = "astronomical_twilight_begin") val astronomicalTwilightBegin: ZonedDateTime,
   @ColumnInfo(name = "astronomical_twilight_end") val astronomicalTwilightEnd: ZonedDateTime,
@@ -18,5 +30,6 @@ data class SunriseSunsetEntity(
   @ColumnInfo(name = "solar_noon") val solarNoon: ZonedDateTime,
   val sunrise: ZonedDateTime,
   val sunset: ZonedDateTime,
-  @PrimaryKey val date: LocalDate,
+  val date: LocalDate,
+  @ColumnInfo(name = "location_id") val locationId: Long,
 )
