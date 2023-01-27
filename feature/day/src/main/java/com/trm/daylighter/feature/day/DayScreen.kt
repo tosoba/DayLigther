@@ -24,7 +24,7 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
+  val locations = viewModel.locationsFlow.collectAsStateWithLifecycle(initialValue = Empty)
   DayScreen(
     locationsLoadable = locations.value,
     onAddLocationClick = onAddLocation,

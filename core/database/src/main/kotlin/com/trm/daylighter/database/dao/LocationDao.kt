@@ -44,4 +44,6 @@ interface LocationDao {
   @Query("SELECT * FROM location") suspend fun selectAll(): List<LocationEntity>
 
   @Transaction @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
+
+  @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity
 }

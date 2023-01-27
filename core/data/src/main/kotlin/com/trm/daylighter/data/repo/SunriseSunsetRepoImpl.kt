@@ -7,15 +7,21 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
+import com.trm.daylighter.data.mapper.asDomainModel
 import com.trm.daylighter.data.mapper.asEntity
 import com.trm.daylighter.database.dao.LocationDao
 import com.trm.daylighter.database.dao.SunriseSunsetDao
 import com.trm.daylighter.database.entity.LocationEntity
 import com.trm.daylighter.database.entity.SunriseSunsetEntity
+import com.trm.daylighter.domain.exception.EmptyAPIResultException
+import com.trm.daylighter.domain.model.SunriseSunsetChange
 import com.trm.daylighter.domain.repo.SunriseSunsetRepo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class SunriseSunsetRepoImpl
 @Inject
@@ -61,8 +67,9 @@ constructor(
                 date = date
               )
             }
-          if (downloaded.isEmpty()) return@suspendRunCatching true
-          if (downloaded.any { it.value == null }) {
+          if (downloaded.isEmpty()) return@forEach
+
+          if (downloaded.any { (_, result) -> result == null }) {
             Log.e("Sync", "One of the results from API was null.")
             return@suspendRunCatching false
           }
@@ -77,6 +84,61 @@ constructor(
         true
       }
       .isSuccess
+
+  override suspend fun getLocationSunriseSunsetChangeById(id: Long): SunriseSunsetChange {
+    val location = locationDao.selectById(id)
+    val today = LocalDate.now()
+    val yesterday = today.minusDays(1L)
+    val dates = listOf(yesterday, today)
+
+    val existingSunriseSunsets =
+      sunriseSunsetDao
+        .selectByLocationIdsAndDates(locationIds = listOf(location.id), dates = dates)
+        .associateBy(SunriseSunsetEntity::date)
+    if (existingSunriseSunsets.size == dates.size) {
+      return SunriseSunsetChange(
+        today = requireNotNull(existingSunriseSunsets[today]).asDomainModel(),
+        yesterday = requireNotNull(existingSunriseSunsets[yesterday]).asDomainModel()
+      )
+    }
+
+    val results =
+      coroutineScope {
+          dates
+            .filter { !existingSunriseSunsets.keys.contains(it) }
+            .map { date ->
+              async {
+                date to
+                  network.getSunriseSunset(
+                    lat = location.latitude,
+                    lng = location.longitude,
+                    date = date
+                  )
+              }
+            }
+        }
+        .awaitAll()
+        .toMap()
+    if (results.any { (_, result) -> result == null }) {
+      Log.e("Sync", "One of the results from API was null.")
+      throw EmptyAPIResultException
+    }
+
+    val downloadedSunriseSunsets =
+      results
+        .map { (date, result) -> requireNotNull(result).asEntity(locationId = id, date = date) }
+        .associateBy(SunriseSunsetEntity::date)
+    sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
+
+    return SunriseSunsetChange(
+      today =
+        requireNotNull(existingSunriseSunsets[today] ?: downloadedSunriseSunsets[today])
+          .asDomainModel(),
+      yesterday =
+        requireNotNull(existingSunriseSunsets[yesterday] ?: downloadedSunriseSunsets[yesterday])
+          .asDomainModel()
+    )
+  }
 
   companion object {
     private const val SYNC_WORK_NAME = "SyncWork"

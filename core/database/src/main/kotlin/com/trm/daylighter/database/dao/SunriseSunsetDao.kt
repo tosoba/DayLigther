@@ -13,11 +13,11 @@ interface SunriseSunsetDao {
 
   @Query("SELECT * FROM sunrise_sunset WHERE location_id IN (:locationIds) AND date IN (:dates)")
   suspend fun selectByLocationIdsAndDates(
-    locationIds: List<Long>,
-    dates: List<LocalDate>
+    locationIds: Collection<Long>,
+    dates: Collection<LocalDate>
   ): List<SunriseSunsetEntity>
 
   @Upsert suspend fun insert(entity: SunriseSunsetEntity)
 
-  @Upsert suspend fun insertMany(entities: List<SunriseSunsetEntity>)
+  @Upsert suspend fun insertMany(entities: Collection<SunriseSunsetEntity>)
 }
