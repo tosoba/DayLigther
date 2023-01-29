@@ -1,19 +1,21 @@
 package com.trm.daylighter.feature.day
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.trm.daylighter.domain.model.Empty
-import com.trm.daylighter.domain.model.Loadable
-import com.trm.daylighter.domain.model.Location
-import com.trm.daylighter.domain.model.WithData
+import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.feature.day.model.LocationSunriseSunsetChange
 
 const val dayRoute = "day_route"
 
@@ -24,9 +26,14 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val locations = viewModel.locationsFlow.collectAsStateWithLifecycle(initialValue = Empty)
+  val locationSunriseSunsetChangeLoadable =
+    viewModel.currentLocationSunriseSunsetChange.collectAsStateWithLifecycle(
+      initialValue = LoadingFirst
+    )
   DayScreen(
-    locationsLoadable = locations.value,
+    locationSunriseSunsetChangeLoadable = locationSunriseSunsetChangeLoadable.value,
+    onPreviousLocationClick = viewModel::previousLocation,
+    onNextLocationClick = viewModel::nextLocation,
     onAddLocationClick = onAddLocation,
     modifier = modifier
   )
@@ -34,26 +41,48 @@ fun DayRoute(
 
 @Composable
 private fun DayScreen(
-  locationsLoadable: Loadable<List<Location>>,
+  locationSunriseSunsetChangeLoadable: Loadable<LocationSunriseSunsetChange>,
+  onPreviousLocationClick: () -> Unit,
+  onNextLocationClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Box(modifier = modifier) {
-    when (locationsLoadable) {
-      is WithData -> {
-        if (locationsLoadable.data.isEmpty()) {
-          Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
-            Text(text = "Add location")
-          }
-        } else {
-          Text(
-            text =
-              """${locationsLoadable.data.first().latitude}, ${locationsLoadable.data.first().longitude}""",
-            modifier = Modifier.align(Alignment.Center)
-          )
+  when (locationSunriseSunsetChangeLoadable) {
+    is Empty -> {
+      Box(modifier = modifier) {
+        Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
+          Text(text = "Add location")
         }
       }
-      else -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    }
+    is Ready -> {
+      val (location, change) = locationSunriseSunsetChangeLoadable.data
+      Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        IconButton(onClick = onPreviousLocationClick) {
+          Icon(imageVector = Icons.Filled.SkipPrevious, contentDescription = "previous_location")
+        }
+        Column {
+          Text(
+            text = """${location.latitude}, ${location.longitude}""",
+          )
+          Text(text = "${change.yesterday.dayLengthSeconds} -> ${change.today.dayLengthSeconds}")
+        }
+        IconButton(onClick = onNextLocationClick) {
+          Icon(imageVector = Icons.Filled.SkipNext, contentDescription = "next_location")
+        }
+      }
+    }
+    is Failed -> {
+      Button(onClick = {}) { Text("Retry") }
+    }
+    is Loading -> {
+      Box(modifier = modifier) {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+      }
     }
   }
 }

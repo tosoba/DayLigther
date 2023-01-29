@@ -1,36 +1,40 @@
 package com.trm.daylighter.domain.model
 
-sealed class Loadable<out T : Any> {
-  open val copyWithLoadingInProgress: Loadable<T>
+sealed interface Loadable<out T : Any> {
+  val copyWithLoadingInProgress: Loadable<T>
     get() = LoadingFirst
 
-  open val copyWithClearedError: Loadable<T>
+  val copyWithClearedError: Loadable<T>
     get() = Empty
 
-  open fun copyWithError(error: Throwable?): Loadable<T> = FailedFirst(error)
+  fun copyWithError(error: Throwable?): Loadable<T> = FailedFirst(error)
 
-  abstract fun <R : Any> map(block: (T) -> R): Loadable<R>
-
-  inline fun <reified E> isFailedWith(): Boolean = (this as? Failed)?.error is E
+  fun <R : Any> map(block: (T) -> R): Loadable<R>
 }
 
-sealed class WithData<T : Any> : Loadable<T>() {
-  abstract val data: T
+inline fun <reified E> Loadable<*>.isFailedWith(): Boolean = (this as? Failed)?.error is E
+
+inline fun <reified E> Loadable<*>.ifIsFailedWith(action: (E) -> Unit) {
+  ((this as? Failed)?.error as? E)?.let(action)
 }
 
-sealed class WithoutData : Loadable<Nothing>()
+sealed interface WithData<T : Any> : Loadable<T> {
+  val data: T
+}
 
-object Empty : WithoutData() {
+sealed interface WithoutData : Loadable<Nothing>
+
+object Empty : WithoutData {
   override fun <R : Any> map(block: (Nothing) -> R): Loadable<R> = this
 }
 
-interface LoadingInProgress
+sealed interface Loading
 
-object LoadingFirst : WithoutData(), LoadingInProgress {
+object LoadingFirst : WithoutData, Loading {
   override fun <R : Any> map(block: (Nothing) -> R): Loadable<R> = this
 }
 
-data class LoadingNext<T : Any>(override val data: T) : WithData<T>(), LoadingInProgress {
+data class LoadingNext<T : Any>(override val data: T) : WithData<T>, Loading {
   override val copyWithLoadingInProgress: Loadable<T>
     get() = this
 
@@ -42,11 +46,11 @@ data class LoadingNext<T : Any>(override val data: T) : WithData<T>(), LoadingIn
   override fun <R : Any> map(block: (T) -> R): LoadingNext<R> = LoadingNext(block(data))
 }
 
-interface Failed {
+sealed interface Failed {
   val error: Throwable?
 }
 
-data class FailedFirst(override val error: Throwable?) : WithoutData(), Failed {
+data class FailedFirst(override val error: Throwable?) : WithoutData, Failed {
   override val copyWithLoadingInProgress: LoadingFirst
     get() = LoadingFirst
 
@@ -56,7 +60,7 @@ data class FailedFirst(override val error: Throwable?) : WithoutData(), Failed {
 data class FailedNext<T : Any>(
   override val data: T,
   override val error: Throwable?,
-) : WithData<T>(), Failed {
+) : WithData<T>, Failed {
   override val copyWithClearedError: Ready<T>
     get() = Ready(data)
 
@@ -68,7 +72,7 @@ data class FailedNext<T : Any>(
   override fun <R : Any> map(block: (T) -> R): FailedNext<R> = FailedNext(block(data), error)
 }
 
-data class Ready<T : Any>(override val data: T) : WithData<T>() {
+data class Ready<T : Any>(override val data: T) : WithData<T> {
   override val copyWithLoadingInProgress: LoadingNext<T>
     get() = LoadingNext(data)
 
