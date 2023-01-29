@@ -1,6 +1,6 @@
 package com.trm.daylighter.domain.repo
 
-import com.trm.daylighter.domain.model.SunriseSunsetChange
+import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 
 interface SunriseSunsetRepo {
   suspend fun sync(): Boolean
@@ -9,5 +9,5 @@ interface SunriseSunsetRepo {
 
   fun cancelSync()
 
-  suspend fun getLocationSunriseSunsetChangeById(id: Long): SunriseSunsetChange
+  suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange
 }

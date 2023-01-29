@@ -4,10 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.domain.usecase.GetLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
-import com.trm.daylighter.feature.day.model.LocationSunriseSunsetChange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
@@ -45,13 +45,13 @@ constructor(
         }
       }
       .distinctUntilChanged()
-      .onEach {
-        if (it is Empty) {
+      .onEach { locationLoadable ->
+        if (locationLoadable is Empty) {
           currentLocationIndex = 0
-        } else {
-          it.ifIsFailedWith<LocationIndexOutOfBoundsException> { (locationsSize) ->
-            currentLocationIndex = locationsSize - 1
-          }
+        } else if (locationLoadable is Failed) {
+          locationLoadable.throwable
+            ?.let { it as? LocationIndexOutOfBoundsException }
+            ?.let { (locationsSize) -> currentLocationIndex = locationsSize - 1 }
         }
       }
       .filterNot { it is Failed }
@@ -59,26 +59,7 @@ constructor(
         when (locationLoadable) {
           is Empty -> emit(Empty)
           is Loading -> emit(LoadingFirst)
-          is Ready -> {
-            emitAll(
-              getLocationSunriseSunsetChangeUseCase(locationLoadable.data.id).map {
-                sunsetChangeLoadable ->
-                when (sunsetChangeLoadable) {
-                  is Empty -> Empty
-                  is Loading -> LoadingFirst
-                  is Ready -> {
-                    Ready(
-                      LocationSunriseSunsetChange(
-                        location = locationLoadable.data,
-                        sunriseSunsetChange = sunsetChangeLoadable.data
-                      )
-                    )
-                  }
-                  is Failed -> FailedFirst(sunsetChangeLoadable.error)
-                }
-              }
-            )
-          }
+          is Ready -> emitAll(getLocationSunriseSunsetChangeUseCase(locationLoadable.data.id))
           else -> throw IllegalStateException()
         }
       }

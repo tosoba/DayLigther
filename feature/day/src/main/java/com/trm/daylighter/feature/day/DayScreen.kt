@@ -15,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.domain.model.*
-import com.trm.daylighter.feature.day.model.LocationSunriseSunsetChange
+import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 
 const val dayRoute = "day_route"
 
@@ -56,7 +56,7 @@ private fun DayScreen(
       }
     }
     is Ready -> {
-      val (location, change) = locationSunriseSunsetChangeLoadable.data
+      val (location, today, yesterday) = locationSunriseSunsetChangeLoadable.data
       Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -69,7 +69,7 @@ private fun DayScreen(
           Text(
             text = """${location.latitude}, ${location.longitude}""",
           )
-          Text(text = "${change.yesterday.dayLengthSeconds} -> ${change.today.dayLengthSeconds}")
+          Text(text = "${yesterday.dayLengthSeconds} -> ${today.dayLengthSeconds}")
         }
         IconButton(onClick = onNextLocationClick) {
           Icon(imageVector = Icons.Filled.SkipNext, contentDescription = "next_location")

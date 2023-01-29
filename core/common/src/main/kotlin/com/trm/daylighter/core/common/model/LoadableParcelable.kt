@@ -18,7 +18,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
       FailedNext::class.java.name -> {
         FailedNext(
           data = parcel.readParcelableByClassName<T>(className),
-          error = parcel.readThrowable(),
+          throwable = parcel.readThrowable(),
         )
       }
       Ready::class.java.name -> Ready(parcel.readParcelableByClassName<T>(className))
@@ -29,7 +29,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
   override fun writeToParcel(parcel: Parcel, flag: Int) {
     parcel.writeString(loadable::class.java.name)
     if (loadable is WithData) parcel.writeParcelable(loadable.data, 0)
-    if (loadable is Failed) loadable.error?.let(parcel::writeSerializable)
+    if (loadable is Failed) loadable.throwable?.let(parcel::writeSerializable)
   }
 
   override fun describeContents(): Int = 0

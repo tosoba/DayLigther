@@ -12,11 +12,7 @@ sealed interface Loadable<out T : Any> {
   fun <R : Any> map(block: (T) -> R): Loadable<R>
 }
 
-inline fun <reified E> Loadable<*>.isFailedWith(): Boolean = (this as? Failed)?.error is E
-
-inline fun <reified E> Loadable<*>.ifIsFailedWith(action: (E) -> Unit) {
-  ((this as? Failed)?.error as? E)?.let(action)
-}
+inline fun <reified E> Loadable<*>.isFailedWith(): Boolean = (this as? Failed)?.throwable is E
 
 sealed interface WithData<T : Any> : Loadable<T> {
   val data: T
@@ -47,10 +43,10 @@ data class LoadingNext<T : Any>(override val data: T) : WithData<T>, Loading {
 }
 
 sealed interface Failed {
-  val error: Throwable?
+  val throwable: Throwable?
 }
 
-data class FailedFirst(override val error: Throwable?) : WithoutData, Failed {
+data class FailedFirst(override val throwable: Throwable?) : WithoutData, Failed {
   override val copyWithLoadingInProgress: LoadingFirst
     get() = LoadingFirst
 
@@ -59,7 +55,7 @@ data class FailedFirst(override val error: Throwable?) : WithoutData, Failed {
 
 data class FailedNext<T : Any>(
   override val data: T,
-  override val error: Throwable?,
+  override val throwable: Throwable?,
 ) : WithData<T>, Failed {
   override val copyWithClearedError: Ready<T>
     get() = Ready(data)
@@ -69,7 +65,7 @@ data class FailedNext<T : Any>(
 
   override fun copyWithError(error: Throwable?): FailedNext<T> = FailedNext(data, error)
 
-  override fun <R : Any> map(block: (T) -> R): FailedNext<R> = FailedNext(block(data), error)
+  override fun <R : Any> map(block: (T) -> R): FailedNext<R> = FailedNext(block(data), throwable)
 }
 
 data class Ready<T : Any>(override val data: T) : WithData<T> {

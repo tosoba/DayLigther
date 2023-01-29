@@ -14,7 +14,7 @@ import com.trm.daylighter.database.dao.SunriseSunsetDao
 import com.trm.daylighter.database.entity.LocationEntity
 import com.trm.daylighter.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.domain.exception.EmptyAPIResultException
-import com.trm.daylighter.domain.model.SunriseSunsetChange
+import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.domain.repo.SunriseSunsetRepo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
@@ -85,7 +85,7 @@ constructor(
       }
       .isSuccess
 
-  override suspend fun getLocationSunriseSunsetChangeById(id: Long): SunriseSunsetChange {
+  override suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange {
     val location = locationDao.selectById(id)
     val today = LocalDate.now()
     val yesterday = today.minusDays(1L)
@@ -96,7 +96,8 @@ constructor(
         .selectByLocationIdsAndDates(locationIds = listOf(location.id), dates = dates)
         .associateBy(SunriseSunsetEntity::date)
     if (existingSunriseSunsets.size == dates.size) {
-      return SunriseSunsetChange(
+      return LocationSunriseSunsetChange(
+        location = location.asDomainModel(),
         today = requireNotNull(existingSunriseSunsets[today]).asDomainModel(),
         yesterday = requireNotNull(existingSunriseSunsets[yesterday]).asDomainModel()
       )
@@ -130,7 +131,8 @@ constructor(
         .associateBy(SunriseSunsetEntity::date)
     sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
 
-    return SunriseSunsetChange(
+    return LocationSunriseSunsetChange(
+      location = location.asDomainModel(),
       today =
         requireNotNull(existingSunriseSunsets[today] ?: downloadedSunriseSunsets[today])
           .asDomainModel(),

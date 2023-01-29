@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.onEach
 class GetLocationSunriseSunsetChangeUseCase
 @Inject
 constructor(private val repo: SunriseSunsetRepo) {
-  operator fun invoke(locationId: Long): Flow<Loadable<SunriseSunsetChange>> =
+  operator fun invoke(locationId: Long): Flow<Loadable<LocationSunriseSunsetChange>> =
     flow {
         emit(LoadingFirst)
         try {
