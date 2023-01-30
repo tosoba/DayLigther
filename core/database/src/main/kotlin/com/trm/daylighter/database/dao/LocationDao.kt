@@ -28,10 +28,12 @@ interface LocationDao {
 
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
-  @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Long
+  @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Int
+
+  @Query("SELECT COUNT(*) FROM location") fun selectCountAllFlow(): Flow<Int>
 
   @Transaction
-  suspend fun deleteByIdAndSelectCountAll(id: Long): Long {
+  suspend fun deleteByIdAndSelectCountAll(id: Long): Int {
     deleteById(id)
     return selectCountAll()
   }
@@ -43,7 +45,7 @@ interface LocationDao {
 
   @Query("SELECT * FROM location") suspend fun selectAll(): List<LocationEntity>
 
-  @Transaction @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
+  @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
 
   @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity
 }

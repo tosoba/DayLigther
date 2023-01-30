@@ -7,8 +7,10 @@ interface LocationRepo {
   suspend fun saveLocation(latitude: Double, longitude: Double)
 
   fun getAllLocationsFlow(): Flow<List<Location>>
+  
+  fun getLocationsCountFlow(): Flow<Int>
 
   fun getDefaultLocationFlow(): Flow<Location?>
 
-  suspend fun deleteLocationByIdAndGetCountAll(id: Long): Long
+  suspend fun deleteLocationByIdAndGetCountAll(id: Long): Int
 }

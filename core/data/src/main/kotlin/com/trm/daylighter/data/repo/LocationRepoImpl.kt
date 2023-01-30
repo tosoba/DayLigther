@@ -17,9 +17,11 @@ class LocationRepoImpl @Inject constructor(private val dao: LocationDao) : Locat
   override fun getAllLocationsFlow(): Flow<List<Location>> =
     dao.selectAllFlow().map { it.map(LocationEntity::asDomainModel) }
 
+  override fun getLocationsCountFlow(): Flow<Int> = dao.selectCountAllFlow()
+
   override fun getDefaultLocationFlow(): Flow<Location?> =
     dao.selectDefaultFlow().map { it?.asDomainModel() }
 
-  override suspend fun deleteLocationByIdAndGetCountAll(id: Long): Long =
+  override suspend fun deleteLocationByIdAndGetCountAll(id: Long): Int =
     dao.deleteByIdAndSelectCountAll(id)
 }

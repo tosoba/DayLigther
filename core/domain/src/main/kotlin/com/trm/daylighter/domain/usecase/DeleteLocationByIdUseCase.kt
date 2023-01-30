@@ -11,7 +11,7 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) {
   suspend operator fun invoke(id: Long) {
-    if (locationRepo.deleteLocationByIdAndGetCountAll(id) == 0L) {
+    if (locationRepo.deleteLocationByIdAndGetCountAll(id) == 0) {
       sunriseSunsetRepo.cancelSync()
     }
   }

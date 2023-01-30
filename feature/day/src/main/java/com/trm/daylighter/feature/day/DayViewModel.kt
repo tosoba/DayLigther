@@ -9,6 +9,7 @@ import com.trm.daylighter.domain.model.*
 import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.domain.usecase.GetLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -21,6 +22,7 @@ class DayViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
+  private val getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
   private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
 ) : ViewModel() {
   private val currentLocationIndexFlow: StateFlow<Int> =
@@ -77,11 +79,7 @@ constructor(
 
   init {
     showPreviousFlow
-      .withLatestFrom(
-        getAllLocationsFlowUseCase().filterIsInstance<Ready<List<Location>>>().map { it.data.size }
-      ) { _, size ->
-        size
-      }
+      .withLatestLocationsCount()
       .onEach { size ->
         currentLocationIndex =
           when {
@@ -93,11 +91,7 @@ constructor(
       .launchIn(viewModelScope)
 
     showNextFlow
-      .withLatestFrom(
-        getAllLocationsFlowUseCase().filterIsInstance<Ready<List<Location>>>().map { it.data.size }
-      ) { _, size ->
-        size
-      }
+      .withLatestLocationsCount()
       .onEach { size ->
         currentLocationIndex =
           when {
@@ -116,6 +110,9 @@ constructor(
   fun nextLocation() {
     viewModelScope.launch { showNextFlow.emit(Unit) }
   }
+
+  private fun Flow<*>.withLatestLocationsCount(): Flow<Int> =
+    withLatestFrom(getLocationsCountFlowUseCase()) { _, size -> size }
 
   private enum class SavedState {
     CURRENT_LOCATION_INDEX
