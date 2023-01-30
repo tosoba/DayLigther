@@ -1,9 +1,9 @@
-package com.trm.daylighter.feature.location.util
+package com.trm.daylighter.core.common.util.map
 
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 
-internal object MapDefaults {
+object MapDefaults {
   val tileSource: XYTileSource
     get() =
       XYTileSource(

@@ -13,24 +13,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
+import com.trm.daylighter.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.views.MapView
 
 const val locationRoute = "location_route"
 
@@ -121,7 +117,7 @@ private fun LocationScreen(
     }
 
     Row(modifier = Modifier.padding(20.dp)) {
-      SmallFloatingActionButton(onClick = onBackClick, modifier=  Modifier.padding(end = 5.dp)) {
+      SmallFloatingActionButton(onClick = onBackClick, modifier = Modifier.padding(end = 5.dp)) {
         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
       }
 
@@ -154,46 +150,6 @@ private fun LocationScreen(
             }
           }
         }
-      }
-    }
-  }
-}
-
-@Composable
-private fun rememberMapViewWithLifecycle(onPause: (MapView) -> Unit): MapView {
-  val context = LocalContext.current
-  val mapView = remember { MapView(context).apply { setDestroyMode(false) } }
-
-  val mapLifecycleObserver = rememberMapLifecycleObserver(mapView, onPause)
-  val lifecycle = LocalLifecycleOwner.current.lifecycle
-  DisposableEffect(lifecycle) {
-    lifecycle.addObserver(mapLifecycleObserver)
-    onDispose { lifecycle.removeObserver(mapLifecycleObserver) }
-  }
-
-  return mapView
-}
-
-@Composable
-private fun rememberMapLifecycleObserver(
-  mapView: MapView,
-  onPause: (MapView) -> Unit
-): LifecycleEventObserver {
-  val onPauseHandler = rememberUpdatedState(newValue = onPause)
-  return remember(mapView) {
-    LifecycleEventObserver { _, event ->
-      when (event) {
-        Lifecycle.Event.ON_RESUME -> {
-          mapView.onResume()
-        }
-        Lifecycle.Event.ON_PAUSE -> {
-          onPauseHandler.value(mapView)
-          mapView.onPause()
-        }
-        Lifecycle.Event.ON_DESTROY -> {
-          mapView.onDetach()
-        }
-        else -> {}
       }
     }
   }

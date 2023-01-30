@@ -75,8 +75,8 @@ constructor(
       )
 
   private val showPreviousFlow = MutableSharedFlow<Unit>()
-
   private val showNextFlow = MutableSharedFlow<Unit>()
+
   init {
     showPreviousFlow
       .withLatestLocationsCount()

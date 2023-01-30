@@ -6,7 +6,4 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.location" }
 
-dependencies {
-  implementation(libs.kotlinx.datetime)
-  implementation(libs.osmdroid)
-}
+dependencies { implementation(libs.osmdroid) }

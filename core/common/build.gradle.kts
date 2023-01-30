@@ -10,4 +10,5 @@ dependencies {
   implementation(project(":core:domain"))
 
   implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.osmdroid)
 }
