@@ -35,6 +35,7 @@ fun DayRoute(
     onPreviousLocationClick = viewModel::previousLocation,
     onNextLocationClick = viewModel::nextLocation,
     onAddLocationClick = onAddLocation,
+    onRetryClick = viewModel::retry,
     modifier = modifier
   )
 }
@@ -45,6 +46,7 @@ private fun DayScreen(
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
   onAddLocationClick: () -> Unit,
+  onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   when (locationSunriseSunsetChangeLoadable) {
@@ -77,7 +79,7 @@ private fun DayScreen(
       }
     }
     is Failed -> {
-      Button(onClick = {}) { Text("Retry") }
+      Button(onClick = onRetryClick) { Text("Retry") }
     }
     is Loading -> {
       Box(modifier = modifier) {

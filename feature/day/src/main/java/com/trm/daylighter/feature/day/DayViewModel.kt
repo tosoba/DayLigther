@@ -34,20 +34,11 @@ constructor(
       savedStateHandle[SavedState.CURRENT_LOCATION_INDEX.name] = value
     }
 
-  val currentLocationSunriseSunsetChange: SharedFlow<Loadable<LocationSunriseSunsetChange>> =
+  private val retryFlow = MutableSharedFlow<Unit>()
+
+  private val currentLocationFlow: Flow<Loadable<Location>> =
     currentLocationIndexFlow
-      .combine(getAllLocationsFlowUseCase()) { index, locations ->
-        when (locations) {
-          is WithoutData -> LoadingFirst
-          is WithData -> {
-            when {
-              locations.data.isEmpty() -> Empty
-              index < locations.data.size -> Ready(locations.data[index])
-              else -> FailedFirst(LocationIndexOutOfBoundsException(locations.data.size))
-            }
-          }
-        }
-      }
+      .combine(getAllLocationsFlowUseCase()) { index, locations -> locations[index] }
       .distinctUntilChanged()
       .onEach { location ->
         if (location is Empty) {
@@ -60,6 +51,15 @@ constructor(
         }
       }
       .filterNot { it is Failed }
+
+  private val retryLocationFlow: Flow<Loadable<Location>> =
+    retryFlow
+      .map { currentLocationIndex }
+      .withLatestFrom(getAllLocationsFlowUseCase()) { index, locations -> locations[index] }
+      .filterNot { it is Failed }
+
+  val currentLocationSunriseSunsetChange: SharedFlow<Loadable<LocationSunriseSunsetChange>> =
+    merge(currentLocationFlow, retryLocationFlow)
       .transformLatest { location ->
         when (location) {
           is Empty -> emit(Empty)
@@ -75,8 +75,8 @@ constructor(
       )
 
   private val showPreviousFlow = MutableSharedFlow<Unit>()
-  private val showNextFlow = MutableSharedFlow<Unit>()
 
+  private val showNextFlow = MutableSharedFlow<Unit>()
   init {
     showPreviousFlow
       .withLatestLocationsCount()
@@ -111,6 +111,10 @@ constructor(
     viewModelScope.launch { showNextFlow.emit(Unit) }
   }
 
+  fun retry() {
+    viewModelScope.launch { retryFlow.emit(Unit) }
+  }
+
   private fun Flow<*>.withLatestLocationsCount(): Flow<Int> =
     withLatestFrom(getLocationsCountFlowUseCase()) { _, size -> size }
 
@@ -118,3 +122,15 @@ constructor(
     CURRENT_LOCATION_INDEX
   }
 }
+
+private operator fun Loadable<List<Location>>.get(index: Int): Loadable<Location> =
+  when (this) {
+    is WithoutData -> LoadingFirst
+    is WithData -> {
+      when {
+        data.isEmpty() -> Empty
+        index < data.size -> Ready(data[index])
+        else -> FailedFirst(LocationIndexOutOfBoundsException(data.size))
+      }
+    }
+  }
