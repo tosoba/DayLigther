@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 
 @Entity(tableName = "location")
 data class LocationEntity(
-  @PrimaryKey var id: Long = 0,
+  @PrimaryKey(autoGenerate = true) var id: Long = 0,
   val latitude: Double,
   val longitude: Double,
   @ColumnInfo(name = "is_default") val isDefault: Boolean,
