@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.day
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,44 +48,40 @@ private fun DayScreen(
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  when (locationSunriseSunsetChange) {
-    is Empty -> {
-      Box(modifier = modifier) {
+  Box(modifier = modifier) {
+    when (locationSunriseSunsetChange) {
+      is Empty -> {
         Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
           Text(text = "Add location")
         }
       }
-    }
-    is Ready -> {
-      val (location, today, yesterday) = locationSunriseSunsetChange.data
-      Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        IconButton(onClick = onPreviousLocationClick) {
-          Icon(imageVector = Icons.Filled.SkipPrevious, contentDescription = "previous_location")
-        }
-        Column {
+      is Ready -> {
+        val (location, today, yesterday) = locationSunriseSunsetChange.data
+        Column(modifier = Modifier.align(Alignment.Center)) {
           Text(
             text = """${location.latitude}, ${location.longitude}""",
           )
           Text(text = "${yesterday.dayLengthSeconds} -> ${today.dayLengthSeconds}")
         }
-        IconButton(onClick = onNextLocationClick) {
-          Icon(imageVector = Icons.Filled.SkipNext, contentDescription = "next_location")
+
+        Row(
+          modifier = Modifier.align(Alignment.BottomCenter),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          IconButton(onClick = onPreviousLocationClick) {
+            Icon(imageVector = Icons.Filled.SkipPrevious, contentDescription = "previous_location")
+          }
+          IconButton(onClick = onNextLocationClick) {
+            Icon(imageVector = Icons.Filled.SkipNext, contentDescription = "next_location")
+          }
         }
       }
-    }
-    is Failed -> {
-      Box(modifier = modifier) {
+      is Failed -> {
         Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
           Text("Retry")
         }
       }
-    }
-    is Loading -> {
-      Box(modifier = modifier) {
+      is Loading -> {
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
       }
     }
