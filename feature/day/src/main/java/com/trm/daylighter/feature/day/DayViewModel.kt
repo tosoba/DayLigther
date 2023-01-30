@@ -3,6 +3,8 @@ package com.trm.daylighter.feature.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trm.daylighter.core.common.util.takeIfInstance
+import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.domain.model.*
 import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.domain.usecase.GetAllLocationsFlowUseCase
@@ -45,21 +47,22 @@ constructor(
         }
       }
       .distinctUntilChanged()
-      .onEach { locationLoadable ->
-        if (locationLoadable is Empty) {
+      .onEach { location ->
+        if (location is Empty) {
           currentLocationIndex = 0
-        } else if (locationLoadable is Failed) {
-          locationLoadable.throwable
-            ?.let { it as? LocationIndexOutOfBoundsException }
-            ?.let { (locationsSize) -> currentLocationIndex = locationsSize - 1 }
+        } else if (location is Failed) {
+          location.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
+            (locationsSize) ->
+            currentLocationIndex = locationsSize - 1
+          }
         }
       }
       .filterNot { it is Failed }
-      .transformLatest { locationLoadable ->
-        when (locationLoadable) {
+      .transformLatest { location ->
+        when (location) {
           is Empty -> emit(Empty)
           is Loading -> emit(LoadingFirst)
-          is Ready -> emitAll(getLocationSunriseSunsetChangeUseCase(locationLoadable.data.id))
+          is Ready -> emitAll(getLocationSunriseSunsetChangeUseCase(locationId = location.data.id))
           else -> throw IllegalStateException()
         }
       }
@@ -70,20 +73,11 @@ constructor(
       )
 
   private val showPreviousFlow = MutableSharedFlow<Unit>()
-
-  fun previousLocation() {
-    viewModelScope.launch { showPreviousFlow.emit(Unit) }
-  }
-
   private val showNextFlow = MutableSharedFlow<Unit>()
-
-  fun nextLocation() {
-    viewModelScope.launch { showNextFlow.emit(Unit) }
-  }
 
   init {
     showPreviousFlow
-      .combine(
+      .withLatestFrom(
         getAllLocationsFlowUseCase().filterIsInstance<Ready<List<Location>>>().map { it.data.size }
       ) { _, size ->
         size
@@ -99,7 +93,7 @@ constructor(
       .launchIn(viewModelScope)
 
     showNextFlow
-      .combine(
+      .withLatestFrom(
         getAllLocationsFlowUseCase().filterIsInstance<Ready<List<Location>>>().map { it.data.size }
       ) { _, size ->
         size
@@ -113,6 +107,14 @@ constructor(
           }
       }
       .launchIn(viewModelScope)
+  }
+
+  fun previousLocation() {
+    viewModelScope.launch { showPreviousFlow.emit(Unit) }
+  }
+
+  fun nextLocation() {
+    viewModelScope.launch { showNextFlow.emit(Unit) }
   }
 
   private enum class SavedState {
