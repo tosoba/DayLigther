@@ -26,12 +26,12 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val locationSunriseSunsetChangeLoadable =
+  val locationSunriseSunsetChange =
     viewModel.currentLocationSunriseSunsetChange.collectAsStateWithLifecycle(
       initialValue = LoadingFirst
     )
   DayScreen(
-    locationSunriseSunsetChangeLoadable = locationSunriseSunsetChangeLoadable.value,
+    locationSunriseSunsetChange = locationSunriseSunsetChange.value,
     onPreviousLocationClick = viewModel::previousLocation,
     onNextLocationClick = viewModel::nextLocation,
     onAddLocationClick = onAddLocation,
@@ -42,14 +42,14 @@ fun DayRoute(
 
 @Composable
 private fun DayScreen(
-  locationSunriseSunsetChangeLoadable: Loadable<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  when (locationSunriseSunsetChangeLoadable) {
+  when (locationSunriseSunsetChange) {
     is Empty -> {
       Box(modifier = modifier) {
         Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
@@ -58,7 +58,7 @@ private fun DayScreen(
       }
     }
     is Ready -> {
-      val (location, today, yesterday) = locationSunriseSunsetChangeLoadable.data
+      val (location, today, yesterday) = locationSunriseSunsetChange.data
       Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -79,7 +79,11 @@ private fun DayScreen(
       }
     }
     is Failed -> {
-      Button(onClick = onRetryClick) { Text("Retry") }
+      Box(modifier = modifier) {
+        Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+          Text("Retry")
+        }
+      }
     }
     is Loading -> {
       Box(modifier = modifier) {
