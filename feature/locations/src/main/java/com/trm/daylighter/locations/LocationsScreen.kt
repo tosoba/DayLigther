@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -35,14 +36,23 @@ const val locationsRoute = "locations_route"
 @Composable
 fun LocationsRoute(
   modifier: Modifier = Modifier,
+  onAddLocationClick: () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
-  LocationsScreen(modifier = modifier, locations = locations.value)
+  LocationsScreen(
+    modifier = modifier,
+    locations = locations.value,
+    onAddLocationClick = onAddLocationClick
+  )
 }
 
 @Composable
-private fun LocationsScreen(locations: Loadable<List<Location>>, modifier: Modifier = Modifier) {
+private fun LocationsScreen(
+  locations: Loadable<List<Location>>,
+  onAddLocationClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
   Box(modifier = modifier) {
     when (locations) {
       is WithData -> {
@@ -99,6 +109,13 @@ private fun LocationsScreen(locations: Loadable<List<Location>>, modifier: Modif
           }
         } else {
           Text(text = "No locations", modifier = Modifier.align(Alignment.Center))
+        }
+
+        FloatingActionButton(
+          onClick = onAddLocationClick,
+          modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
+        ) {
+          Icon(imageVector = Icons.Filled.Add, contentDescription = "add_location")
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

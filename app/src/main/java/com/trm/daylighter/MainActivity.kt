@@ -159,7 +159,17 @@ private fun DaylighterNavHost(
       LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
     }
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
-    composable(locationsRoute) { LocationsRoute(modifier = Modifier.fillMaxSize()) }
+    composable(locationsRoute) {
+      LocationsRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocationClick = {
+          navController.navigate(
+            route = locationRoute,
+            navOptions = navOptions { launchSingleTop = true }
+          )
+        }
+      )
+    }
     composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
