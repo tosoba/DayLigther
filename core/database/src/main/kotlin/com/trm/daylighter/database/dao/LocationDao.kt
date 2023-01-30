@@ -2,6 +2,7 @@ package com.trm.daylighter.database.dao
 
 import androidx.room.*
 import com.trm.daylighter.database.entity.LocationEntity
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlinx.coroutines.flow.Flow
 
@@ -10,14 +11,15 @@ interface LocationDao {
   @Insert suspend fun insert(entity: LocationEntity)
 
   @Transaction
-  suspend fun insert(latitude: Double, longitude: Double) {
+  suspend fun insert(latitude: Double, longitude: Double, zoneId: ZoneId) {
     val anyExists = selectAnyExists()
     insert(
       LocationEntity(
         latitude = latitude,
         longitude = longitude,
         isDefault = !anyExists,
-        updatedAt = ZonedDateTime.now()
+        updatedAt = ZonedDateTime.now(),
+        zoneId = zoneId,
       )
     )
   }

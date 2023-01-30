@@ -14,6 +14,10 @@ object DispatchersModule {
   @Provides
   @Dispatcher(DaylighterDispatchers.IO)
   fun ioDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+  @Provides
+  @Dispatcher(DaylighterDispatchers.DEFAULT)
+  fun defaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }
 
 @Qualifier
@@ -21,5 +25,6 @@ object DispatchersModule {
 annotation class Dispatcher(val dispatcher: DaylighterDispatchers)
 
 enum class DaylighterDispatchers {
-  IO
+  IO,
+  DEFAULT
 }

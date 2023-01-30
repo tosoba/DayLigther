@@ -38,15 +38,6 @@ fun SunriseSunsetEntity.asDomainModel(): SunriseSunset =
     date = date
   )
 
-fun Location.asEntity(): LocationEntity =
-  LocationEntity(
-    id = id,
-    latitude = latitude,
-    longitude = longitude,
-    isDefault = isDefault,
-    updatedAt = updatedAt
-  )
-
 fun LocationEntity.asDomainModel(): Location =
   Location(
     id = id,

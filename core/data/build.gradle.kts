@@ -23,4 +23,9 @@ dependencies {
   implementation(libs.kotlinx.datetime)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
+
+  implementation("net.iakovlev:timeshape:2022f.15") {
+    exclude(group = "com.github.luben", module = "zstd-jni")
+  }
+  implementation("com.github.luben:zstd-jni:1.5.2-3@aar")
 }

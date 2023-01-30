@@ -9,6 +9,7 @@ import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import com.trm.daylighter.data.mapper.asDomainModel
 import com.trm.daylighter.data.mapper.asEntity
+import com.trm.daylighter.data.util.timezoneAdjusted
 import com.trm.daylighter.database.dao.LocationDao
 import com.trm.daylighter.database.dao.SunriseSunsetDao
 import com.trm.daylighter.database.entity.LocationEntity
@@ -76,7 +77,9 @@ constructor(
 
           sunriseSunsetDao.insertMany(
             downloaded.map { (date, result) ->
-              requireNotNull(result).asEntity(locationId = location.id, date = date)
+              requireNotNull(result)
+                .timezoneAdjusted(zoneId = location.zoneId)
+                .asEntity(locationId = location.id, date = date)
             }
           )
         }
@@ -126,9 +129,11 @@ constructor(
     }
 
     val downloadedSunriseSunsets =
-      results
-        .map { (date, result) -> requireNotNull(result).asEntity(locationId = id, date = date) }
-        .associateBy(SunriseSunsetEntity::date)
+      results.mapValues { (date, result) ->
+        requireNotNull(result)
+          .timezoneAdjusted(zoneId = location.zoneId)
+          .asEntity(locationId = id, date = date)
+      }
     sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
 
     return LocationSunriseSunsetChange(

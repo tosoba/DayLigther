@@ -3,6 +3,7 @@ package com.trm.daylighter.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Entity(tableName = "location")
@@ -12,4 +13,5 @@ data class LocationEntity(
   val longitude: Double,
   @ColumnInfo(name = "is_default") val isDefault: Boolean,
   @ColumnInfo(name = "updated_at") val updatedAt: ZonedDateTime,
+  val zoneId: ZoneId,
 )
