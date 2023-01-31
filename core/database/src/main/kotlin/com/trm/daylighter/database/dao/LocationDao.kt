@@ -50,4 +50,15 @@ interface LocationDao {
   @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
 
   @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity
+
+  @Query("UPDATE location SET is_default = FALSE") suspend fun setIsDefaultToFalse()
+
+  @Query("UPDATE location SET is_default = TRUE WHERE id = :id")
+  suspend fun setIsDefaultToTrueById(id: Long)
+
+  @Transaction
+  suspend fun updateDefaultLocationById(id: Long) {
+    setIsDefaultToFalse()
+    setIsDefaultToTrueById(id)
+  }
 }

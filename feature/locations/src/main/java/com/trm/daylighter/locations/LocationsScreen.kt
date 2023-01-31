@@ -43,7 +43,8 @@ fun LocationsRoute(
   LocationsScreen(
     modifier = modifier,
     locations = locations.value,
-    onAddLocationClick = onAddLocationClick
+    onAddLocationClick = onAddLocationClick,
+    onSetDefaultLocationClick = viewModel::setDefaultLocation
   )
 }
 
@@ -51,6 +52,7 @@ fun LocationsRoute(
 private fun LocationsScreen(
   locations: Loadable<List<Location>>,
   onAddLocationClick: () -> Unit,
+  onSetDefaultLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
@@ -85,7 +87,9 @@ private fun LocationsScreen(
 
                   Checkbox(
                     checked = location.isDefault,
-                    onCheckedChange = {},
+                    onCheckedChange = { checked ->
+                      if (checked) onSetDefaultLocationClick(location.id)
+                    },
                     modifier = Modifier.align(Alignment.TopEnd)
                   )
                 }

@@ -36,4 +36,8 @@ constructor(
 
   override suspend fun deleteLocationByIdAndGetCountAll(id: Long): Int =
     dao.deleteByIdAndSelectCountAll(id)
+
+  override suspend fun setDefaultLocationById(id: Long) {
+    dao.updateDefaultLocationById(id)
+  }
 }
