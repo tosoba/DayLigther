@@ -141,7 +141,7 @@ private fun MapView.setDefaultConfig() {
 }
 
 private fun MapView.setLocation(location: Location) {
-  controller.setZoom(15.0)
+  controller.setZoom(13.0)
   mapOrientation = MapDefaults.ORIENTATION
   setExpectedCenter(GeoPoint(location.latitude, location.longitude))
 }
