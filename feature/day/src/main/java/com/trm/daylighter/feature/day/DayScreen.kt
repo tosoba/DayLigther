@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +40,8 @@ fun DayRoute(
   )
 }
 
+data class DayChartSegment(val sweepAngleDegrees: Float, val color: Color)
+
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
@@ -57,64 +60,31 @@ private fun DayScreen(
       }
       is Ready -> {
         val (location, today, yesterday) = locationSunriseSunsetChange.data
+        val chartSegments = remember {
+          sequenceOf(
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
+            DayChartSegment(sweepAngleDegrees = 144f, color = Color.Black),
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
+            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
+            DayChartSegment(sweepAngleDegrees = 180f, color = Color.Cyan),
+          )
+        }
 
-        Canvas(modifier = Modifier.align(Alignment.Center).fillMaxWidth().aspectRatio(1f)) {
-          drawArc(
-            color = Color.Blue,
-            startAngle = 0f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Green,
-            startAngle = 6f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Red,
-            startAngle = 12f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Black,
-            startAngle = 18f,
-            sweepAngle = 144f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Red,
-            startAngle = 162f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Green,
-            startAngle = 168f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Blue,
-            startAngle = 174f,
-            sweepAngle = 6f,
-            useCenter = true,
-            size = size
-          )
-          drawArc(
-            color = Color.Cyan,
-            startAngle = 180f,
-            sweepAngle = 180f,
-            useCenter = true,
-            size = size
-          )
+        Canvas(modifier = Modifier.align(Alignment.Center).fillMaxWidth(.75f).aspectRatio(1f)) {
+          var startAngle = 0f
+          chartSegments.forEach { (sweepAngleDegrees, color) ->
+            drawArc(
+              color = color,
+              startAngle = startAngle,
+              sweepAngle = sweepAngleDegrees,
+              useCenter = true,
+              size = size
+            )
+            startAngle += sweepAngleDegrees
+          }
         }
 
         Row(
