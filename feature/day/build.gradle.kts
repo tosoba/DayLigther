@@ -5,4 +5,7 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.day" }
 
-dependencies { implementation(libs.kotlinx.datetime) }
+dependencies {
+  implementation(libs.kotlinx.datetime)
+  implementation(libs.androidx.constraintlayout)
+}

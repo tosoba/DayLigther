@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.day
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SkipNext
@@ -12,6 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,14 +56,25 @@ private fun DayScreen(
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Box(modifier = modifier) {
+  ConstraintLayout(modifier = modifier) {
     when (locationSunriseSunsetChange) {
       is Empty -> {
-        Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
+        val button = createRef()
+        Button(
+          onClick = onAddLocationClick,
+          modifier =
+            Modifier.constrainAs(button) {
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, parent.bottom)
+            }
+        ) {
           Text(text = "Add location")
         }
       }
       is Ready -> {
+        val (canvas, controls) = createRefs()
+        createVerticalChain(canvas, controls, chainStyle = ChainStyle.SpreadInside)
+
         val (location, today, yesterday) = locationSunriseSunsetChange.data
         val chartSegments = remember {
           sequenceOf(
@@ -74,7 +89,16 @@ private fun DayScreen(
           )
         }
 
-        Canvas(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight().aspectRatio(1f)) {
+        Canvas(
+          modifier =
+            Modifier.constrainAs(canvas) {
+                linkTo(parent.start, parent.end)
+                linkTo(parent.top, controls.top)
+                height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+              }
+              .background(Color.Magenta)
+        ) {
           var startAngle = 0f
           chartSegments.forEach { (sweepAngleDegrees, color) ->
             drawArc(
@@ -90,7 +114,12 @@ private fun DayScreen(
         }
 
         Row(
-          modifier = Modifier.align(Alignment.BottomCenter),
+          modifier =
+            Modifier.constrainAs(controls) {
+                linkTo(parent.start, parent.end)
+                linkTo(canvas.bottom, parent.bottom)
+              }
+              .background(Color.LightGray),
           verticalAlignment = Alignment.CenterVertically
         ) {
           IconButton(onClick = onPreviousLocationClick) {
@@ -102,12 +131,27 @@ private fun DayScreen(
         }
       }
       is Failed -> {
-        Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+        val button = createRef()
+        Button(
+          onClick = onRetryClick,
+          modifier =
+            Modifier.constrainAs(button) {
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, parent.bottom)
+            }
+        ) {
           Text("Retry")
         }
       }
       is Loading -> {
-        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        val indicator = createRef()
+        CircularProgressIndicator(
+          modifier =
+            Modifier.constrainAs(indicator) {
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, parent.bottom)
+            }
+        )
       }
     }
   }
