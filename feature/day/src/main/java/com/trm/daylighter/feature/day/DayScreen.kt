@@ -1,8 +1,7 @@
 package com.trm.daylighter.feature.day
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -10,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,11 +57,64 @@ private fun DayScreen(
       }
       is Ready -> {
         val (location, today, yesterday) = locationSunriseSunsetChange.data
-        Column(modifier = Modifier.align(Alignment.Center)) {
-          Text(
-            text = """${location.latitude}, ${location.longitude}""",
+
+        Canvas(modifier = Modifier.align(Alignment.Center).fillMaxWidth().aspectRatio(1f)) {
+          drawArc(
+            color = Color.Blue,
+            startAngle = 0f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
           )
-          Text(text = "${yesterday.dayLengthSeconds} -> ${today.dayLengthSeconds}")
+          drawArc(
+            color = Color.Green,
+            startAngle = 6f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Red,
+            startAngle = 12f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Black,
+            startAngle = 18f,
+            sweepAngle = 144f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Red,
+            startAngle = 162f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Green,
+            startAngle = 168f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Blue,
+            startAngle = 174f,
+            sweepAngle = 6f,
+            useCenter = true,
+            size = size
+          )
+          drawArc(
+            color = Color.Cyan,
+            startAngle = 180f,
+            sweepAngle = 180f,
+            useCenter = true,
+            size = size
+          )
         }
 
         Row(
