@@ -89,30 +89,30 @@ private fun LocationsScreen(
               }
             }
           }
+
+          Row(modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)) {
+            AnimatedVisibility(
+              visible = zoom < MapDefaults.MAX_ZOOM,
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              SmallFloatingActionButton(onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom }) {
+                Icon(imageVector = Icons.Filled.ZoomIn, contentDescription = "zoom_in")
+              }
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            AnimatedVisibility(
+              visible = zoom > MapDefaults.MIN_ZOOM,
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              SmallFloatingActionButton(onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom }) {
+                Icon(imageVector = Icons.Filled.ZoomOut, contentDescription = "zoom_out")
+              }
+            }
+          }
         } else {
           Text(text = "No locations", modifier = Modifier.align(Alignment.Center))
-        }
-
-        Row(modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)) {
-          AnimatedVisibility(
-            visible = zoom < MapDefaults.MAX_ZOOM,
-            enter = fadeIn(),
-            exit = fadeOut()
-          ) {
-            SmallFloatingActionButton(onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom }) {
-              Icon(imageVector = Icons.Filled.ZoomIn, contentDescription = "zoom_in")
-            }
-          }
-          Spacer(modifier = Modifier.width(5.dp))
-          AnimatedVisibility(
-            visible = zoom > MapDefaults.MIN_ZOOM,
-            enter = fadeIn(),
-            exit = fadeOut()
-          ) {
-            SmallFloatingActionButton(onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom }) {
-              Icon(imageVector = Icons.Filled.ZoomOut, contentDescription = "zoom_out")
-            }
-          }
         }
 
         FloatingActionButton(
