@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
@@ -73,7 +74,7 @@ private fun DayScreen(
           )
         }
 
-        Canvas(modifier = Modifier.align(Alignment.Center).fillMaxWidth(.75f).aspectRatio(1f)) {
+        Canvas(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight().aspectRatio(1f)) {
           var startAngle = 0f
           chartSegments.forEach { (sweepAngleDegrees, color) ->
             drawArc(
@@ -81,6 +82,7 @@ private fun DayScreen(
               startAngle = startAngle,
               sweepAngle = sweepAngleDegrees,
               useCenter = true,
+              topLeft = Offset(-size.width / 2f, 0f),
               size = size
             )
             startAngle += sweepAngleDegrees
