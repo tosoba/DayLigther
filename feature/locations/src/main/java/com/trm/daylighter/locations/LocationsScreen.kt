@@ -5,23 +5,17 @@ import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -74,15 +68,11 @@ private fun LocationsScreen(
               )
           ) {
             items(locations.data, key = Location::id) { location ->
-              val mapView = rememberMapViewWithLifecycle()
-              Card(modifier = Modifier.fillMaxWidth().padding(5.dp)) {
-                Box(
-                  modifier =
-                    Modifier.fillMaxWidth()
-                      .background(MaterialTheme.colorScheme.background)
-                      .clip(RoundedCornerShape(12.dp))
-                      .aspectRatio(1f)
-                ) {
+              Card(
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+              ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                  val mapView = rememberMapViewWithLifecycle()
                   AndroidView(
                     factory = { mapView },
                     update = {
@@ -90,29 +80,11 @@ private fun LocationsScreen(
                       it.setLocation(location = location, zoom = zoom)
                     }
                   )
-
-                  Checkbox(
-                    checked = location.isDefault,
-                    onCheckedChange = { checked ->
-                      if (checked) onSetDefaultLocationClick(location.id)
-                    },
-                    modifier = Modifier.align(Alignment.TopEnd)
+                  LocationDropDrownMenu(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    location = location,
+                    onSetDefaultLocationClick = onSetDefaultLocationClick
                   )
-                }
-                Row(
-                  modifier =
-                    Modifier.fillMaxWidth()
-                      .background(MaterialTheme.colorScheme.background)
-                      .padding(5.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Edit, contentDescription = "edit_location")
-                  }
-                  IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Delete, contentDescription = "delete_location")
-                  }
                 }
               }
             }
@@ -151,6 +123,44 @@ private fun LocationsScreen(
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    }
+  }
+}
+
+@Composable
+private fun LocationDropDrownMenu(
+  modifier: Modifier = Modifier,
+  location: Location,
+  onSetDefaultLocationClick: (Long) -> Unit
+) {
+  Box(modifier = modifier) {
+    var expanded by remember { mutableStateOf(false) }
+    IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
+      Icon(imageVector = Icons.Default.MoreVert, contentDescription = "location_menu")
+    }
+
+    DropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.align(Alignment.BottomEnd)
+    ) {
+      DropdownMenuItem(
+        text = {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(text = "Default")
+            if (location.isDefault) {
+              Icon(imageVector = Icons.Filled.Done, contentDescription = "location_default")
+            }
+          }
+        },
+        onClick = { if (!location.isDefault) onSetDefaultLocationClick(location.id) }
+      )
+      DropdownMenuItem(text = { Text(text = "Edit") }, onClick = {})
+      DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {})
     }
   }
 }
