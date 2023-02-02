@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.constraintlayout.compose.ChainStyle
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,7 +73,6 @@ private fun DayScreen(
       }
       is Ready -> {
         val (canvas, controls) = createRefs()
-        createVerticalChain(canvas, controls, chainStyle = ChainStyle.SpreadInside)
 
         val (location, today, yesterday) = locationSunriseSunsetChange.data
         val chartSegments = remember {
@@ -92,12 +91,11 @@ private fun DayScreen(
         Canvas(
           modifier =
             Modifier.constrainAs(canvas) {
-                linkTo(parent.start, parent.end)
-                linkTo(parent.top, controls.top)
-                height = Dimension.fillToConstraints
-                width = Dimension.fillToConstraints
-              }
-              .background(Color.Magenta)
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, controls.top, topMargin = 20.dp, bottomMargin = 20.dp)
+              height = Dimension.fillToConstraints
+              width = Dimension.fillToConstraints
+            }
         ) {
           var startAngle = 0f
           chartSegments.forEach { (sweepAngleDegrees, color) ->
