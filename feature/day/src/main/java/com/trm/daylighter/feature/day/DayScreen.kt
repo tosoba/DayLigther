@@ -2,22 +2,19 @@ package com.trm.daylighter.feature.day
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
@@ -75,36 +72,7 @@ private fun DayScreen(
         }
       }
       is Ready -> {
-        val (chart, controls) = createRefs()
-
-        val (location, today, yesterday) = locationSunriseSunsetChange.data
-
-        SunriseSunsetChart(
-          modifier =
-            Modifier.constrainAs(chart) {
-              linkTo(parent.start, parent.end)
-              linkTo(parent.top, controls.top)
-              height = Dimension.fillToConstraints
-              width = Dimension.fillToConstraints
-            }
-        )
-
-        Row(
-          modifier =
-            Modifier.constrainAs(controls) {
-                linkTo(parent.start, parent.end)
-                linkTo(chart.bottom, parent.bottom)
-              }
-              .background(Color.LightGray),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          IconButton(onClick = onPreviousLocationClick) {
-            Icon(imageVector = Icons.Filled.SkipPrevious, contentDescription = "previous_location")
-          }
-          IconButton(onClick = onNextLocationClick) {
-            Icon(imageVector = Icons.Filled.SkipNext, contentDescription = "next_location")
-          }
-        }
+        SunriseSunset(locationSunriseSunsetChange = locationSunriseSunsetChange.data)
       }
       is Failed -> {
         val button = createRef()
@@ -134,6 +102,84 @@ private fun DayScreen(
 }
 
 @Composable
+private fun ConstraintLayoutScope.SunriseSunset(
+  locationSunriseSunsetChange: LocationSunriseSunsetChange
+) {
+  val (chart, navigation) = createRefs()
+  val (location, today, yesterday) = locationSunriseSunsetChange
+  val orientation = LocalConfiguration.current.orientation
+
+  SunriseSunsetChart(
+    modifier =
+      Modifier.constrainAs(chart) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+          linkTo(parent.start, parent.end)
+          linkTo(parent.top, navigation.top)
+        } else {
+          linkTo(navigation.end, parent.end)
+          linkTo(parent.top, parent.bottom)
+        }
+        height = Dimension.fillToConstraints
+        width = Dimension.fillToConstraints
+      }
+  )
+
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    NavigationBar(
+      modifier =
+        Modifier.constrainAs(navigation) {
+          linkTo(chart.bottom, parent.bottom)
+          linkTo(parent.start, parent.end)
+        }
+    ) {
+      NavigationBarItem(
+        selected = true,
+        onClick = {},
+        icon = {
+          Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+        },
+        label = { Text(text = "Sunrise") }
+      )
+      NavigationBarItem(
+        selected = false,
+        onClick = {},
+        icon = {
+          Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset")
+        },
+        label = { Text(text = "Sunset") }
+      )
+    }
+  } else {
+    NavigationRail(
+      modifier =
+        Modifier.constrainAs(navigation) {
+          linkTo(parent.start, chart.start)
+          linkTo(parent.top, parent.bottom)
+        }
+    ) {
+      Spacer(modifier = Modifier.weight(1f))
+      NavigationRailItem(
+        selected = true,
+        onClick = {},
+        icon = {
+          Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+        },
+        label = { Text(text = "Sunrise") }
+      )
+      NavigationRailItem(
+        selected = false,
+        onClick = {},
+        icon = {
+          Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset")
+        },
+        label = { Text(text = "Sunset") }
+      )
+      Spacer(modifier = Modifier.weight(1f))
+    }
+  }
+}
+
+@Composable
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
     sequenceOf(
@@ -149,12 +195,14 @@ private fun SunriseSunsetChart(modifier: Modifier) {
   }
 
   val orientation = LocalConfiguration.current.orientation
+
   fun DrawScope.segmentTopLeftOffset(): Offset =
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       Offset(-size.height * 1.65f, -size.height * 0.5f)
     } else {
-      Offset(-size.height * 2f, -size.height * 1.5f)
+      Offset(-size.height * 2.25f, -size.height * 1.5f)
     }
+
   fun DrawScope.segmentSize(): Size =
     if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
     else Size(size.height, size.height) * 4f
