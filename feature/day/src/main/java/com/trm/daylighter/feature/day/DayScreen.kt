@@ -320,21 +320,22 @@ private fun SunriseSunsetChart(modifier: Modifier) {
 
   val orientation = LocalConfiguration.current.orientation
 
-  fun DrawScope.segmentTopLeftOffset(): Offset =
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-      Offset(-size.height * 1.65f, -size.height * 0.5f)
-    } else {
-      Offset(-size.height * 2f, -size.height * 1f)
-    }
-
-  fun DrawScope.segmentSize(): Size =
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
-    else Size(size.height, size.height) * 3f
-
   Canvas(modifier = modifier) {
-    val topLeftOffset = segmentTopLeftOffset()
-    val segmentSize = segmentSize()
+    val topLeftOffset =
+      if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        Offset(-size.height * 1.65f, -size.height * 0.5f)
+      } else {
+        Offset(-size.height * 2f, -size.height * 1f)
+      }
+
+    val segmentSize =
+      if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
+      else Size(size.height, size.height) * 3f
+
     var startAngle = 0f
+
+    val chartRadius = segmentSize.maxDimension / 2f
+    val chartCenter = Offset(topLeftOffset.x + chartRadius, chartRadius)
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       drawArc(
@@ -361,5 +362,11 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     }
 
     drawHorizon()
+
+    drawLine(
+      color = Color.Red,
+      start = Offset(chartCenter.x, size.height / 2f),
+      end = Offset(size.width, size.height / 2f + 240f)
+    )
   }
 }
