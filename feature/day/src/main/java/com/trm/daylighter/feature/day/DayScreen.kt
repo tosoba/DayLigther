@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
@@ -258,13 +259,13 @@ private fun SunriseSunsetNavigationBar(modifier: Modifier = Modifier) {
       icon = {
         Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
       },
-      label = { Text(text = "Sunrise") }
+      label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationBarItem(
       selected = false,
       onClick = {},
       icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
-      label = { Text(text = "Sunset") }
+      label = { Text(text = stringResource(R.string.sunset)) }
     )
   }
 }
@@ -290,13 +291,13 @@ private fun SunriseSunsetNavigationRail(
       icon = {
         Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
       },
-      label = { Text(text = "Sunrise") }
+      label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationRailItem(
       selected = false,
       onClick = {},
       icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
-      label = { Text(text = "Sunset") }
+      label = { Text(text = stringResource(R.string.sunset)) }
     )
     Spacer(modifier = Modifier.weight(1f))
   }
