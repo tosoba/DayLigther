@@ -3,6 +3,8 @@ package com.trm.daylighter.feature.day
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
@@ -27,6 +30,7 @@ const val dayRoute = "day_route"
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun DayRoute(
+  onDrawerMenuClick: () -> Unit,
   onAddLocation: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
@@ -37,6 +41,7 @@ fun DayRoute(
     )
   DayScreen(
     locationSunriseSunsetChange = locationSunriseSunsetChange.value,
+    onDrawerMenuClick = onDrawerMenuClick,
     onPreviousLocationClick = viewModel::previousLocation,
     onNextLocationClick = viewModel::nextLocation,
     onAddLocationClick = onAddLocation,
@@ -50,6 +55,7 @@ data class DayChartSegment(val sweepAngleDegrees: Float, val color: Color)
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
+  onDrawerMenuClick: () -> Unit,
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
   onAddLocationClick: () -> Unit,
@@ -59,11 +65,19 @@ private fun DayScreen(
   ConstraintLayout(modifier = modifier) {
     when (locationSunriseSunsetChange) {
       is Empty -> {
-        val button = createRef()
+        val (drawerMenuButton, addLocationButton) = createRefs()
+        DrawerMenuButton(
+          onDrawerMenuClick = onDrawerMenuClick,
+          modifier =
+            Modifier.constrainAs(drawerMenuButton) {
+              start.linkTo(parent.start, 16.dp)
+              top.linkTo(parent.top, 16.dp)
+            }
+        )
         Button(
           onClick = onAddLocationClick,
           modifier =
-            Modifier.constrainAs(button) {
+            Modifier.constrainAs(addLocationButton) {
               linkTo(parent.start, parent.end)
               linkTo(parent.top, parent.bottom)
             }
@@ -72,14 +86,25 @@ private fun DayScreen(
         }
       }
       is Ready -> {
-        SunriseSunset(locationSunriseSunsetChange = locationSunriseSunsetChange.data)
+        SunriseSunset(
+          locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+          onDrawerMenuClick = onDrawerMenuClick,
+        )
       }
       is Failed -> {
-        val button = createRef()
+        val (drawerMenuButton, retryButton) = createRefs()
+        DrawerMenuButton(
+          onDrawerMenuClick = onDrawerMenuClick,
+          modifier =
+            Modifier.constrainAs(drawerMenuButton) {
+              start.linkTo(parent.start, 16.dp)
+              top.linkTo(parent.top, 16.dp)
+            }
+        )
         Button(
           onClick = onRetryClick,
           modifier =
-            Modifier.constrainAs(button) {
+            Modifier.constrainAs(retryButton) {
               linkTo(parent.start, parent.end)
               linkTo(parent.top, parent.bottom)
             }
@@ -88,10 +113,19 @@ private fun DayScreen(
         }
       }
       is Loading -> {
-        val indicator = createRef()
+        val (drawerMenuButton, loadingIndicator) = createRefs()
+        DrawerMenuButton(
+          onDrawerMenuClick = onDrawerMenuClick,
+          modifier =
+            Modifier.constrainAs(drawerMenuButton) {
+              start.linkTo(parent.start, 16.dp)
+              top.linkTo(parent.top, 16.dp)
+            }
+        )
+
         CircularProgressIndicator(
           modifier =
-            Modifier.constrainAs(indicator) {
+            Modifier.constrainAs(loadingIndicator) {
               linkTo(parent.start, parent.end)
               linkTo(parent.top, parent.bottom)
             }
@@ -102,10 +136,21 @@ private fun DayScreen(
 }
 
 @Composable
-private fun ConstraintLayoutScope.SunriseSunset(
-  locationSunriseSunsetChange: LocationSunriseSunsetChange
+private fun ConstraintLayoutScope.DrawerMenuButton(
+  onDrawerMenuClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  val (chart, navigation) = createRefs()
+  SmallFloatingActionButton(onClick = onDrawerMenuClick, modifier = modifier) {
+    Icon(imageVector = Icons.Filled.Menu, contentDescription = "drawer_menu")
+  }
+}
+
+@Composable
+private fun ConstraintLayoutScope.SunriseSunset(
+  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  onDrawerMenuClick: () -> Unit,
+) {
+  val (drawerMenuButton, chart, navigation) = createRefs()
   val (location, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
 
@@ -177,6 +222,15 @@ private fun ConstraintLayoutScope.SunriseSunset(
       Spacer(modifier = Modifier.weight(1f))
     }
   }
+
+  DrawerMenuButton(
+    onDrawerMenuClick = onDrawerMenuClick,
+    modifier =
+      Modifier.constrainAs(drawerMenuButton) {
+        start.linkTo(parent.start, 16.dp)
+        top.linkTo(parent.top, 16.dp)
+      }
+  )
 }
 
 @Composable

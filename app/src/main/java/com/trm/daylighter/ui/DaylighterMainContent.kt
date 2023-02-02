@@ -65,25 +65,16 @@ fun DaylighterMainContent() {
   ) {
     DayLighterScaffold(
       navController = navController,
+      onDrawerMenuClick = {
+        scope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
+      },
       topBar = {
-        AnimatedVisibility(visible = currentRoute != locationRoute) {
+        AnimatedVisibility(visible = currentRoute != dayRoute && currentRoute != locationRoute) {
           CenterAlignedTopAppBar(
             title = { Text(stringResource(id = R.string.app_name)) },
             navigationIcon = {
-              if (currentRoute != dayRoute) {
-                IconButton(onClick = navController::popBackStack) {
-                  Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back_arrow")
-                }
-              } else {
-                IconButton(
-                  onClick = {
-                    scope.launch {
-                      if (drawerState.isOpen) drawerState.close() else drawerState.open()
-                    }
-                  }
-                ) {
-                  Icon(imageVector = Icons.Filled.Menu, contentDescription = "toggle_drawer")
-                }
+              IconButton(onClick = navController::popBackStack) {
+                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back_arrow")
               }
             }
           )
@@ -128,7 +119,11 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   ExperimentalLayoutApi::class
 )
 @Composable
-private fun DayLighterScaffold(navController: NavHostController, topBar: @Composable () -> Unit) {
+private fun DayLighterScaffold(
+  navController: NavHostController,
+  onDrawerMenuClick: () -> Unit,
+  topBar: @Composable () -> Unit
+) {
   Scaffold(
     modifier = Modifier.semantics { testTagsAsResourceId = true },
     containerColor = Color.Transparent,
@@ -138,6 +133,7 @@ private fun DayLighterScaffold(navController: NavHostController, topBar: @Compos
   ) {
     DaylighterNavHost(
       navController = navController,
+      onDrawerMenuClick = onDrawerMenuClick,
       modifier =
         Modifier.padding(it).consumedWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
     )
@@ -145,7 +141,11 @@ private fun DayLighterScaffold(navController: NavHostController, topBar: @Compos
 }
 
 @Composable
-private fun DaylighterNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+private fun DaylighterNavHost(
+  navController: NavHostController,
+  onDrawerMenuClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
   fun navigateToAddLocation() {
     navController.navigate(
       route = locationRoute,
@@ -155,7 +155,11 @@ private fun DaylighterNavHost(navController: NavHostController, modifier: Modifi
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
     composable(dayRoute) {
-      DayRoute(modifier = Modifier.fillMaxSize(), onAddLocation = ::navigateToAddLocation)
+      DayRoute(
+        modifier = Modifier.fillMaxSize(),
+        onDrawerMenuClick = onDrawerMenuClick,
+        onAddLocation = ::navigateToAddLocation
+      )
     }
     composable(locationRoute) {
       LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
