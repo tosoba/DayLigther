@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -104,8 +105,8 @@ private fun DayScreen(
               startAngle = startAngle,
               sweepAngle = sweepAngleDegrees,
               useCenter = true,
-              topLeft = Offset(-size.width * 1.5f, -size.height / 2f),
-              size = size * 2f
+              topLeft = Offset(-size.height * 1.5f, -size.height * 0.5f),
+              size = Size(size.height, size.height) * 2f
             )
             startAngle += sweepAngleDegrees
           }
