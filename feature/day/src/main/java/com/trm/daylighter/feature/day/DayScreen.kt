@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -89,6 +91,8 @@ private fun DayScreen(
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
           onDrawerMenuClick = onDrawerMenuClick,
+          onPreviousLocationClick = onPreviousLocationClick,
+          onNextLocationClick = onNextLocationClick
         )
       }
       is Failed -> {
@@ -146,8 +150,10 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 private fun ConstraintLayoutScope.SunriseSunset(
   locationSunriseSunsetChange: LocationSunriseSunsetChange,
   onDrawerMenuClick: () -> Unit,
+  onPreviousLocationClick: () -> Unit,
+  onNextLocationClick: () -> Unit,
 ) {
-  val (drawerMenuButton, chart, navigation) = createRefs()
+  val (drawerMenuButton, chart, navigation, prevLocationButton, nextLocationButton) = createRefs()
   val (location, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
 
@@ -176,6 +182,15 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
+    PrevLocationButton(
+      onClick = onPreviousLocationClick,
+      modifier =
+        Modifier.constrainAs(prevLocationButton) {
+          bottom.linkTo(navigation.top, 16.dp)
+          start.linkTo(parent.start, 16.dp)
+        }
+    )
+
     NavigationBar(
       modifier =
         Modifier.constrainAs(navigation) {
@@ -200,7 +215,24 @@ private fun ConstraintLayoutScope.SunriseSunset(
         label = { Text(text = "Sunset") }
       )
     }
+
+    NextLocationButton(
+      onClick = onNextLocationClick,
+      Modifier.constrainAs(nextLocationButton) {
+        bottom.linkTo(navigation.top, 16.dp)
+        end.linkTo(parent.end, 16.dp)
+      }
+    )
   } else {
+    PrevLocationButton(
+      onClick = onPreviousLocationClick,
+      modifier =
+        Modifier.constrainAs(prevLocationButton) {
+          bottom.linkTo(parent.bottom, 16.dp)
+          start.linkTo(navigation.end, 16.dp)
+        }
+    )
+
     NavigationRail(
       header = {
         DrawerMenuButton(
@@ -233,6 +265,28 @@ private fun ConstraintLayoutScope.SunriseSunset(
       )
       Spacer(modifier = Modifier.weight(1f))
     }
+
+    NextLocationButton(
+      onClick = onNextLocationClick,
+      Modifier.constrainAs(nextLocationButton) {
+        bottom.linkTo(parent.bottom, 16.dp)
+        end.linkTo(parent.end, 16.dp)
+      }
+    )
+  }
+}
+
+@Composable
+private fun PrevLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+  SmallFloatingActionButton(modifier = modifier, onClick = onClick) {
+    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "prev_location")
+  }
+}
+
+@Composable
+private fun NextLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+  SmallFloatingActionButton(modifier = modifier, onClick = onClick) {
+    Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "next_location")
   }
 }
 
