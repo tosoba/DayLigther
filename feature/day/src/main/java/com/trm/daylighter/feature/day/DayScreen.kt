@@ -370,7 +370,8 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         drawContext.canvas.nativeCanvas.drawText(
           "Horizon",
           chartCenter.x + chartRadius,
-          size.height / 2f + chartRadius * sin(lineAngleDegrees.radians) - 5.dp.toPx(),
+          (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
+            (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))),
           Paint().apply {
             textSize = 16.sp.toPx()
             textAlign = Paint.Align.CENTER
