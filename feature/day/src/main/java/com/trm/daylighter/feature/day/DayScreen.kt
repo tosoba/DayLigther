@@ -1,7 +1,6 @@
 package com.trm.daylighter.feature.day
 
 import android.content.res.Configuration
-import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,13 +16,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
@@ -311,6 +311,7 @@ private fun SunriseSunsetNavigationRail(
   }
 }
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
@@ -324,6 +325,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
   }
 
   val orientation = LocalConfiguration.current.orientation
+  val textMeasurer = rememberTextMeasurer()
 
   Canvas(modifier = modifier) {
     val topLeftOffset =
@@ -367,17 +369,18 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       )
 
       rotate(lineAngleDegrees) {
-        drawContext.canvas.nativeCanvas.drawText(
-          "Horizon",
-          chartCenter.x + chartRadius,
-          (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
-            (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))),
-          Paint().apply {
-            textSize = 16.sp.toPx()
-            textAlign = Paint.Align.CENTER
-            color = Color.Black.toArgb()
-            isFakeBoldText = true
-          }
+        val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Horizon"))
+        drawText(
+          textMeasurer = textMeasurer,
+          text = "Horizon",
+          topLeft =
+            Offset(
+              x = size.width - textLayoutResult.size.width,
+              y =
+                (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
+                  (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))) -
+                  textLayoutResult.size.height
+            ),
         )
       }
 
