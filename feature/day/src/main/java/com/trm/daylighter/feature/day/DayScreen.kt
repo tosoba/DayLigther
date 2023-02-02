@@ -310,14 +310,11 @@ private fun SunriseSunsetNavigationRail(
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
     sequenceOf(
+      DayChartSegment(sweepAngleDegrees = 90f, color = Color.Cyan),
       DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
       DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
       DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
-      DayChartSegment(sweepAngleDegrees = 144f, color = Color.Black),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
-      DayChartSegment(sweepAngleDegrees = 180f, color = Color.Cyan),
+      DayChartSegment(sweepAngleDegrees = 72f, color = Color.Black),
     )
   }
 
@@ -335,7 +332,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
       else Size(size.height, size.height) * 3f
 
-    var startAngle = 0f
+    var startAngle = -90f
 
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, chartRadius)
