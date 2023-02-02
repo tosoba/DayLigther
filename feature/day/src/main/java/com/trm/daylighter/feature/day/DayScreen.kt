@@ -25,8 +25,11 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.domain.model.*
 import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
+import kotlin.math.cos
+import kotlin.math.sin
 
 const val dayRoute = "day_route"
 
@@ -364,9 +367,13 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     drawHorizon()
 
     drawLine(
-      color = Color.Red,
+      color = Color.Blue,
       start = Offset(chartCenter.x, size.height / 2f),
-      end = Offset(size.width, size.height / 2f + 240f)
+      end =
+        Offset(
+          chartCenter.x + chartRadius * 10f * cos(6f.radians),
+          size.height / 2f + chartRadius * 10f * sin(6f.radians)
+        ),
     )
   }
 }
