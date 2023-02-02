@@ -333,18 +333,33 @@ private fun SunriseSunsetChart(modifier: Modifier) {
 
   Canvas(modifier = modifier) {
     val topLeftOffset = segmentTopLeftOffset()
-    val size = segmentSize()
+    val segmentSize = segmentSize()
     var startAngle = 0f
-    chartSegments.forEach { (sweepAngleDegrees, color) ->
+
+    fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       drawArc(
-        color = color,
+        color = segment.color,
         startAngle = startAngle,
-        sweepAngle = sweepAngleDegrees,
+        sweepAngle = segment.sweepAngleDegrees,
         useCenter = true,
         topLeft = topLeftOffset,
-        size = size
+        size = segmentSize
       )
-      startAngle += sweepAngleDegrees
     }
+
+    fun DrawScope.drawHorizon() {
+      drawLine(
+        color = Color.Cyan,
+        start = Offset(0f, size.height / 2f),
+        end = Offset(size.width, size.height / 2f),
+      )
+    }
+
+    chartSegments.forEach { segment ->
+      drawChartSegment(segment)
+      startAngle += segment.sweepAngleDegrees
+    }
+
+    drawHorizon()
   }
 }
