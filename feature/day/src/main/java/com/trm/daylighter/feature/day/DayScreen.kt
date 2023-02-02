@@ -1,5 +1,6 @@
 package com.trm.daylighter.feature.day
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -89,6 +92,17 @@ private fun DayScreen(
           )
         }
 
+        val orientation = LocalConfiguration.current.orientation
+        fun DrawScope.segmentTopLeftOffset(): Offset =
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Offset(-size.height * 1.5f, -size.height * 0.5f)
+          } else {
+            Offset(-size.height * 2f, -size.height * 1.5f)
+          }
+        fun DrawScope.segmentSize(): Size =
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
+          else Size(size.height, size.height) * 4f
+
         Canvas(
           modifier =
             Modifier.constrainAs(canvas) {
@@ -98,6 +112,8 @@ private fun DayScreen(
               width = Dimension.fillToConstraints
             }
         ) {
+          val topLeftOffset = segmentTopLeftOffset()
+          val size = segmentSize()
           var startAngle = 0f
           chartSegments.forEach { (sweepAngleDegrees, color) ->
             drawArc(
@@ -105,8 +121,8 @@ private fun DayScreen(
               startAngle = startAngle,
               sweepAngle = sweepAngleDegrees,
               useCenter = true,
-              topLeft = Offset(-size.height * 1.5f, -size.height * 0.5f),
-              size = Size(size.height, size.height) * 2f
+              topLeft = topLeftOffset,
+              size = size
             )
             startAngle += sweepAngleDegrees
           }
