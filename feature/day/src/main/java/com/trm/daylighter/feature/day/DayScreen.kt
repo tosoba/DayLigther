@@ -323,14 +323,12 @@ private fun SunriseSunsetChart(modifier: Modifier) {
   Canvas(modifier = modifier) {
     val topLeftOffset =
       if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Offset(-size.height * 1.65f, -size.height * 0.5f)
+        Offset(-size.height * 1.65f, -size.height * .5f)
       } else {
-        Offset(-size.height * 2f, -size.height * 1f)
+        Offset(-size.height * 1f, -size.height * .5f)
       }
 
-    val segmentSize =
-      if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
-      else Size(size.height, size.height) * 3f
+    val segmentSize = Size(size.height, size.height) * 2f
 
     var startAngle = -90f
 
