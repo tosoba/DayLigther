@@ -384,6 +384,22 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         )
       }
 
+      rotate(lineAngleDegrees) {
+        val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Twilight"))
+        drawText(
+          textMeasurer = textMeasurer,
+          text = "Twilight",
+          topLeft =
+            Offset(
+              x = chartCenter.x + chartRadius - textLayoutResult.size.width,
+              y =
+                (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
+                  (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))) -
+                  textLayoutResult.size.height
+            ),
+        )
+      }
+
       lineAngleDegrees += chartSegments[segmentIndex + 1].sweepAngleDegrees
     }
   }
