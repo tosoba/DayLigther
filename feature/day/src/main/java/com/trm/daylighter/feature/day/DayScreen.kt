@@ -309,7 +309,7 @@ private fun SunriseSunsetNavigationRail(
 @Composable
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
-    sequenceOf(
+    listOf(
       DayChartSegment(sweepAngleDegrees = 90f, color = Color.Cyan),
       DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
       DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
@@ -334,9 +334,6 @@ private fun SunriseSunsetChart(modifier: Modifier) {
 
     var startAngle = -90f
 
-    val chartRadius = segmentSize.maxDimension / 2f
-    val chartCenter = Offset(topLeftOffset.x + chartRadius, chartRadius)
-
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       drawArc(
         color = segment.color,
@@ -348,29 +345,27 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       )
     }
 
-    fun DrawScope.drawHorizon() {
-      drawLine(
-        color = Color.Cyan,
-        start = Offset(0f, size.height / 2f),
-        end = Offset(size.width, size.height / 2f),
-      )
-    }
-
     chartSegments.forEach { segment ->
       drawChartSegment(segment)
       startAngle += segment.sweepAngleDegrees
     }
 
-    drawHorizon()
+    val chartRadius = segmentSize.maxDimension / 2f
+    val chartCenter = Offset(topLeftOffset.x + chartRadius, chartRadius)
+    var lineAngleDegrees = 0f
+    val radiusMultiplier = 10f
 
-    drawLine(
-      color = Color.Blue,
-      start = Offset(chartCenter.x, size.height / 2f),
-      end =
-        Offset(
-          chartCenter.x + chartRadius * 10f * cos(6f.radians),
-          size.height / 2f + chartRadius * 10f * sin(6f.radians)
-        ),
-    )
+    repeat(chartSegments.size - 1) { segmentIndex ->
+      drawLine(
+        color = chartSegments[segmentIndex].color,
+        start = Offset(chartCenter.x, size.height / 2f),
+        end =
+          Offset(
+            chartCenter.x + chartRadius * radiusMultiplier * cos(lineAngleDegrees.radians),
+            size.height / 2f + chartRadius * radiusMultiplier * sin(lineAngleDegrees.radians)
+          ),
+      )
+      lineAngleDegrees += chartSegments[segmentIndex + 1].sweepAngleDegrees
+    }
   }
 }
