@@ -95,7 +95,7 @@ private fun DayScreen(
         val orientation = LocalConfiguration.current.orientation
         fun DrawScope.segmentTopLeftOffset(): Offset =
           if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Offset(-size.height * 1.5f, -size.height * 0.5f)
+            Offset(-size.height * 1.65f, -size.height * 0.5f)
           } else {
             Offset(-size.height * 2f, -size.height * 1.5f)
           }
@@ -107,7 +107,7 @@ private fun DayScreen(
           modifier =
             Modifier.constrainAs(canvas) {
               linkTo(parent.start, parent.end)
-              linkTo(parent.top, controls.top, topMargin = 20.dp, bottomMargin = 20.dp)
+              linkTo(parent.top, controls.top)
               height = Dimension.fillToConstraints
               width = Dimension.fillToConstraints
             }
