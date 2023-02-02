@@ -136,10 +136,7 @@ private fun DayScreen(
 }
 
 @Composable
-private fun ConstraintLayoutScope.DrawerMenuButton(
-  onDrawerMenuClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier = Modifier) {
   SmallFloatingActionButton(onClick = onDrawerMenuClick, modifier = modifier) {
     Icon(imageVector = Icons.Filled.Menu, contentDescription = "drawer_menu")
   }
@@ -170,6 +167,15 @@ private fun ConstraintLayoutScope.SunriseSunset(
   )
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    DrawerMenuButton(
+      onDrawerMenuClick = onDrawerMenuClick,
+      modifier =
+        Modifier.constrainAs(drawerMenuButton) {
+          start.linkTo(parent.start, 16.dp)
+          top.linkTo(parent.top, 16.dp)
+        }
+    )
+
     NavigationBar(
       modifier =
         Modifier.constrainAs(navigation) {
@@ -196,6 +202,12 @@ private fun ConstraintLayoutScope.SunriseSunset(
     }
   } else {
     NavigationRail(
+      header = {
+        DrawerMenuButton(
+          onDrawerMenuClick = onDrawerMenuClick,
+          modifier = Modifier.padding(top = 8.dp)
+        )
+      },
       modifier =
         Modifier.constrainAs(navigation) {
           linkTo(parent.start, chart.start)
@@ -222,15 +234,6 @@ private fun ConstraintLayoutScope.SunriseSunset(
       Spacer(modifier = Modifier.weight(1f))
     }
   }
-
-  DrawerMenuButton(
-    onDrawerMenuClick = onDrawerMenuClick,
-    modifier =
-      Modifier.constrainAs(drawerMenuButton) {
-        start.linkTo(parent.start, 16.dp)
-        top.linkTo(parent.top, 16.dp)
-      }
-  )
 }
 
 @Composable
