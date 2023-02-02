@@ -104,8 +104,8 @@ private fun DayScreen(
               startAngle = startAngle,
               sweepAngle = sweepAngleDegrees,
               useCenter = true,
-              topLeft = Offset(-size.width / 2f, 0f),
-              size = size
+              topLeft = Offset(-size.width * 1.5f, -size.height / 2f),
+              size = size * 2f
             )
             startAngle += sweepAngleDegrees
           }
