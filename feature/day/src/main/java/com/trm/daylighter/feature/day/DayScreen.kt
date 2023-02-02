@@ -17,7 +17,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -76,63 +75,25 @@ private fun DayScreen(
         }
       }
       is Ready -> {
-        val (canvas, controls) = createRefs()
+        val (chart, controls) = createRefs()
 
         val (location, today, yesterday) = locationSunriseSunsetChange.data
-        val chartSegments = remember {
-          sequenceOf(
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
-            DayChartSegment(sweepAngleDegrees = 144f, color = Color.Black),
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
-            DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
-            DayChartSegment(sweepAngleDegrees = 180f, color = Color.Cyan),
-          )
-        }
 
-        val orientation = LocalConfiguration.current.orientation
-        fun DrawScope.segmentTopLeftOffset(): Offset =
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Offset(-size.height * 1.65f, -size.height * 0.5f)
-          } else {
-            Offset(-size.height * 2f, -size.height * 1.5f)
-          }
-        fun DrawScope.segmentSize(): Size =
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
-          else Size(size.height, size.height) * 4f
-
-        Canvas(
+        SunriseSunsetChart(
           modifier =
-            Modifier.constrainAs(canvas) {
+            Modifier.constrainAs(chart) {
               linkTo(parent.start, parent.end)
               linkTo(parent.top, controls.top)
               height = Dimension.fillToConstraints
               width = Dimension.fillToConstraints
             }
-        ) {
-          val topLeftOffset = segmentTopLeftOffset()
-          val size = segmentSize()
-          var startAngle = 0f
-          chartSegments.forEach { (sweepAngleDegrees, color) ->
-            drawArc(
-              color = color,
-              startAngle = startAngle,
-              sweepAngle = sweepAngleDegrees,
-              useCenter = true,
-              topLeft = topLeftOffset,
-              size = size
-            )
-            startAngle += sweepAngleDegrees
-          }
-        }
+        )
 
         Row(
           modifier =
             Modifier.constrainAs(controls) {
                 linkTo(parent.start, parent.end)
-                linkTo(canvas.bottom, parent.bottom)
+                linkTo(chart.bottom, parent.bottom)
               }
               .background(Color.LightGray),
           verticalAlignment = Alignment.CenterVertically
@@ -168,6 +129,50 @@ private fun DayScreen(
             }
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun SunriseSunsetChart(modifier: Modifier) {
+  val chartSegments = remember {
+    sequenceOf(
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
+      DayChartSegment(sweepAngleDegrees = 144f, color = Color.Black),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
+      DayChartSegment(sweepAngleDegrees = 180f, color = Color.Cyan),
+    )
+  }
+
+  val orientation = LocalConfiguration.current.orientation
+  fun DrawScope.segmentTopLeftOffset(): Offset =
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      Offset(-size.height * 1.65f, -size.height * 0.5f)
+    } else {
+      Offset(-size.height * 2f, -size.height * 1.5f)
+    }
+  fun DrawScope.segmentSize(): Size =
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
+    else Size(size.height, size.height) * 4f
+
+  Canvas(modifier = modifier) {
+    val topLeftOffset = segmentTopLeftOffset()
+    val size = segmentSize()
+    var startAngle = 0f
+    chartSegments.forEach { (sweepAngleDegrees, color) ->
+      drawArc(
+        color = color,
+        startAngle = startAngle,
+        sweepAngle = sweepAngleDegrees,
+        useCenter = true,
+        topLeft = topLeftOffset,
+        size = size
+      )
+      startAngle += sweepAngleDegrees
     }
   }
 }
