@@ -191,30 +191,13 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    NavigationBar(
+    SunriseSunsetNavigationBar(
       modifier =
         Modifier.constrainAs(navigation) {
           linkTo(chart.bottom, parent.bottom)
           linkTo(parent.start, parent.end)
         }
-    ) {
-      NavigationBarItem(
-        selected = true,
-        onClick = {},
-        icon = {
-          Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
-        },
-        label = { Text(text = "Sunrise") }
-      )
-      NavigationBarItem(
-        selected = false,
-        onClick = {},
-        icon = {
-          Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset")
-        },
-        label = { Text(text = "Sunset") }
-      )
-    }
+    )
 
     NextLocationButton(
       onClick = onNextLocationClick,
@@ -233,38 +216,14 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    NavigationRail(
-      header = {
-        DrawerMenuButton(
-          onDrawerMenuClick = onDrawerMenuClick,
-          modifier = Modifier.padding(top = 8.dp)
-        )
-      },
+    SunriseSunsetNavigationRail(
+      onDrawerMenuClick = onDrawerMenuClick,
       modifier =
         Modifier.constrainAs(navigation) {
           linkTo(parent.start, chart.start)
           linkTo(parent.top, parent.bottom)
         }
-    ) {
-      Spacer(modifier = Modifier.weight(1f))
-      NavigationRailItem(
-        selected = true,
-        onClick = {},
-        icon = {
-          Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
-        },
-        label = { Text(text = "Sunrise") }
-      )
-      NavigationRailItem(
-        selected = false,
-        onClick = {},
-        icon = {
-          Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset")
-        },
-        label = { Text(text = "Sunset") }
-      )
-      Spacer(modifier = Modifier.weight(1f))
-    }
+    )
 
     NextLocationButton(
       onClick = onNextLocationClick,
@@ -287,6 +246,59 @@ private fun PrevLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 private fun NextLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
   SmallFloatingActionButton(modifier = modifier, onClick = onClick) {
     Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "next_location")
+  }
+}
+
+@Composable
+private fun SunriseSunsetNavigationBar(modifier: Modifier = Modifier) {
+  NavigationBar(modifier = modifier) {
+    NavigationBarItem(
+      selected = true,
+      onClick = {},
+      icon = {
+        Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+      },
+      label = { Text(text = "Sunrise") }
+    )
+    NavigationBarItem(
+      selected = false,
+      onClick = {},
+      icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
+      label = { Text(text = "Sunset") }
+    )
+  }
+}
+
+@Composable
+private fun SunriseSunsetNavigationRail(
+  onDrawerMenuClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  NavigationRail(
+    header = {
+      DrawerMenuButton(
+        onDrawerMenuClick = onDrawerMenuClick,
+        modifier = Modifier.padding(top = 8.dp)
+      )
+    },
+    modifier = modifier
+  ) {
+    Spacer(modifier = Modifier.weight(1f))
+    NavigationRailItem(
+      selected = true,
+      onClick = {},
+      icon = {
+        Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+      },
+      label = { Text(text = "Sunrise") }
+    )
+    NavigationRailItem(
+      selected = false,
+      onClick = {},
+      icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
+      label = { Text(text = "Sunset") }
+    )
+    Spacer(modifier = Modifier.weight(1f))
   }
 }
 
