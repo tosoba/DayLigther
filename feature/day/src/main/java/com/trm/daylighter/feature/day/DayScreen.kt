@@ -200,12 +200,12 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       Offset(-size.height * 1.65f, -size.height * 0.5f)
     } else {
-      Offset(-size.height * 2.25f, -size.height * 1.5f)
+      Offset(-size.height * 2f, -size.height * 1f)
     }
 
   fun DrawScope.segmentSize(): Size =
     if (orientation == Configuration.ORIENTATION_PORTRAIT) Size(size.height, size.height) * 2f
-    else Size(size.height, size.height) * 4f
+    else Size(size.height, size.height) * 3f
 
   Canvas(modifier = modifier) {
     val topLeftOffset = segmentTopLeftOffset()
