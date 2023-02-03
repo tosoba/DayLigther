@@ -390,6 +390,18 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     val angleIncrementDegrees = 6f
     val textPadding = 3.dp.toPx()
 
+    val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString("Horizon"))
+    drawText(
+      textMeasurer = textMeasurer,
+      text = "Horizon",
+      topLeft =
+        Offset(
+          x = size.width - horizonLayoutResult.size.width - textPadding,
+          y = chartCenter.y - horizonLayoutResult.size.height - textPadding
+        ),
+      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right)
+    )
+
     repeat(chartSegments.size - 1) { segmentIndex ->
       val lineRadiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
       drawLine(
@@ -405,7 +417,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       val textRadiusMultiplier = 1.1f
       rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
         val label = chartSegments[segmentIndex].endingEdgeLabel
-        val textLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
+        val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
         drawText(
           textMeasurer = textMeasurer,
           text = label,
@@ -414,8 +426,9 @@ private fun SunriseSunsetChart(modifier: Modifier) {
               x = chartCenter.x + chartRadius * textRadiusMultiplier + textPadding,
               y =
                 chartCenter.y + textPadding -
-                  if (segmentIndex == 0) 0f else textLayoutResult.lastBaseline
+                  if (segmentIndex == 0) 0f else labelLayoutResult.lastBaseline
             ),
+          style = labelSmallTextStyle.copy(textAlign = TextAlign.Left)
         )
       }
 
