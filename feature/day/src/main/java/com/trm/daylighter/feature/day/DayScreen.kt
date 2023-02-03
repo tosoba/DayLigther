@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalConfiguration
@@ -403,23 +404,25 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
+      val segment = chartSegments[segmentIndex]
       val lineRadiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
       drawLine(
-        color = chartSegments[segmentIndex].color,
+        color = segment.color,
         start = chartCenter,
         end =
           Offset(
             chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
             chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians)
           ),
+        pathEffect =
+          if (segmentIndex == 0) null else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
       )
 
       val textRadiusMultiplier = 1.1f
-      val label = chartSegments[segmentIndex].endingEdgeLabel
-      val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
+      val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.endingEdgeLabel))
       drawText(
         textMeasurer = textMeasurer,
-        text = label,
+        text = segment.endingEdgeLabel,
         topLeft =
           Offset(
             x =
