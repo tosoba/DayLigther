@@ -34,7 +34,6 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.domain.model.*
-import com.trm.daylighter.domain.model.LocationSunriseSunsetChange
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -404,25 +403,29 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      val segment = chartSegments[segmentIndex]
       val lineRadiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
+      val strokeWidth = 2f
       drawLine(
-        color = segment.color,
+        color = chartSegments[segmentIndex + 1].color,
         start = chartCenter,
         end =
           Offset(
             chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
-            chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians)
+            chartCenter.y +
+              chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians) +
+              strokeWidth
           ),
+        strokeWidth = strokeWidth,
         pathEffect =
           if (segmentIndex == 0) null else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
       )
 
       val textRadiusMultiplier = 1.1f
-      val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.endingEdgeLabel))
+      val labelLayoutResult =
+        textMeasurer.measure(text = AnnotatedString(chartSegments[segmentIndex].endingEdgeLabel))
       drawText(
         textMeasurer = textMeasurer,
-        text = segment.endingEdgeLabel,
+        text = chartSegments[segmentIndex].endingEdgeLabel,
         topLeft =
           Offset(
             x =
