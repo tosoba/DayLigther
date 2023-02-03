@@ -409,7 +409,12 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      val lineRadiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
+      val lineRadiusMultiplier =
+        when {
+          segmentIndex == 0 -> 10f
+          orientation == Configuration.ORIENTATION_PORTRAIT -> 1.025f
+          else -> 1.1f
+        }
       val strokeWidth = 2f
       drawLine(
         color = chartSegments[segmentIndex + 1].color,
@@ -426,7 +431,8 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           if (segmentIndex == 0) null else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
       )
 
-      val textRadiusMultiplier = 1.1f
+      val textRadiusMultiplier =
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
       val labelLayoutResult =
         textMeasurer.measure(text = AnnotatedString(chartSegments[segmentIndex].endingEdgeLabel))
       drawText(
