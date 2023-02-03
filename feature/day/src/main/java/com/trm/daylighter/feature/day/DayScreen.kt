@@ -355,17 +355,17 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
     var currentAngleDegrees = 0f
-    val radiusMultiplier = 10f
     val textPadding = 3.dp.toPx()
 
     repeat(chartSegments.size - 1) { segmentIndex ->
+      val radiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
       drawLine(
         color = chartSegments[segmentIndex].color,
         start = chartCenter,
         end =
           Offset(
             chartCenter.x + chartRadius * radiusMultiplier * cos(currentAngleDegrees.radians),
-            size.height / 2f + chartRadius * radiusMultiplier * sin(currentAngleDegrees.radians)
+            chartCenter.y + chartRadius * radiusMultiplier * sin(currentAngleDegrees.radians)
           ),
       )
 
@@ -377,7 +377,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           topLeft =
             Offset(
               x = size.width - textLayoutResult.size.width - textPadding,
-              y = size.height / 2f - textLayoutResult.size.height - textPadding
+              y = chartCenter.y - textLayoutResult.size.height - textPadding
             ),
         )
       }
@@ -390,7 +390,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           topLeft =
             Offset(
               x = chartCenter.x + chartRadius - textLayoutResult.size.width - textPadding,
-              y = size.height / 2f - textLayoutResult.size.height - textPadding
+              y = chartCenter.y - textLayoutResult.size.height - textPadding
             ),
         )
       }
