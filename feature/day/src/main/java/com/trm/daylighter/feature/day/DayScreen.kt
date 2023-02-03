@@ -23,6 +23,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
@@ -61,7 +62,7 @@ fun DayRoute(
   )
 }
 
-data class DayChartSegment(val sweepAngleDegrees: Float, val color: Color)
+data class DayChartSegment(val sweepAngleDegrees: Float, val color: Color, val periodLabel: String)
 
 @Composable
 private fun DayScreen(
@@ -316,16 +317,17 @@ private fun SunriseSunsetNavigationRail(
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
     listOf(
-      DayChartSegment(sweepAngleDegrees = 90f, color = Color.Cyan),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red),
-      DayChartSegment(sweepAngleDegrees = 72f, color = Color.Black),
+      DayChartSegment(sweepAngleDegrees = 90f, color = Color.Cyan, "Day"),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue, "Civil twilight"),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green, "Nautical twilight"),
+      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red, "Astronomical twilight"),
+      DayChartSegment(sweepAngleDegrees = 72f, color = Color.Black, "Night"),
     )
   }
 
   val orientation = LocalConfiguration.current.orientation
   val textMeasurer = rememberTextMeasurer()
+  val labelSmallTextStyle = MaterialTheme.typography.labelSmall
 
   Canvas(modifier = modifier) {
     val topLeftOffset =
@@ -355,6 +357,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
     var currentAngleDegrees = 0f
+    val angleIncrementDegrees = 6f
     val textPadding = 3.dp.toPx()
 
     repeat(chartSegments.size - 1) { segmentIndex ->
@@ -382,20 +385,29 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         )
       }
 
+      currentAngleDegrees += angleIncrementDegrees
+    }
+
+    currentAngleDegrees = 0f
+    chartSegments.forEachIndexed { index, segment ->
       rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
-        val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Twilight"))
+        val textLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.periodLabel))
         drawText(
           textMeasurer = textMeasurer,
-          text = "Twilight",
+          text = segment.periodLabel,
           topLeft =
             Offset(
               x = chartCenter.x + chartRadius - textLayoutResult.size.width - textPadding,
               y = chartCenter.y - textLayoutResult.size.height - textPadding
             ),
+          style =
+            labelSmallTextStyle.copy(
+              color = if (index == 0) Color.Black else Color.White,
+              textAlign = TextAlign.Right
+            ),
         )
+        currentAngleDegrees += angleIncrementDegrees
       }
-
-      currentAngleDegrees += chartSegments[segmentIndex + 1].sweepAngleDegrees
     }
   }
 }
