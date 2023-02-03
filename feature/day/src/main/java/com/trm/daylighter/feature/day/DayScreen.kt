@@ -62,7 +62,12 @@ fun DayRoute(
   )
 }
 
-data class DayChartSegment(val sweepAngleDegrees: Float, val color: Color, val periodLabel: String)
+data class DayChartSegment(
+  val sweepAngleDegrees: Float,
+  val color: Color,
+  val periodLabel: String,
+  val endingEdgeLabel: String
+)
 
 @Composable
 private fun DayScreen(
@@ -317,11 +322,36 @@ private fun SunriseSunsetNavigationRail(
 private fun SunriseSunsetChart(modifier: Modifier) {
   val chartSegments = remember {
     listOf(
-      DayChartSegment(sweepAngleDegrees = 90f, color = Color.Cyan, "Day"),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Blue, "Civil twilight"),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Green, "Nautical twilight"),
-      DayChartSegment(sweepAngleDegrees = 6f, color = Color.Red, "Astronomical twilight"),
-      DayChartSegment(sweepAngleDegrees = 72f, color = Color.Black, "Night"),
+      DayChartSegment(
+        sweepAngleDegrees = 90f,
+        color = Color.Cyan,
+        periodLabel = "Day",
+        endingEdgeLabel = "Sunrise"
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color.Blue,
+        periodLabel = "Civil twilight",
+        endingEdgeLabel = "Civil dawn - 6º below"
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color.Green,
+        periodLabel = "Nautical twilight",
+        endingEdgeLabel = "Nautical dawn - 12º below"
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color.Red,
+        periodLabel = "Astronomical twilight",
+        endingEdgeLabel = "Astronomical dawn - 18º below"
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 72f,
+        color = Color.Black,
+        periodLabel = "Night",
+        endingEdgeLabel = ""
+      ),
     )
   }
 
@@ -361,26 +391,30 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     val textPadding = 3.dp.toPx()
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      val radiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
+      val lineRadiusMultiplier = if (segmentIndex == 0) 10f else 1.1f
       drawLine(
         color = chartSegments[segmentIndex].color,
         start = chartCenter,
         end =
           Offset(
-            chartCenter.x + chartRadius * radiusMultiplier * cos(currentAngleDegrees.radians),
-            chartCenter.y + chartRadius * radiusMultiplier * sin(currentAngleDegrees.radians)
+            chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
+            chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians)
           ),
       )
 
+      val textRadiusMultiplier = 1.1f
       rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
-        val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Horizon"))
+        val label = chartSegments[segmentIndex].endingEdgeLabel
+        val textLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
         drawText(
           textMeasurer = textMeasurer,
-          text = "Horizon",
+          text = label,
           topLeft =
             Offset(
-              x = size.width - textLayoutResult.size.width - textPadding,
-              y = chartCenter.y - textLayoutResult.size.height - textPadding
+              x = chartCenter.x + chartRadius * textRadiusMultiplier + textPadding,
+              y =
+                chartCenter.y + textPadding -
+                  if (segmentIndex == 0) 0f else textLayoutResult.lastBaseline
             ),
         )
       }
