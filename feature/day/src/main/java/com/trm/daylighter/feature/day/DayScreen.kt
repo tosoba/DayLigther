@@ -25,6 +25,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
@@ -320,6 +321,7 @@ private fun SunriseSunsetNavigationRail(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(modifier: Modifier) {
+  val orientation = LocalConfiguration.current.orientation
   val chartSegments = remember {
     listOf(
       DayChartSegment(
@@ -332,19 +334,22 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
-        endingEdgeLabel = "Civil dawn - 6º below"
+        endingEdgeLabel =
+          "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
-        endingEdgeLabel = "Nautical dawn - 12º below"
+        endingEdgeLabel =
+          "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
-        endingEdgeLabel = "Astronomical dawn - 18º below"
+        endingEdgeLabel =
+          "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 72f,
@@ -355,7 +360,6 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
   }
 
-  val orientation = LocalConfiguration.current.orientation
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
 
@@ -399,7 +403,9 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           x = size.width - horizonLayoutResult.size.width - textPadding,
           y = chartCenter.y - horizonLayoutResult.size.height - textPadding
         ),
-      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right)
+      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
     )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
@@ -434,10 +440,12 @@ private fun SunriseSunsetChart(modifier: Modifier) {
                 textPadding,
             y =
               chartCenter.y +
-                chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) +
-                textPadding - if (segmentIndex == 0) 0f else labelLayoutResult.lastBaseline
+                chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
+                if (segmentIndex == 0) 0f else labelLayoutResult.size.height / 2f
           ),
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left)
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left),
+        maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
+        overflow = TextOverflow.Ellipsis,
       )
 
       currentAngleDegrees += angleIncrementDegrees
