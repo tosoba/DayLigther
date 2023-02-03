@@ -439,7 +439,10 @@ private fun SunriseSunsetChart(modifier: Modifier) {
 
     currentAngleDegrees = 0f
     chartSegments.forEachIndexed { index, segment ->
-      rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
+      rotate(
+        degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
+        pivot = chartCenter
+      ) {
         val textLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.periodLabel))
         drawText(
           textMeasurer = textMeasurer,
@@ -447,7 +450,9 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           topLeft =
             Offset(
               x = chartCenter.x + chartRadius - textLayoutResult.size.width - textPadding,
-              y = chartCenter.y - textLayoutResult.size.height - textPadding
+              y =
+                if (index == 0) chartCenter.y - textLayoutResult.size.height - textPadding
+                else chartCenter.y - textLayoutResult.size.height / 2f
             ),
           style =
             labelSmallTextStyle.copy(
