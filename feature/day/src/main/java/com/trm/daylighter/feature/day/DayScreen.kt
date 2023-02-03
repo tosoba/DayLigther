@@ -353,54 +353,49 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     }
 
     val chartRadius = segmentSize.maxDimension / 2f
-    val chartCenter = Offset(topLeftOffset.x + chartRadius, chartRadius)
-    var lineAngleDegrees = 0f
+    val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
+    var currentAngleDegrees = 0f
     val radiusMultiplier = 10f
+    val textPadding = 3.dp.toPx()
 
     repeat(chartSegments.size - 1) { segmentIndex ->
       drawLine(
         color = chartSegments[segmentIndex].color,
-        start = Offset(chartCenter.x, size.height / 2f),
+        start = chartCenter,
         end =
           Offset(
-            chartCenter.x + chartRadius * radiusMultiplier * cos(lineAngleDegrees.radians),
-            size.height / 2f + chartRadius * radiusMultiplier * sin(lineAngleDegrees.radians)
+            chartCenter.x + chartRadius * radiusMultiplier * cos(currentAngleDegrees.radians),
+            size.height / 2f + chartRadius * radiusMultiplier * sin(currentAngleDegrees.radians)
           ),
       )
 
-      rotate(lineAngleDegrees) {
+      rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
         val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Horizon"))
         drawText(
           textMeasurer = textMeasurer,
           text = "Horizon",
           topLeft =
             Offset(
-              x = size.width - textLayoutResult.size.width,
-              y =
-                (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
-                  (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))) -
-                  textLayoutResult.size.height
+              x = size.width - textLayoutResult.size.width - textPadding,
+              y = size.height / 2f - textLayoutResult.size.height - textPadding
             ),
         )
       }
 
-      rotate(lineAngleDegrees) {
+      rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
         val textLayoutResult = textMeasurer.measure(text = AnnotatedString("Twilight"))
         drawText(
           textMeasurer = textMeasurer,
           text = "Twilight",
           topLeft =
             Offset(
-              x = chartCenter.x + chartRadius - textLayoutResult.size.width,
-              y =
-                (size.height / 2f + chartRadius * sin(lineAngleDegrees.radians)) -
-                  (5.dp.toPx() * (1 + 2 * sin(lineAngleDegrees.radians))) -
-                  textLayoutResult.size.height
+              x = chartCenter.x + chartRadius - textLayoutResult.size.width - textPadding,
+              y = size.height / 2f - textLayoutResult.size.height - textPadding
             ),
         )
       }
 
-      lineAngleDegrees += chartSegments[segmentIndex + 1].sweepAngleDegrees
+      currentAngleDegrees += chartSegments[segmentIndex + 1].sweepAngleDegrees
     }
   }
 }
