@@ -415,22 +415,24 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       )
 
       val textRadiusMultiplier = 1.1f
-      rotate(degrees = currentAngleDegrees, pivot = chartCenter) {
-        val label = chartSegments[segmentIndex].endingEdgeLabel
-        val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
-        drawText(
-          textMeasurer = textMeasurer,
-          text = label,
-          topLeft =
-            Offset(
-              x = chartCenter.x + chartRadius * textRadiusMultiplier + textPadding,
-              y =
-                chartCenter.y + textPadding -
-                  if (segmentIndex == 0) 0f else labelLayoutResult.lastBaseline
-            ),
-          style = labelSmallTextStyle.copy(textAlign = TextAlign.Left)
-        )
-      }
+      val label = chartSegments[segmentIndex].endingEdgeLabel
+      val labelLayoutResult = textMeasurer.measure(text = AnnotatedString(label))
+      drawText(
+        textMeasurer = textMeasurer,
+        text = label,
+        topLeft =
+          Offset(
+            x =
+              chartCenter.x +
+                chartRadius * textRadiusMultiplier * cos(currentAngleDegrees.radians) +
+                textPadding,
+            y =
+              chartCenter.y +
+                chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) +
+                textPadding - if (segmentIndex == 0) 0f else labelLayoutResult.lastBaseline
+          ),
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left)
+      )
 
       currentAngleDegrees += angleIncrementDegrees
     }
