@@ -325,31 +325,31 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     listOf(
       DayChartSegment(
         sweepAngleDegrees = 90f,
-        color = Color.Cyan,
+        color = Color(0xFFB9D9E5),
         periodLabel = "Day",
         endingEdgeLabel = "Sunrise"
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color.Blue,
+        color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
         endingEdgeLabel = "Civil dawn - 6º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color.Green,
+        color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
         endingEdgeLabel = "Nautical dawn - 12º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color.Red,
+        color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
         endingEdgeLabel = "Astronomical dawn - 18º below"
       ),
       DayChartSegment(
         sweepAngleDegrees = 72f,
-        color = Color.Black,
+        color = Color(0xFF172A33),
         periodLabel = "Night",
         endingEdgeLabel = ""
       ),
