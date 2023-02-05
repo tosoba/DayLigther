@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -483,5 +484,16 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         currentAngleDegrees += angleIncrementDegrees
       }
     }
+
+    drawArc(
+      color = Color.Yellow,
+      startAngle = 0f,
+      sweepAngle = 90f,
+      useCenter = false,
+      topLeft = topLeftOffset * 1.1f,
+      size = segmentSize * 1f,
+      style =
+        Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
+    )
   }
 }
