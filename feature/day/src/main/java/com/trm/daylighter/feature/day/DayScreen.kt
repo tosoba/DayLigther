@@ -490,8 +490,14 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       startAngle = 0f,
       sweepAngle = 90f,
       useCenter = false,
-      topLeft = topLeftOffset * 1.1f,
-      size = segmentSize * 1f,
+      topLeft =
+        Offset(
+          topLeftOffset.x -
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) chartRadius / 8f
+            else chartRadius / 2f,
+          topLeftOffset.y
+        ),
+      size = segmentSize,
       style =
         Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
     )
