@@ -499,6 +499,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           else chartRadius / 2f,
         topLeftOffset.y
       )
+    val sunArcCenter = Offset(sunArcTopLeft.x + chartRadius, size.height / 2f)
     val sunArcSweepAngle = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10f else 20f
     drawArc(
       color = Color.Yellow,
@@ -511,7 +512,8 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
     )
 
-    val arrowHeadCenterX = sunArcTopLeft.x + segmentSize.maxDimension
+    val arrowHeadCenterX =
+      (sunArcTopLeft.x + segmentSize.maxDimension)
     val arrowHeadDimension = 10.dp.toPx()
     val arrowHeadPath =
       Path().apply {
@@ -520,14 +522,12 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         lineTo(arrowHeadCenterX + arrowHeadDimension / 2f, size.height / 2f)
         close()
       }
-    drawPath(
-      path = arrowHeadPath,
-      color = Color.Yellow,
-    )
+    rotate(degrees = -sunArcSweepAngle / 2f, pivot = sunArcCenter) {
+      drawPath(path = arrowHeadPath, color = Color.Yellow)
+    }
 
     translate(
-      (arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f) *
-        cos((sunArcSweepAngle / 2f).radians),
+      arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
       size.height / 2f - sunPainter.intrinsicSize.height / 2f
     ) {
       with(sunPainter) { draw(intrinsicSize) }
