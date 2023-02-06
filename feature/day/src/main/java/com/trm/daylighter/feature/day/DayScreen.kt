@@ -14,13 +14,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.drawText
@@ -364,6 +369,8 @@ private fun SunriseSunsetChart(modifier: Modifier) {
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
 
+  val sunPainter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
+
   Canvas(modifier = modifier) {
     val topLeftOffset =
       Offset(
@@ -485,21 +492,43 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       }
     }
 
+    val sunArcTopLeft =
+      Offset(
+        topLeftOffset.x -
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) chartRadius / 8f
+          else chartRadius / 2f,
+        topLeftOffset.y
+      )
     drawArc(
       color = Color.Yellow,
-      startAngle = 0f,
+      startAngle = 355f,
       sweepAngle = 90f,
       useCenter = false,
-      topLeft =
-        Offset(
-          topLeftOffset.x -
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) chartRadius / 8f
-            else chartRadius / 2f,
-          topLeftOffset.y
-        ),
+      topLeft = sunArcTopLeft,
       size = segmentSize,
       style =
         Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
     )
+
+    val arrowHeadCenterX = sunArcTopLeft.x + segmentSize.maxDimension
+    val arrowHeadDimension = 10.dp.toPx()
+    val arrowHeadPath =
+      Path().apply {
+        moveTo(arrowHeadCenterX - arrowHeadDimension / 2f, size.height / 2f)
+        lineTo(arrowHeadCenterX, size.height / 2f - arrowHeadDimension)
+        lineTo(arrowHeadCenterX + arrowHeadDimension / 2f, size.height / 2f)
+        close()
+      }
+    drawPath(
+      path = arrowHeadPath,
+      color = Color.Yellow,
+    )
+
+    translate(
+      (arrowHeadCenterX - sunPainter.intrinsicSize.width / 4f) * cos(5f.radians),
+      size.height / 2f - sunPainter.intrinsicSize.height - 25.dp.toPx()
+    ) {
+      with(sunPainter) { draw(intrinsicSize / 2f) }
+    }
   }
 }
