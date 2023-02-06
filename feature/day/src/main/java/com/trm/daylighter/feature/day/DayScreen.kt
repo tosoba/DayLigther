@@ -16,10 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
@@ -512,8 +509,7 @@ private fun SunriseSunsetChart(modifier: Modifier) {
         Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
     )
 
-    val arrowHeadCenterX =
-      (sunArcTopLeft.x + segmentSize.maxDimension)
+    val arrowHeadCenterX = (sunArcTopLeft.x + segmentSize.maxDimension)
     val arrowHeadDimension = 10.dp.toPx()
     val arrowHeadPath =
       Path().apply {
@@ -526,11 +522,18 @@ private fun SunriseSunsetChart(modifier: Modifier) {
       drawPath(path = arrowHeadPath, color = Color.Yellow)
     }
 
-    translate(
-      arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
-      size.height / 2f - sunPainter.intrinsicSize.height / 2f
+    clipRect(
+      left = arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
+      top = size.height / 2f - sunPainter.intrinsicSize.height / 2f,
+      right = arrowHeadCenterX + sunPainter.intrinsicSize.width / 2f,
+      bottom = size.height / 2f,
     ) {
-      with(sunPainter) { draw(intrinsicSize) }
+      translate(
+        arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
+        size.height / 2f - sunPainter.intrinsicSize.height / 2f
+      ) {
+        with(sunPainter) { draw(intrinsicSize) }
+      }
     }
   }
 }
