@@ -499,10 +499,11 @@ private fun SunriseSunsetChart(modifier: Modifier) {
           else chartRadius / 2f,
         topLeftOffset.y
       )
+    val sunArcSweepAngle = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10f else 20f
     drawArc(
       color = Color.Yellow,
-      startAngle = 355f,
-      sweepAngle = 90f,
+      startAngle = 360f - sunArcSweepAngle / 2f,
+      sweepAngle = sunArcSweepAngle,
       useCenter = false,
       topLeft = sunArcTopLeft,
       size = segmentSize,
@@ -525,10 +526,11 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
 
     translate(
-      (arrowHeadCenterX - sunPainter.intrinsicSize.width / 4f) * cos(5f.radians),
-      size.height / 2f - sunPainter.intrinsicSize.height - 25.dp.toPx()
+      (arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f) *
+        cos((sunArcSweepAngle / 2f).radians),
+      size.height / 2f - sunPainter.intrinsicSize.height / 2f
     ) {
-      with(sunPainter) { draw(intrinsicSize / 2f) }
+      with(sunPainter) { draw(intrinsicSize) }
     }
   }
 }
