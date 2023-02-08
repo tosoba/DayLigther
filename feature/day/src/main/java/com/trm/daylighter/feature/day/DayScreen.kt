@@ -187,6 +187,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   val orientation = LocalConfiguration.current.orientation
 
   SunriseSunsetChart(
+    dayMode = dayMode,
     modifier =
       Modifier.constrainAs(chart) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -343,7 +344,7 @@ private fun SunriseSunsetNavigationRail(
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-private fun SunriseSunsetChart(modifier: Modifier) {
+private fun SunriseSunsetChart(dayMode: DayMode, modifier: Modifier = Modifier) {
   val orientation = LocalConfiguration.current.orientation
   val chartSegments = remember {
     listOf(
@@ -530,15 +531,16 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     )
 
     val arrowHeadCenterX = (sunArcTopLeft.x + segmentSize.maxDimension)
-    val arrowHeadDimension = 10.dp.toPx()
     val arrowHeadPath =
-      Path().apply {
-        moveTo(arrowHeadCenterX - arrowHeadDimension / 2f, size.height / 2f)
-        lineTo(arrowHeadCenterX, size.height / 2f - arrowHeadDimension)
-        lineTo(arrowHeadCenterX + arrowHeadDimension / 2f, size.height / 2f)
-        close()
-      }
-    rotate(degrees = -sunArcSweepAngle / 2f, pivot = sunArcCenter) {
+      buildSunArcArrowHeadPath(
+        dayMode = dayMode,
+        arrowHeadCenterX = arrowHeadCenterX,
+        arrowHeadDimension = 10.dp.toPx()
+      )
+    rotate(
+      degrees = if (dayMode == DayMode.SUNRISE) -sunArcSweepAngle / 2f else sunArcSweepAngle / 2f,
+      pivot = sunArcCenter
+    ) {
       drawPath(path = arrowHeadPath, color = Color.Yellow)
     }
 
@@ -557,3 +559,20 @@ private fun SunriseSunsetChart(modifier: Modifier) {
     }
   }
 }
+
+private fun DrawScope.buildSunArcArrowHeadPath(
+  dayMode: DayMode,
+  arrowHeadCenterX: Float,
+  arrowHeadDimension: Float
+): Path =
+  Path().apply {
+    moveTo(arrowHeadCenterX - arrowHeadDimension / 2f, size.height / 2f)
+    lineTo(
+      x = arrowHeadCenterX,
+      y =
+        if (dayMode == DayMode.SUNRISE) size.height / 2f - arrowHeadDimension
+        else size.height / 2f + arrowHeadDimension
+    )
+    lineTo(arrowHeadCenterX + arrowHeadDimension / 2f, size.height / 2f)
+    close()
+  }
