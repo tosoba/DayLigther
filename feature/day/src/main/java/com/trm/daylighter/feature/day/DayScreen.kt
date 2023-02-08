@@ -72,7 +72,8 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val endingEdgeLabel: String,
+  val sunriseEndingEdgeLabel: String = "",
+  val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
   val sunsetTimeLabel: (() -> String)? = null,
 )
@@ -357,7 +358,8 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 90f,
         color = Color(0xFFB9D9E5),
         periodLabel = "Day",
-        endingEdgeLabel = "Sunrise",
+        sunriseEndingEdgeLabel = "Sunrise",
+        sunsetEndingEdgeLabel = "Sunset",
         sunriseTimeLabel = today.sunrise::isoLocalTimeLabel,
         sunsetTimeLabel = today.sunset::isoLocalTimeLabel
       ),
@@ -365,8 +367,10 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
-        endingEdgeLabel =
+        sunriseEndingEdgeLabel =
           "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below",
+        sunsetEndingEdgeLabel =
+          "Civil dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below",
         sunriseTimeLabel = today.civilTwilightBegin::isoLocalTimeLabel,
         sunsetTimeLabel = today.civilTwilightEnd::isoLocalTimeLabel
       ),
@@ -374,8 +378,10 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
-        endingEdgeLabel =
+        sunriseEndingEdgeLabel =
           "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below",
+        sunsetEndingEdgeLabel =
+          "Nautical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below",
         sunriseTimeLabel = today.nauticalTwilightBegin::isoLocalTimeLabel,
         sunsetTimeLabel = today.nauticalTwilightEnd::isoLocalTimeLabel
       ),
@@ -383,8 +389,10 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
-        endingEdgeLabel =
+        sunriseEndingEdgeLabel =
           "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below",
+        sunsetEndingEdgeLabel =
+          "Astronomical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below",
         sunriseTimeLabel = today.astronomicalTwilightBegin::isoLocalTimeLabel,
         sunsetTimeLabel = today.astronomicalTwilightEnd::isoLocalTimeLabel
       ),
@@ -392,7 +400,6 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 72f,
         color = Color(0xFF172A33),
         periodLabel = "Night",
-        endingEdgeLabel = ""
       ),
     )
   }
@@ -472,9 +479,14 @@ private fun SunriseSunsetChart(
 
       val textRadiusMultiplier =
         if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
-      val labelLayoutResult =
-        textMeasurer.measure(text = AnnotatedString(chartSegments[segmentIndex].endingEdgeLabel))
-      val labelTopLeft =
+      val endingEdgeLabel =
+        AnnotatedString(
+          chartSegments[segmentIndex].run {
+            if (dayMode == DayMode.SUNRISE) sunriseEndingEdgeLabel else sunsetEndingEdgeLabel
+          }
+        )
+      val endingEdgeLabelLayoutResult = textMeasurer.measure(text = endingEdgeLabel)
+      val endingEdgeLabelTopLeft =
         Offset(
           x =
             chartCenter.x +
@@ -482,12 +494,12 @@ private fun SunriseSunsetChart(
               textPadding,
           y =
             chartCenter.y + chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
-              if (segmentIndex == 0) 0f else labelLayoutResult.size.height / 2f
+              if (segmentIndex == 0) 0f else endingEdgeLabelLayoutResult.size.height / 2f
         )
       drawText(
         textMeasurer = textMeasurer,
-        text = chartSegments[segmentIndex].endingEdgeLabel,
-        topLeft = labelTopLeft,
+        text = endingEdgeLabel,
+        topLeft = endingEdgeLabelTopLeft,
         style = labelSmallTextStyle.copy(textAlign = TextAlign.Left),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
         overflow = TextOverflow.Ellipsis,
@@ -502,7 +514,9 @@ private fun SunriseSunsetChart(
         Offset(
           x =
             max(
-              labelTopLeft.x + labelLayoutResult.size.width.toFloat() + textPadding,
+              endingEdgeLabelTopLeft.x +
+                endingEdgeLabelLayoutResult.size.width.toFloat() +
+                textPadding,
               size.width - timeLayoutResult.size.width - textPadding
             ),
           y =
