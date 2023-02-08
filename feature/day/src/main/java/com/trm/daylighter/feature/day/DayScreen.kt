@@ -9,7 +9,11 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -83,6 +87,8 @@ private fun DayScreen(
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
+
   ConstraintLayout(modifier = modifier) {
     when (locationSunriseSunsetChange) {
       is Empty -> {
@@ -109,6 +115,8 @@ private fun DayScreen(
       is Ready -> {
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+          dayMode = dayMode,
+          onDayModeChange = { dayMode = it },
           onDrawerMenuClick = onDrawerMenuClick,
           onPreviousLocationClick = onPreviousLocationClick,
           onNextLocationClick = onNextLocationClick
@@ -168,6 +176,8 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 @Composable
 private fun ConstraintLayoutScope.SunriseSunset(
   locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  dayMode: DayMode,
+  onDayModeChange: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
@@ -215,7 +225,9 @@ private fun ConstraintLayoutScope.SunriseSunset(
         Modifier.constrainAs(navigation) {
           linkTo(chart.bottom, parent.bottom)
           linkTo(parent.start, parent.end)
-        }
+        },
+      dayMode = dayMode,
+      onDayModeChange = onDayModeChange
     )
 
     NextLocationButton(
@@ -236,12 +248,14 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
 
     SunriseSunsetNavigationRail(
-      onDrawerMenuClick = onDrawerMenuClick,
       modifier =
         Modifier.constrainAs(navigation) {
           linkTo(parent.start, chart.start)
           linkTo(parent.top, parent.bottom)
-        }
+        },
+      onDrawerMenuClick = onDrawerMenuClick,
+      dayMode = dayMode,
+      onDayModeChange = onDayModeChange
     )
 
     NextLocationButton(
@@ -269,19 +283,23 @@ private fun NextLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun SunriseSunsetNavigationBar(modifier: Modifier = Modifier) {
+private fun SunriseSunsetNavigationBar(
+  modifier: Modifier = Modifier,
+  dayMode: DayMode,
+  onDayModeChange: (DayMode) -> Unit,
+) {
   NavigationBar(modifier = modifier) {
     NavigationBarItem(
-      selected = true,
-      onClick = {},
+      selected = dayMode == DayMode.SUNRISE,
+      onClick = { onDayModeChange(DayMode.SUNRISE) },
       icon = {
         Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
       },
       label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationBarItem(
-      selected = false,
-      onClick = {},
+      selected = dayMode == DayMode.SUNSET,
+      onClick = { onDayModeChange(DayMode.SUNSET) },
       icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
       label = { Text(text = stringResource(R.string.sunset)) }
     )
@@ -290,6 +308,8 @@ private fun SunriseSunsetNavigationBar(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SunriseSunsetNavigationRail(
+  dayMode: DayMode,
+  onDayModeChange: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -304,16 +324,16 @@ private fun SunriseSunsetNavigationRail(
   ) {
     Spacer(modifier = Modifier.weight(1f))
     NavigationRailItem(
-      selected = true,
-      onClick = {},
+      selected = dayMode == DayMode.SUNRISE,
+      onClick = { onDayModeChange(DayMode.SUNRISE) },
       icon = {
         Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
       },
       label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationRailItem(
-      selected = false,
-      onClick = {},
+      selected = dayMode == DayMode.SUNSET,
+      onClick = { onDayModeChange(DayMode.SUNSET) },
       icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
       label = { Text(text = stringResource(R.string.sunset)) }
     )
