@@ -8,12 +8,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -42,6 +38,8 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.domain.model.*
+import java.lang.Float.max
+import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -70,7 +68,7 @@ fun DayRoute(
   )
 }
 
-data class DayChartSegment(
+private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
@@ -183,10 +181,10 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onNextLocationClick: () -> Unit,
 ) {
   val (drawerMenuButton, chart, navigation, prevLocationButton, nextLocationButton) = createRefs()
-  val (location, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
 
   SunriseSunsetChart(
+    locationSunriseSunsetChange = locationSunriseSunsetChange,
     dayMode = dayMode,
     modifier =
       Modifier.constrainAs(chart) {
@@ -344,7 +342,12 @@ private fun SunriseSunsetNavigationRail(
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-private fun SunriseSunsetChart(dayMode: DayMode, modifier: Modifier = Modifier) {
+private fun SunriseSunsetChart(
+  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  dayMode: DayMode,
+  modifier: Modifier = Modifier
+) {
+  val (location, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
   val chartSegments = remember {
     listOf(
@@ -419,6 +422,7 @@ private fun SunriseSunsetChart(dayMode: DayMode, modifier: Modifier = Modifier) 
     var currentAngleDegrees = 0f
     val angleIncrementDegrees = 6f
     val textPadding = 3.dp.toPx()
+    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
     val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString("Horizon"))
     drawText(
@@ -453,29 +457,60 @@ private fun SunriseSunsetChart(dayMode: DayMode, modifier: Modifier = Modifier) 
               strokeWidth
           ),
         strokeWidth = strokeWidth,
-        pathEffect =
-          if (segmentIndex == 0) null else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+        pathEffect = if (segmentIndex == 0) null else dashPathEffect
       )
 
       val textRadiusMultiplier =
         if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
       val labelLayoutResult =
         textMeasurer.measure(text = AnnotatedString(chartSegments[segmentIndex].endingEdgeLabel))
+      val labelTopLeft =
+        Offset(
+          x =
+            chartCenter.x +
+              chartRadius * textRadiusMultiplier * cos(currentAngleDegrees.radians) +
+              textPadding,
+          y =
+            chartCenter.y + chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
+              if (segmentIndex == 0) 0f else labelLayoutResult.size.height / 2f
+        )
       drawText(
         textMeasurer = textMeasurer,
         text = chartSegments[segmentIndex].endingEdgeLabel,
-        topLeft =
-          Offset(
-            x =
-              chartCenter.x +
-                chartRadius * textRadiusMultiplier * cos(currentAngleDegrees.radians) +
-                textPadding,
-            y =
-              chartCenter.y +
-                chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
-                if (segmentIndex == 0) 0f else labelLayoutResult.size.height / 2f
-          ),
+        topLeft = labelTopLeft,
         style = labelSmallTextStyle.copy(textAlign = TextAlign.Left),
+        maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+
+      val timeLayoutResult =
+        textMeasurer.measure(
+          text =
+            AnnotatedString(
+              locationSunriseSunsetChange.today.sunrise
+                .toLocalTime()
+                .format(DateTimeFormatter.ISO_TIME)
+            )
+        )
+      val timeTopLeft =
+        Offset(
+          x =
+            max(
+              labelTopLeft.x + labelLayoutResult.size.width.toFloat() + textPadding,
+              size.width - timeLayoutResult.size.width - textPadding
+            ),
+          y =
+            chartCenter.y + chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
+              if (segmentIndex == 0) 0f else timeLayoutResult.size.height / 2f
+        )
+      drawText(
+        textMeasurer = textMeasurer,
+        text =
+          locationSunriseSunsetChange.today.sunrise
+            .toLocalTime()
+            .format(DateTimeFormatter.ISO_TIME),
+        topLeft = timeTopLeft,
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -526,8 +561,7 @@ private fun SunriseSunsetChart(dayMode: DayMode, modifier: Modifier = Modifier) 
       useCenter = false,
       topLeft = sunArcTopLeft,
       size = segmentSize,
-      style =
-        Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)),
+      style = Stroke(width = 2f, pathEffect = dashPathEffect),
     )
 
     val arrowHeadCenterX = (sunArcTopLeft.x + segmentSize.maxDimension)
