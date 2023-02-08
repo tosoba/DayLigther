@@ -352,57 +352,7 @@ private fun SunriseSunsetChart(
 ) {
   val (location, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
-  val chartSegments = remember {
-    listOf(
-      DayChartSegment(
-        sweepAngleDegrees = 90f,
-        color = Color(0xFFB9D9E5),
-        periodLabel = "Day",
-        sunriseEndingEdgeLabel = "Sunrise",
-        sunsetEndingEdgeLabel = "Sunset",
-        sunriseTimeLabel = today.sunrise::isoLocalTimeLabel,
-        sunsetTimeLabel = today.sunset::isoLocalTimeLabel
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = 6f,
-        color = Color(0xFF76B3CC),
-        periodLabel = "Civil twilight",
-        sunriseEndingEdgeLabel =
-          "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below",
-        sunsetEndingEdgeLabel =
-          "Civil dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below",
-        sunriseTimeLabel = today.civilTwilightBegin::isoLocalTimeLabel,
-        sunsetTimeLabel = today.civilTwilightEnd::isoLocalTimeLabel
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = 6f,
-        color = Color(0xFF3D6475),
-        periodLabel = "Nautical twilight",
-        sunriseEndingEdgeLabel =
-          "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below",
-        sunsetEndingEdgeLabel =
-          "Nautical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below",
-        sunriseTimeLabel = today.nauticalTwilightBegin::isoLocalTimeLabel,
-        sunsetTimeLabel = today.nauticalTwilightEnd::isoLocalTimeLabel
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = 6f,
-        color = Color(0xFF223F4D),
-        periodLabel = "Astronomical twilight",
-        sunriseEndingEdgeLabel =
-          "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below",
-        sunsetEndingEdgeLabel =
-          "Astronomical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below",
-        sunriseTimeLabel = today.astronomicalTwilightBegin::isoLocalTimeLabel,
-        sunsetTimeLabel = today.astronomicalTwilightEnd::isoLocalTimeLabel
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = 72f,
-        color = Color(0xFF172A33),
-        periodLabel = "Night",
-      ),
-    )
-  }
+  val chartSegments = dayChartSegments(today, orientation)
 
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
@@ -608,6 +558,63 @@ private fun SunriseSunsetChart(
         with(sunPainter) { draw(intrinsicSize) }
       }
     }
+  }
+}
+
+@Composable
+private fun dayChartSegments(today: SunriseSunset, orientation: Int): List<DayChartSegment> {
+  val sunrise = stringResource(id = R.string.sunrise)
+  val sunset = stringResource(id = R.string.sunset)
+  return remember {
+    listOf(
+      DayChartSegment(
+        sweepAngleDegrees = 90f,
+        color = Color(0xFFB9D9E5),
+        periodLabel = "Day",
+        sunriseEndingEdgeLabel = sunrise,
+        sunsetEndingEdgeLabel = sunset,
+        sunriseTimeLabel = today.sunrise::isoLocalTimeLabel,
+        sunsetTimeLabel = today.sunset::isoLocalTimeLabel
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color(0xFF76B3CC),
+        periodLabel = "Civil twilight",
+        sunriseEndingEdgeLabel =
+          "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
+        sunsetEndingEdgeLabel =
+          "Civil dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
+        sunriseTimeLabel = today.civilTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.civilTwilightEnd::isoLocalTimeLabel
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color(0xFF3D6475),
+        periodLabel = "Nautical twilight",
+        sunriseEndingEdgeLabel =
+          "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
+        sunsetEndingEdgeLabel =
+          "Nautical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
+        sunriseTimeLabel = today.nauticalTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.nauticalTwilightEnd::isoLocalTimeLabel
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 6f,
+        color = Color(0xFF223F4D),
+        periodLabel = "Astronomical twilight",
+        sunriseEndingEdgeLabel =
+          "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
+        sunsetEndingEdgeLabel =
+          "Astronomical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
+        sunriseTimeLabel = today.astronomicalTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.astronomicalTwilightEnd::isoLocalTimeLabel
+      ),
+      DayChartSegment(
+        sweepAngleDegrees = 72f,
+        color = Color(0xFF172A33),
+        periodLabel = "Night",
+      ),
+    )
   }
 }
 
