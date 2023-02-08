@@ -36,10 +36,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.util.ext.isoLocalTimeLabel
 import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
-import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -72,7 +72,9 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val endingEdgeLabel: String
+  val endingEdgeLabel: String,
+  val sunriseTimeLabel: (() -> String)? = null,
+  val sunsetTimeLabel: (() -> String)? = null,
 )
 
 @Composable
@@ -355,28 +357,36 @@ private fun SunriseSunsetChart(
         sweepAngleDegrees = 90f,
         color = Color(0xFFB9D9E5),
         periodLabel = "Day",
-        endingEdgeLabel = "Sunrise"
+        endingEdgeLabel = "Sunrise",
+        sunriseTimeLabel = today.sunrise::isoLocalTimeLabel,
+        sunsetTimeLabel = today.sunset::isoLocalTimeLabel
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
         endingEdgeLabel =
-          "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below"
+          "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 6º below",
+        sunriseTimeLabel = today.civilTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.civilTwilightEnd::isoLocalTimeLabel
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
         endingEdgeLabel =
-          "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below"
+          "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 12º below",
+        sunriseTimeLabel = today.nauticalTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.nauticalTwilightEnd::isoLocalTimeLabel
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
         endingEdgeLabel =
-          "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below"
+          "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT)"\n" else " - "} 18º below",
+        sunriseTimeLabel = today.astronomicalTwilightBegin::isoLocalTimeLabel,
+        sunsetTimeLabel = today.astronomicalTwilightEnd::isoLocalTimeLabel
       ),
       DayChartSegment(
         sweepAngleDegrees = 72f,
@@ -483,15 +493,11 @@ private fun SunriseSunsetChart(
         overflow = TextOverflow.Ellipsis,
       )
 
-      val timeLayoutResult =
-        textMeasurer.measure(
-          text =
-            AnnotatedString(
-              locationSunriseSunsetChange.today.sunrise
-                .toLocalTime()
-                .format(DateTimeFormatter.ISO_TIME)
-            )
-        )
+      val timeLabel =
+        chartSegments[segmentIndex].run {
+          requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel)
+        }()
+      val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeLabel))
       val timeTopLeft =
         Offset(
           x =
@@ -505,10 +511,7 @@ private fun SunriseSunsetChart(
         )
       drawText(
         textMeasurer = textMeasurer,
-        text =
-          locationSunriseSunsetChange.today.sunrise
-            .toLocalTime()
-            .format(DateTimeFormatter.ISO_TIME),
+        text = timeLabel,
         topLeft = timeTopLeft,
         style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
