@@ -582,7 +582,7 @@ private fun SunriseSunsetChart(
 private fun dayChartSegments(today: SunriseSunset, orientation: Int): List<DayChartSegment> {
   val sunrise = stringResource(id = R.string.sunrise)
   val sunset = stringResource(id = R.string.sunset)
-  return remember {
+  return remember(today) {
     listOf(
       DayChartSegment(
         sweepAngleDegrees = 90f,
