@@ -25,6 +25,11 @@ constructor(
   private val getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
   private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
 ) : ViewModel() {
+  val locationNavigationEnabledFlow: SharedFlow<Boolean> =
+    getLocationsCountFlowUseCase()
+      .map { it > 1 }
+      .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
+
   private val currentLocationIndexFlow: StateFlow<Int> =
     savedStateHandle.getStateFlow(SavedState.CURRENT_LOCATION_INDEX.name, 0)
 

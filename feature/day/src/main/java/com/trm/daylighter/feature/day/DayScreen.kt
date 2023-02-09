@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.day
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -57,8 +58,11 @@ fun DayRoute(
     viewModel.currentLocationSunriseSunsetChange.collectAsStateWithLifecycle(
       initialValue = LoadingFirst
     )
+  val locationNavigationEnabled =
+    viewModel.locationNavigationEnabledFlow.collectAsStateWithLifecycle(initialValue = false)
   DayScreen(
     locationSunriseSunsetChange = locationSunriseSunsetChange.value,
+    locationNavigationEnabled = locationNavigationEnabled.value,
     onDrawerMenuClick = onDrawerMenuClick,
     onPreviousLocationClick = viewModel::previousLocation,
     onNextLocationClick = viewModel::nextLocation,
@@ -81,6 +85,7 @@ private data class DayChartSegment(
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
+  locationNavigationEnabled: Boolean,
   onDrawerMenuClick: () -> Unit,
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
@@ -116,6 +121,7 @@ private fun DayScreen(
       is Ready -> {
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+          locationNavigationEnabled = locationNavigationEnabled,
           dayMode = dayMode,
           onDayModeChange = { dayMode = it },
           onDrawerMenuClick = onDrawerMenuClick,
@@ -178,6 +184,7 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 private fun ConstraintLayoutScope.SunriseSunset(
   locationSunriseSunsetChange: LocationSunriseSunsetChange,
   dayMode: DayMode,
+  locationNavigationEnabled: Boolean,
   onDayModeChange: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
   onPreviousLocationClick: () -> Unit,
@@ -213,14 +220,16 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    PrevLocationButton(
-      onClick = onPreviousLocationClick,
+    AnimatedVisibility(
+      visible = locationNavigationEnabled,
       modifier =
         Modifier.constrainAs(prevLocationButton) {
           bottom.linkTo(navigation.top, 16.dp)
           start.linkTo(parent.start, 16.dp)
         }
-    )
+    ) {
+      PrevLocationButton(onClick = onPreviousLocationClick)
+    }
 
     SunriseSunsetNavigationBar(
       modifier =
@@ -232,22 +241,27 @@ private fun ConstraintLayoutScope.SunriseSunset(
       onDayModeChange = onDayModeChange
     )
 
-    NextLocationButton(
-      onClick = onNextLocationClick,
-      Modifier.constrainAs(nextLocationButton) {
-        bottom.linkTo(navigation.top, 16.dp)
-        end.linkTo(parent.end, 16.dp)
-      }
-    )
+    AnimatedVisibility(
+      visible = locationNavigationEnabled,
+      modifier =
+        Modifier.constrainAs(nextLocationButton) {
+          bottom.linkTo(navigation.top, 16.dp)
+          end.linkTo(parent.end, 16.dp)
+        }
+    ) {
+      NextLocationButton(onClick = onNextLocationClick)
+    }
   } else {
-    PrevLocationButton(
-      onClick = onPreviousLocationClick,
+    AnimatedVisibility(
+      visible = locationNavigationEnabled,
       modifier =
         Modifier.constrainAs(prevLocationButton) {
           bottom.linkTo(parent.bottom, 16.dp)
           start.linkTo(navigation.end, 16.dp)
         }
-    )
+    ) {
+      PrevLocationButton(onClick = onPreviousLocationClick)
+    }
 
     SunriseSunsetNavigationRail(
       modifier =
@@ -260,13 +274,16 @@ private fun ConstraintLayoutScope.SunriseSunset(
       onDayModeChange = onDayModeChange
     )
 
-    NextLocationButton(
-      onClick = onNextLocationClick,
-      Modifier.constrainAs(nextLocationButton) {
-        bottom.linkTo(parent.bottom, 16.dp)
-        end.linkTo(parent.end, 16.dp)
-      }
-    )
+    AnimatedVisibility(
+      visible = locationNavigationEnabled,
+      modifier =
+        Modifier.constrainAs(nextLocationButton) {
+          bottom.linkTo(parent.bottom, 16.dp)
+          end.linkTo(parent.end, 16.dp)
+        }
+    ) {
+      NextLocationButton(onClick = onNextLocationClick)
+    }
   }
 }
 
