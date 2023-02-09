@@ -73,6 +73,7 @@ constructor(
           else -> throw IllegalStateException()
         }
       }
+      .debounce(250L)
       .shareIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
