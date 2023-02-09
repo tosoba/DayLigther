@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.day
 
 import android.content.res.Configuration
+import android.widget.TextClock
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
@@ -190,7 +192,8 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onPreviousLocationClick: () -> Unit,
   onNextLocationClick: () -> Unit,
 ) {
-  val (drawerMenuButton, chart, navigation, prevLocationButton, nextLocationButton) = createRefs()
+  val (drawerMenuButton, chart, navigation, prevLocationButton, nextLocationButton, clock) =
+    createRefs()
   val orientation = LocalConfiguration.current.orientation
 
   SunriseSunsetChart(
@@ -208,6 +211,18 @@ private fun ConstraintLayoutScope.SunriseSunset(
         height = Dimension.fillToConstraints
         width = Dimension.fillToConstraints
       }
+  )
+
+  AndroidView(
+    factory = { context -> TextClock(context) },
+    update = { clockView ->
+      clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
+    },
+    modifier =
+      Modifier.constrainAs(clock) {
+        top.linkTo(parent.top, 16.dp)
+        end.linkTo(parent.end, 16.dp)
+      },
   )
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
