@@ -4,16 +4,14 @@ import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.widget.TextClock
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -47,6 +45,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.core.common.util.ext.timeLabel
 import com.trm.daylighter.core.common.util.takeIfInstance
@@ -69,14 +71,13 @@ fun DayRoute(
     viewModel.currentLocationSunriseSunsetChange.collectAsStateWithLifecycle(
       initialValue = LoadingFirst
     )
-  val locationNavigationEnabled =
-    viewModel.locationNavigationEnabledFlow.collectAsStateWithLifecycle(initialValue = false)
+  val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
   DayScreen(
     locationSunriseSunsetChange = locationSunriseSunsetChange.value,
-    locationNavigationEnabled = locationNavigationEnabled.value,
+    locationsCount = locationsCount.value,
+    currentLocationIndex = viewModel.currentLocationIndex,
     onDrawerMenuClick = onDrawerMenuClick,
-    onPreviousLocationClick = viewModel::previousLocation,
-    onNextLocationClick = viewModel::nextLocation,
+    onChangeLocationIndex = viewModel::changeLocation,
     onAddLocationClick = onAddLocation,
     onRetryClick = viewModel::retry,
     modifier = modifier
@@ -96,10 +97,10 @@ private data class DayChartSegment(
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
-  locationNavigationEnabled: Boolean,
+  locationsCount: Int,
+  currentLocationIndex: Int,
   onDrawerMenuClick: () -> Unit,
-  onPreviousLocationClick: () -> Unit,
-  onNextLocationClick: () -> Unit,
+  onChangeLocationIndex: (Int) -> Unit,
   onAddLocationClick: () -> Unit,
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -132,12 +133,12 @@ private fun DayScreen(
       is Ready -> {
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-          locationNavigationEnabled = locationNavigationEnabled,
           dayMode = dayMode,
-          onDayModeChange = { dayMode = it },
-          onDrawerMenuClick = onDrawerMenuClick,
-          onPreviousLocationClick = onPreviousLocationClick,
-          onNextLocationClick = onNextLocationClick
+          locationsCount = locationsCount,
+          currentLocationIndex = currentLocationIndex,
+          onChangeLocationIndex = onChangeLocationIndex,
+          onDayModeNavClick = { dayMode = it },
+          onDrawerMenuClick = onDrawerMenuClick
         )
       }
       is Failed -> {
@@ -191,25 +192,28 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
   }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ConstraintLayoutScope.SunriseSunset(
   locationSunriseSunsetChange: LocationSunriseSunsetChange,
   dayMode: DayMode,
-  locationNavigationEnabled: Boolean,
-  onDayModeChange: (DayMode) -> Unit,
+  locationsCount: Int,
+  currentLocationIndex: Int,
+  onChangeLocationIndex: (Int) -> Unit,
+  onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
-  onPreviousLocationClick: () -> Unit,
-  onNextLocationClick: () -> Unit,
 ) {
-  val (drawerMenuButton, chart, navigation, prevLocationButton, nextLocationButton, clock) =
-    createRefs()
+  val (drawerMenuButton, pagerBox, navigation, clock) = createRefs()
   val orientation = LocalConfiguration.current.orientation
 
-  SunriseSunsetChart(
-    locationSunriseSunsetChange = locationSunriseSunsetChange,
-    dayMode = dayMode,
+  val pagerState = rememberPagerState(initialPage = currentLocationIndex)
+  LaunchedEffect(pagerState) {
+    snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
+  }
+
+  Box(
     modifier =
-      Modifier.constrainAs(chart) {
+      Modifier.constrainAs(pagerBox) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
           linkTo(parent.start, parent.end)
           linkTo(parent.top, navigation.top)
@@ -220,7 +224,20 @@ private fun ConstraintLayoutScope.SunriseSunset(
         height = Dimension.fillToConstraints
         width = Dimension.fillToConstraints
       }
-  )
+  ) {
+    HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
+      SunriseSunsetChart(
+        locationSunriseSunsetChange = locationSunriseSunsetChange,
+        dayMode = dayMode,
+        modifier = Modifier.fillMaxSize()
+      )
+    }
+
+    HorizontalPagerIndicator(
+      pagerState = pagerState,
+      modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+    )
+  }
 
   val labelMediumStyle = MaterialTheme.typography.labelMedium
   val resolver = LocalFontFamilyResolver.current
@@ -264,84 +281,26 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    AnimatedVisibility(
-      visible = locationNavigationEnabled,
-      modifier =
-        Modifier.constrainAs(prevLocationButton) {
-          bottom.linkTo(navigation.top, 16.dp)
-          start.linkTo(parent.start, 16.dp)
-        }
-    ) {
-      PrevLocationButton(onClick = onPreviousLocationClick)
-    }
-
     SunriseSunsetNavigationBar(
       modifier =
         Modifier.constrainAs(navigation) {
-          linkTo(chart.bottom, parent.bottom)
+          linkTo(pagerBox.bottom, parent.bottom)
           linkTo(parent.start, parent.end)
         },
       dayMode = dayMode,
-      onDayModeChange = onDayModeChange
+      onDayModeChange = onDayModeNavClick
     )
-
-    AnimatedVisibility(
-      visible = locationNavigationEnabled,
-      modifier =
-        Modifier.constrainAs(nextLocationButton) {
-          bottom.linkTo(navigation.top, 16.dp)
-          end.linkTo(parent.end, 16.dp)
-        }
-    ) {
-      NextLocationButton(onClick = onNextLocationClick)
-    }
   } else {
-    AnimatedVisibility(
-      visible = locationNavigationEnabled,
-      modifier =
-        Modifier.constrainAs(prevLocationButton) {
-          bottom.linkTo(parent.bottom, 16.dp)
-          start.linkTo(navigation.end, 16.dp)
-        }
-    ) {
-      PrevLocationButton(onClick = onPreviousLocationClick)
-    }
-
     SunriseSunsetNavigationRail(
       modifier =
         Modifier.constrainAs(navigation) {
-          linkTo(parent.start, chart.start)
+          linkTo(parent.start, pagerBox.start)
           linkTo(parent.top, parent.bottom)
         },
       onDrawerMenuClick = onDrawerMenuClick,
       dayMode = dayMode,
-      onDayModeChange = onDayModeChange
+      onDayModeChange = onDayModeNavClick
     )
-
-    AnimatedVisibility(
-      visible = locationNavigationEnabled,
-      modifier =
-        Modifier.constrainAs(nextLocationButton) {
-          bottom.linkTo(parent.bottom, 16.dp)
-          end.linkTo(parent.end, 16.dp)
-        }
-    ) {
-      NextLocationButton(onClick = onNextLocationClick)
-    }
-  }
-}
-
-@Composable
-private fun PrevLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-  SmallFloatingActionButton(modifier = modifier, onClick = onClick) {
-    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "prev_location")
-  }
-}
-
-@Composable
-private fun NextLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-  SmallFloatingActionButton(modifier = modifier, onClick = onClick) {
-    Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "next_location")
   }
 }
 
@@ -436,14 +395,16 @@ private fun SunriseSunsetChart(
     var startAngle = -90f
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
-      drawArc(
-        color = segment.color,
-        startAngle = startAngle,
-        sweepAngle = segment.sweepAngleDegrees,
-        useCenter = true,
-        topLeft = topLeftOffset,
-        size = segmentSize
-      )
+      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+        drawArc(
+          color = segment.color,
+          startAngle = startAngle,
+          sweepAngle = segment.sweepAngleDegrees,
+          useCenter = true,
+          topLeft = topLeftOffset,
+          size = segmentSize
+        )
+      }
     }
 
     chartSegments.forEach { segment ->
@@ -473,26 +434,28 @@ private fun SunriseSunsetChart(
     )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      val lineRadiusMultiplier =
-        when {
-          segmentIndex == 0 -> 10f
-          orientation == Configuration.ORIENTATION_PORTRAIT -> 1.025f
-          else -> 1.1f
-        }
-      val strokeWidth = 2f
-      drawLine(
-        color = chartSegments[segmentIndex + 1].color,
-        start = chartCenter,
-        end =
-          Offset(
-            chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
-            chartCenter.y +
-              chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians) +
-              strokeWidth
-          ),
-        strokeWidth = strokeWidth,
-        pathEffect = if (segmentIndex == 0) null else dashPathEffect
-      )
+      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+        val lineRadiusMultiplier =
+          when {
+            segmentIndex == 0 -> 10f
+            orientation == Configuration.ORIENTATION_PORTRAIT -> 1.025f
+            else -> 1.1f
+          }
+        val strokeWidth = 2f
+        drawLine(
+          color = chartSegments[segmentIndex + 1].color,
+          start = chartCenter,
+          end =
+            Offset(
+              chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
+              chartCenter.y +
+                chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians) +
+                strokeWidth
+            ),
+          strokeWidth = strokeWidth,
+          pathEffect = if (segmentIndex == 0) null else dashPathEffect
+        )
+      }
 
       val textRadiusMultiplier =
         if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f

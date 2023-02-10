@@ -13,6 +13,7 @@ import com.trm.daylighter.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -22,20 +23,19 @@ class DayViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
-  private val getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
+  getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
   private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
 ) : ViewModel() {
-  val locationNavigationEnabledFlow: SharedFlow<Boolean> =
+  val locationCountFlow: SharedFlow<Int> =
     getLocationsCountFlowUseCase()
-      .map { it > 1 }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
 
   private val currentLocationIndexFlow: StateFlow<Int> =
     savedStateHandle.getStateFlow(SavedState.CURRENT_LOCATION_INDEX.name, 0)
 
-  private var currentLocationIndex: Int
+  var currentLocationIndex: Int
     get() = currentLocationIndexFlow.value
-    set(value) {
+    private set(value) {
       savedStateHandle[SavedState.CURRENT_LOCATION_INDEX.name] = value
     }
 
@@ -80,49 +80,29 @@ constructor(
         replay = 1,
       )
 
-  private val showPreviousFlow = MutableSharedFlow<Unit>()
-  private val showNextFlow = MutableSharedFlow<Unit>()
+  private val changeLocationIndexFlow = MutableSharedFlow<Int>()
 
   init {
-    showPreviousFlow
-      .withLatestLocationsCount()
-      .onEach { size ->
+    changeLocationIndexFlow
+      .withLatestFrom(getLocationsCountFlowUseCase()) { index, count -> index to count }
+      .onEach { (index, count) ->
         currentLocationIndex =
           when {
-            size == 0 -> 0
-            currentLocationIndex == 0 -> size - 1
-            else -> currentLocationIndex - 1
-          }
-      }
-      .launchIn(viewModelScope)
-
-    showNextFlow
-      .withLatestLocationsCount()
-      .onEach { size ->
-        currentLocationIndex =
-          when {
-            size == 0 -> 0
-            currentLocationIndex == size - 1 -> 0
-            else -> currentLocationIndex + 1
+            index < 0 -> max(0, count - 1)
+            index < count -> index
+            else -> 0
           }
       }
       .launchIn(viewModelScope)
   }
 
-  fun previousLocation() {
-    viewModelScope.launch { showPreviousFlow.emit(Unit) }
-  }
-
-  fun nextLocation() {
-    viewModelScope.launch { showNextFlow.emit(Unit) }
+  fun changeLocation(index: Int) {
+    viewModelScope.launch { changeLocationIndexFlow.emit(index) }
   }
 
   fun retry() {
     viewModelScope.launch { retryFlow.emit(Unit) }
   }
-
-  private fun Flow<*>.withLatestLocationsCount(): Flow<Int> =
-    withLatestFrom(getLocationsCountFlowUseCase()) { _, size -> size }
 
   private enum class SavedState {
     CURRENT_LOCATION_INDEX

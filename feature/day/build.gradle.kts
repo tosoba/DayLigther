@@ -6,6 +6,7 @@ plugins {
 android { namespace = "com.trm.daylighter.feature.day" }
 
 dependencies {
-  implementation(libs.kotlinx.datetime)
+  implementation(libs.accompanist.pager)
+  implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
 }
