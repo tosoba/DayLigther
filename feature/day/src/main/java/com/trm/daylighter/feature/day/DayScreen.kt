@@ -203,7 +203,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
 ) {
-  val (drawerMenuButton, pagerBox, navigation, clock) = createRefs()
+  val (drawerMenuButton, pagerBox, navigation, dayTimeCard) = createRefs()
   val orientation = LocalConfiguration.current.orientation
 
   val pagerState = rememberPagerState(initialPage = currentLocationIndex)
@@ -239,37 +239,42 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
   }
 
-  val labelMediumStyle = MaterialTheme.typography.labelMedium
-  val resolver = LocalFontFamilyResolver.current
-  val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
-  AndroidView(
-    factory = { context ->
-      TextClock(context).apply {
-        format24Hour = "hh:mm:ss"
-        format12Hour = "hh:mm:ss a"
-        resolver
-          .resolve(
-            fontFamily = labelMediumStyle.fontFamily,
-            fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
-            fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
-            fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
-          )
-          .value
-          .takeIfInstance<Typeface>()
-          ?.let { typeface = it }
-        textSize = 18f
-        setTextColor(textColor)
-      }
-    },
-    update = { clockView ->
-      clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
-    },
+  Card(
     modifier =
-      Modifier.constrainAs(clock) {
+      Modifier.constrainAs(dayTimeCard) {
         top.linkTo(parent.top, 16.dp)
+        start.linkTo(parent.start, 16.dp)
         end.linkTo(parent.end, 16.dp)
+      }
+  ) {
+    val labelMediumStyle = MaterialTheme.typography.labelMedium
+    val resolver = LocalFontFamilyResolver.current
+    val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
+    AndroidView(
+      factory = { context ->
+        TextClock(context).apply {
+          format24Hour = "hh:mm:ss"
+          format12Hour = "hh:mm:ss a"
+          resolver
+            .resolve(
+              fontFamily = labelMediumStyle.fontFamily,
+              fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
+              fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
+              fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
+            )
+            .value
+            .takeIfInstance<Typeface>()
+            ?.let { typeface = it }
+          textSize = 18f
+          setTextColor(textColor)
+        }
       },
-  )
+      update = { clockView ->
+        clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
+      },
+      modifier = Modifier.padding(16.dp)
+    )
+  }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     DrawerMenuButton(
