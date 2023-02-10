@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.day
 
 import android.content.res.Configuration
+import android.graphics.Typeface
 import android.widget.TextClock
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -19,15 +20,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.*
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontSynthesis
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +47,7 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.util.ext.isoLocalTimeLabel
 import com.trm.daylighter.core.common.util.ext.radians
+import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
 import kotlin.math.cos
@@ -213,8 +220,28 @@ private fun ConstraintLayoutScope.SunriseSunset(
       }
   )
 
+  val labelMediumStyle = MaterialTheme.typography.labelMedium
+  val resolver = LocalFontFamilyResolver.current
+  val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
   AndroidView(
-    factory = { context -> TextClock(context) },
+    factory = { context ->
+      TextClock(context).apply {
+        format24Hour = "hh:mm:ss"
+        format12Hour = "hh:mm:ss a"
+        resolver
+          .resolve(
+            fontFamily = labelMediumStyle.fontFamily,
+            fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
+            fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
+            fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
+          )
+          .value
+          .takeIfInstance<Typeface>()
+          ?.let { typeface = it }
+        textSize = 18f
+        setTextColor(textColor)
+      }
+    },
     update = { clockView ->
       clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
     },
