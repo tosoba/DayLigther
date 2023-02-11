@@ -57,10 +57,19 @@ import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 
 const val dayRoute = "day_route"
 
@@ -569,7 +578,7 @@ private fun SunriseSunsetChart(
   dayMode: DayMode,
   modifier: Modifier = Modifier
 ) {
-  val (location, today, yesterday) = locationSunriseSunsetChange
+  val (_, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
 
   val chartSegments =
@@ -599,6 +608,41 @@ private fun SunriseSunsetChart(
     }
   }
 
+  var now by remember { mutableStateOf(LocalTime.now(today.sunrise.zone)) }
+  val remainingTimestamps = remember {
+    LinkedList(
+      today.run {
+        listOf(
+            astronomicalTwilightBegin,
+            astronomicalTwilightEnd,
+            civilTwilightBegin,
+            civilTwilightEnd,
+            nauticalTwilightBegin,
+            nauticalTwilightEnd,
+            sunrise,
+            sunset
+          )
+          .map(ZonedDateTime::toLocalTime)
+          .filter { it.isAfter(now) }
+          .sorted()
+      }
+    )
+  }
+  LaunchedEffect(Unit) {
+    flow {
+        while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
+          emit(LocalTime.now(today.sunrise.zone))
+          delay(1000L)
+        }
+      }
+      .filter { remainingTimestamps.isNotEmpty() && remainingTimestamps.first().isBefore(it) }
+      .onEach {
+        remainingTimestamps.removeFirst()
+        now = LocalTime.now(today.sunrise.zone)
+      }
+      .launchIn(this)
+  }
+
   Canvas(modifier = modifier) {
     val topLeftOffset =
       Offset(
@@ -607,7 +651,6 @@ private fun SunriseSunsetChart(
       )
     val segmentSize = Size(size.height, size.height) * 2f
     var startAngle = -180f
-    val now = LocalTime.now(today.sunrise.zone)
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       val isCurrent =
