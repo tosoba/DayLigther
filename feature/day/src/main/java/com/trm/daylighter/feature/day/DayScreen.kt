@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.widget.TextClock
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -331,6 +332,21 @@ private fun ClockCard(
       },
       modifier = Modifier.padding(10.dp)
     )
+
+    Box(modifier = Modifier.size(50.dp)) {
+      val sunPainter =
+        rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
+      Image(
+        painter = sunPainter,
+        contentDescription = "",
+        Modifier.align(Alignment.Center).size(40.dp)
+      )
+      Icon(
+        painter = painterResource(id = R.drawable.clock),
+        contentDescription = "",
+        Modifier.align(Alignment.BottomEnd)
+      )
+    }
   }
 }
 
