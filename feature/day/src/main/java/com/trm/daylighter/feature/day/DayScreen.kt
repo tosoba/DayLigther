@@ -56,6 +56,7 @@ import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.cos
@@ -309,76 +310,100 @@ private fun ClockAndDayLengthCard(
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Spacer(modifier = Modifier.height(5.dp))
-
-      val labelMediumStyle = MaterialTheme.typography.labelMedium
-      val resolver = LocalFontFamilyResolver.current
-      val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
-
-      AndroidView(
-        factory = { context ->
-          TextClock(context).apply {
-            format24Hour = "HH:mm:ss \n zz"
-            format12Hour = "hh:mm:ss a \n zz"
-            resolver
-              .resolve(
-                fontFamily = labelMediumStyle.fontFamily,
-                fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
-                fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
-                fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
-              )
-              .value
-              .takeIfInstance<Typeface>()
-              ?.let(this::setTypeface)
-            textSize = 18f
-            setTextColor(textColor)
-          }
-        },
-        update = { clockView -> clockView.timeZone = today.sunrise.zone.id },
-        modifier = Modifier.padding(horizontal = 10.dp)
-      )
-
-      Spacer(modifier = Modifier.height(5.dp))
-
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 10.dp)
-      ) {
-        Box(modifier = Modifier.size(50.dp)) {
-          val sunPainter =
-            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
-          Image(
-            painter = sunPainter,
-            contentDescription = "",
-            Modifier.align(Alignment.Center).size(40.dp)
-          )
-          Icon(
-            painter = painterResource(id = R.drawable.clock),
-            contentDescription = "",
-            Modifier.align(Alignment.BottomEnd)
-          )
-        }
-
-        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
-          val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
-          val diffLength =
-            LocalTime.ofSecondOfDay(
-              abs(today.dayLengthSeconds - yesterday.dayLengthSeconds).toLong()
-            )
-          val diffPrefix =
-            when {
-              today.dayLengthSeconds > yesterday.dayLengthSeconds -> "+"
-              today.dayLengthSeconds < yesterday.dayLengthSeconds -> "-"
-              else -> ""
-            }
-
-          Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
-          Text(text = "$diffPrefix${diffLength.format(DateTimeFormatter.ISO_LOCAL_TIME)}")
-        }
+    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+      Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(5.dp))
+        Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(horizontal = 8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
+        DayLength(
+          today = today,
+          yesterday = yesterday,
+          modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(5.dp))
       }
+    } else {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = Modifier.width(5.dp))
+        Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(vertical = 8.dp))
+        Spacer(modifier = Modifier.width(5.dp))
+        DayLength(
+          today = today,
+          yesterday = yesterday,
+          modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+      }
+    }
+  }
+}
 
-      Spacer(modifier = Modifier.height(5.dp))
+@Composable
+private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
+  val labelMediumStyle = MaterialTheme.typography.labelMedium
+  val resolver = LocalFontFamilyResolver.current
+  val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
+  val orientation = LocalConfiguration.current.orientation
+
+  AndroidView(
+    factory = { context ->
+      TextClock(context).apply {
+        format24Hour = "HH:mm:ss \n zz"
+        format12Hour = "hh:mm:ss a \n zz"
+        resolver
+          .resolve(
+            fontFamily = labelMediumStyle.fontFamily,
+            fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
+            fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
+            fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
+          )
+          .value
+          .takeIfInstance<Typeface>()
+          ?.let(this::setTypeface)
+        textSize = if (orientation == Configuration.ORIENTATION_PORTRAIT) 18f else 16f
+        setTextColor(textColor)
+      }
+    },
+    update = { clockView -> clockView.timeZone = zoneId.id },
+    modifier = modifier
+  )
+}
+
+@Composable
+private fun DayLength(
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
+  modifier: Modifier = Modifier
+) {
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+    Box(modifier = Modifier.size(50.dp)) {
+      val sunPainter =
+        rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
+      Image(
+        painter = sunPainter,
+        contentDescription = "",
+        Modifier.align(Alignment.Center).size(40.dp)
+      )
+      Icon(
+        painter = painterResource(id = R.drawable.clock),
+        contentDescription = "",
+        Modifier.align(Alignment.BottomEnd)
+      )
+    }
+
+    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
+      val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
+      val diffLength =
+        LocalTime.ofSecondOfDay(abs(today.dayLengthSeconds - yesterday.dayLengthSeconds).toLong())
+      val diffPrefix =
+        when {
+          today.dayLengthSeconds > yesterday.dayLengthSeconds -> "+"
+          today.dayLengthSeconds < yesterday.dayLengthSeconds -> "-"
+          else -> ""
+        }
+
+      Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
+      Text(text = "$diffPrefix${diffLength.format(DateTimeFormatter.ISO_LOCAL_TIME)}")
     }
   }
 }
@@ -629,7 +654,7 @@ private fun SunriseSunsetChart(
         topLeftOffset.y
       )
     val sunArcCenter = Offset(sunArcTopLeft.x + chartRadius, size.height / 2f)
-    val sunArcSweepAngle = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10f else 20f
+    val sunArcSweepAngle = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10f else 15f
     drawArc(
       color = Color.Yellow,
       startAngle = 360f - sunArcSweepAngle / 2f,
