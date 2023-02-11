@@ -16,11 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
@@ -95,6 +92,10 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
+  val sunrisePeriodStart: LocalTime,
+  val sunrisePeriodEnd: LocalTime,
+  val sunsetPeriodStart: LocalTime,
+  val sunsetPeriodEnd: LocalTime,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
@@ -584,6 +585,20 @@ private fun SunriseSunsetChart(
 
   val sunPainter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
 
+  val chartSegmentGlowPaint = remember {
+    Paint().apply {
+      style = PaintingStyle.Stroke
+      strokeWidth = 30f
+    }
+  }
+  remember {
+    chartSegmentGlowPaint.asFrameworkPaint().apply {
+      val glowColor = Color.Yellow
+      color = glowColor.copy(alpha = 0f).toArgb()
+      setShadowLayer(30f, 0f, 0f, glowColor.copy(alpha = .5f).toArgb())
+    }
+  }
+
   Canvas(modifier = modifier) {
     val topLeftOffset =
       Offset(
@@ -591,10 +606,32 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    var startAngle = -90f
+    var startAngle = -180f
+    val now = LocalTime.now()
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
+      val isCurrent =
+        (dayMode == DayMode.SUNRISE &&
+          now.isAfter(segment.sunrisePeriodStart) &&
+          now.isBefore(segment.sunrisePeriodEnd)) ||
+          (dayMode == DayMode.SUNSET &&
+            now.isAfter(segment.sunsetPeriodStart) &&
+            now.isBefore(segment.sunsetPeriodEnd))
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+        if (isCurrent) {
+          drawIntoCanvas {
+            it.drawArc(
+              left = topLeftOffset.x,
+              top = topLeftOffset.y,
+              bottom = topLeftOffset.y + segmentSize.height,
+              right = topLeftOffset.x + segmentSize.width,
+              startAngle = startAngle,
+              sweepAngle = segment.sweepAngleDegrees,
+              useCenter = true,
+              paint = chartSegmentGlowPaint,
+            )
+          }
+        }
         drawArc(
           color = segment.color,
           startAngle = startAngle,
@@ -811,9 +848,13 @@ private fun dayChartSegments(
   return remember(today) {
     listOf(
       DayChartSegment(
-        sweepAngleDegrees = 90f,
+        sweepAngleDegrees = 180f,
         color = Color(0xFFB9D9E5),
         periodLabel = "Day",
+        sunrisePeriodStart = today.sunrise.toLocalTime(),
+        sunrisePeriodEnd = today.sunset.toLocalTime(),
+        sunsetPeriodStart = today.sunrise.toLocalTime(),
+        sunsetPeriodEnd = today.sunset.toLocalTime(),
         sunriseEndingEdgeLabel = sunrise,
         sunsetEndingEdgeLabel = sunset,
         sunriseTimeLabel = today.sunrise.timeLabel(using24HFormat),
@@ -829,6 +870,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
+        sunrisePeriodStart = today.civilTwilightBegin.toLocalTime(),
+        sunrisePeriodEnd = today.sunrise.toLocalTime(),
+        sunsetPeriodStart = today.sunset.toLocalTime(),
+        sunsetPeriodEnd = today.civilTwilightEnd.toLocalTime(),
         sunriseEndingEdgeLabel =
           "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
         sunsetEndingEdgeLabel =
@@ -852,6 +897,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
+        sunrisePeriodStart = today.nauticalTwilightBegin.toLocalTime(),
+        sunrisePeriodEnd = today.civilTwilightBegin.toLocalTime(),
+        sunsetPeriodStart = today.civilTwilightEnd.toLocalTime(),
+        sunsetPeriodEnd = today.nauticalTwilightEnd.toLocalTime(),
         sunriseEndingEdgeLabel =
           "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
         sunsetEndingEdgeLabel =
@@ -875,6 +924,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
+        sunrisePeriodStart = today.astronomicalTwilightBegin.toLocalTime(),
+        sunrisePeriodEnd = today.nauticalTwilightBegin.toLocalTime(),
+        sunsetPeriodStart = today.nauticalTwilightEnd.toLocalTime(),
+        sunsetPeriodEnd = today.astronomicalTwilightEnd.toLocalTime(),
         sunriseEndingEdgeLabel =
           "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
         sunsetEndingEdgeLabel =
@@ -894,7 +947,15 @@ private fun dayChartSegments(
           )
         }
       ),
-      DayChartSegment(sweepAngleDegrees = 72f, color = Color(0xFF172A33), periodLabel = "Night"),
+      DayChartSegment(
+        sweepAngleDegrees = 72f,
+        color = Color(0xFF172A33),
+        periodLabel = "Night",
+        sunrisePeriodStart = today.date.atStartOfDay().toLocalTime(),
+        sunrisePeriodEnd = today.astronomicalTwilightBegin.toLocalTime(),
+        sunsetPeriodStart = today.astronomicalTwilightEnd.toLocalTime(),
+        sunsetPeriodEnd = today.date.atStartOfDay().plusDays(1L).toLocalTime(),
+      ),
     )
   }
 }
