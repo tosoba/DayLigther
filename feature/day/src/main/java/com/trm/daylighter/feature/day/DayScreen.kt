@@ -253,53 +253,58 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
   }
 
-  Card(
-    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+  MapCard(
+    locationSunriseSunsetChange = locationSunriseSunsetChange,
+    mapZoom = mapZoom,
     modifier =
       Modifier.run {
           if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             width((LocalConfiguration.current.screenWidthDp * .4f).dp)
           } else {
-            height((LocalConfiguration.current.screenHeightDp * .32f).dp)
+            height((LocalConfiguration.current.screenHeightDp * .35f).dp)
           }
         }
         .aspectRatio(1f)
         .constrainAs(map) {
-          end.linkTo(parent.end, 16.dp)
           top.linkTo(parent.top, 16.dp)
-        },
-  ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-      val mapView = rememberMapViewWithLifecycle()
-      AndroidView(
-        factory = { mapView },
-        update = {
-          it.setDefaultDisabledConfig()
-          it.setLocation(location = locationSunriseSunsetChange.location, zoom = mapZoom)
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            end.linkTo(parent.end, 16.dp)
+          } else {
+            end.linkTo(mapZoomControls.start, 5.dp)
+          }
         }
-      )
-      Icon(
-        painter = painterResource(id = com.trm.daylighter.core.common.R.drawable.marker),
-        contentDescription =
-          stringResource(id = com.trm.daylighter.core.common.R.string.location_marker),
-        modifier = Modifier.align(Alignment.Center).size(36.dp)
-      )
-    }
-  }
+  )
 
-  Row(
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.Center,
-    modifier =
-      Modifier.constrainAs(mapZoomControls) {
-        start.linkTo(map.start)
-        end.linkTo(map.end)
-        top.linkTo(map.bottom, 5.dp)
-      }
-  ) {
-    ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-    Spacer(modifier = Modifier.width(5.dp))
-    ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center,
+      modifier =
+        Modifier.constrainAs(mapZoomControls) {
+          start.linkTo(map.start)
+          end.linkTo(map.end)
+          top.linkTo(map.bottom, 5.dp)
+        }
+    ) {
+      ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+      Spacer(modifier = Modifier.width(5.dp))
+      ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+    }
+  } else {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+      modifier =
+        Modifier.constrainAs(mapZoomControls) {
+          end.linkTo(parent.end, 16.dp)
+          top.linkTo(map.top)
+          bottom.linkTo(map.bottom)
+        }
+    ) {
+      ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+      Spacer(modifier = Modifier.height(5.dp))
+      ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+    }
   }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -352,6 +357,35 @@ private fun ConstraintLayoutScope.SunriseSunset(
           start.linkTo(navigation.end, 16.dp)
         },
     )
+  }
+}
+
+@Composable
+private fun MapCard(
+  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  mapZoom: Double,
+  modifier: Modifier = Modifier,
+) {
+  Card(
+    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    modifier = modifier,
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      val mapView = rememberMapViewWithLifecycle()
+      AndroidView(
+        factory = { mapView },
+        update = {
+          it.setDefaultDisabledConfig()
+          it.setLocation(location = locationSunriseSunsetChange.location, zoom = mapZoom)
+        }
+      )
+      Icon(
+        painter = painterResource(id = com.trm.daylighter.core.common.R.drawable.marker),
+        contentDescription =
+          stringResource(id = com.trm.daylighter.core.common.R.string.location_marker),
+        modifier = Modifier.align(Alignment.Center).size(36.dp)
+      )
+    }
   }
 }
 
