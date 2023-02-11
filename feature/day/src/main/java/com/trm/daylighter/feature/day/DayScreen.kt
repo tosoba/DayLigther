@@ -55,9 +55,7 @@ import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.LinkedList
 import kotlin.math.abs
@@ -102,10 +100,10 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val sunrisePeriodStart: LocalTime,
-  val sunrisePeriodEnd: LocalTime,
-  val sunsetPeriodStart: LocalTime,
-  val sunsetPeriodEnd: LocalTime,
+  val sunrisePeriodStart: ZonedDateTime,
+  val sunrisePeriodEnd: ZonedDateTime,
+  val sunsetPeriodStart: ZonedDateTime,
+  val sunsetPeriodEnd: ZonedDateTime,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
@@ -608,7 +606,7 @@ private fun SunriseSunsetChart(
     }
   }
 
-  var now by remember { mutableStateOf(LocalTime.now(today.sunrise.zone)) }
+  var now by remember { mutableStateOf(ZonedDateTime.now(today.sunrise.zone)) }
   val remainingTimestamps = remember {
     LinkedList(
       today.run {
@@ -622,7 +620,6 @@ private fun SunriseSunsetChart(
             sunrise,
             sunset
           )
-          .map(ZonedDateTime::toLocalTime)
           .filter { it.isAfter(now) }
           .sorted()
       }
@@ -631,14 +628,14 @@ private fun SunriseSunsetChart(
   LaunchedEffect(Unit) {
     flow {
         while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          emit(LocalTime.now(today.sunrise.zone))
+          emit(ZonedDateTime.now(today.sunrise.zone))
           delay(1000L)
         }
       }
       .filter { remainingTimestamps.isNotEmpty() && remainingTimestamps.first().isBefore(it) }
       .onEach {
         remainingTimestamps.removeFirst()
-        now = LocalTime.now(today.sunrise.zone)
+        now = ZonedDateTime.now(today.sunrise.zone)
       }
       .launchIn(this)
   }
@@ -894,10 +891,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 180f,
         color = Color(0xFFB9D9E5),
         periodLabel = "Day",
-        sunrisePeriodStart = today.sunrise.toLocalTime(),
-        sunrisePeriodEnd = today.sunset.toLocalTime(),
-        sunsetPeriodStart = today.sunrise.toLocalTime(),
-        sunsetPeriodEnd = today.sunset.toLocalTime(),
+        sunrisePeriodStart = today.sunrise,
+        sunrisePeriodEnd = today.sunset,
+        sunsetPeriodStart = today.sunrise,
+        sunsetPeriodEnd = today.sunset,
         sunriseEndingEdgeLabel = sunrise,
         sunsetEndingEdgeLabel = sunset,
         sunriseTimeLabel = today.sunrise.timeLabel(using24HFormat),
@@ -913,10 +910,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
-        sunrisePeriodStart = today.civilTwilightBegin.toLocalTime(),
-        sunrisePeriodEnd = today.sunrise.toLocalTime(),
-        sunsetPeriodStart = today.sunset.toLocalTime(),
-        sunsetPeriodEnd = today.civilTwilightEnd.toLocalTime(),
+        sunrisePeriodStart = today.civilTwilightBegin,
+        sunrisePeriodEnd = today.sunrise,
+        sunsetPeriodStart = today.sunset,
+        sunsetPeriodEnd = today.civilTwilightEnd,
         sunriseEndingEdgeLabel =
           "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
         sunsetEndingEdgeLabel =
@@ -940,10 +937,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
-        sunrisePeriodStart = today.nauticalTwilightBegin.toLocalTime(),
-        sunrisePeriodEnd = today.civilTwilightBegin.toLocalTime(),
-        sunsetPeriodStart = today.civilTwilightEnd.toLocalTime(),
-        sunsetPeriodEnd = today.nauticalTwilightEnd.toLocalTime(),
+        sunrisePeriodStart = today.nauticalTwilightBegin,
+        sunrisePeriodEnd = today.civilTwilightBegin,
+        sunsetPeriodStart = today.civilTwilightEnd,
+        sunsetPeriodEnd = today.nauticalTwilightEnd,
         sunriseEndingEdgeLabel =
           "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
         sunsetEndingEdgeLabel =
@@ -967,10 +964,10 @@ private fun dayChartSegments(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
-        sunrisePeriodStart = today.astronomicalTwilightBegin.toLocalTime(),
-        sunrisePeriodEnd = today.nauticalTwilightBegin.toLocalTime(),
-        sunsetPeriodStart = today.nauticalTwilightEnd.toLocalTime(),
-        sunsetPeriodEnd = today.astronomicalTwilightEnd.toLocalTime(),
+        sunrisePeriodStart = today.astronomicalTwilightBegin,
+        sunrisePeriodEnd = today.nauticalTwilightBegin,
+        sunsetPeriodStart = today.nauticalTwilightEnd,
+        sunsetPeriodEnd = today.astronomicalTwilightEnd,
         sunriseEndingEdgeLabel =
           "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
         sunsetEndingEdgeLabel =
@@ -994,10 +991,12 @@ private fun dayChartSegments(
         sweepAngleDegrees = 72f,
         color = Color(0xFF172A33),
         periodLabel = "Night",
-        sunrisePeriodStart = today.date.atStartOfDay().toLocalTime(),
-        sunrisePeriodEnd = today.astronomicalTwilightBegin.toLocalTime(),
-        sunsetPeriodStart = today.astronomicalTwilightEnd.toLocalTime(),
-        sunsetPeriodEnd = today.date.atStartOfDay().plusDays(1L).toLocalTime(),
+        sunrisePeriodStart =
+          ZonedDateTime.ofLocal(today.date.atStartOfDay(), today.sunrise.zone, null),
+        sunrisePeriodEnd = today.astronomicalTwilightBegin,
+        sunsetPeriodStart = today.astronomicalTwilightEnd,
+        sunsetPeriodEnd =
+          ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), today.sunrise.zone, null),
       ),
     )
   }

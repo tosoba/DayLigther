@@ -6,10 +6,10 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 val ZonedDateTime.isoLocalTimeLabel24H: String
-  get() = toLocalTime().format(DateTimeFormatter.ISO_TIME)
+  get() = format(DateTimeFormatter.ISO_TIME)
 
 val ZonedDateTime.isoLocalTimeLabel12H: String
-  get() = toLocalTime().format(DateTimeFormatter.ofPattern("hh:mm:ss"))
+  get() = format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 
 fun ZonedDateTime.timeLabel(using24HFormat: Boolean): () -> String =
   if (using24HFormat) ::isoLocalTimeLabel24H else ::isoLocalTimeLabel12H
