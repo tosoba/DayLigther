@@ -56,6 +56,7 @@ import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.NonDisposableHandle.parent
 
 const val dayRoute = "day_route"
 
@@ -240,6 +241,12 @@ private fun ConstraintLayoutScope.SunriseSunset(
   }
 
   Card(
+    colors =
+      CardDefaults.cardColors(
+        containerColor = FloatingActionButtonDefaults.containerColor,
+        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
+      ),
+    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     modifier =
       Modifier.constrainAs(dayTimeCard) {
         top.linkTo(parent.top, 16.dp)
@@ -253,8 +260,8 @@ private fun ConstraintLayoutScope.SunriseSunset(
     AndroidView(
       factory = { context ->
         TextClock(context).apply {
-          format24Hour = "HH:mm:ss"
-          format12Hour = "hh:mm:ss a"
+          format24Hour = "HH:mm:ss \n zz"
+          format12Hour = "hh:mm:ss a \n zz"
           resolver
             .resolve(
               fontFamily = labelMediumStyle.fontFamily,
@@ -265,7 +272,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
             .value
             .takeIfInstance<Typeface>()
             ?.let(this::setTypeface)
-          textSize = 18f
+          textSize = 16f
           setTextColor(textColor)
         }
       },
