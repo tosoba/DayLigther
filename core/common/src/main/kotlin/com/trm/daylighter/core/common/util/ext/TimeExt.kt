@@ -24,5 +24,8 @@ fun timeDifferenceLabel(from: LocalTime, to: LocalTime): String {
       toSecondOfDay < fromSecondOfDay -> "-"
       else -> ""
     }
-  return "$diffPrefix${diffLength.format(DateTimeFormatter.ISO_LOCAL_TIME)}"
+  return formatTimeDifference(diffPrefix, diffLength)
 }
+
+fun formatTimeDifference(prefix: String, diff: LocalTime): String =
+  "$prefix${diff.format(DateTimeFormatter.ISO_LOCAL_TIME).run { if (startsWith("00:")) substring(3) else this }}"

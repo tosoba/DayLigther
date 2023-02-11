@@ -497,7 +497,7 @@ private fun DayLength(
         }
 
       Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
-      Text(text = "$diffPrefix${diffLength.format(DateTimeFormatter.ISO_LOCAL_TIME)}")
+      Text(text = formatTimeDifference(diffPrefix, diffLength))
     }
   }
 }
