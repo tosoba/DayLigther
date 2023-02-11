@@ -253,7 +253,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     AndroidView(
       factory = { context ->
         TextClock(context).apply {
-          format24Hour = "hh:mm:ss"
+          format24Hour = "HH:mm:ss"
           format12Hour = "hh:mm:ss a"
           resolver
             .resolve(
@@ -264,7 +264,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
             )
             .value
             .takeIfInstance<Typeface>()
-            ?.let { typeface = it }
+            ?.let(this::setTypeface)
           textSize = 18f
           setTextColor(textColor)
         }
