@@ -4,16 +4,11 @@ import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.widget.TextClock
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.ZoomIn
-import androidx.compose.material.icons.filled.ZoomOut
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,8 +50,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import com.trm.daylighter.composable.ZoomInButton
+import com.trm.daylighter.composable.ZoomOutButton
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
-import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
@@ -301,31 +297,9 @@ private fun ConstraintLayoutScope.SunriseSunset(
         top.linkTo(map.bottom, 5.dp)
       }
   ) {
-    AnimatedVisibility(
-      visible = mapZoom < MapDefaults.MAX_ZOOM,
-      enter = fadeIn(),
-      exit = fadeOut()
-    ) {
-      SmallFloatingActionButton(onClick = onZoomInClick) {
-        Icon(
-          imageVector = Icons.Filled.ZoomIn,
-          contentDescription = stringResource(id = commonR.string.zoom_in)
-        )
-      }
-    }
+    ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
     Spacer(modifier = Modifier.width(5.dp))
-    AnimatedVisibility(
-      visible = mapZoom > MapDefaults.MIN_ZOOM,
-      enter = fadeIn(),
-      exit = fadeOut()
-    ) {
-      SmallFloatingActionButton(onClick = onZoomOutClick) {
-        Icon(
-          imageVector = Icons.Filled.ZoomOut,
-          contentDescription = stringResource(id = commonR.string.zoom_out)
-        )
-      }
-    }
+    ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
   }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
