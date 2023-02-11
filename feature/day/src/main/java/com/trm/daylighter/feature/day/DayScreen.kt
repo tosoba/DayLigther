@@ -99,6 +99,8 @@ private data class DayChartSegment(
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
   val sunsetTimeLabel: (() -> String)? = null,
+  val sunriseDiffLabel: (() -> String)? = null,
+  val sunsetDiffLabel: (() -> String)? = null,
 )
 
 @Composable
@@ -572,6 +574,7 @@ private fun SunriseSunsetChart(
   val chartSegments =
     dayChartSegments(
       today = today,
+      yesterday = yesterday,
       orientation = orientation,
       using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
     )
@@ -681,11 +684,20 @@ private fun SunriseSunsetChart(
         overflow = TextOverflow.Ellipsis,
       )
 
-      val timeLabel =
-        chartSegments[segmentIndex].run {
-          requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel)
-        }()
-      val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeLabel))
+      val timeAndDiffLabel = buildString {
+        append(
+          chartSegments[segmentIndex].run {
+            requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel)
+          }()
+        )
+        append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
+        append(
+          chartSegments[segmentIndex].run {
+            requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseDiffLabel else sunsetDiffLabel)
+          }()
+        )
+      }
+      val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeAndDiffLabel))
       val timeTopLeft =
         Offset(
           x =
@@ -701,7 +713,7 @@ private fun SunriseSunsetChart(
         )
       drawText(
         textMeasurer = textMeasurer,
-        text = timeLabel,
+        text = timeAndDiffLabel,
         topLeft = timeTopLeft,
         style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
@@ -790,6 +802,7 @@ private fun SunriseSunsetChart(
 @Composable
 private fun dayChartSegments(
   today: SunriseSunset,
+  yesterday: SunriseSunset,
   orientation: Int,
   using24HFormat: Boolean
 ): List<DayChartSegment> {
@@ -804,7 +817,13 @@ private fun dayChartSegments(
         sunriseEndingEdgeLabel = sunrise,
         sunsetEndingEdgeLabel = sunset,
         sunriseTimeLabel = today.sunrise.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.sunset.timeLabel(using24HFormat)
+        sunsetTimeLabel = today.sunset.timeLabel(using24HFormat),
+        sunriseDiffLabel = {
+          timeDifferenceLabel(yesterday.sunrise.toLocalTime(), today.sunrise.toLocalTime())
+        },
+        sunsetDiffLabel = {
+          timeDifferenceLabel(yesterday.sunset.toLocalTime(), today.sunset.toLocalTime())
+        }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
@@ -815,7 +834,19 @@ private fun dayChartSegments(
         sunsetEndingEdgeLabel =
           "Civil dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
         sunriseTimeLabel = today.civilTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.civilTwilightEnd.timeLabel(using24HFormat)
+        sunsetTimeLabel = today.civilTwilightEnd.timeLabel(using24HFormat),
+        sunriseDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.civilTwilightBegin.toLocalTime(),
+            today.civilTwilightBegin.toLocalTime()
+          )
+        },
+        sunsetDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.civilTwilightEnd.toLocalTime(),
+            today.civilTwilightEnd.toLocalTime()
+          )
+        }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
@@ -826,7 +857,19 @@ private fun dayChartSegments(
         sunsetEndingEdgeLabel =
           "Nautical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
         sunriseTimeLabel = today.nauticalTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.nauticalTwilightEnd.timeLabel(using24HFormat)
+        sunsetTimeLabel = today.nauticalTwilightEnd.timeLabel(using24HFormat),
+        sunriseDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.nauticalTwilightBegin.toLocalTime(),
+            today.nauticalTwilightBegin.toLocalTime()
+          )
+        },
+        sunsetDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.nauticalTwilightEnd.toLocalTime(),
+            today.nauticalTwilightEnd.toLocalTime()
+          )
+        }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
@@ -837,7 +880,19 @@ private fun dayChartSegments(
         sunsetEndingEdgeLabel =
           "Astronomical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
         sunriseTimeLabel = today.astronomicalTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.astronomicalTwilightEnd.timeLabel(using24HFormat)
+        sunsetTimeLabel = today.astronomicalTwilightEnd.timeLabel(using24HFormat),
+        sunriseDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.astronomicalTwilightBegin.toLocalTime(),
+            today.astronomicalTwilightBegin.toLocalTime()
+          )
+        },
+        sunsetDiffLabel = {
+          timeDifferenceLabel(
+            yesterday.astronomicalTwilightEnd.toLocalTime(),
+            today.astronomicalTwilightEnd.toLocalTime()
+          )
+        }
       ),
       DayChartSegment(sweepAngleDegrees = 72f, color = Color(0xFF172A33), periodLabel = "Night"),
     )
