@@ -17,12 +17,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.map.MapDefaults
 import com.trm.daylighter.domain.model.*
 import org.osmdroid.util.GeoPoint
@@ -79,6 +82,11 @@ private fun LocationsScreen(
                       it.setDefaultConfig()
                       it.setLocation(location = location, zoom = zoom)
                     }
+                  )
+                  Icon(
+                    painter = painterResource(id = commonR.drawable.marker),
+                    contentDescription = stringResource(id = commonR.string.location_marker),
+                    modifier = Modifier.align(Alignment.Center).size(36.dp)
                   )
                   LocationDropDrownMenu(
                     modifier = Modifier.align(Alignment.BottomEnd),

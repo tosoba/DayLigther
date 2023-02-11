@@ -21,6 +21,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -96,8 +97,8 @@ private fun LocationScreen(
     )
 
     Icon(
-      painter = painterResource(id = R.drawable.marker),
-      contentDescription = "center_marker",
+      painter = painterResource(id = commonR.drawable.marker),
+      contentDescription = stringResource(id = commonR.string.location_marker),
       modifier = Modifier.align(Alignment.Center)
     )
 
