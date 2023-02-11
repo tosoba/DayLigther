@@ -104,7 +104,10 @@ private fun LocationsScreen(
               exit = fadeOut()
             ) {
               SmallFloatingActionButton(onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom }) {
-                Icon(imageVector = Icons.Filled.ZoomIn, contentDescription = "zoom_in")
+                Icon(
+                  imageVector = Icons.Filled.ZoomIn,
+                  contentDescription = stringResource(id = commonR.string.zoom_in)
+                )
               }
             }
             Spacer(modifier = Modifier.width(5.dp))
@@ -114,7 +117,10 @@ private fun LocationsScreen(
               exit = fadeOut()
             ) {
               SmallFloatingActionButton(onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom }) {
-                Icon(imageVector = Icons.Filled.ZoomOut, contentDescription = "zoom_out")
+                Icon(
+                  imageVector = Icons.Filled.ZoomOut,
+                  contentDescription = stringResource(id = commonR.string.zoom_out)
+                )
               }
             }
           }

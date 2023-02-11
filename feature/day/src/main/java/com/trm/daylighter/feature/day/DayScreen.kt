@@ -4,11 +4,16 @@ import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.widget.TextClock
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.filled.ZoomOut
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,6 +56,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
@@ -111,6 +117,7 @@ private fun DayScreen(
   modifier: Modifier = Modifier,
 ) {
   var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
+  var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
   ConstraintLayout(modifier = modifier) {
     when (locationSunriseSunsetChange) {
@@ -142,6 +149,9 @@ private fun DayScreen(
           locationsCount = locationsCount,
           currentLocationIndex = currentLocationIndex,
           onChangeLocationIndex = onChangeLocationIndex,
+          mapZoom = mapZoom,
+          onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
+          onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
           onDayModeNavClick = { dayMode = it },
           onDrawerMenuClick = onDrawerMenuClick
         )
@@ -205,10 +215,13 @@ private fun ConstraintLayoutScope.SunriseSunset(
   locationsCount: Int,
   currentLocationIndex: Int,
   onChangeLocationIndex: (Int) -> Unit,
+  mapZoom: Double,
+  onZoomInClick: () -> Unit,
+  onZoomOutClick: () -> Unit,
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
 ) {
-  val (drawerMenuButton, pagerBox, navigation, dayTimeCard, map) = createRefs()
+  val (drawerMenuButton, pagerBox, navigation, dayTimeCard, map, mapZoomControls) = createRefs()
   val orientation = LocalConfiguration.current.orientation
 
   val pagerState = rememberPagerState(initialPage = currentLocationIndex)
@@ -266,10 +279,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
         factory = { mapView },
         update = {
           it.setDefaultDisabledConfig()
-          it.setLocation(
-            location = locationSunriseSunsetChange.location,
-            zoom = MapDefaults.INITIAL_LOCATION_ZOOM
-          )
+          it.setLocation(location = locationSunriseSunsetChange.location, zoom = mapZoom)
         }
       )
       Icon(
@@ -278,6 +288,43 @@ private fun ConstraintLayoutScope.SunriseSunset(
           stringResource(id = com.trm.daylighter.core.common.R.string.location_marker),
         modifier = Modifier.align(Alignment.Center).size(36.dp)
       )
+    }
+  }
+
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.Center,
+    modifier =
+      Modifier.constrainAs(mapZoomControls) {
+        start.linkTo(map.start)
+        end.linkTo(map.end)
+        top.linkTo(map.bottom, 5.dp)
+      }
+  ) {
+    AnimatedVisibility(
+      visible = mapZoom < MapDefaults.MAX_ZOOM,
+      enter = fadeIn(),
+      exit = fadeOut()
+    ) {
+      SmallFloatingActionButton(onClick = onZoomInClick) {
+        Icon(
+          imageVector = Icons.Filled.ZoomIn,
+          contentDescription = stringResource(id = commonR.string.zoom_in)
+        )
+      }
+    }
+    Spacer(modifier = Modifier.width(5.dp))
+    AnimatedVisibility(
+      visible = mapZoom > MapDefaults.MIN_ZOOM,
+      enter = fadeIn(),
+      exit = fadeOut()
+    ) {
+      SmallFloatingActionButton(onClick = onZoomOutClick) {
+        Icon(
+          imageVector = Icons.Filled.ZoomOut,
+          contentDescription = stringResource(id = commonR.string.zoom_out)
+        )
+      }
     }
   }
 
