@@ -56,7 +56,6 @@ import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlinx.coroutines.NonDisposableHandle.parent
 
 const val dayRoute = "day_route"
 
@@ -240,6 +239,62 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
   }
 
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    DrawerMenuButton(
+      onDrawerMenuClick = onDrawerMenuClick,
+      modifier =
+        Modifier.constrainAs(drawerMenuButton) {
+          start.linkTo(parent.start, 16.dp)
+          top.linkTo(parent.top, 16.dp)
+        }
+    )
+
+    ClockCard(
+      locationSunriseSunsetChange = locationSunriseSunsetChange,
+      modifier =
+        Modifier.constrainAs(dayTimeCard) {
+          top.linkTo(drawerMenuButton.bottom, 10.dp)
+          start.linkTo(parent.start, 16.dp)
+        },
+    )
+
+    SunriseSunsetNavigationBar(
+      modifier =
+        Modifier.constrainAs(navigation) {
+          linkTo(pagerBox.bottom, parent.bottom)
+          linkTo(parent.start, parent.end)
+        },
+      dayMode = dayMode,
+      onDayModeChange = onDayModeNavClick
+    )
+  } else {
+    SunriseSunsetNavigationRail(
+      modifier =
+        Modifier.constrainAs(navigation) {
+          linkTo(parent.start, pagerBox.start)
+          linkTo(parent.top, parent.bottom)
+        },
+      onDrawerMenuClick = onDrawerMenuClick,
+      dayMode = dayMode,
+      onDayModeChange = onDayModeNavClick
+    )
+
+    ClockCard(
+      locationSunriseSunsetChange = locationSunriseSunsetChange,
+      modifier =
+        Modifier.constrainAs(dayTimeCard) {
+          top.linkTo(parent.top, 16.dp)
+          start.linkTo(navigation.end, 16.dp)
+        },
+    )
+  }
+}
+
+@Composable
+private fun ClockCard(
+  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  modifier: Modifier = Modifier,
+) {
   Card(
     colors =
       CardDefaults.cardColors(
@@ -247,12 +302,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
         contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
       ),
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier =
-      Modifier.constrainAs(dayTimeCard) {
-        top.linkTo(parent.top, 16.dp)
-        start.linkTo(parent.start, 16.dp)
-        end.linkTo(parent.end, 16.dp)
-      }
+    modifier = modifier
   ) {
     val labelMediumStyle = MaterialTheme.typography.labelMedium
     val resolver = LocalFontFamilyResolver.current
@@ -279,39 +329,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
       update = { clockView ->
         clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
       },
-      modifier = Modifier.padding(16.dp)
-    )
-  }
-
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-    DrawerMenuButton(
-      onDrawerMenuClick = onDrawerMenuClick,
-      modifier =
-        Modifier.constrainAs(drawerMenuButton) {
-          start.linkTo(parent.start, 16.dp)
-          top.linkTo(parent.top, 16.dp)
-        }
-    )
-
-    SunriseSunsetNavigationBar(
-      modifier =
-        Modifier.constrainAs(navigation) {
-          linkTo(pagerBox.bottom, parent.bottom)
-          linkTo(parent.start, parent.end)
-        },
-      dayMode = dayMode,
-      onDayModeChange = onDayModeNavClick
-    )
-  } else {
-    SunriseSunsetNavigationRail(
-      modifier =
-        Modifier.constrainAs(navigation) {
-          linkTo(parent.start, pagerBox.start)
-          linkTo(parent.top, parent.bottom)
-        },
-      onDrawerMenuClick = onDrawerMenuClick,
-      dayMode = dayMode,
-      onDayModeChange = onDayModeNavClick
+      modifier = Modifier.padding(10.dp)
     )
   }
 }
