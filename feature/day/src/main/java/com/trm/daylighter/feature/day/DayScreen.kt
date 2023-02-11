@@ -50,6 +50,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.composable.ZoomInButton
 import com.trm.daylighter.composable.ZoomOutButton
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
@@ -383,9 +384,8 @@ private fun MapCard(
         }
       )
       Icon(
-        painter = painterResource(id = com.trm.daylighter.core.common.R.drawable.marker),
-        contentDescription =
-          stringResource(id = com.trm.daylighter.core.common.R.string.location_marker),
+        painter = painterResource(id = commonR.drawable.marker),
+        contentDescription = stringResource(id = commonR.string.location_marker),
         modifier = Modifier.align(Alignment.Center).size(36.dp)
       )
     }
@@ -607,7 +607,7 @@ private fun SunriseSunsetChart(
       )
     val segmentSize = Size(size.height, size.height) * 2f
     var startAngle = -180f
-    val now = LocalTime.now()
+    val now = LocalTime.now(today.sunrise.zone)
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       val isCurrent =
@@ -627,7 +627,7 @@ private fun SunriseSunsetChart(
               right = topLeftOffset.x + segmentSize.width,
               startAngle = startAngle,
               sweepAngle = segment.sweepAngleDegrees,
-              useCenter = true,
+              useCenter = false,
               paint = chartSegmentGlowPaint,
             )
           }
@@ -845,7 +845,7 @@ private fun dayChartSegments(
 ): List<DayChartSegment> {
   val sunrise = stringResource(id = R.string.sunrise)
   val sunset = stringResource(id = R.string.sunset)
-  return remember(today) {
+  return remember(today, yesterday) {
     listOf(
       DayChartSegment(
         sweepAngleDegrees = 180f,
