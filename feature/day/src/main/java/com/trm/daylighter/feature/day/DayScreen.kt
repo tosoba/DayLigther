@@ -55,6 +55,9 @@ import com.trm.daylighter.core.common.util.ext.timeLabel
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -250,8 +253,9 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    ClockCard(
-      locationSunriseSunsetChange = locationSunriseSunsetChange,
+    ClockAndDayLengthCard(
+      today = locationSunriseSunsetChange.today,
+      yesterday = locationSunriseSunsetChange.yesterday,
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.linkTo(drawerMenuButton.bottom, 10.dp)
@@ -280,8 +284,9 @@ private fun ConstraintLayoutScope.SunriseSunset(
       onDayModeChange = onDayModeNavClick
     )
 
-    ClockCard(
-      locationSunriseSunsetChange = locationSunriseSunsetChange,
+    ClockAndDayLengthCard(
+      today = locationSunriseSunsetChange.today,
+      yesterday = locationSunriseSunsetChange.yesterday,
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.linkTo(parent.top, 16.dp)
@@ -292,60 +297,88 @@ private fun ConstraintLayoutScope.SunriseSunset(
 }
 
 @Composable
-private fun ClockCard(
-  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+private fun ClockAndDayLengthCard(
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
   modifier: Modifier = Modifier,
 ) {
-  Card(
-    colors =
-      CardDefaults.cardColors(
-        containerColor = FloatingActionButtonDefaults.containerColor,
-        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
-      ),
-    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+  Surface(
+    shape = CardDefaults.shape,
+    color = FloatingActionButtonDefaults.containerColor,
+    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
+    shadowElevation = 6.dp,
     modifier = modifier
   ) {
-    val labelMediumStyle = MaterialTheme.typography.labelMedium
-    val resolver = LocalFontFamilyResolver.current
-    val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
-    AndroidView(
-      factory = { context ->
-        TextClock(context).apply {
-          format24Hour = "HH:mm:ss \n zz"
-          format12Hour = "hh:mm:ss a \n zz"
-          resolver
-            .resolve(
-              fontFamily = labelMediumStyle.fontFamily,
-              fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
-              fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
-              fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
-            )
-            .value
-            .takeIfInstance<Typeface>()
-            ?.let(this::setTypeface)
-          textSize = 16f
-          setTextColor(textColor)
-        }
-      },
-      update = { clockView ->
-        clockView.timeZone = locationSunriseSunsetChange.today.sunrise.zone.id
-      },
-      modifier = Modifier.padding(10.dp)
-    )
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Spacer(modifier = Modifier.height(5.dp))
 
-    Box(modifier = Modifier.size(50.dp)) {
-      val sunPainter =
-        rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
-      Image(
-        painter = sunPainter,
-        contentDescription = "",
-        Modifier.align(Alignment.Center).size(40.dp)
+      val labelMediumStyle = MaterialTheme.typography.labelMedium
+      val resolver = LocalFontFamilyResolver.current
+      val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
+
+      AndroidView(
+        factory = { context ->
+          TextClock(context).apply {
+            format24Hour = "HH:mm:ss \n zz"
+            format12Hour = "hh:mm:ss a \n zz"
+            resolver
+              .resolve(
+                fontFamily = labelMediumStyle.fontFamily,
+                fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
+                fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
+                fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
+              )
+              .value
+              .takeIfInstance<Typeface>()
+              ?.let(this::setTypeface)
+            textSize = 18f
+            setTextColor(textColor)
+          }
+        },
+        update = { clockView -> clockView.timeZone = today.sunrise.zone.id },
+        modifier = Modifier.padding(horizontal = 10.dp)
       )
-      Icon(
-        painter = painterResource(id = R.drawable.clock),
-        contentDescription = "",
-        Modifier.align(Alignment.BottomEnd)
-      )
+
+      Spacer(modifier = Modifier.height(5.dp))
+
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 10.dp)
+      ) {
+        Box(modifier = Modifier.size(50.dp)) {
+          val sunPainter =
+            rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
+          Image(
+            painter = sunPainter,
+            contentDescription = "",
+            Modifier.align(Alignment.Center).size(40.dp)
+          )
+          Icon(
+            painter = painterResource(id = R.drawable.clock),
+            contentDescription = "",
+            Modifier.align(Alignment.BottomEnd)
+          )
+        }
+
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
+          val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
+          val diffLength =
+            LocalTime.ofSecondOfDay(
+              abs(today.dayLengthSeconds - yesterday.dayLengthSeconds).toLong()
+            )
+          val diffPrefix =
+            when {
+              today.dayLengthSeconds > yesterday.dayLengthSeconds -> "+"
+              today.dayLengthSeconds < yesterday.dayLengthSeconds -> "-"
+              else -> ""
+            }
+
+          Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
+          Text(text = "$diffPrefix${diffLength.format(DateTimeFormatter.ISO_LOCAL_TIME)}")
+        }
+      }
+
+      Spacer(modifier = Modifier.height(5.dp))
     }
   }
 }
