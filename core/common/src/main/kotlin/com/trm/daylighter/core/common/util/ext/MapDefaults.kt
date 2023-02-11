@@ -1,7 +1,6 @@
 package com.trm.daylighter.core.common.util.ext
 
 import android.annotation.SuppressLint
-import com.trm.daylighter.domain.model.Location
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
@@ -53,8 +52,8 @@ fun MapView.setDefaultDisabledConfig() {
   setOnTouchListener { _, _ -> true }
 }
 
-fun MapView.setLocation(location: Location, zoom: Double) {
+fun MapView.setPosition(latitude: Double, longitude: Double, zoom: Double) {
   controller.setZoom(zoom)
   mapOrientation = MapDefaults.ORIENTATION
-  setExpectedCenter(GeoPoint(location.latitude, location.longitude))
+  setExpectedCenter(GeoPoint(latitude, longitude))
 }

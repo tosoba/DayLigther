@@ -26,7 +26,7 @@ import com.trm.daylighter.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
-import com.trm.daylighter.core.common.util.ext.setLocation
+import com.trm.daylighter.core.common.util.ext.setPosition
 import com.trm.daylighter.domain.model.*
 
 const val locationsRoute = "locations_route"
@@ -68,31 +68,11 @@ private fun LocationsScreen(
               )
           ) {
             items(locations.data, key = Location::id) { location ->
-              Card(
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
-              ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                  val mapView = rememberMapViewWithLifecycle()
-                  AndroidView(
-                    factory = { mapView },
-                    update = {
-                      it.setDefaultDisabledConfig()
-                      it.setLocation(location = location, zoom = zoom)
-                    }
-                  )
-                  Icon(
-                    painter = painterResource(id = commonR.drawable.marker),
-                    contentDescription = stringResource(id = commonR.string.location_marker),
-                    modifier = Modifier.align(Alignment.Center).size(36.dp)
-                  )
-                  LocationDropDrownMenu(
-                    modifier = Modifier.align(Alignment.BottomEnd),
-                    location = location,
-                    onSetDefaultLocationClick = onSetDefaultLocationClick
-                  )
-                }
-              }
+              MapCard(
+                location = location,
+                zoom = zoom,
+                onSetDefaultLocationClick = onSetDefaultLocationClick
+              )
             }
           }
 
@@ -113,6 +93,35 @@ private fun LocationsScreen(
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    }
+  }
+}
+
+@Composable
+private fun MapCard(location: Location, zoom: Double, onSetDefaultLocationClick: (Long) -> Unit) {
+  Card(
+    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      val mapView = rememberMapViewWithLifecycle()
+      AndroidView(
+        factory = { mapView },
+        update = {
+          it.setDefaultDisabledConfig()
+          it.setPosition(latitude = location.latitude, longitude = location.longitude, zoom = zoom)
+        }
+      )
+      Icon(
+        painter = painterResource(id = commonR.drawable.marker),
+        contentDescription = stringResource(id = commonR.string.location_marker),
+        modifier = Modifier.align(Alignment.Center).size(36.dp)
+      )
+      LocationDropDrownMenu(
+        modifier = Modifier.align(Alignment.BottomEnd),
+        location = location,
+        onSetDefaultLocationClick = onSetDefaultLocationClick
+      )
     }
   }
 }

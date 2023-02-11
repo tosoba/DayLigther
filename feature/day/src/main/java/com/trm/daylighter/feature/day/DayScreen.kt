@@ -252,7 +252,8 @@ private fun ConstraintLayoutScope.SunriseSunset(
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
       SunriseSunsetChart(
-        locationSunriseSunsetChange = locationSunriseSunsetChange,
+        today = locationSunriseSunsetChange.today,
+        yesterday = locationSunriseSunsetChange.yesterday,
         dayMode = dayMode,
         modifier = Modifier.fillMaxSize()
       )
@@ -265,7 +266,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   }
 
   MapCard(
-    locationSunriseSunsetChange = locationSunriseSunsetChange,
+    location = locationSunriseSunsetChange.location,
     mapZoom = mapZoom,
     modifier =
       Modifier.run {
@@ -373,7 +374,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
 
 @Composable
 private fun MapCard(
-  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  location: Location,
   mapZoom: Double,
   modifier: Modifier = Modifier,
 ) {
@@ -387,7 +388,11 @@ private fun MapCard(
         factory = { mapView },
         update = {
           it.setDefaultDisabledConfig()
-          it.setLocation(location = locationSunriseSunsetChange.location, zoom = mapZoom)
+          it.setPosition(
+            latitude = location.latitude,
+            longitude = location.longitude,
+            zoom = mapZoom
+          )
         }
       )
       Icon(
@@ -572,11 +577,11 @@ private fun SunriseSunsetNavigationRail(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(
-  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
   dayMode: DayMode,
   modifier: Modifier = Modifier
 ) {
-  val (_, today, yesterday) = locationSunriseSunsetChange
   val orientation = LocalConfiguration.current.orientation
 
   val chartSegments =
