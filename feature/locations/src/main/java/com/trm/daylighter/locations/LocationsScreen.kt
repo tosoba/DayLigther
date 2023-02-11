@@ -1,6 +1,5 @@
 package com.trm.daylighter.locations
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,11 +25,10 @@ import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.map.MapDefaults
+import com.trm.daylighter.core.common.util.ext.MapDefaults
+import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
+import com.trm.daylighter.core.common.util.ext.setLocation
 import com.trm.daylighter.domain.model.*
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.MapView
 
 const val locationsRoute = "locations_route"
 
@@ -72,6 +70,7 @@ private fun LocationsScreen(
           ) {
             items(locations.data, key = Location::id) { location ->
               Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
               ) {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -79,7 +78,7 @@ private fun LocationsScreen(
                   AndroidView(
                     factory = { mapView },
                     update = {
-                      it.setDefaultConfig()
+                      it.setDefaultDisabledConfig()
                       it.setLocation(location = location, zoom = zoom)
                     }
                   )
@@ -171,23 +170,4 @@ private fun LocationDropDrownMenu(
       DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {})
     }
   }
-}
-
-@SuppressLint("ClickableViewAccessibility")
-private fun MapView.setDefaultConfig() {
-  setTileSource(MapDefaults.tileSource)
-  isTilesScaledToDpi = true
-  setMultiTouchControls(false)
-  zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-  val tileSystem = MapView.getTileSystem()
-  setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
-  setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
-  isFlingEnabled = false
-  setOnTouchListener { _, _ -> true }
-}
-
-private fun MapView.setLocation(location: Location, zoom: Double) {
-  controller.setZoom(zoom)
-  mapOrientation = MapDefaults.ORIENTATION
-  setExpectedCenter(GeoPoint(location.latitude, location.longitude))
 }

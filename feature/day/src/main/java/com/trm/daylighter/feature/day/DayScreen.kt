@@ -50,8 +50,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import com.trm.daylighter.core.common.util.ext.radians
-import com.trm.daylighter.core.common.util.ext.timeLabel
+import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
 import java.lang.Float.max
@@ -208,7 +208,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
 ) {
-  val (drawerMenuButton, pagerBox, navigation, dayTimeCard) = createRefs()
+  val (drawerMenuButton, pagerBox, navigation, dayTimeCard, map) = createRefs()
   val orientation = LocalConfiguration.current.orientation
 
   val pagerState = rememberPagerState(initialPage = currentLocationIndex)
@@ -242,6 +242,43 @@ private fun ConstraintLayoutScope.SunriseSunset(
       pagerState = pagerState,
       modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
     )
+  }
+
+  Card(
+    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    modifier =
+      Modifier.run {
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            width((LocalConfiguration.current.screenWidthDp * .4f).dp)
+          } else {
+            height((LocalConfiguration.current.screenHeightDp * .32f).dp)
+          }
+        }
+        .aspectRatio(1f)
+        .constrainAs(map) {
+          end.linkTo(parent.end, 16.dp)
+          top.linkTo(parent.top, 16.dp)
+        },
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      val mapView = rememberMapViewWithLifecycle()
+      AndroidView(
+        factory = { mapView },
+        update = {
+          it.setDefaultDisabledConfig()
+          it.setLocation(
+            location = locationSunriseSunsetChange.location,
+            zoom = MapDefaults.INITIAL_LOCATION_ZOOM
+          )
+        }
+      )
+      Icon(
+        painter = painterResource(id = com.trm.daylighter.core.common.R.drawable.marker),
+        contentDescription =
+          stringResource(id = com.trm.daylighter.core.common.R.string.location_marker),
+        modifier = Modifier.align(Alignment.Center).size(36.dp)
+      )
+    }
   }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {

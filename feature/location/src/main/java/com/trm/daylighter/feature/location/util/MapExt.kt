@@ -1,6 +1,6 @@
 package com.trm.daylighter.feature.location.util
 
-import com.trm.daylighter.core.common.util.map.MapDefaults
+import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.feature.location.model.MapPosition
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController

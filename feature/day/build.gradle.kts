@@ -9,4 +9,6 @@ dependencies {
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
+
+  implementation(libs.osmdroid)
 }
