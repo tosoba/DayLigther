@@ -54,6 +54,7 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.ui.model.StableValue
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -114,7 +115,7 @@ private data class DayChartSegment(
 
 @Composable
 private fun DayScreen(
-  locationSunriseSunsetChange: Loadable<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
   locationsCount: Int,
   currentLocationIndex: Int,
   onDrawerMenuClick: () -> Unit,
@@ -217,7 +218,7 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ConstraintLayoutScope.SunriseSunset(
-  locationSunriseSunsetChange: LocationSunriseSunsetChange,
+  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   dayMode: DayMode,
   locationsCount: Int,
   currentLocationIndex: Int,
@@ -252,8 +253,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
       SunriseSunsetChart(
-        today = locationSunriseSunsetChange.today,
-        yesterday = locationSunriseSunsetChange.yesterday,
+        locationSunriseSunsetChange = locationSunriseSunsetChange,
         dayMode = dayMode,
         modifier = Modifier.fillMaxSize()
       )
@@ -266,7 +266,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   }
 
   MapCard(
-    location = locationSunriseSunsetChange.location,
+    locationSunriseSunsetChange = locationSunriseSunsetChange,
     mapZoom = mapZoom,
     modifier =
       Modifier.run {
@@ -330,8 +330,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
 
     ClockAndDayLengthCard(
-      today = locationSunriseSunsetChange.today,
-      yesterday = locationSunriseSunsetChange.yesterday,
+      locationSunriseSunsetChange = locationSunriseSunsetChange,
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.linkTo(drawerMenuButton.bottom, 10.dp)
@@ -361,8 +360,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
 
     ClockAndDayLengthCard(
-      today = locationSunriseSunsetChange.today,
-      yesterday = locationSunriseSunsetChange.yesterday,
+      locationSunriseSunsetChange = locationSunriseSunsetChange,
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.linkTo(parent.top, 16.dp)
@@ -374,10 +372,11 @@ private fun ConstraintLayoutScope.SunriseSunset(
 
 @Composable
 private fun MapCard(
-  location: Location,
+  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   mapZoom: Double,
   modifier: Modifier = Modifier,
 ) {
+  val (location) = locationSunriseSunsetChange.value
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     modifier = modifier,
@@ -406,10 +405,10 @@ private fun MapCard(
 
 @Composable
 private fun ClockAndDayLengthCard(
-  today: SunriseSunset,
-  yesterday: SunriseSunset,
+  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   modifier: Modifier = Modifier,
 ) {
+  val (_, today, yesterday) = locationSunriseSunsetChange.value
   Surface(
     shape = CardDefaults.shape,
     color = FloatingActionButtonDefaults.containerColor,
@@ -577,12 +576,12 @@ private fun SunriseSunsetNavigationRail(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(
-  today: SunriseSunset,
-  yesterday: SunriseSunset,
+  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   dayMode: DayMode,
   modifier: Modifier = Modifier
 ) {
   val orientation = LocalConfiguration.current.orientation
+  val (_, today, yesterday) = locationSunriseSunsetChange.value
 
   val chartSegments =
     dayChartSegments(

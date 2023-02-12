@@ -11,6 +11,8 @@ import com.trm.daylighter.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.domain.usecase.GetLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
+import com.trm.daylighter.ui.model.StableValue
+import com.trm.daylighter.ui.model.asStable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.max
@@ -63,13 +65,20 @@ constructor(
       .withLatestFrom(getAllLocationsFlowUseCase()) { index, locations -> locations[index] }
       .filterNot { it is Failed }
 
-  val currentLocationSunriseSunsetChange: SharedFlow<Loadable<LocationSunriseSunsetChange>> =
+  val currentLocationSunriseSunsetChange:
+    SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
     merge(currentLocationFlow, retryLocationFlow)
       .transformLatest { location ->
         when (location) {
           is Empty -> emit(Empty)
           is Loading -> emit(LoadingFirst)
-          is Ready -> emitAll(getLocationSunriseSunsetChangeUseCase(locationId = location.data.id))
+          is Ready -> {
+            emitAll(
+              getLocationSunriseSunsetChangeUseCase(locationId = location.data.id).map {
+                it.map(LocationSunriseSunsetChange::asStable)
+              }
+            )
+          }
           else -> throw IllegalStateException()
         }
       }
