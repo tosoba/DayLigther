@@ -28,6 +28,7 @@ import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.ext.setPosition
 import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.ui.model.StableValue
 
 const val locationsRoute = "locations_route"
 
@@ -49,7 +50,7 @@ fun LocationsRoute(
 
 @Composable
 private fun LocationsScreen(
-  locations: Loadable<List<Location>>,
+  locations: Loadable<List<StableValue<Location>>>,
   onAddLocationClick: () -> Unit,
   onSetDefaultLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
@@ -67,7 +68,7 @@ private fun LocationsScreen(
                 else 4
               )
           ) {
-            items(locations.data, key = Location::id) { location ->
+            items(locations.data, key = { it.value.id }) { location ->
               MapCard(
                 location = location,
                 zoom = zoom,
@@ -98,20 +99,17 @@ private fun LocationsScreen(
 }
 
 @Composable
-private fun MapCard(location: Location, zoom: Double, onSetDefaultLocationClick: (Long) -> Unit) {
+private fun MapCard(
+  location: StableValue<Location>,
+  zoom: Double,
+  onSetDefaultLocationClick: (Long) -> Unit
+) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
-      val mapView = rememberMapViewWithLifecycle()
-      AndroidView(
-        factory = { mapView },
-        update = {
-          it.setDefaultDisabledConfig()
-          it.setPosition(latitude = location.latitude, longitude = location.longitude, zoom = zoom)
-        }
-      )
+      MapView(latitude = location.value.latitude, longitude = location.value.longitude, zoom = zoom)
       Icon(
         painter = painterResource(id = commonR.drawable.marker),
         contentDescription = stringResource(id = commonR.string.location_marker),
@@ -127,10 +125,22 @@ private fun MapCard(location: Location, zoom: Double, onSetDefaultLocationClick:
 }
 
 @Composable
+private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
+  val mapView = rememberMapViewWithLifecycle()
+  AndroidView(
+    factory = { mapView },
+    update = {
+      it.setDefaultDisabledConfig()
+      it.setPosition(latitude = latitude, longitude = longitude, zoom = zoom)
+    }
+  )
+}
+
+@Composable
 private fun LocationDropDrownMenu(
-  modifier: Modifier = Modifier,
-  location: Location,
-  onSetDefaultLocationClick: (Long) -> Unit
+  location: StableValue<Location>,
+  onSetDefaultLocationClick: (Long) -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var expanded by remember { mutableStateOf(false) }
@@ -151,12 +161,12 @@ private fun LocationDropDrownMenu(
             verticalAlignment = Alignment.CenterVertically
           ) {
             Text(text = "Default")
-            if (location.isDefault) {
+            if (location.value.isDefault) {
               Icon(imageVector = Icons.Filled.Done, contentDescription = "location_default")
             }
           }
         },
-        onClick = { if (!location.isDefault) onSetDefaultLocationClick(location.id) }
+        onClick = { if (!location.value.isDefault) onSetDefaultLocationClick(location.value.id) }
       )
       DropdownMenuItem(text = { Text(text = "Edit") }, onClick = {})
       DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {})
