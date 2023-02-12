@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition

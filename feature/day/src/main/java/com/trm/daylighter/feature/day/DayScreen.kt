@@ -47,9 +47,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import com.trm.daylighter.composable.ZoomInButton
-import com.trm.daylighter.composable.ZoomOutButton
-import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.ui.composable.ZoomInButton
+import com.trm.daylighter.ui.composable.ZoomOutButton
+import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance

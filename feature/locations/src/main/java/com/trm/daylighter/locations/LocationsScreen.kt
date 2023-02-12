@@ -20,9 +20,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.trm.daylighter.composable.ZoomInButton
-import com.trm.daylighter.composable.ZoomOutButton
-import com.trm.daylighter.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.ui.composable.ZoomInButton
+import com.trm.daylighter.ui.composable.ZoomOutButton
+import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig

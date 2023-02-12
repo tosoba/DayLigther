@@ -1,4 +1,4 @@
-package com.trm.daylighter.composable
+package com.trm.daylighter.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
