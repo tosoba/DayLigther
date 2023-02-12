@@ -113,6 +113,17 @@ private data class DayChartSegment(
   val sunsetDiffLabel: (() -> String)? = null,
 )
 
+private fun initialDayMode(today: SunriseSunset): DayMode {
+  val now = ZonedDateTime.now(today.sunrise.zone)
+  if (now.isBefore(today.sunrise)) return DayMode.SUNRISE
+  else if (now.isAfter(today.sunset)) return DayMode.SUNSET
+
+  val nowSeconds = now.toLocalTime().toSecondOfDay()
+  val diffSunrise = abs(nowSeconds - today.sunrise.toLocalTime().toSecondOfDay())
+  val diffSunset = abs(nowSeconds - today.sunset.toLocalTime().toSecondOfDay())
+  return if (diffSunset < diffSunrise) DayMode.SUNSET else DayMode.SUNRISE
+}
+
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
@@ -124,7 +135,6 @@ private fun DayScreen(
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
   var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
   ConstraintLayout(modifier = modifier) {
@@ -151,6 +161,9 @@ private fun DayScreen(
         }
       }
       is Ready -> {
+        var dayMode by rememberSaveable {
+          mutableStateOf(initialDayMode(locationSunriseSunsetChange.data.value.today))
+        }
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
           dayMode = dayMode,
