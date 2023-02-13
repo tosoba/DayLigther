@@ -28,10 +28,10 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 
-const val locationRoute = "location_route"
+const val addLocationRoute = "location_route"
 
 @Composable
-fun LocationRoute(
+fun AddLocationRoute(
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()

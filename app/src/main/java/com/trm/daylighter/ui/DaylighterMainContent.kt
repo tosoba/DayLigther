@@ -23,13 +23,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import androidx.navigation.navigation
 import com.trm.daylighter.R
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
-import com.trm.daylighter.feature.location.LocationRoute
-import com.trm.daylighter.feature.location.locationRoute
+import com.trm.daylighter.feature.location.AddLocationRoute
+import com.trm.daylighter.feature.location.addLocationRoute
 import com.trm.daylighter.locations.LocationsRoute
 import com.trm.daylighter.locations.locationsRoute
 import com.trm.daylighter.widget.WidgetsScreen
@@ -69,7 +70,7 @@ fun DaylighterMainContent() {
         scope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
       },
       topBar = {
-        AnimatedVisibility(visible = currentRoute != dayRoute && currentRoute != locationRoute) {
+        AnimatedVisibility(visible = currentRoute != dayRoute && currentRoute != addLocationRoute) {
           CenterAlignedTopAppBar(
             title = { Text(stringResource(id = R.string.app_name)) },
             navigationIcon = {
@@ -90,7 +91,11 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   val drawerDestinations = remember {
     sequenceOf(
       DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, "Widgets"),
-      DrawerDestination(route = locationsRoute, icon = Icons.Filled.LocationOn, "Locations"),
+      DrawerDestination(
+        route = locationsGraphRoutePattern,
+        icon = Icons.Filled.LocationOn,
+        "Locations"
+      ),
       DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About")
     )
   }
@@ -140,6 +145,8 @@ private fun DayLighterScaffold(
   }
 }
 
+private const val locationsGraphRoutePattern = "locations_graph"
+
 @Composable
 private fun DaylighterNavHost(
   navController: NavHostController,
@@ -148,7 +155,7 @@ private fun DaylighterNavHost(
 ) {
   fun navigateToAddLocation() {
     navController.navigate(
-      route = locationRoute,
+      route = addLocationRoute,
       navOptions = navOptions { launchSingleTop = true }
     )
   }
@@ -161,16 +168,24 @@ private fun DaylighterNavHost(
         onAddLocation = ::navigateToAddLocation
       )
     }
-    composable(locationRoute) {
-      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
-    }
+
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
-    composable(locationsRoute) {
-      LocationsRoute(
-        modifier = Modifier.fillMaxSize(),
-        onAddLocationClick = ::navigateToAddLocation
-      )
+
+    navigation(startDestination = locationsRoute, route = locationsGraphRoutePattern) {
+      composable(locationsRoute) {
+        LocationsRoute(
+          modifier = Modifier.fillMaxSize(),
+          onAddLocationClick = ::navigateToAddLocation
+        )
+      }
+      composable(addLocationRoute) {
+        AddLocationRoute(
+          onBackClick = navController::popBackStack,
+          modifier = Modifier.fillMaxSize()
+        )
+      }
     }
+
     composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
