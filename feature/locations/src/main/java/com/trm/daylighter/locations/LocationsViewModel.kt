@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.domain.model.Loadable
 import com.trm.daylighter.domain.model.Location
+import com.trm.daylighter.domain.usecase.DeleteLocationUseCase
 import com.trm.daylighter.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.domain.usecase.SetDefaultLocationUseCase
 import com.trm.daylighter.ui.model.StableValue
@@ -19,6 +20,7 @@ class LocationsViewModel
 constructor(
   getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
   private val setDefaultLocationUseCase: SetDefaultLocationUseCase,
+  private val deleteLocationUseCase: DeleteLocationUseCase,
 ) : ViewModel() {
   val locations: Flow<Loadable<List<StableValue<Location>>>> =
     getAllLocationsFlowUseCase()
@@ -29,5 +31,7 @@ constructor(
     viewModelScope.launch { setDefaultLocationUseCase(id = id) }
   }
 
-  fun deleteLocation(id: Long) {}
+  fun deleteLocation(location: Location) {
+    viewModelScope.launch { deleteLocationUseCase(location) }
+  }
 }

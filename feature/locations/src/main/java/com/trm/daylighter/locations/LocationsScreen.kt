@@ -55,13 +55,13 @@ fun LocationsRoute(
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
   onAddLocationClick: () -> Unit,
-  onDeleteLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
   onSetDefaultLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
-    var locationIdBeingDeleted: Long? by rememberSaveable { mutableStateOf(null) }
+    var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
 
     when (locations) {
       is WithData -> {
@@ -80,7 +80,7 @@ private fun LocationsScreen(
                 zoom = zoom,
                 onSetDefaultLocationClick = onSetDefaultLocationClick,
                 onEditLocationClick = {},
-                onDeleteLocationClick = { locationIdBeingDeleted = it },
+                onDeleteLocationClick = { locationBeingDeleted = it },
               )
             }
           }
@@ -111,12 +111,12 @@ private fun LocationsScreen(
     }
 
     DeleteLocationConfirmationDialog(
-      locationIdBeingDeleted = locationIdBeingDeleted,
+      locationBeingDeleted = locationBeingDeleted,
       onConfirmClick = {
-        onDeleteLocationClick(requireNotNull(locationIdBeingDeleted))
-        locationIdBeingDeleted = null
+        onDeleteLocationClick(requireNotNull(locationBeingDeleted))
+        locationBeingDeleted = null
       },
-      onDismissRequest = { locationIdBeingDeleted = null },
+      onDismissRequest = { locationBeingDeleted = null },
       modifier = Modifier.align(Alignment.Center)
     )
   }
@@ -124,12 +124,12 @@ private fun LocationsScreen(
 
 @Composable
 private fun DeleteLocationConfirmationDialog(
-  locationIdBeingDeleted: Long?,
+  locationBeingDeleted: Location?,
   onConfirmClick: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  AnimatedVisibility(visible = locationIdBeingDeleted != null, modifier = modifier) {
+  AnimatedVisibility(visible = locationBeingDeleted != null, modifier = modifier) {
     AlertDialog(
       onDismissRequest = onDismissRequest,
       confirmButton = {
@@ -154,7 +154,7 @@ private fun MapCard(
   zoom: Double,
   onSetDefaultLocationClick: (Long) -> Unit,
   onEditLocationClick: (Long) -> Unit,
-  onDeleteLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
 ) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -194,7 +194,7 @@ private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
 private fun LocationDropDrownMenu(
   location: StableValue<Location>,
   onSetDefaultLocationClick: (Long) -> Unit,
-  onDeleteLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
   onEditLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -245,7 +245,7 @@ private fun LocationDropDrownMenu(
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.delete)) },
         onClick = {
-          onDeleteLocationClick(location.value.id)
+          onDeleteLocationClick(location.value)
           hideDropdown()
         }
       )

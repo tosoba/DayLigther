@@ -26,8 +26,6 @@ interface LocationDao {
 
   @Update suspend fun update(entity: LocationEntity)
 
-  @Delete suspend fun delete(entity: LocationEntity)
-
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
   @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Int
@@ -35,8 +33,9 @@ interface LocationDao {
   @Query("SELECT COUNT(*) FROM location") fun selectCountAllFlow(): Flow<Int>
 
   @Transaction
-  suspend fun deleteByIdAndSelectCountAll(id: Long): Int {
+  suspend fun deleteByIdAndSelectCountAll(id: Long, isDefault: Boolean): Int {
     deleteById(id)
+    if (isDefault) setDefaultToMostRecentlyAddedLocation()
     return selectCountAll()
   }
 
@@ -61,4 +60,9 @@ interface LocationDao {
     setIsDefaultToFalse()
     setIsDefaultToTrueById(id)
   }
+
+  @Query(
+    "UPDATE location SET is_default = TRUE WHERE updated_at = (SELECT MAX(updated_at) FROM location)"
+  )
+  suspend fun setDefaultToMostRecentlyAddedLocation()
 }
