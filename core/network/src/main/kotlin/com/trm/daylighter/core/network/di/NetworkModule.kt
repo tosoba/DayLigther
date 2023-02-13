@@ -22,7 +22,7 @@ object NetworkModule {
 
   @Provides
   @Singleton
-  fun daylighterEndpoints(networkJson: Json): DaylighterApi =
+  fun daylighterApi(networkJson: Json): DaylighterApi =
     Retrofit.Builder()
       .client(
         OkHttpClient.Builder()
