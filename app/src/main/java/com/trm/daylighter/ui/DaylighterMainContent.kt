@@ -162,7 +162,7 @@ private fun DaylighterNavHost(
       )
     }
     composable(locationRoute) {
-      LocationRoute(navController = navController, modifier = Modifier.fillMaxSize())
+      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
     }
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
     composable(locationsRoute) {

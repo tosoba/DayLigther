@@ -19,12 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
+import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -33,15 +32,15 @@ const val locationRoute = "location_route"
 
 @Composable
 fun LocationRoute(
-  navController: NavController,
+  onBackClick: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()
 ) {
-  LaunchedEffect(Unit) { viewModel.savedFlow.collect { navController.popBackStack() } }
+  LaunchedEffect(Unit) { viewModel.savedFlow.collect { onBackClick() } }
   LocationScreen(
     onSaveLocationClick = viewModel::saveLocation,
     modifier = modifier,
-    onBackClick = navController::popBackStack
+    onBackClick = onBackClick
   )
 }
 
