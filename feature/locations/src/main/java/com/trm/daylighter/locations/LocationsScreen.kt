@@ -21,6 +21,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
@@ -32,11 +35,27 @@ import com.trm.daylighter.ui.composable.ZoomOutButton
 import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.ui.model.StableValue
 
-const val locationsRoute = "locations_route"
+const val locationsGraphRoute = "locations_graph"
+private const val locationsRoute = "locations_route"
+
+fun NavGraphBuilder.locationsGraph(
+  onAddLocationClick: () -> Unit,
+  nestedRoutes: NavGraphBuilder.() -> Unit
+) {
+  navigation(startDestination = locationsRoute, route = locationsGraphRoute) {
+    composable(locationsRoute) {
+      LocationsRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocationClick = onAddLocationClick,
+      )
+    }
+    nestedRoutes()
+  }
+}
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-fun LocationsRoute(
+private fun LocationsRoute(
   modifier: Modifier = Modifier,
   onAddLocationClick: () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),

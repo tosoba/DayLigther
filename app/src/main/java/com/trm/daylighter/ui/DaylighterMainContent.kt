@@ -23,7 +23,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import androidx.navigation.navigation
 import com.trm.daylighter.R
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -31,8 +30,8 @@ import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.AddLocationRoute
 import com.trm.daylighter.feature.location.addLocationRoute
-import com.trm.daylighter.locations.LocationsRoute
-import com.trm.daylighter.locations.locationsRoute
+import com.trm.daylighter.locations.locationsGraph
+import com.trm.daylighter.locations.locationsGraphRoute
 import com.trm.daylighter.widget.WidgetsScreen
 import com.trm.daylighter.widget.widgetsRoute
 import kotlinx.coroutines.launch
@@ -92,7 +91,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
     sequenceOf(
       DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, "Widgets"),
       DrawerDestination(
-        route = locationsGraphRoutePattern,
+        route = locationsGraphRoute,
         icon = Icons.Filled.LocationOn,
         "Locations"
       ),
@@ -145,8 +144,6 @@ private fun DayLighterScaffold(
   }
 }
 
-private const val locationsGraphRoutePattern = "locations_graph"
-
 @Composable
 private fun DaylighterNavHost(
   navController: NavHostController,
@@ -171,13 +168,7 @@ private fun DaylighterNavHost(
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
-    navigation(startDestination = locationsRoute, route = locationsGraphRoutePattern) {
-      composable(locationsRoute) {
-        LocationsRoute(
-          modifier = Modifier.fillMaxSize(),
-          onAddLocationClick = ::navigateToAddLocation
-        )
-      }
+    locationsGraph(onAddLocationClick = ::navigateToAddLocation) {
       composable(addLocationRoute) {
         AddLocationRoute(
           onBackClick = navController::popBackStack,
