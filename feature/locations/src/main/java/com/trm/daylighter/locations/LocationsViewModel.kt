@@ -28,4 +28,6 @@ constructor(
   fun setDefaultLocation(id: Long) {
     viewModelScope.launch { setDefaultLocationUseCase(id = id) }
   }
+
+  fun deleteLocation(id: Long) {}
 }

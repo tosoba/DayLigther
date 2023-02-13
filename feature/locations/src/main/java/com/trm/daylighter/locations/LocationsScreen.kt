@@ -1,6 +1,7 @@
 package com.trm.daylighter.locations
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -20,14 +21,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.trm.daylighter.ui.composable.ZoomInButton
-import com.trm.daylighter.ui.composable.ZoomOutButton
-import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.MapDefaults
 import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.ext.setPosition
 import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.feature.locations.R
+import com.trm.daylighter.ui.composable.ZoomInButton
+import com.trm.daylighter.ui.composable.ZoomOutButton
+import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.ui.model.StableValue
 
 const val locationsRoute = "locations_route"
@@ -44,6 +46,7 @@ fun LocationsRoute(
     modifier = modifier,
     locations = locations.value,
     onAddLocationClick = onAddLocationClick,
+    onDeleteLocationClick = viewModel::deleteLocation,
     onSetDefaultLocationClick = viewModel::setDefaultLocation
   )
 }
@@ -52,11 +55,14 @@ fun LocationsRoute(
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
   onAddLocationClick: () -> Unit,
+  onDeleteLocationClick: (Long) -> Unit,
   onSetDefaultLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
+    var locationIdBeingDeleted: Long? by rememberSaveable { mutableStateOf(null) }
+
     when (locations) {
       is WithData -> {
         if (locations.data.isNotEmpty()) {
@@ -72,7 +78,9 @@ private fun LocationsScreen(
               MapCard(
                 location = location,
                 zoom = zoom,
-                onSetDefaultLocationClick = onSetDefaultLocationClick
+                onSetDefaultLocationClick = onSetDefaultLocationClick,
+                onEditLocationClick = {},
+                onDeleteLocationClick = { locationIdBeingDeleted = it },
               )
             }
           }
@@ -83,18 +91,60 @@ private fun LocationsScreen(
             ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
           }
         } else {
-          Text(text = "No locations", modifier = Modifier.align(Alignment.Center))
+          Text(
+            text = stringResource(R.string.no_locations),
+            modifier = Modifier.align(Alignment.Center)
+          )
         }
 
         FloatingActionButton(
           modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
           onClick = onAddLocationClick
         ) {
-          Icon(imageVector = Icons.Filled.Add, contentDescription = "add_location")
+          Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(id = R.string.add_a_location)
+          )
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
+
+    DeleteLocationConfirmationDialog(
+      locationIdBeingDeleted = locationIdBeingDeleted,
+      onConfirmClick = {
+        onDeleteLocationClick(requireNotNull(locationIdBeingDeleted))
+        locationIdBeingDeleted = null
+      },
+      onDismissRequest = { locationIdBeingDeleted = null },
+      modifier = Modifier.align(Alignment.Center)
+    )
+  }
+}
+
+@Composable
+private fun DeleteLocationConfirmationDialog(
+  locationIdBeingDeleted: Long?,
+  onConfirmClick: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  AnimatedVisibility(visible = locationIdBeingDeleted != null, modifier = modifier) {
+    AlertDialog(
+      onDismissRequest = onDismissRequest,
+      confirmButton = {
+        TextButton(onClick = onConfirmClick) {
+          Text(text = stringResource(id = android.R.string.ok))
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismissRequest) {
+          Text(text = stringResource(id = android.R.string.cancel))
+        }
+      },
+      title = { Text(text = stringResource(R.string.delete_location)) },
+      text = { Text(text = stringResource(R.string.delete_location_prompt)) },
+    )
   }
 }
 
@@ -102,7 +152,9 @@ private fun LocationsScreen(
 private fun MapCard(
   location: StableValue<Location>,
   zoom: Double,
-  onSetDefaultLocationClick: (Long) -> Unit
+  onSetDefaultLocationClick: (Long) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Long) -> Unit,
 ) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -118,7 +170,9 @@ private fun MapCard(
       LocationDropDrownMenu(
         modifier = Modifier.align(Alignment.BottomEnd),
         location = location,
-        onSetDefaultLocationClick = onSetDefaultLocationClick
+        onSetDefaultLocationClick = onSetDefaultLocationClick,
+        onEditLocationClick = onEditLocationClick,
+        onDeleteLocationClick = onDeleteLocationClick,
       )
     }
   }
@@ -140,17 +194,26 @@ private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
 private fun LocationDropDrownMenu(
   location: StableValue<Location>,
   onSetDefaultLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Long) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
-      Icon(imageVector = Icons.Default.MoreVert, contentDescription = "location_menu")
+      Icon(
+        imageVector = Icons.Default.MoreVert,
+        contentDescription = stringResource(id = R.string.location_actions)
+      )
+    }
+
+    fun hideDropdown() {
+      expanded = false
     }
 
     DropdownMenu(
       expanded = expanded,
-      onDismissRequest = { expanded = false },
+      onDismissRequest = ::hideDropdown,
       modifier = Modifier.align(Alignment.BottomEnd)
     ) {
       DropdownMenuItem(
@@ -160,16 +223,32 @@ private fun LocationDropDrownMenu(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(text = "Default")
+            Text(text = stringResource(R.string.set_as_default))
             if (location.value.isDefault) {
-              Icon(imageVector = Icons.Filled.Done, contentDescription = "location_default")
+              Spacer(modifier = Modifier.width(3.dp))
+              Icon(
+                imageVector = Icons.Filled.Done,
+                contentDescription = stringResource(id = R.string.location_is_default)
+              )
             }
           }
         },
         onClick = { if (!location.value.isDefault) onSetDefaultLocationClick(location.value.id) }
       )
-      DropdownMenuItem(text = { Text(text = "Edit") }, onClick = {})
-      DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {})
+      DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.edit)) },
+        onClick = {
+          onEditLocationClick(location.value.id)
+          hideDropdown()
+        }
+      )
+      DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.delete)) },
+        onClick = {
+          onDeleteLocationClick(location.value.id)
+          hideDropdown()
+        }
+      )
     }
   }
 }
