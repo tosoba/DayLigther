@@ -3,7 +3,7 @@ package com.trm.daylighter.core.common.model
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
-import com.trm.daylighter.domain.model.*
+import com.trm.daylighter.core.domain.model.*
 
 data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : Parcelable {
   constructor(

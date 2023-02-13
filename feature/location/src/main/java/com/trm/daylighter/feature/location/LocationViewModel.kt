@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.ext.MapDefaults
-import com.trm.daylighter.domain.usecase.GetLocationById
-import com.trm.daylighter.domain.usecase.SaveLocationUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationById
+import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.model.MapPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

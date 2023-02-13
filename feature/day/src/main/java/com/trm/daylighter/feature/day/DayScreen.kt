@@ -47,14 +47,15 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
-import com.trm.daylighter.ui.composable.ZoomInButton
-import com.trm.daylighter.ui.composable.ZoomOutButton
-import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.takeIfInstance
-import com.trm.daylighter.domain.model.*
-import com.trm.daylighter.ui.model.StableValue
+import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.ui.composable.ZoomInButton
+import com.trm.daylighter.core.ui.composable.ZoomOutButton
+import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.feature.day.model.DayMode
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -538,14 +539,22 @@ private fun SunriseSunsetNavigationBar(
       selected = dayMode == DayMode.SUNRISE,
       onClick = { onDayModeChange(DayMode.SUNRISE) },
       icon = {
-        Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+        Icon(
+          painter = painterResource(R.drawable.sunrise),
+          contentDescription = stringResource(R.string.sunrise)
+        )
       },
       label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationBarItem(
       selected = dayMode == DayMode.SUNSET,
       onClick = { onDayModeChange(DayMode.SUNSET) },
-      icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
+      icon = {
+        Icon(
+          painter = painterResource(R.drawable.sunset),
+          contentDescription = stringResource(R.string.sunset)
+        )
+      },
       label = { Text(text = stringResource(R.string.sunset)) }
     )
   }
@@ -572,14 +581,22 @@ private fun SunriseSunsetNavigationRail(
       selected = dayMode == DayMode.SUNRISE,
       onClick = { onDayModeChange(DayMode.SUNRISE) },
       icon = {
-        Icon(painter = painterResource(R.drawable.sunrise), contentDescription = "sunrise")
+        Icon(
+          painter = painterResource(R.drawable.sunrise),
+          contentDescription = stringResource(R.string.sunrise)
+        )
       },
       label = { Text(text = stringResource(R.string.sunrise)) }
     )
     NavigationRailItem(
       selected = dayMode == DayMode.SUNSET,
       onClick = { onDayModeChange(DayMode.SUNSET) },
-      icon = { Icon(painter = painterResource(R.drawable.sunset), contentDescription = "sunset") },
+      icon = {
+        Icon(
+          painter = painterResource(R.drawable.sunset),
+          contentDescription = stringResource(R.string.sunset)
+        )
+      },
       label = { Text(text = stringResource(R.string.sunset)) }
     )
     Spacer(modifier = Modifier.weight(1f))

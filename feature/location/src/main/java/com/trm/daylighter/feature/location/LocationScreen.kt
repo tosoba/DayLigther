@@ -25,7 +25,7 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
-import com.trm.daylighter.ui.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
