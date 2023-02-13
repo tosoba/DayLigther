@@ -16,20 +16,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
 import com.trm.daylighter.R
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
-import com.trm.daylighter.feature.location.AddLocationRoute
-import com.trm.daylighter.feature.location.addLocationRoute
+import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.locations.locationsGraph
 import com.trm.daylighter.locations.locationsGraphRoute
 import com.trm.daylighter.widget.WidgetsScreen
@@ -69,7 +66,9 @@ fun DaylighterMainContent() {
         scope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
       },
       topBar = {
-        AnimatedVisibility(visible = currentRoute != dayRoute && currentRoute != addLocationRoute) {
+        AnimatedVisibility(
+          visible = currentRoute != dayRoute && !currentRoute.startsWith(locationRoute)
+        ) {
           CenterAlignedTopAppBar(
             title = { Text(stringResource(id = R.string.app_name)) },
             navigationIcon = {
@@ -90,11 +89,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   val drawerDestinations = remember {
     sequenceOf(
       DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, "Widgets"),
-      DrawerDestination(
-        route = locationsGraphRoute,
-        icon = Icons.Filled.LocationOn,
-        "Locations"
-      ),
+      DrawerDestination(route = locationsGraphRoute, icon = Icons.Filled.LocationOn, "Locations"),
       DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About")
     )
   }
@@ -152,7 +147,7 @@ private fun DaylighterNavHost(
 ) {
   fun navigateToAddLocation() {
     navController.navigate(
-      route = addLocationRoute,
+      route = locationRoute,
       navOptions = navOptions { launchSingleTop = true }
     )
   }
@@ -168,12 +163,24 @@ private fun DaylighterNavHost(
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
-    locationsGraph(onAddLocationClick = ::navigateToAddLocation) {
-      composable(addLocationRoute) {
-        AddLocationRoute(
-          onBackClick = navController::popBackStack,
-          modifier = Modifier.fillMaxSize()
+    composable(locationRoute) {
+      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
+    }
+
+    locationsGraph(
+      onAddLocationClick = ::navigateToAddLocation,
+      onEditLocationClick = {
+        navController.navigate(
+          route = "$locationRoute/$it",
+          navOptions = navOptions { launchSingleTop = true }
         )
+      }
+    ) {
+      composable(
+        route = editLocationRoute,
+        arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
+      ) {
+        LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
       }
     }
 

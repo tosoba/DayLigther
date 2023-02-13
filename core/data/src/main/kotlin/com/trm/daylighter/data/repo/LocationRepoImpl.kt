@@ -40,4 +40,6 @@ constructor(
   override suspend fun setDefaultLocationById(id: Long) {
     dao.updateDefaultLocationById(id)
   }
+
+  override suspend fun getLocationById(id: Long): Location = dao.selectById(id).asDomainModel()
 }

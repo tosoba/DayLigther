@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
@@ -28,16 +30,22 @@ import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 
-const val addLocationRoute = "location_route"
+const val locationRoute = "location_route"
 
+const val locationIdParam = "locationId"
+const val editLocationRoute = "location_route/{${locationIdParam}}"
+
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-fun AddLocationRoute(
+fun LocationRoute(
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()
 ) {
   LaunchedEffect(Unit) { viewModel.savedFlow.collect { onBackClick() } }
+  val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
   LocationScreen(
+    mapPosition = mapPosition.value,
     onSaveLocationClick = viewModel::saveLocation,
     modifier = modifier,
     onBackClick = onBackClick
@@ -46,11 +54,12 @@ fun AddLocationRoute(
 
 @Composable
 private fun LocationScreen(
+  mapPosition: MapPosition,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  var savedMapPosition by rememberSaveable { mutableStateOf(MapPosition()) }
+  var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var currentMapPosition by remember { mutableStateOf(savedMapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
 

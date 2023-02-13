@@ -15,4 +15,6 @@ interface LocationRepo {
   suspend fun deleteLocationByIdAndGetCountAll(id: Long, isDefault: Boolean): Int
 
   suspend fun setDefaultLocationById(id: Long)
+
+  suspend fun getLocationById(id: Long): Location
 }

@@ -40,12 +40,14 @@ private const val locationsRoute = "locations_route"
 
 fun NavGraphBuilder.locationsGraph(
   onAddLocationClick: () -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   nestedRoutes: NavGraphBuilder.() -> Unit
 ) {
   navigation(startDestination = locationsRoute, route = locationsGraphRoute) {
     composable(locationsRoute) {
       LocationsRoute(
         modifier = Modifier.fillMaxSize(),
+        onEditLocationClick = onEditLocationClick,
         onAddLocationClick = onAddLocationClick,
       )
     }
@@ -58,15 +60,17 @@ fun NavGraphBuilder.locationsGraph(
 private fun LocationsRoute(
   modifier: Modifier = Modifier,
   onAddLocationClick: () -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
   LocationsScreen(
     modifier = modifier,
     locations = locations.value,
-    onAddLocationClick = onAddLocationClick,
+    onSetDefaultLocationClick = viewModel::setDefaultLocation,
+    onEditLocationClick = onEditLocationClick,
     onDeleteLocationClick = viewModel::deleteLocation,
-    onSetDefaultLocationClick = viewModel::setDefaultLocation
+    onAddLocationClick = onAddLocationClick
   )
 }
 
@@ -74,8 +78,9 @@ private fun LocationsRoute(
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
   onAddLocationClick: () -> Unit,
-  onDeleteLocationClick: (Location) -> Unit,
   onSetDefaultLocationClick: (Long) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
@@ -98,7 +103,7 @@ private fun LocationsScreen(
                 location = location,
                 zoom = zoom,
                 onSetDefaultLocationClick = onSetDefaultLocationClick,
-                onEditLocationClick = {},
+                onEditLocationClick = onEditLocationClick,
                 onDeleteLocationClick = { locationBeingDeleted = it },
               )
             }
