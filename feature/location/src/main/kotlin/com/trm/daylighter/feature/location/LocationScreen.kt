@@ -116,20 +116,26 @@ private fun LocationScreen(
       FloatingActionButton(onClick = {}) {
         Icon(
           imageVector = Icons.Filled.MyLocation,
-          contentDescription = "my_location",
+          contentDescription = stringResource(R.string.my_location),
         )
       }
       Spacer(modifier = Modifier.height(10.dp))
       FloatingActionButton(
         onClick = { onSaveLocationClick(currentMapPosition.latitude, currentMapPosition.longitude) }
       ) {
-        Icon(imageVector = Icons.Filled.Done, contentDescription = "save_location")
+        Icon(
+          imageVector = Icons.Filled.Done,
+          contentDescription = stringResource(R.string.save_location)
+        )
       }
     }
 
     Row(modifier = Modifier.padding(20.dp)) {
       SmallFloatingActionButton(onClick = onBackClick, modifier = Modifier.padding(end = 5.dp)) {
-        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
+        Icon(
+          imageVector = Icons.Filled.ArrowBack,
+          contentDescription = stringResource(id = commonR.string.back)
+        )
       }
 
       Spacer(modifier = Modifier.weight(1f))
@@ -149,7 +155,10 @@ private fun LocationScreen(
           modifier = Modifier.padding(horizontal = 16.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Icon(imageVector = Icons.Filled.Info, contentDescription = "location_info")
+          Icon(
+            imageVector = Icons.Filled.Info,
+            contentDescription = stringResource(R.string.center_map_on_location)
+          )
           AnimatedVisibility(visible = infoExpanded) {
             Row {
               Spacer(modifier = Modifier.width(12.dp))
