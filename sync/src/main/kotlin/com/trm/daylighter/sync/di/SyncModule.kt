@@ -18,7 +18,7 @@ import java.time.Duration
 class SyncModule {
   @Provides
   fun syncWorkRequest(): PeriodicWorkRequest =
-    PeriodicWorkRequestBuilder<DelegatingWorker>(Duration.ofDays(1L))
+    PeriodicWorkRequestBuilder<DelegatingWorker>(Duration.ofHours(1L))
       .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
       .setInputData(SyncWorker::class.delegatedData())
       .build()

@@ -9,7 +9,6 @@ import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.data.mapper.asEntity
 import com.trm.daylighter.core.data.util.timezoneAdjusted
-import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.dao.SunriseSunsetDao
 import com.trm.daylighter.core.database.entity.LocationEntity
@@ -17,6 +16,7 @@ import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
+import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import javax.inject.Inject
@@ -58,6 +58,7 @@ constructor(
             .mapValues { (_, sunriseSunsets) ->
               sunriseSunsets.associateBy(SunriseSunsetEntity::date)
             }
+
         locations.forEach { location ->
           val locationSunriseSunsets = existingSunriseSunsets[location.id] ?: emptyMap()
           val downloaded =
