@@ -60,7 +60,6 @@ private fun LocationScreen(
   modifier: Modifier = Modifier
 ) {
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
-  var currentMapPosition by remember { mutableStateOf(savedMapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
 
   val mapView =
@@ -81,14 +80,6 @@ private fun LocationScreen(
       override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
       private fun onMapInteraction(): Boolean {
         infoExpanded = false
-        val mapCenter = mapView.mapCenter
-        currentMapPosition =
-          MapPosition(
-            latitude = mapCenter.latitude,
-            longitude = mapCenter.longitude,
-            zoom = mapView.zoomLevelDouble,
-            orientation = mapView.mapOrientation
-          )
         return false
       }
     }
@@ -121,7 +112,7 @@ private fun LocationScreen(
       }
       Spacer(modifier = Modifier.height(10.dp))
       FloatingActionButton(
-        onClick = { onSaveLocationClick(currentMapPosition.latitude, currentMapPosition.longitude) }
+        onClick = { onSaveLocationClick(mapView.mapCenter.latitude, mapView.mapCenter.longitude) }
       ) {
         Icon(
           imageVector = Icons.Filled.Done,
