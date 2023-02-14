@@ -55,4 +55,7 @@ constructor(
       sunriseSunsetDao.deleteByLocationId(locationId = id)
     }
   }
+
+  override suspend fun getLocationAtIndex(index: Int): Location? =
+    locationDao.selectLocationAtOffset(offset = index)?.asDomainModel()
 }

@@ -7,7 +7,7 @@ import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
-import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.core.ui.model.StableValue
@@ -24,8 +24,8 @@ class DayViewModel
 @Inject
 constructor(
   private val savedStateHandle: SavedStateHandle,
-  getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
+  private val getLocationAtIndexUseCase: GetLocationAtIndexUseCase,
   private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
@@ -45,15 +45,16 @@ constructor(
 
   private val currentLocationFlow: Flow<Loadable<Location>> =
     currentLocationIndexFlow
-      .combine(getAllLocationsFlowUseCase()) { index, locations -> locations[index] }
+      .combine(locationCountFlow, ::Pair)
       .distinctUntilChanged()
+      .transformToLocation()
       .onEach { location ->
         if (location is Empty) {
           currentLocationIndex = 0
         } else if (location is Failed) {
           location.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
             (locationsSize) ->
-            currentLocationIndex = locationsSize - 1
+            currentLocationIndex = if (locationsSize > 0) locationsSize - 1 else 0
           }
         }
       }
@@ -62,7 +63,8 @@ constructor(
   private val retryLocationFlow: Flow<Loadable<Location>> =
     retryFlow
       .map { currentLocationIndex }
-      .withLatestFrom(getAllLocationsFlowUseCase()) { index, locations -> locations[index] }
+      .withLatestFrom(locationCountFlow, ::Pair)
+      .transformToLocation()
       .filterNot { it is Failed }
 
   val currentLocationSunriseSunsetChange:
@@ -113,19 +115,22 @@ constructor(
     viewModelScope.launch { retryFlow.emit(Unit) }
   }
 
+  private fun Flow<Pair<Int, Int>>.transformToLocation(): Flow<Loadable<Location>> =
+    transformLatest { (index, size) ->
+      when {
+        size == 0 -> emit(Empty)
+        index >= size -> emit(FailedFirst(LocationIndexOutOfBoundsException(size)))
+        else -> {
+          emit(LoadingFirst)
+          emit(
+            getLocationAtIndexUseCase(index)?.let(::Ready)
+              ?: FailedFirst(LocationIndexOutOfBoundsException(size))
+          )
+        }
+      }
+    }
+
   private enum class SavedState {
     CURRENT_LOCATION_INDEX
   }
 }
-
-private operator fun Loadable<List<Location>>.get(index: Int): Loadable<Location> =
-  when (this) {
-    is WithoutData -> LoadingFirst
-    is WithData -> {
-      when {
-        data.isEmpty() -> Empty
-        index < data.size -> Ready(data[index])
-        else -> FailedFirst(LocationIndexOutOfBoundsException(data.size))
-      }
-    }
-  }
