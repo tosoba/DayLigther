@@ -22,10 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
-import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -75,31 +75,33 @@ private fun LocationScreen(
           )
       }
     )
+  val mapListener = remember {
+    object : MapListener {
+      override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
+      override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
+      private fun onMapInteraction(): Boolean {
+        infoExpanded = false
+        val mapCenter = mapView.mapCenter
+        currentMapPosition =
+          MapPosition(
+            latitude = mapCenter.latitude,
+            longitude = mapCenter.longitude,
+            zoom = mapView.zoomLevelDouble,
+            orientation = mapView.mapOrientation
+          )
+        return false
+      }
+    }
+  }
 
   Box(modifier = modifier) {
     AndroidView(
       factory = { mapView },
       update = {
         it.setDefaultConfig()
+        it.removeMapListener(mapListener)
         it.restorePosition(savedMapPosition)
-        it.addMapListener(
-          object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
-            override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
-            private fun onMapInteraction(): Boolean {
-              infoExpanded = false
-              val mapCenter = it.mapCenter
-              currentMapPosition =
-                MapPosition(
-                  latitude = mapCenter.latitude,
-                  longitude = mapCenter.longitude,
-                  zoom = it.zoomLevelDouble,
-                  orientation = it.mapOrientation
-                )
-              return false
-            }
-          }
-        )
+        it.addMapListener(mapListener)
       },
       modifier = Modifier.fillMaxSize(),
     )
