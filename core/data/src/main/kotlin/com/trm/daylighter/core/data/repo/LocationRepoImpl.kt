@@ -1,8 +1,11 @@
 package com.trm.daylighter.core.data.repo
 
+import androidx.room.withTransaction
 import com.trm.daylighter.core.data.di.TimeZoneEngineAsyncProvider
 import com.trm.daylighter.core.data.mapper.asDomainModel
+import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
+import com.trm.daylighter.core.database.dao.SunriseSunsetDao
 import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.repo.LocationRepo
@@ -14,7 +17,9 @@ import kotlinx.coroutines.flow.map
 class LocationRepoImpl
 @Inject
 constructor(
-  private val dao: LocationDao,
+  private val locationDao: LocationDao,
+  private val sunriseSunsetDao: SunriseSunsetDao,
+  private val db: DaylighterDatabase,
   private val timeZoneEngineAsyncProvider: TimeZoneEngineAsyncProvider,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double) {
@@ -23,27 +28,31 @@ constructor(
         .await()
         .query(latitude, longitude)
         .orElse(ZoneId.systemDefault())
-    dao.insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
+    locationDao.insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
   }
 
   override fun getAllLocationsFlow(): Flow<List<Location>> =
-    dao.selectAllFlow().map { it.map(LocationEntity::asDomainModel) }
+    locationDao.selectAllFlow().map { it.map(LocationEntity::asDomainModel) }
 
-  override fun getLocationsCountFlow(): Flow<Int> = dao.selectCountAllFlow()
+  override fun getLocationsCountFlow(): Flow<Int> = locationDao.selectCountAllFlow()
 
   override fun getDefaultLocationFlow(): Flow<Location?> =
-    dao.selectDefaultFlow().map { it?.asDomainModel() }
+    locationDao.selectDefaultFlow().map { it?.asDomainModel() }
 
   override suspend fun deleteLocationByIdAndGetCountAll(id: Long, isDefault: Boolean): Int =
-    dao.deleteByIdAndSelectCountAll(id, isDefault)
+    locationDao.deleteByIdAndSelectCountAll(id, isDefault)
 
   override suspend fun setDefaultLocationById(id: Long) {
-    dao.updateDefaultLocationById(id)
+    locationDao.updateDefaultLocationById(id)
   }
 
-  override suspend fun getLocationById(id: Long): Location = dao.selectById(id).asDomainModel()
+  override suspend fun getLocationById(id: Long): Location =
+    locationDao.selectById(id).asDomainModel()
 
   override suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double) {
-    dao.updateLocationLatLngById(id = id, latitude = latitude, longitude = longitude)
+    db.withTransaction {
+      locationDao.updateLocationLatLngById(id = id, latitude = latitude, longitude = longitude)
+      sunriseSunsetDao.deleteByLocationId(locationId = id)
+    }
   }
 }

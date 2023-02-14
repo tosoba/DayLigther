@@ -3,6 +3,7 @@ plugins {
   id("daylighter.android.library.jacoco")
   id("daylighter.android.hilt")
   id("kotlinx-serialization")
+  alias(libs.plugins.ksp)
 }
 
 android {
@@ -19,6 +20,10 @@ dependencies {
 
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.work.ktx)
+
+  implementation(libs.room.runtime)
+  implementation(libs.room.ktx)
+  ksp(libs.room.compiler)
 
   implementation(libs.kotlinx.datetime)
   implementation(libs.kotlinx.coroutines.android)

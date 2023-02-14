@@ -20,4 +20,7 @@ interface SunriseSunsetDao {
   @Upsert suspend fun insert(entity: SunriseSunsetEntity)
 
   @Upsert suspend fun insertMany(entities: Collection<SunriseSunsetEntity>)
+
+  @Query("DELETE FROM sunrise_sunset WHERE location_id = :locationId")
+  suspend fun deleteByLocationId(locationId: Long)
 }
