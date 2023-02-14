@@ -7,4 +7,8 @@ class SaveLocationUseCase @Inject constructor(private val locationRepo: Location
   suspend operator fun invoke(latitude: Double, longitude: Double) {
     locationRepo.saveLocation(latitude = latitude, longitude = longitude)
   }
+
+  suspend operator fun invoke(id: Long, latitude: Double, longitude: Double) {
+    locationRepo.updateLocationLatLngById(id = id, latitude = latitude, longitude = longitude)
+  }
 }

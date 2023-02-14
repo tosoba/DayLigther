@@ -42,4 +42,8 @@ constructor(
   }
 
   override suspend fun getLocationById(id: Long): Location = dao.selectById(id).asDomainModel()
+
+  override suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double) {
+    dao.updateLocationLatLngById(id = id, latitude = latitude, longitude = longitude)
+  }
 }

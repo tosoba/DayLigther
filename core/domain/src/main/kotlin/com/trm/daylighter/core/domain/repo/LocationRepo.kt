@@ -17,4 +17,6 @@ interface LocationRepo {
   suspend fun setDefaultLocationById(id: Long)
 
   suspend fun getLocationById(id: Long): Location
+
+  suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double)
 }

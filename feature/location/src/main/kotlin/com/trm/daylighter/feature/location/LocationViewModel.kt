@@ -25,8 +25,8 @@ constructor(
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
-        savedStateHandle.get<Long>(locationIdParam)?.let {
-          val location = getLocationById(id = it)
+        savedStateHandle.get<Long>(locationIdParam)?.let { id ->
+          val location = getLocationById(id)
           emit(
             MapPosition(
               latitude = location.latitude,
@@ -44,7 +44,7 @@ constructor(
       if (locationId == null) {
         saveLocationUseCase(latitude = latitude, longitude = longitude)
       } else {
-        // TODO:
+        saveLocationUseCase(id = locationId, latitude = latitude, longitude = longitude)
       }
       _savedFlow.emit(Unit)
     }

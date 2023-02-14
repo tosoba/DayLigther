@@ -24,8 +24,6 @@ interface LocationDao {
     )
   }
 
-  @Update suspend fun update(entity: LocationEntity)
-
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
   @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Int
@@ -65,4 +63,7 @@ interface LocationDao {
     "UPDATE location SET is_default = TRUE WHERE updated_at = (SELECT MAX(updated_at) FROM location)"
   )
   suspend fun setDefaultToMostRecentlyAddedLocation()
+
+  @Query("UPDATE location SET latitude = :latitude, longitude = :longitude WHERE id = :id")
+  suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double)
 }
