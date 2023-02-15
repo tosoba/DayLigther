@@ -33,4 +33,12 @@ interface SunriseSunsetDao {
 
   @Query("DELETE FROM sunrise_sunset WHERE location_id = :locationId")
   suspend fun deleteByLocationId(locationId: Long)
+
+  @Query(
+    "DELETE FROM sunrise_sunset WHERE rowid IN (" +
+      "SELECT ss.rowid FROM location l " +
+      "INNER JOIN sunrise_sunset ss ON ss.location_id = l.id " +
+      "AND ss.date NOT IN (SELECT date FROM sunrise_sunset ssi WHERE location_id = l.id ORDER BY date DESC LIMIT :limit))"
+  )
+  suspend fun deleteForEachLocationExceptMostRecent(limit: Int)
 }
