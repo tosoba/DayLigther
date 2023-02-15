@@ -44,15 +44,12 @@ constructor(
 
   override suspend fun sync(): Boolean =
     suspendRunCatching {
-        val today = LocalDate.now()
-        val dates = listOf(today.minusDays(1L), today)
-
         val locations = locationDao.selectAll()
-        val existingSunriseSunsets =
+        val mostRecentExistingSunriseSunsets =
           sunriseSunsetDao
-            .selectByLocationIdsAndDates(
+            .selectMostRecentForEachLocationId(
               locationIds = locations.map(LocationEntity::id),
-              dates = dates
+              limit = 2,
             )
             .groupBy(SunriseSunsetEntity::locationId)
             .mapValues { (_, sunriseSunsets) ->
@@ -60,7 +57,9 @@ constructor(
             }
 
         locations.forEach { location ->
-          val locationSunriseSunsets = existingSunriseSunsets[location.id] ?: emptyMap()
+          val locationSunriseSunsets = mostRecentExistingSunriseSunsets[location.id] ?: emptyMap()
+          val today = LocalDate.now(location.zoneId)
+          val dates = listOf(today.minusDays(1L), today)
           val downloaded =
             dates.filterNot(locationSunriseSunsets::containsKey).associateWith { date ->
               network.getSunriseSunset(
@@ -91,15 +90,15 @@ constructor(
 
   override suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange {
     val location = locationDao.selectById(id)
-    val today = LocalDate.now()
+    val today = LocalDate.now(location.zoneId)
     val yesterday = today.minusDays(1L)
     val dates = listOf(yesterday, today)
 
     val existingSunriseSunsets =
       sunriseSunsetDao
-        .selectByLocationIdsAndDates(locationIds = listOf(location.id), dates = dates)
+        .selectMostRecentByLocationId(locationId = location.id, limit = 2)
         .associateBy(SunriseSunsetEntity::date)
-    if (existingSunriseSunsets.size == dates.size) {
+    if (existingSunriseSunsets.keys.containsAll(dates)) {
       return LocationSunriseSunsetChange(
         location = location.asDomainModel(),
         today = requireNotNull(existingSunriseSunsets[today]).asDomainModel(),
