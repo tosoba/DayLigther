@@ -101,19 +101,20 @@ constructor(
         .transformToLocation()
         .filterNot { it is Failed }
 
+    fun getLocationSunriseSunsetChangeFlow(
+      locationId: Long
+    ): Flow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
+      getLocationSunriseSunsetChangeUseCase(locationId = locationId).map {
+        it.map(LocationSunriseSunsetChange::asStable)
+      }
+
     val currentLocationSunriseSunsetChangeFlow =
       merge(currentLocationFlow, retryLocationFlow)
         .transformLatest { location ->
           when (location) {
             is Empty -> emit(Empty)
             is Loading -> emit(LoadingFirst)
-            is Ready -> {
-              emitAll(
-                getLocationSunriseSunsetChangeUseCase(locationId = location.data.id).map {
-                  it.map(LocationSunriseSunsetChange::asStable)
-                }
-              )
-            }
+            is Ready -> emitAll(getLocationSunriseSunsetChangeFlow(locationId = location.data.id))
             else -> throw IllegalStateException()
           }
         }
@@ -127,11 +128,7 @@ constructor(
           while (currentCoroutineContext().isActive) {
             val now = ZonedDateTime.now(location.zoneId)
             if (now.dayOfMonth != today.date.dayOfMonth) {
-              emitAll(
-                getLocationSunriseSunsetChangeUseCase(locationId = location.id).map {
-                  it.map(LocationSunriseSunsetChange::asStable)
-                }
-              )
+              emitAll(getLocationSunriseSunsetChangeFlow(locationId = location.id))
             }
             delay(1000L)
           }
