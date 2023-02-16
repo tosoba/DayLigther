@@ -47,30 +47,6 @@ constructor(
 
   private val retryFlow = MutableSharedFlow<Unit>()
 
-  private val currentLocationFlow: Flow<Loadable<Location>> =
-    currentLocationIndexFlow
-      .combine(locationCountFlow, ::Pair)
-      .distinctUntilChanged()
-      .transformToLocation()
-      .onEach { location ->
-        if (location is Empty) {
-          currentLocationIndex = 0
-        } else if (location is Failed) {
-          location.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
-            (locationsSize) ->
-            currentLocationIndex = if (locationsSize > 0) locationsSize - 1 else 0
-          }
-        }
-      }
-      .filterNot { it is Failed }
-
-  private val retryLocationFlow: Flow<Loadable<Location>> =
-    retryFlow
-      .map { currentLocationIndex }
-      .withLatestFrom(locationCountFlow, ::Pair)
-      .transformToLocation()
-      .filterNot { it is Failed }
-
   val currentLocationSunriseSunsetChangeFlow:
     SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
     buildCurrentLocationSunriseSunsetChangeFlow()
@@ -101,7 +77,31 @@ constructor(
 
   private fun buildCurrentLocationSunriseSunsetChangeFlow():
     SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> {
-    val currentLocationSunriseSunsetChange =
+    val currentLocationFlow: Flow<Loadable<Location>> =
+      currentLocationIndexFlow
+        .combine(locationCountFlow, ::Pair)
+        .distinctUntilChanged()
+        .transformToLocation()
+        .onEach { location ->
+          if (location is Empty) {
+            currentLocationIndex = 0
+          } else if (location is Failed) {
+            location.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
+              (locationsSize) ->
+              currentLocationIndex = if (locationsSize > 0) locationsSize - 1 else 0
+            }
+          }
+        }
+        .filterNot { it is Failed }
+
+    val retryLocationFlow: Flow<Loadable<Location>> =
+      retryFlow
+        .map { currentLocationIndex }
+        .withLatestFrom(locationCountFlow, ::Pair)
+        .transformToLocation()
+        .filterNot { it is Failed }
+
+    val currentLocationSunriseSunsetChangeFlow =
       merge(currentLocationFlow, retryLocationFlow)
         .transformLatest { location ->
           when (location) {
@@ -117,10 +117,10 @@ constructor(
             else -> throw IllegalStateException()
           }
         }
-        .debounce(250L)
+        .shareIn(scope = viewModelScope, started = SharingStarted.Eagerly)
 
-    val loadNextLocationSunriseSunsetChangeAtMidnight =
-      currentLocationSunriseSunsetChange
+    val loadNextLocationSunriseSunsetChangeAfterMidnightFlow =
+      currentLocationSunriseSunsetChangeFlow
         .filterIsInstance<Ready<StableValue<LocationSunriseSunsetChange>>>()
         .map { it.data.value }
         .transformLatest { (location, today, _) ->
@@ -140,7 +140,11 @@ constructor(
           )
         }
 
-    return merge(currentLocationSunriseSunsetChange, loadNextLocationSunriseSunsetChangeAtMidnight)
+    return merge(
+        currentLocationSunriseSunsetChangeFlow,
+        loadNextLocationSunriseSunsetChangeAfterMidnightFlow
+      )
+      .debounce(250L)
       .shareIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
