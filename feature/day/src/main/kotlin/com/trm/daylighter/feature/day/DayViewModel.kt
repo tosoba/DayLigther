@@ -127,17 +127,14 @@ constructor(
           while (currentCoroutineContext().isActive) {
             val now = ZonedDateTime.now(location.zoneId)
             if (now.dayOfMonth != today.date.dayOfMonth) {
-              emit(location.id)
+              emitAll(
+                getLocationSunriseSunsetChangeUseCase(locationId = location.id).map {
+                  it.map(LocationSunriseSunsetChange::asStable)
+                }
+              )
             }
             delay(1000L)
           }
-        }
-        .transformLatest { locationId ->
-          emitAll(
-            getLocationSunriseSunsetChangeUseCase(locationId = locationId).map {
-              it.map(LocationSunriseSunsetChange::asStable)
-            }
-          )
         }
 
     return merge(
