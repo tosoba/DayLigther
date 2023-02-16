@@ -59,17 +59,9 @@ import com.trm.daylighter.feature.day.model.DayMode
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.isActive
 
 const val dayRoute = "day_route"
 
@@ -85,9 +77,13 @@ fun DayRoute(
     viewModel.currentLocationSunriseSunsetChangeFlow.collectAsStateWithLifecycle(
       initialValue = LoadingFirst
     )
+  val now =
+    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = ZonedDateTime.now())
   val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
+
   DayScreen(
     locationSunriseSunsetChange = locationSunriseSunsetChange.value,
+    now = now.value,
     locationsCount = locationsCount.value,
     currentLocationIndex = viewModel.currentLocationIndex,
     onDrawerMenuClick = onDrawerMenuClick,
@@ -128,6 +124,7 @@ private fun initialDayMode(today: SunriseSunset): DayMode {
 @Composable
 private fun DayScreen(
   locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  now: ZonedDateTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onDrawerMenuClick: () -> Unit,
@@ -168,6 +165,7 @@ private fun DayScreen(
         SunriseSunset(
           locationSunriseSunsetChange = locationSunriseSunsetChange.data,
           dayMode = dayMode,
+          now = now,
           locationsCount = locationsCount,
           currentLocationIndex = currentLocationIndex,
           onChangeLocationIndex = onChangeLocationIndex,
@@ -234,6 +232,7 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 private fun ConstraintLayoutScope.SunriseSunset(
   locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   dayMode: DayMode,
+  now: ZonedDateTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onChangeLocationIndex: (Int) -> Unit,
@@ -269,6 +268,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
       SunriseSunsetChart(
         locationSunriseSunsetChange = locationSunriseSunsetChange,
         dayMode = dayMode,
+        now = now,
         modifier = Modifier.fillMaxSize()
       )
     }
@@ -608,6 +608,7 @@ private fun SunriseSunsetNavigationRail(
 private fun SunriseSunsetChart(
   locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
   dayMode: DayMode,
+  now: ZonedDateTime,
   modifier: Modifier = Modifier
 ) {
   val orientation = LocalConfiguration.current.orientation
@@ -638,40 +639,6 @@ private fun SunriseSunsetChart(
       color = glowColor.copy(alpha = 0f).toArgb()
       setShadowLayer(30f, 0f, 0f, glowColor.copy(alpha = .5f).toArgb())
     }
-  }
-
-  var now by remember { mutableStateOf(ZonedDateTime.now(today.sunrise.zone)) }
-  val remainingTimestamps = remember {
-    LinkedList(
-      today.run {
-        listOf(
-            astronomicalTwilightBegin,
-            astronomicalTwilightEnd,
-            civilTwilightBegin,
-            civilTwilightEnd,
-            nauticalTwilightBegin,
-            nauticalTwilightEnd,
-            sunrise,
-            sunset
-          )
-          .filter { it.isAfter(now) }
-          .sorted()
-      }
-    )
-  }
-  LaunchedEffect(Unit) {
-    flow {
-        while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          emit(ZonedDateTime.now(today.sunrise.zone))
-          delay(1000L)
-        }
-      }
-      .filter { remainingTimestamps.isNotEmpty() && remainingTimestamps.first().isBefore(it) }
-      .onEach {
-        remainingTimestamps.removeFirst()
-        now = ZonedDateTime.now(today.sunrise.zone)
-      }
-      .launchIn(this)
   }
 
   Canvas(modifier = modifier) {
