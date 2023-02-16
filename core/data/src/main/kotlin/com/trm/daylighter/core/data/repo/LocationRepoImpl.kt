@@ -23,11 +23,7 @@ constructor(
   private val timeZoneEngineAsyncProvider: TimeZoneEngineAsyncProvider,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double) {
-    val zoneId =
-      timeZoneEngineAsyncProvider.engine
-        .await()
-        .query(latitude, longitude)
-        .orElse(ZoneId.systemDefault())
+    val zoneId = getTimeZoneId(latitude, longitude)
     locationDao.insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
   }
 
@@ -50,12 +46,24 @@ constructor(
     locationDao.selectById(id).asDomainModel()
 
   override suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double) {
+    val zoneId = getTimeZoneId(latitude, longitude)
     db.withTransaction {
-      locationDao.updateLocationLatLngById(id = id, latitude = latitude, longitude = longitude)
+      locationDao.updateLocationLatLngById(
+        id = id,
+        latitude = latitude,
+        longitude = longitude,
+        zoneId = zoneId
+      )
       sunriseSunsetDao.deleteByLocationId(locationId = id)
     }
   }
 
   override suspend fun getLocationAtIndex(index: Int): Location? =
     locationDao.selectLocationAtOffset(offset = index)?.asDomainModel()
+
+  private suspend fun getTimeZoneId(latitude: Double, longitude: Double): ZoneId =
+    timeZoneEngineAsyncProvider.engine
+      .await()
+      .query(latitude, longitude)
+      .orElse(ZoneId.systemDefault())
 }

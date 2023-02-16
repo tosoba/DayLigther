@@ -14,9 +14,13 @@ import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlin.math.max
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -67,29 +71,9 @@ constructor(
       .transformToLocation()
       .filterNot { it is Failed }
 
-  val currentLocationSunriseSunsetChange:
+  val currentLocationSunriseSunsetChangeFlow:
     SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
-    merge(currentLocationFlow, retryLocationFlow)
-      .transformLatest { location ->
-        when (location) {
-          is Empty -> emit(Empty)
-          is Loading -> emit(LoadingFirst)
-          is Ready -> {
-            emitAll(
-              getLocationSunriseSunsetChangeUseCase(locationId = location.data.id).map {
-                it.map(LocationSunriseSunsetChange::asStable)
-              }
-            )
-          }
-          else -> throw IllegalStateException()
-        }
-      }
-      .debounce(250L)
-      .shareIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        replay = 1,
-      )
+    buildCurrentLocationSunriseSunsetChangeFlow()
 
   private val changeLocationIndexFlow = MutableSharedFlow<Int>()
 
@@ -113,6 +97,55 @@ constructor(
 
   fun retry() {
     viewModelScope.launch { retryFlow.emit(Unit) }
+  }
+
+  private fun buildCurrentLocationSunriseSunsetChangeFlow():
+    SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> {
+    val currentLocationSunriseSunsetChange =
+      merge(currentLocationFlow, retryLocationFlow)
+        .transformLatest { location ->
+          when (location) {
+            is Empty -> emit(Empty)
+            is Loading -> emit(LoadingFirst)
+            is Ready -> {
+              emitAll(
+                getLocationSunriseSunsetChangeUseCase(locationId = location.data.id).map {
+                  it.map(LocationSunriseSunsetChange::asStable)
+                }
+              )
+            }
+            else -> throw IllegalStateException()
+          }
+        }
+        .debounce(250L)
+
+    val loadNextLocationSunriseSunsetChangeAtMidnight =
+      currentLocationSunriseSunsetChange
+        .filterIsInstance<Ready<StableValue<LocationSunriseSunsetChange>>>()
+        .map { it.data.value }
+        .transformLatest { (location, today, _) ->
+          while (currentCoroutineContext().isActive) {
+            val now = ZonedDateTime.now(location.zoneId)
+            if (now.dayOfMonth != today.date.dayOfMonth) {
+              emit(location.id)
+            }
+            delay(1000L)
+          }
+        }
+        .transformLatest { locationId ->
+          emitAll(
+            getLocationSunriseSunsetChangeUseCase(locationId = locationId).map {
+              it.map(LocationSunriseSunsetChange::asStable)
+            }
+          )
+        }
+
+    return merge(currentLocationSunriseSunsetChange, loadNextLocationSunriseSunsetChangeAtMidnight)
+      .shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        replay = 1,
+      )
   }
 
   private fun Flow<Pair<Int, Int>>.transformToLocation(): Flow<Loadable<Location>> =

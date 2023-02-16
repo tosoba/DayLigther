@@ -64,8 +64,15 @@ interface LocationDao {
   )
   suspend fun setDefaultToMostRecentlyAddedLocation()
 
-  @Query("UPDATE location SET latitude = :latitude, longitude = :longitude WHERE id = :id")
-  suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double)
+  @Query(
+    "UPDATE location SET latitude = :latitude, longitude = :longitude, zone_id = :zoneId WHERE id = :id"
+  )
+  suspend fun updateLocationLatLngById(
+    id: Long,
+    latitude: Double,
+    longitude: Double,
+    zoneId: ZoneId
+  )
 
   @Query("SELECT * FROM location ORDER BY is_default DESC, updated_at DESC LIMIT 1 OFFSET :offset")
   suspend fun selectLocationAtOffset(offset: Int): LocationEntity?

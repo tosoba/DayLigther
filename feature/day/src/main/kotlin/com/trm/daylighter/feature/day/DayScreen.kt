@@ -82,7 +82,7 @@ fun DayRoute(
   viewModel: DayViewModel = hiltViewModel(),
 ) {
   val locationSunriseSunsetChange =
-    viewModel.currentLocationSunriseSunsetChange.collectAsStateWithLifecycle(
+    viewModel.currentLocationSunriseSunsetChangeFlow.collectAsStateWithLifecycle(
       initialValue = LoadingFirst
     )
   val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)

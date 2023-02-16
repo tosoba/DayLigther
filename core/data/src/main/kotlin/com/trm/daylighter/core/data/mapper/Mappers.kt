@@ -1,10 +1,10 @@
 package com.trm.daylighter.core.data.mapper
 
-import com.trm.daylighter.core.network.model.SunriseSunsetResult
 import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.core.network.model.SunriseSunsetResult
 import java.time.LocalDate
 
 fun SunriseSunsetResult.asEntity(locationId: Long, date: LocalDate): SunriseSunsetEntity =
@@ -44,5 +44,6 @@ fun LocationEntity.asDomainModel(): Location =
     latitude = latitude,
     longitude = longitude,
     isDefault = isDefault,
-    updatedAt = updatedAt
+    updatedAt = updatedAt,
+    zoneId = zoneId,
   )

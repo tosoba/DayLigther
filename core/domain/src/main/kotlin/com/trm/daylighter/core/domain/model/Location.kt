@@ -1,5 +1,6 @@
 package com.trm.daylighter.core.domain.model
 
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 data class Location(
@@ -8,4 +9,5 @@ data class Location(
   val longitude: Double,
   val isDefault: Boolean,
   val updatedAt: ZonedDateTime,
+  val zoneId: ZoneId,
 )

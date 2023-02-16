@@ -13,5 +13,5 @@ data class LocationEntity(
   val longitude: Double,
   @ColumnInfo(name = "is_default") val isDefault: Boolean,
   @ColumnInfo(name = "updated_at") val updatedAt: ZonedDateTime,
-  val zoneId: ZoneId,
+  @ColumnInfo(name = "zone_id") val zoneId: ZoneId,
 )
