@@ -147,6 +147,10 @@ constructor(
     )
   }
 
+  override suspend fun deleteForEachLocationExceptMostRecent(limit: Int) {
+    sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
+  }
+
   companion object {
     private const val SYNC_WORK_NAME = "SyncWork"
   }

@@ -10,4 +10,6 @@ interface SunriseSunsetRepo {
   fun cancelSync()
 
   suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange
+
+  suspend fun deleteForEachLocationExceptMostRecent(limit: Int)
 }
