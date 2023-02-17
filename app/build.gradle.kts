@@ -53,8 +53,7 @@ dependencies {
   implementation(project(":feature:location"))
   implementation(project(":feature:locations"))
   implementation(project(":feature:widget"))
-
-  implementation(project(":sync"))
+  implementation(project(":work"))
 
   implementation(libs.accompanist.systemuicontroller)
   implementation(libs.androidx.activity.compose)

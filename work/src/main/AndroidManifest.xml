@@ -10,7 +10,7 @@
             tools:node="merge">
             <!-- TODO: Disable cleanup sync startup till it works well with instrumented tests   -->
             <meta-data
-                android:name="com.trm.daylighter.sync.initializer.CleanupInitializer"
+                android:name="com.trm.daylighter.work.initializer.CleanupInitializer"
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>

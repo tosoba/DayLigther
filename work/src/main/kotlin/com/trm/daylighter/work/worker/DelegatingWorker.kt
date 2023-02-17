@@ -1,4 +1,4 @@
-package com.trm.daylighter.sync.worker
+package com.trm.daylighter.work.worker
 
 import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory

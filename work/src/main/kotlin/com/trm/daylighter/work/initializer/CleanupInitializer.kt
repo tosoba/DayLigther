@@ -1,10 +1,10 @@
-package com.trm.daylighter.sync.initializer
+package com.trm.daylighter.work.initializer
 
 import android.content.Context
 import androidx.startup.AppInitializer
 import androidx.startup.Initializer
 import androidx.work.*
-import com.trm.daylighter.sync.worker.CleanupWorker
+import com.trm.daylighter.work.worker.CleanupWorker
 
 object Cleanup {
   fun initialize(context: Context) {

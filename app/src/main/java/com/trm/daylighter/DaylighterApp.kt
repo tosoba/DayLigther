@@ -1,7 +1,7 @@
 package com.trm.daylighter
 
 import android.app.Application
-import com.trm.daylighter.sync.initializer.Cleanup
+import com.trm.daylighter.work.initializer.Cleanup
 import dagger.hilt.android.HiltAndroidApp
 import org.osmdroid.config.Configuration
 

@@ -45,4 +45,4 @@ include(":feature:locations")
 
 include(":feature:widget")
 
-include(":sync")
+include(":work")
