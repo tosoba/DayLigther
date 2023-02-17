@@ -4,7 +4,12 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-android { namespace = "com.trm.daylighter.core.database" }
+android {
+  namespace = "com.trm.daylighter.core.database"
+  defaultConfig {
+    testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
+  }
+}
 
 dependencies {
   implementation(libs.kotlinx.coroutines.android)
@@ -13,4 +18,6 @@ dependencies {
   implementation(libs.room.runtime)
   implementation(libs.room.ktx)
   ksp(libs.room.compiler)
+
+  androidTestImplementation(project(":core:testing"))
 }

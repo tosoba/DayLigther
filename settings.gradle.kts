@@ -46,3 +46,4 @@ include(":feature:locations")
 include(":feature:widget")
 
 include(":work")
+include(":core:testing")
