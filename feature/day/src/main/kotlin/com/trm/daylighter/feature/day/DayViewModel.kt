@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
-import com.trm.daylighter.core.domain.usecase.GetLocationAtIndexUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationAtIndexFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.core.ui.model.StableValue
@@ -32,7 +31,7 @@ class DayViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
-  private val getLocationAtIndexUseCase: GetLocationAtIndexUseCase,
+  private val getLocationAtIndexFlowUseCase: GetLocationAtIndexFlowUseCase,
   private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
@@ -177,9 +176,10 @@ constructor(
         index >= size -> emit(FailedFirst(LocationIndexOutOfBoundsException(size)))
         else -> {
           emit(LoadingFirst)
-          emit(
-            getLocationAtIndexUseCase(index)?.let(::Ready)
-              ?: FailedFirst(LocationIndexOutOfBoundsException(size))
+          emitAll(
+            getLocationAtIndexFlowUseCase(index).map { location ->
+              location?.let(::Ready) ?: FailedFirst(LocationIndexOutOfBoundsException(size))
+            }
           )
         }
       }
