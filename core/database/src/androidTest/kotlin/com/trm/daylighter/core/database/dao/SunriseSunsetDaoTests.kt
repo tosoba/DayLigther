@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.trm.daylighter.core.database.DaylighterDatabase
+import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import java.time.LocalDate
 import java.time.ZoneId
@@ -30,26 +31,31 @@ class SunriseSunsetDaoTests {
   @Test
   fun deleteForEachLocationExceptMostRecent() = runTest {
     val limit = 2
-    repeat(2) { locationDao.insert(0.0, 0.0, ZoneId.systemDefault()) }
-    val insertedLocations = locationDao.selectAll()
-    val insertedSunriseSunsets = ArrayList<SunriseSunsetEntity>(15)
+    val insertedLocations = insertLocations(amount = 2)
     var dateIt1 = LocalDate.now()
     var dateIt2 = dateIt1.minusDays(10L)
-    repeat(10) { index ->
-      if (index % 2 == 0) {
-        getSunriseSunsetWithNowTimestamps(dateIt1, insertedLocations.first().id).also {
-          sunriseSunsetDao.insert(it)
-          insertedSunriseSunsets.add(it)
+    val insertedSunriseSunsets =
+      insertSunriseSunsets(locations = insertedLocations, iterationsForEachLocation = 10) {
+        location,
+        sunriseSunsetIndex ->
+        when (location.id) {
+          insertedLocations.first().id -> {
+            if (sunriseSunsetIndex % 2 == 0) {
+              getSunriseSunsetWithNowTimestamps(dateIt1, location.id).also {
+                dateIt1 = dateIt1.minusDays(1L)
+              }
+            } else {
+              null
+            }
+          }
+          insertedLocations.last().id -> {
+            getSunriseSunsetWithNowTimestamps(dateIt2, location.id).also {
+              dateIt2 = dateIt1.minusDays(1L)
+            }
+          }
+          else -> throw IllegalArgumentException()
         }
-        dateIt1 = dateIt1.minusDays(1L)
       }
-
-      getSunriseSunsetWithNowTimestamps(dateIt2, insertedLocations.last().id).also {
-        sunriseSunsetDao.insert(it)
-        insertedSunriseSunsets.add(it)
-      }
-      dateIt2 = dateIt2.minusDays(1L)
-    }
 
     sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit = limit)
 
@@ -79,6 +85,39 @@ class SunriseSunsetDaoTests {
           .containsAll(sunriseSunsetsForLocation.map(RemainingSunriseSunset::date))
       }
     }
+  }
+
+  private suspend fun insertLocations(
+    amount: Int,
+    latitude: (Int) -> Double = { 0.0 },
+    longitude: (Int) -> Double = { 0.0 },
+    zoneId: (Int) -> ZoneId = { ZoneId.systemDefault() }
+  ): List<LocationEntity> {
+    repeat(amount) { index ->
+      locationDao.insert(
+        latitude = latitude(index),
+        longitude = longitude(index),
+        zoneId = zoneId(index)
+      )
+    }
+    return locationDao.selectAll()
+  }
+
+  private suspend fun insertSunriseSunsets(
+    locations: List<LocationEntity>,
+    iterationsForEachLocation: Int,
+    sunriseSunset: (location: LocationEntity, sunriseSunsetIndex: Int) -> SunriseSunsetEntity?,
+  ): List<SunriseSunsetEntity> {
+    val insertedSunriseSunsets = mutableListOf<SunriseSunsetEntity>()
+    repeat(iterationsForEachLocation) { index ->
+      locations.forEach { location ->
+        sunriseSunset(location, index)?.let {
+          sunriseSunsetDao.insert(it)
+          insertedSunriseSunsets.add(it)
+        }
+      }
+    }
+    return insertedSunriseSunsets
   }
 
   private fun getSunriseSunsetWithNowTimestamps(
