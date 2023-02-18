@@ -50,7 +50,7 @@ class SunriseSunsetDaoTests {
           }
           insertedLocations.last().id -> {
             getSunriseSunsetWithNowTimestamps(dateIt2, location.id).also {
-              dateIt2 = dateIt1.minusDays(1L)
+              dateIt2 = dateIt2.minusDays(1L)
             }
           }
           else -> throw IllegalArgumentException()
@@ -74,15 +74,84 @@ class SunriseSunsetDaoTests {
         )
       )
     }
-    assertEquals(insertedLocations.size * limit, remainingSunriseSunsets.size)
-    remainingSunriseSunsets.groupBy(RemainingSunriseSunset::locationId).values.forEach {
-      sunriseSunsetsForLocation ->
-      assertEquals(limit, sunriseSunsetsForLocation.size)
+    assertEquals(expected = insertedLocations.size * limit, actual = remainingSunriseSunsets.size)
+    remainingSunriseSunsets.groupBy(RemainingSunriseSunset::locationId).forEach {
+      (locationId, sunriseSunsetsForLocation) ->
+      assertEquals(expected = limit, actual = sunriseSunsetsForLocation.size)
       assertTrue {
         insertedSunriseSunsets
+          .filter { it.locationId == locationId }
           .map(SunriseSunsetEntity::date)
           .sortedDescending()
           .containsAll(sunriseSunsetsForLocation.map(RemainingSunriseSunset::date))
+      }
+    }
+  }
+
+  @Test
+  fun selectMostRecentForEachLocationId() = runTest {
+    val limit = 2
+    val insertedLocations = insertLocations(amount = 3)
+    var dateIt1 = LocalDate.now()
+    var dateIt2 = dateIt1.minusDays(10L)
+    val dateIt3 = dateIt1.minusDays(20L)
+    val insertedSunriseSunsets =
+      insertSunriseSunsets(locations = insertedLocations, iterationsForEachLocation = 10) {
+        location,
+        sunriseSunsetIndex ->
+        when (location.id) {
+          insertedLocations[0].id -> {
+            if (sunriseSunsetIndex % 2 == 0) {
+              getSunriseSunsetWithNowTimestamps(dateIt1, location.id).also {
+                dateIt1 = dateIt1.minusDays(1L)
+              }
+            } else {
+              null
+            }
+          }
+          insertedLocations[1].id -> {
+            getSunriseSunsetWithNowTimestamps(dateIt2, location.id).also {
+              dateIt2 = dateIt2.minusDays(1L)
+            }
+          }
+          insertedLocations[2].id -> {
+            if (sunriseSunsetIndex == 0) {
+              getSunriseSunsetWithNowTimestamps(dateIt3, location.id)
+            } else {
+              null
+            }
+          }
+          else -> throw IllegalArgumentException()
+        }
+      }
+
+    val mostRecentSunriseSunsets =
+      sunriseSunsetDao.selectMostRecentForEachLocationId(
+        locationIds = insertedLocations.map(LocationEntity::id),
+        limit = limit
+      )
+    assertEquals(expected = 5, actual = mostRecentSunriseSunsets.size)
+    mostRecentSunriseSunsets.groupBy(SunriseSunsetEntity::locationId).forEach {
+      (locationId, sunriseSunsetsForLocation) ->
+      assertEquals(
+        expected = if (locationId == insertedLocations.last().id) 1 else limit,
+        actual = sunriseSunsetsForLocation.size
+      )
+      assertTrue {
+        insertedSunriseSunsets
+          .filter { it.locationId == locationId }
+          .map(SunriseSunsetEntity::date)
+          .sortedDescending()
+          .containsAll(sunriseSunsetsForLocation.map(SunriseSunsetEntity::date))
+      }
+      assertTrue {
+        sunriseSunsetsForLocation
+          .map(SunriseSunsetEntity::date)
+          .contains(
+            insertedSunriseSunsets
+              .filter { it.locationId == locationId }
+              .maxOf(SunriseSunsetEntity::date)
+          )
       }
     }
   }
