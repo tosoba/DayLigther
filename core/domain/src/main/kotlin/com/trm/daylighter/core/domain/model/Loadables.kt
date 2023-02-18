@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.domain.model
 
 import java.io.*
-import java.util.*
+import java.io.Serializable as JavaSerializable
 import kotlinx.serialization.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -9,6 +9,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.apache.commons.codec.binary.Base64 as ApacheBase64
 
 @Serializable(with = LoadableSerializer::class)
 sealed interface Loadable<out T : Any> {
@@ -102,7 +103,7 @@ class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer
     @EncodeDefault(EncodeDefault.Mode.NEVER) val data: T? = null,
     @EncodeDefault(EncodeDefault.Mode.NEVER)
     @Serializable(with = JavaSerializableSerializer::class)
-    val error: java.io.Serializable? = null
+    val error: JavaSerializable? = null
   )
 
   private val surrogateSerializer = LoadableSurrogate.serializer(valueSerializer)
@@ -110,10 +111,14 @@ class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer
   override val descriptor: SerialDescriptor = surrogateSerializer.descriptor
 
   override fun serialize(encoder: Encoder, value: Loadable<T>) {
-    LoadableSurrogate(
-      className = value::class.java.name,
-      data = if (value is WithData) value.data else null,
-      error = if (value is Failed) value.throwable else null
+    encoder.encodeSerializableValue(
+      serializer = surrogateSerializer,
+      value =
+        LoadableSurrogate(
+          className = value::class.java.name,
+          data = if (value is WithData) value.data else null,
+          error = if (value is Failed) value.throwable else null
+        )
     )
   }
 
@@ -133,7 +138,9 @@ class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer
   }
 }
 
-class JavaSerializableSerializer<T : java.io.Serializable> : KSerializer<T> {
+class JavaSerializableSerializer<T : JavaSerializable> : KSerializer<T> {
+  private val base64 = ApacheBase64()
+
   override val descriptor = PrimitiveSerialDescriptor("Serializable", PrimitiveKind.STRING)
 
   override fun deserialize(decoder: Decoder): T = fromString(decoder.decodeString())
@@ -144,17 +151,18 @@ class JavaSerializableSerializer<T : java.io.Serializable> : KSerializer<T> {
 
   @Throws(IOException::class, ClassNotFoundException::class, ClassCastException::class)
   private fun fromString(string: String): T =
-    ObjectInputStream(ByteArrayInputStream(string.toByteArray())).use {
-      @Suppress("UNCHECKED_CAST") return it.readObject() as T
+    ObjectInputStream(ByteArrayInputStream(base64.decode(string))).use {
+      @Suppress("UNCHECKED_CAST")
+      it.readObject() as T
     }
 
   @Throws(IOException::class)
   private fun toString(serializable: T): String {
-    val baos = ByteArrayOutputStream()
-    ObjectOutputStream(baos).use {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    return ObjectOutputStream(byteArrayOutputStream).use {
       it.writeObject(serializable)
       it.close()
-      return String(baos.toByteArray())
+      base64.encodeToString(byteArrayOutputStream.toByteArray())
     }
   }
 }
