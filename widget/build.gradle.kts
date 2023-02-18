@@ -3,6 +3,6 @@ plugins {
   id("daylighter.android.library.compose")
 }
 
-android { namespace = "com.trm.daylighter.feature.intro" }
+android { namespace = "com.trm.daylighter.widget" }
 
 dependencies {}

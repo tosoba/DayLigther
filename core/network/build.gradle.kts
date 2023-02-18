@@ -18,7 +18,6 @@ dependencies {
 
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
-  implementation(libs.kotlinx.datetime)
 
   implementation(libs.okhttp.logging)
   implementation(libs.retrofit.core)

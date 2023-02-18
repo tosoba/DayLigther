@@ -5,4 +5,4 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.widgets" }
 
-dependencies { implementation(libs.kotlinx.datetime) }
+dependencies {}

@@ -25,7 +25,6 @@ dependencies {
   implementation(libs.room.ktx)
   ksp(libs.room.compiler)
 
-  implementation(libs.kotlinx.datetime)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
 

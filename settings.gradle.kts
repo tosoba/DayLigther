@@ -31,6 +31,8 @@ include(":core:datastore")
 
 include(":core:domain")
 
+include(":core:testing")
+
 include(":core:ui")
 
 include(":feature:about")
@@ -46,4 +48,5 @@ include(":feature:locations")
 include(":feature:widgets")
 
 include(":work")
-include(":core:testing")
+
+include(":widget")
