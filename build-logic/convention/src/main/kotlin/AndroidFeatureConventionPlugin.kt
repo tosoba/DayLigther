@@ -15,19 +15,19 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         apply("daylighter.android.hilt")
       }
 
-//      extensions.configure<LibraryExtension> {
-//        defaultConfig {
-//          testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
-//        }
-//      }
+      extensions.configure<LibraryExtension> {
+        defaultConfig {
+          testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
+        }
+      }
 
       val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
       dependencies {
-        add("implementation", project(":core:ui"))
         add("implementation", project(":core:data"))
         add("implementation", project(":core:common"))
         add("implementation", project(":core:domain"))
+        add("implementation", project(":core:ui"))
 
         add("testImplementation", kotlin("test"))
         add("androidTestImplementation", kotlin("test"))
