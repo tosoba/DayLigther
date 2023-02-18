@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.trm.daylighter.ui.DaylighterMainContent
-import com.trm.daylighter.ui.theme.DayLighterTheme
+import com.trm.daylighter.core.ui.theme.DayLighterTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

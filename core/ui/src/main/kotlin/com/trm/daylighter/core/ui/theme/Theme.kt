@@ -1,4 +1,4 @@
-package com.trm.daylighter.ui.theme
+package com.trm.daylighter.core.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

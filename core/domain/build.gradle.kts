@@ -1,11 +1,11 @@
 plugins {
   id("kotlin")
-  id("kotlin-kapt")
+  id("kotlinx-serialization")
 }
 
 dependencies {
   implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.kotlinx.serialization.json)
 
   implementation(libs.dagger.dagger)
-  kapt(libs.dagger.compiler)
 }

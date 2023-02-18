@@ -1,4 +1,4 @@
-package com.trm.daylighter.ui.theme
+package com.trm.daylighter.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

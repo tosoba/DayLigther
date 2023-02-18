@@ -1,0 +1,53 @@
+package com.trm.daylighter.widget
+
+import android.content.Context
+import androidx.datastore.core.CorruptionException
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.Serializer
+import androidx.datastore.dataStore
+import androidx.datastore.dataStoreFile
+import androidx.glance.state.GlanceStateDefinition
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Location
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+
+object SunriseSunsetWidgetStateDefinition : GlanceStateDefinition<Loadable<Location>> {
+  private const val DATA_STORE_FILENAME = "sunriseSunsetWidget"
+
+  private val Context.datastore by dataStore(DATA_STORE_FILENAME, LocationLoadableSerializer)
+
+  override suspend fun getDataStore(
+    context: Context,
+    fileKey: String
+  ): DataStore<Loadable<Location>> = context.datastore
+
+  override fun getLocation(context: Context, fileKey: String): File =
+    context.dataStoreFile(DATA_STORE_FILENAME)
+
+  private object LocationLoadableSerializer : Serializer<Loadable<Location>> {
+    override val defaultValue = Empty
+
+    override suspend fun readFrom(input: InputStream): Loadable<Location> =
+      try {
+        Json.decodeFromString(
+          Loadable.serializer(Location.serializer()),
+          input.readBytes().decodeToString()
+        )
+      } catch (exception: SerializationException) {
+        throw CorruptionException("Could not read weather data: ${exception.message}")
+      }
+
+    override suspend fun writeTo(t: Loadable<Location>, output: OutputStream) {
+      output.use {
+        it.write(
+          Json.encodeToString(Loadable.serializer(Location.serializer()), t).encodeToByteArray()
+        )
+      }
+    }
+  }
+}
