@@ -9,6 +9,8 @@ android {
   android { namespace = "com.trm.daylighter.core.network" }
 
   buildFeatures { buildConfig = true }
+
+  packagingOptions { resources { excludes += "META-INF/DEPENDENCIES" } }
 }
 
 dependencies {
@@ -21,6 +23,9 @@ dependencies {
   implementation(libs.okhttp.logging)
   implementation(libs.retrofit.core)
   implementation(libs.retrofit.kotlin.serialization)
+
+  implementation(libs.nominatim.api)
+  implementation(libs.guava.listenablefuture.conflict)
 
   api(libs.junit4)
   api(libs.kotlinx.coroutines.test)

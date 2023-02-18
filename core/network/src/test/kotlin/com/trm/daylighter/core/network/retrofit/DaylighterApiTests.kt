@@ -1,13 +1,15 @@
 package com.trm.daylighter.core.network.retrofit
 
 import com.trm.daylighter.core.network.di.DaggerNetworkTestComponent
+import com.trm.daylighter.core.network.di.NetworkTestComponent
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class DaylighterApiTests {
-  private val api: DaylighterApi = DaggerNetworkTestComponent.builder().build().daylighterApi()
+  private val component: NetworkTestComponent = DaggerNetworkTestComponent.builder().build()
+  private val api: DaylighterApi = component.daylighterApi()
 
   @Test
   fun getSunriseSunset() = runTest {
