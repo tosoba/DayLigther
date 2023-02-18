@@ -149,12 +149,11 @@ class JavaSerializableSerializer<T : JavaSerializable> : KSerializer<T> {
     encoder.encodeString(toString(value))
   }
 
+  @Suppress("UNCHECKED_CAST")
   @Throws(IOException::class, ClassNotFoundException::class, ClassCastException::class)
   private fun fromString(string: String): T =
-    ObjectInputStream(ByteArrayInputStream(base64.decode(string))).use {
-      @Suppress("UNCHECKED_CAST")
-      it.readObject() as T
-    }
+    ObjectInputStream(ByteArrayInputStream(base64.decode(string)))
+      .use(ObjectInputStream::readObject) as T
 
   @Throws(IOException::class)
   private fun toString(serializable: T): String {

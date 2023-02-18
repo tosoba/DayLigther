@@ -22,7 +22,7 @@ class SunriseSunsetWidget : GlanceAppWidget() {
   @Composable
   override fun Content() {
     val location = currentState<Loadable<Location>>()
-    DayLighterTheme {
+    DayLighterTheme(darkTheme = false, tweakStatusBarAppearance = false) {
       AppWidgetBox(contentAlignment = Alignment.Center) {
         when (location) {
           is Failed -> Text(text = "Failed")
