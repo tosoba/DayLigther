@@ -57,7 +57,7 @@ dependencies {
   implementation(project(":feature:intro"))
   implementation(project(":feature:location"))
   implementation(project(":feature:locations"))
-  implementation(project(":feature:widget"))
+  implementation(project(":feature:widgets"))
   implementation(project(":work"))
 
   implementation(libs.accompanist.systemuicontroller)

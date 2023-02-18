@@ -43,7 +43,7 @@ include(":feature:location")
 
 include(":feature:locations")
 
-include(":feature:widget")
+include(":feature:widgets")
 
 include(":work")
 include(":core:testing")

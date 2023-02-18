@@ -29,8 +29,8 @@ import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.locationsGraph
 import com.trm.daylighter.feature.locations.locationsGraphRoute
-import com.trm.daylighter.feature.widget.WidgetsScreen
-import com.trm.daylighter.feature.widget.widgetsRoute
+import com.trm.daylighter.feature.widgets.WidgetsScreen
+import com.trm.daylighter.feature.widgets.widgetsRoute
 import kotlinx.coroutines.launch
 
 @Composable
