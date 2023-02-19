@@ -27,11 +27,13 @@ constructor(
       Result.success()
     }
 
-  companion object {
+  internal companion object {
     fun workRequest(): PeriodicWorkRequest =
       PeriodicWorkRequestBuilder<DelegatingWorker>(Duration.ofDays(1L))
         .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
         .setInputData(CleanupWorker::class.delegatedData())
         .build()
+
+    const val WORK_NAME = "CleanupWork"
   }
 }

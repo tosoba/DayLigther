@@ -12,13 +12,11 @@ object Cleanup {
   }
 }
 
-internal const val CleanupWorkName = "CleanupWorkName"
-
-class CleanupInitializer : Initializer<Cleanup> {
+internal class CleanupInitializer : Initializer<Cleanup> {
   override fun create(context: Context): Cleanup {
     WorkManager.getInstance(context).apply {
       enqueueUniquePeriodicWork(
-        CleanupWorkName,
+        CleanupWorker.WORK_NAME,
         ExistingPeriodicWorkPolicy.KEEP,
         CleanupWorker.workRequest()
       )

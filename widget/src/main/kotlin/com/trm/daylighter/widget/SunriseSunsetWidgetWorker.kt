@@ -55,13 +55,13 @@ constructor(
     SunriseSunsetWidget().updateAll(context)
   }
 
-  companion object {
-    private val uniqueWorkName = SunriseSunsetWidget::class.java.simpleName
+  internal companion object {
+    private const val WORK_NAME = "SunriseSunsetWidgetWork"
 
     fun enqueue(context: Context) {
       val manager = WorkManager.getInstance(context)
       manager.enqueueUniqueWork(
-        uniqueWorkName,
+        WORK_NAME,
         ExistingWorkPolicy.KEEP,
         OneTimeWorkRequestBuilder<DelegatingWorker>()
           .setInputData(SunriseSunsetWidgetWorker::class.delegatedData())
@@ -70,7 +70,7 @@ constructor(
     }
 
     fun cancel(context: Context) {
-      WorkManager.getInstance(context).cancelUniqueWork(uniqueWorkName)
+      WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
     }
   }
 }

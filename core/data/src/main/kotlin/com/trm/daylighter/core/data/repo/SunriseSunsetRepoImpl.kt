@@ -1,10 +1,6 @@
 package com.trm.daylighter.core.data.repo
 
-import android.content.Context
 import android.util.Log
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.data.mapper.asEntity
@@ -17,7 +13,6 @@ import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.async
@@ -27,21 +22,10 @@ import kotlinx.coroutines.coroutineScope
 class SunriseSunsetRepoImpl
 @Inject
 constructor(
-  @ApplicationContext private val context: Context,
   private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
   private val network: DaylighterNetworkDataSource,
-  private val syncWorkRequest: PeriodicWorkRequest,
 ) : SunriseSunsetRepo {
-  override fun enqueueSync() {
-    WorkManager.getInstance(context)
-      .enqueueUniquePeriodicWork(SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, syncWorkRequest)
-  }
-
-  override fun cancelSync() {
-    WorkManager.getInstance(context).cancelUniqueWork(SYNC_WORK_NAME)
-  }
-
   override suspend fun sync(): Boolean =
     suspendRunCatching {
         val locations = locationDao.selectAll()
@@ -149,9 +133,5 @@ constructor(
 
   override suspend fun deleteForEachLocationExceptMostRecent(limit: Int) {
     sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
-  }
-
-  companion object {
-    private const val SYNC_WORK_NAME = "SyncWork"
   }
 }
