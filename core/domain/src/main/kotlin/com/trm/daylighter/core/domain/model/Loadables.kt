@@ -1,15 +1,7 @@
 package com.trm.daylighter.core.domain.model
 
-import java.io.*
-import java.io.Serializable as JavaSerializable
-import kotlinx.serialization.*
+import com.trm.daylighter.core.domain.serializer.LoadableSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import org.apache.commons.codec.binary.Base64 as ApacheBase64
 
 @Serializable(with = LoadableSerializer::class)
 sealed interface Loadable<out T : Any> {
@@ -93,75 +85,3 @@ data class Ready<T : Any>(override val data: T) : WithData<T> {
 }
 
 inline fun <reified T : Any> T?.asLoadable(): Loadable<T> = if (this == null) Empty else Ready(this)
-
-class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer<Loadable<T>> {
-  @OptIn(ExperimentalSerializationApi::class)
-  @Serializable
-  @SerialName("ServiceResult")
-  data class LoadableSurrogate<T : Any>(
-    val className: String,
-    @EncodeDefault(EncodeDefault.Mode.NEVER) val data: T? = null,
-    @EncodeDefault(EncodeDefault.Mode.NEVER)
-    @Serializable(with = JavaSerializableSerializer::class)
-    val error: JavaSerializable? = null
-  )
-
-  private val surrogateSerializer = LoadableSurrogate.serializer(valueSerializer)
-
-  override val descriptor: SerialDescriptor = surrogateSerializer.descriptor
-
-  override fun serialize(encoder: Encoder, value: Loadable<T>) {
-    encoder.encodeSerializableValue(
-      serializer = surrogateSerializer,
-      value =
-        LoadableSurrogate(
-          className = value::class.java.name,
-          data = if (value is WithData) value.data else null,
-          error = if (value is Failed) value.throwable else null
-        )
-    )
-  }
-
-  override fun deserialize(decoder: Decoder): Loadable<T> {
-    val surrogate = surrogateSerializer.deserialize(decoder)
-    return when (surrogate.className) {
-      Empty::class.java.name -> Empty
-      LoadingFirst::class.java.name -> LoadingFirst
-      LoadingNext::class.java.name -> LoadingNext(requireNotNull(surrogate.data))
-      FailedFirst::class.java.name -> FailedFirst(surrogate.error as? Throwable)
-      FailedNext::class.java.name -> {
-        FailedNext(data = requireNotNull(surrogate.data), throwable = surrogate.error as? Throwable)
-      }
-      Ready::class.java.name -> Ready(requireNotNull(surrogate.data))
-      else -> throw IllegalStateException()
-    }
-  }
-}
-
-class JavaSerializableSerializer<T : JavaSerializable> : KSerializer<T> {
-  private val base64 = ApacheBase64()
-
-  override val descriptor = PrimitiveSerialDescriptor("Serializable", PrimitiveKind.STRING)
-
-  override fun deserialize(decoder: Decoder): T = fromString(decoder.decodeString())
-
-  override fun serialize(encoder: Encoder, value: T) {
-    encoder.encodeString(toString(value))
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  @Throws(IOException::class, ClassNotFoundException::class, ClassCastException::class)
-  private fun fromString(string: String): T =
-    ObjectInputStream(ByteArrayInputStream(base64.decode(string)))
-      .use(ObjectInputStream::readObject) as T
-
-  @Throws(IOException::class)
-  private fun toString(serializable: T): String {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    return ObjectOutputStream(byteArrayOutputStream).use {
-      it.writeObject(serializable)
-      it.close()
-      base64.encodeToString(byteArrayOutputStream.toByteArray())
-    }
-  }
-}
