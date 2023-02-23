@@ -5,8 +5,9 @@ import com.trm.daylighter.feature.location.model.MapPosition
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.TilesOverlay
 
-internal fun MapView.setDefaultConfig() {
+internal fun MapView.setDefaultConfig(darkMode: Boolean) {
   setTileSource(MapDefaults.tileSource)
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
@@ -15,6 +16,7 @@ internal fun MapView.setDefaultConfig() {
   setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
   setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
   minZoomLevel = MapDefaults.MIN_ZOOM
+  if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
 }
 
 internal fun MapView.restorePosition(position: MapPosition) {

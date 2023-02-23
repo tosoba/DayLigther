@@ -2,6 +2,7 @@ package com.trm.daylighter.feature.location
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -61,6 +62,7 @@ private fun LocationScreen(
 ) {
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
+  val darkMode = isSystemInDarkTheme()
 
   val mapView =
     rememberMapViewWithLifecycle(
@@ -89,7 +91,7 @@ private fun LocationScreen(
     AndroidView(
       factory = { mapView },
       update = {
-        it.setDefaultConfig()
+        it.setDefaultConfig(darkMode = darkMode)
         it.removeMapListener(mapListener)
         it.restorePosition(savedMapPosition)
         it.addMapListener(mapListener)

@@ -2,6 +2,7 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -75,12 +76,12 @@ private fun LocationsRoute(
 
 @Composable
 private fun LocationsScreen(
-    locations: Loadable<List<StableValue<Location>>>,
-    onAddLocationClick: () -> Unit,
-    onSetDefaultLocationClick: (Long) -> Unit,
-    onEditLocationClick: (Long) -> Unit,
-    onDeleteLocationClick: (Location) -> Unit,
-    modifier: Modifier = Modifier
+  locations: Loadable<List<StableValue<Location>>>,
+  onAddLocationClick: () -> Unit,
+  onSetDefaultLocationClick: (Long) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
@@ -147,10 +148,10 @@ private fun LocationsScreen(
 
 @Composable
 private fun DeleteLocationConfirmationDialog(
-    locationBeingDeleted: Location?,
-    onConfirmClick: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier
+  locationBeingDeleted: Location?,
+  onConfirmClick: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   AnimatedVisibility(visible = locationBeingDeleted != null, modifier = modifier) {
     AlertDialog(
@@ -173,11 +174,11 @@ private fun DeleteLocationConfirmationDialog(
 
 @Composable
 private fun MapCard(
-    location: StableValue<Location>,
-    zoom: Double,
-    onSetDefaultLocationClick: (Long) -> Unit,
-    onEditLocationClick: (Long) -> Unit,
-    onDeleteLocationClick: (Location) -> Unit,
+  location: StableValue<Location>,
+  zoom: Double,
+  onSetDefaultLocationClick: (Long) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
 ) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -204,10 +205,11 @@ private fun MapCard(
 @Composable
 private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
   val mapView = rememberMapViewWithLifecycle()
+  val darkMode = isSystemInDarkTheme()
   AndroidView(
     factory = { mapView },
     update = {
-      it.setDefaultDisabledConfig()
+      it.setDefaultDisabledConfig(darkMode = darkMode)
       it.setPosition(latitude = latitude, longitude = longitude, zoom = zoom)
     }
   )
@@ -215,15 +217,18 @@ private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
 
 @Composable
 private fun LocationDropDrownMenu(
-    location: StableValue<Location>,
-    onSetDefaultLocationClick: (Long) -> Unit,
-    onDeleteLocationClick: (Location) -> Unit,
-    onEditLocationClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+  location: StableValue<Location>,
+  onSetDefaultLocationClick: (Long) -> Unit,
+  onDeleteLocationClick: (Location) -> Unit,
+  onEditLocationClick: (Long) -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
     var expanded by remember { mutableStateOf(false) }
-    IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
+    SmallFloatingActionButton(
+      onClick = { expanded = true },
+      modifier = Modifier.align(Alignment.BottomEnd)
+    ) {
       Icon(
         imageVector = Icons.Default.MoreVert,
         contentDescription = stringResource(id = R.string.location_actions)

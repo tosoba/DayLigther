@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import android.widget.TextClock
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -276,6 +277,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     HorizontalPagerIndicator(
       pagerState = pagerState,
       modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+      activeColor = MaterialTheme.colorScheme.onBackground,
     )
   }
 
@@ -397,10 +399,11 @@ private fun MapCard(
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       val mapView = rememberMapViewWithLifecycle()
+      val darkMode = isSystemInDarkTheme()
       AndroidView(
         factory = { mapView },
         update = {
-          it.setDefaultDisabledConfig()
+          it.setDefaultDisabledConfig(darkMode = darkMode)
           it.setPosition(
             latitude = location.latitude,
             longitude = location.longitude,
@@ -624,6 +627,7 @@ private fun SunriseSunsetChart(
 
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
+  val textColor = MaterialTheme.colorScheme.onBackground
 
   val sunPainter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
 
@@ -705,7 +709,7 @@ private fun SunriseSunsetChart(
           x = size.width - horizonLayoutResult.size.width - textPadding,
           y = chartCenter.y - horizonLayoutResult.size.height - textPadding
         ),
-      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
+      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -757,7 +761,7 @@ private fun SunriseSunsetChart(
         textMeasurer = textMeasurer,
         text = endingEdgeLabel,
         topLeft = endingEdgeLabelTopLeft,
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left),
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left, color = textColor),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -793,7 +797,7 @@ private fun SunriseSunsetChart(
         textMeasurer = textMeasurer,
         text = timeAndDiffLabel,
         topLeft = timeTopLeft,
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right),
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
         overflow = TextOverflow.Ellipsis,
       )

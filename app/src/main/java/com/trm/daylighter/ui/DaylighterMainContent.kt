@@ -125,7 +125,7 @@ private fun DayLighterScaffold(
 ) {
   Scaffold(
     modifier = Modifier.semantics { testTagsAsResourceId = true },
-    containerColor = Color.Transparent,
+    containerColor = MaterialTheme.colorScheme.background,
     contentColor = MaterialTheme.colorScheme.onBackground,
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
     topBar = topBar,

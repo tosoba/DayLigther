@@ -6,6 +6,7 @@ import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.TilesOverlay
 
 object MapDefaults {
   val tileSource: XYTileSource
@@ -40,7 +41,7 @@ object MapDefaults {
 }
 
 @SuppressLint("ClickableViewAccessibility")
-fun MapView.setDefaultDisabledConfig() {
+fun MapView.setDefaultDisabledConfig(darkMode: Boolean) {
   setTileSource(MapDefaults.tileSource)
   isTilesScaledToDpi = true
   setMultiTouchControls(false)
@@ -50,6 +51,7 @@ fun MapView.setDefaultDisabledConfig() {
   setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
   isFlingEnabled = false
   setOnTouchListener { _, _ -> true }
+  if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
 }
 
 fun MapView.setPosition(latitude: Double, longitude: Double, zoom: Double) {
