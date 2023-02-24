@@ -125,31 +125,26 @@ class SunriseSunsetDaoTests {
         }
       }
 
-    val mostRecentSunriseSunsets =
-      sunriseSunsetDao.selectMostRecentForEachLocationId(
-        locationIds = insertedLocations.map(LocationEntity::id),
-        limit = limit
-      )
-    assertEquals(expected = 5, actual = mostRecentSunriseSunsets.size)
-    mostRecentSunriseSunsets.groupBy(SunriseSunsetEntity::locationId).forEach {
-      (locationId, sunriseSunsetsForLocation) ->
+    val mostRecentSunriseSunsets = sunriseSunsetDao.selectMostRecentForEachLocation(limit = limit)
+    assertEquals(expected = insertedLocations.size, actual = mostRecentSunriseSunsets.size)
+    mostRecentSunriseSunsets.forEach { (location, sunriseSunsets) ->
       assertEquals(
-        expected = if (locationId == insertedLocations.last().id) 1 else limit,
-        actual = sunriseSunsetsForLocation.size
+        expected = if (location.id == insertedLocations.last().id) 1 else limit,
+        actual = sunriseSunsets.size
       )
       assertTrue {
         insertedSunriseSunsets
-          .filter { it.locationId == locationId }
+          .filter { it.locationId == location.id }
           .map(SunriseSunsetEntity::date)
           .sortedDescending()
-          .containsAll(sunriseSunsetsForLocation.map(SunriseSunsetEntity::date))
+          .containsAll(sunriseSunsets.map(SunriseSunsetEntity::date))
       }
       assertTrue {
-        sunriseSunsetsForLocation
+        sunriseSunsets
           .map(SunriseSunsetEntity::date)
           .contains(
             insertedSunriseSunsets
-              .filter { it.locationId == locationId }
+              .filter { it.locationId == location.id }
               .maxOf(SunriseSunsetEntity::date)
           )
       }

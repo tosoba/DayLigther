@@ -5,9 +5,7 @@ import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.data.mapper.asEntity
 import com.trm.daylighter.core.data.util.timezoneAdjusted
-import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.dao.SunriseSunsetDao
-import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
@@ -22,30 +20,20 @@ import kotlinx.coroutines.coroutineScope
 class SunriseSunsetRepoImpl
 @Inject
 constructor(
-  private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
   private val network: DaylighterNetworkDataSource,
 ) : SunriseSunsetRepo {
   override suspend fun sync(): Boolean =
     suspendRunCatching {
-        val locations = locationDao.selectAll()
-        val mostRecentExistingSunriseSunsets =
-          sunriseSunsetDao
-            .selectMostRecentForEachLocationId(
-              locationIds = locations.map(LocationEntity::id),
-              limit = 2,
-            )
-            .groupBy(SunriseSunsetEntity::locationId)
-            .mapValues { (_, sunriseSunsets) ->
-              sunriseSunsets.associateBy(SunriseSunsetEntity::date)
-            }
-
-        locations.forEach { location ->
-          val locationSunriseSunsets = mostRecentExistingSunriseSunsets[location.id] ?: emptyMap()
+        val existingLocationsSunriseSunsetsList =
+          sunriseSunsetDao.selectMostRecentForEachLocation(limit = 2)
+        existingLocationsSunriseSunsetsList.forEach { (location, sunriseSunsets) ->
           val today = LocalDate.now(location.zoneId)
           val dates = listOf(today.minusDays(1L), today)
+
+          val sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
           val downloaded =
-            dates.filterNot(locationSunriseSunsets::containsKey).associateWith { date ->
+            dates.filterNot(sunriseSunsetsDates::contains).associateWith { date ->
               network.getSunriseSunset(
                 lat = location.latitude,
                 lng = location.longitude,
@@ -73,15 +61,16 @@ constructor(
       .isSuccess
 
   override suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange {
-    val location = locationDao.selectById(id)
+    val existingLocationSunriseSunsets =
+      sunriseSunsetDao.selectMostRecentByLocationId(locationId = id, limit = 2).entries.first()
+    val existingSunriseSunsets =
+      existingLocationSunriseSunsets.value.associateBy(SunriseSunsetEntity::date)
+    val location = existingLocationSunriseSunsets.key
+
     val today = LocalDate.now(location.zoneId)
     val yesterday = today.minusDays(1L)
     val dates = listOf(yesterday, today)
 
-    val existingSunriseSunsets =
-      sunriseSunsetDao
-        .selectMostRecentByLocationId(locationId = location.id, limit = 2)
-        .associateBy(SunriseSunsetEntity::date)
     if (existingSunriseSunsets.keys.containsAll(dates)) {
       return LocationSunriseSunsetChange(
         location = location.asDomainModel(),

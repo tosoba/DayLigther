@@ -3,6 +3,7 @@ package com.trm.daylighter.core.database.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import java.time.LocalDate
 
@@ -12,20 +13,24 @@ interface SunriseSunsetDao {
   suspend fun selectByLocationIdAndDate(locationId: Long, date: LocalDate): SunriseSunsetEntity
 
   @Query(
-    "SELECT * FROM sunrise_sunset WHERE location_id = :locationId ORDER BY date DESC LIMIT :limit"
+    "SELECT * FROM location l " +
+      "LEFT JOIN sunrise_sunset ss ON ss.location_id = l.id " +
+      "WHERE l.id = :locationId " +
+      "ORDER BY date DESC LIMIT :limit"
   )
-  suspend fun selectMostRecentByLocationId(locationId: Long, limit: Int): List<SunriseSunsetEntity>
+  suspend fun selectMostRecentByLocationId(
+    locationId: Long,
+    limit: Int
+  ): Map<LocationEntity, List<SunriseSunsetEntity>>
 
   @Query(
-    "SELECT ss.* FROM location l " +
-      "INNER JOIN sunrise_sunset ss ON ss.location_id = l.id " +
-      "AND ss.date IN (SELECT date FROM sunrise_sunset ssi WHERE location_id = l.id ORDER BY date DESC LIMIT :limit) " +
-      "WHERE ss.location_id IN (:locationIds)"
+    "SELECT * FROM location l " +
+      "LEFT JOIN sunrise_sunset ss ON ss.location_id = l.id " +
+      "AND ss.date IN (SELECT ssi.date FROM sunrise_sunset ssi WHERE location_id = l.id ORDER BY ssi.date DESC LIMIT :limit)"
   )
-  suspend fun selectMostRecentForEachLocationId(
-    locationIds: Collection<Long>,
+  suspend fun selectMostRecentForEachLocation(
     limit: Int
-  ): List<SunriseSunsetEntity>
+  ): Map<LocationEntity, List<SunriseSunsetEntity>>
 
   @Upsert suspend fun insert(entity: SunriseSunsetEntity)
 

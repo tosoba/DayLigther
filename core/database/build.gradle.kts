@@ -9,6 +9,12 @@ android {
   defaultConfig {
     testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
   }
+  packagingOptions {
+    resources {
+      excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      excludes += "META-INF/DEPENDENCIES"
+    }
+  }
 }
 
 dependencies {
