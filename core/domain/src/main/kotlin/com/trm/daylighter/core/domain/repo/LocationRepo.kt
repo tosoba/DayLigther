@@ -19,6 +19,4 @@ interface LocationRepo {
   suspend fun getLocationById(id: Long): Location
 
   suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double)
-
-  fun getLocationAtIndexFlow(index: Int): Flow<Location?>
 }

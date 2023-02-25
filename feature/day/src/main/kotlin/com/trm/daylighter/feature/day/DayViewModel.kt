@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.domain.usecase.GetLocationAtIndexFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
@@ -31,8 +30,8 @@ class DayViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
-  private val getLocationAtIndexFlowUseCase: GetLocationAtIndexFlowUseCase,
-  private val getLocationSunriseSunsetChangeUseCase: GetLocationSunriseSunsetChangeUseCase,
+  private val getLocationSunriseSunsetChangeAtIndexUseCase:
+    GetLocationSunriseSunsetChangeAtIndexUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
     getLocationsCountFlowUseCase()
@@ -62,7 +61,6 @@ constructor(
         emit(initialNow)
 
         val remainingTimestamps = LinkedList(today.getUpcomingTimestampsSorted(initialNow))
-
         while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
           val now = today.now()
           if (remainingTimestamps.first().isBefore(now)) {
@@ -100,58 +98,41 @@ constructor(
 
   private fun buildCurrentLocationSunriseSunsetChangeFlow():
     SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> {
-    val currentLocationFlow: Flow<Loadable<Location>> =
+    val atCurrentIndexFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
       currentLocationIndexFlow
         .combine(locationCountFlow, ::Pair)
         .distinctUntilChanged()
-        .transformToLocation()
-        .onEach { location ->
-          if (location is Empty) {
+        .transformToLocationSunriseSunsetChange()
+        .onEach { loadable ->
+          if (loadable is Empty) {
             currentLocationIndex = 0
-          } else if (location is Failed) {
-            location.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
+          } else if (loadable is Failed) {
+            loadable.throwable?.takeIfInstance<LocationIndexOutOfBoundsException>()?.let {
               (locationsSize) ->
               currentLocationIndex = if (locationsSize > 0) locationsSize - 1 else 0
             }
           }
         }
-        .filterNot { it is Failed }
 
-    val retryLocationFlow: Flow<Loadable<Location>> =
+    val retriedFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
       retryFlow
         .map { currentLocationIndex }
         .withLatestFrom(locationCountFlow, ::Pair)
-        .transformToLocation()
-        .filterNot { it is Failed }
+        .transformToLocationSunriseSunsetChange()
 
-    fun getLocationSunriseSunsetChangeFlow(
-      locationId: Long
-    ): Flow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
-      getLocationSunriseSunsetChangeUseCase(locationId = locationId).map {
-        it.map(LocationSunriseSunsetChange::asStable)
-      }
-
-    val currentLocationSunriseSunsetChangeFlow =
-      merge(currentLocationFlow, retryLocationFlow)
-        .transformLatest { location ->
-          when (location) {
-            is Empty -> emit(Empty)
-            is Loading -> emit(LoadingFirst)
-            is Ready -> emitAll(getLocationSunriseSunsetChangeFlow(locationId = location.data.id))
-            else -> throw IllegalStateException()
-          }
-        }
+    val currentLocationSunriseSunsetChangeFlow: SharedFlow<Loadable<LocationSunriseSunsetChange>> =
+      merge(atCurrentIndexFlow, retriedFlow)
         .shareIn(scope = viewModelScope, started = SharingStarted.Eagerly)
 
     val loadNextLocationSunriseSunsetChangeAfterMidnightFlow =
       currentLocationSunriseSunsetChangeFlow
-        .filterIsInstance<Ready<StableValue<LocationSunriseSunsetChange>>>()
-        .map { it.data.value }
+        .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
+        .map { it.data }
         .transformLatest { (location, today, _) ->
           while (currentCoroutineContext().isActive) {
             val now = ZonedDateTime.now(location.zoneId)
             if (now.dayOfMonth != today.date.dayOfMonth) {
-              emitAll(getLocationSunriseSunsetChangeFlow(locationId = location.id))
+              emitAll(getLocationSunriseSunsetChangeAtIndexUseCase(index = currentLocationIndex))
             }
             delay(1000L)
           }
@@ -161,6 +142,7 @@ constructor(
         currentLocationSunriseSunsetChangeFlow,
         loadNextLocationSunriseSunsetChangeAfterMidnightFlow
       )
+      .map { it.map(LocationSunriseSunsetChange::asStable) }
       .debounce(250L)
       .shareIn(
         scope = viewModelScope,
@@ -169,21 +151,21 @@ constructor(
       )
   }
 
-  private fun Flow<Pair<Int, Int>>.transformToLocation(): Flow<Loadable<Location>> =
-    transformLatest { (index, size) ->
-      when {
-        size == 0 -> emit(Empty)
-        index >= size -> emit(FailedFirst(LocationIndexOutOfBoundsException(size)))
-        else -> {
-          emit(LoadingFirst)
-          emitAll(
-            getLocationAtIndexFlowUseCase(index).map { location ->
-              location?.let(::Ready) ?: FailedFirst(LocationIndexOutOfBoundsException(size))
-            }
-          )
-        }
+  private fun Flow<Pair<Int, Int>>.transformToLocationSunriseSunsetChange():
+    Flow<Loadable<LocationSunriseSunsetChange>> = transformLatest { (index, size) ->
+    when {
+      size == 0 -> emit(Empty)
+      index >= size -> emit(FailedFirst(LocationIndexOutOfBoundsException(size)))
+      else -> {
+        emit(LoadingFirst)
+        emitAll(
+          getLocationSunriseSunsetChangeAtIndexUseCase(index).map {
+            if (it is Empty) FailedFirst(LocationIndexOutOfBoundsException(size)) else it
+          }
+        )
       }
     }
+  }
 
   private enum class SavedState {
     CURRENT_LOCATION_INDEX

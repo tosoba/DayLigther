@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 
-class GetLocationSunriseSunsetChangeUseCase
+class GetLocationSunriseSunsetChangeAtIndexUseCase
 @Inject
 constructor(private val repo: SunriseSunsetRepo, private val manager: SyncWorkManager) {
-  operator fun invoke(locationId: Long): Flow<Loadable<LocationSunriseSunsetChange>> =
+  operator fun invoke(index: Int): Flow<Loadable<LocationSunriseSunsetChange>> =
     flow {
         emit(LoadingFirst)
         try {
-          emit(repo.getLocationSunriseSunsetChangeById(locationId).asLoadable())
+          emit(repo.getLocationSunriseSunsetChangeAtIndex(index).asLoadable())
         } catch (cancellationException: CancellationException) {
           throw cancellationException
         } catch (ex: Exception) {

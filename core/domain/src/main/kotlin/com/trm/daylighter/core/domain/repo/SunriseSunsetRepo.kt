@@ -5,7 +5,7 @@ import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 interface SunriseSunsetRepo {
   suspend fun sync(): Boolean
 
-  suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange
+  suspend fun getLocationSunriseSunsetChangeAtIndex(index: Int): LocationSunriseSunsetChange?
 
   suspend fun deleteForEachLocationExceptMostRecent(limit: Int)
 }

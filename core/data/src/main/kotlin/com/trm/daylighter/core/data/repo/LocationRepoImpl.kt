@@ -58,9 +58,6 @@ constructor(
     }
   }
 
-  override fun getLocationAtIndexFlow(index: Int): Flow<Location?> =
-    locationDao.selectLocationAtOffset(offset = index).map { it?.asDomainModel() }
-
   private suspend fun getTimeZoneId(latitude: Double, longitude: Double): ZoneId =
     timeZoneEngineAsyncProvider.engine
       .await()

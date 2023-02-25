@@ -75,5 +75,5 @@ interface LocationDao {
   )
 
   @Query("SELECT * FROM location ORDER BY is_default DESC, updated_at DESC LIMIT 1 OFFSET :offset")
-  fun selectLocationAtOffset(offset: Int): Flow<LocationEntity?>
+  fun selectLocationAtOffset(offset: Int): LocationEntity?
 }

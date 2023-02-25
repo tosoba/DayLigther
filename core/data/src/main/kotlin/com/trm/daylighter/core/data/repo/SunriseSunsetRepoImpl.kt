@@ -1,10 +1,13 @@
 package com.trm.daylighter.core.data.repo
 
 import android.util.Log
+import androidx.room.withTransaction
 import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.data.mapper.asEntity
 import com.trm.daylighter.core.data.util.timezoneAdjusted
+import com.trm.daylighter.core.database.DaylighterDatabase
+import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.dao.SunriseSunsetDao
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
@@ -20,6 +23,8 @@ import kotlinx.coroutines.coroutineScope
 class SunriseSunsetRepoImpl
 @Inject
 constructor(
+  private val db: DaylighterDatabase,
+  private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
   private val network: DaylighterNetworkDataSource,
 ) : SunriseSunsetRepo {
@@ -60,12 +65,20 @@ constructor(
       }
       .isSuccess
 
-  override suspend fun getLocationSunriseSunsetChangeById(id: Long): LocationSunriseSunsetChange {
-    val existingLocationSunriseSunsets =
-      sunriseSunsetDao.selectMostRecentByLocationId(locationId = id, limit = 2).entries.first()
-    val existingSunriseSunsets =
-      existingLocationSunriseSunsets.value.associateBy(SunriseSunsetEntity::date)
-    val location = existingLocationSunriseSunsets.key
+  override suspend fun getLocationSunriseSunsetChangeAtIndex(
+    index: Int
+  ): LocationSunriseSunsetChange? {
+    val (location, existingSunriseSunsets) =
+      db.withTransaction {
+        val location =
+          locationDao.selectLocationAtOffset(offset = index) ?: return@withTransaction null
+        val sunriseSunsets =
+          sunriseSunsetDao
+            .selectMostRecentByLocationId(locationId = location.id, limit = 2)
+            .associateBy(SunriseSunsetEntity::date)
+        location to sunriseSunsets
+      }
+        ?: return null
 
     val today = LocalDate.now(location.zoneId)
     val yesterday = today.minusDays(1L)
@@ -105,7 +118,7 @@ constructor(
       results.mapValues { (date, result) ->
         requireNotNull(result)
           .timezoneAdjusted(zoneId = location.zoneId)
-          .asEntity(locationId = id, date = date)
+          .asEntity(locationId = location.id, date = date)
       }
     sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
 
