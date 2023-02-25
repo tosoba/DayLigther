@@ -3,6 +3,7 @@ package com.trm.daylighter.feature.day
 import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.TextClock
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -474,6 +475,7 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
         textSize = if (orientation == Configuration.ORIENTATION_PORTRAIT) 18f else 16f
+        textAlignment = View.TEXT_ALIGNMENT_CENTER
         setTextColor(textColor)
       }
     },
