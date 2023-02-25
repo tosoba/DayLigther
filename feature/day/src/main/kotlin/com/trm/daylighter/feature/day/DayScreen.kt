@@ -5,6 +5,9 @@ import android.graphics.Typeface
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.TextClock
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -266,54 +269,70 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
   }
 
-  if (locationSunriseSunsetChange is Ready) {
+  AnimatedVisibility(
+    visible = locationSunriseSunsetChange is Ready,
+    enter = fadeIn(),
+    exit = fadeOut(),
+    modifier =
+      Modifier.run {
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            width((LocalConfiguration.current.screenWidthDp * .4f).dp)
+          } else {
+            height((LocalConfiguration.current.screenHeightDp * .35f).dp)
+          }
+        }
+        .aspectRatio(1f)
+        .constrainAs(map) {
+          top.linkTo(parent.top, 16.dp)
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            end.linkTo(parent.end, 16.dp)
+          } else {
+            end.linkTo(mapZoomControls.start, 5.dp)
+          }
+        }
+  ) {
     MapCard(
-      locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+      locationSunriseSunsetChange = locationSunriseSunsetChange,
       mapZoom = mapZoom,
-      modifier =
-        Modifier.run {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-              width((LocalConfiguration.current.screenWidthDp * .4f).dp)
-            } else {
-              height((LocalConfiguration.current.screenHeightDp * .35f).dp)
-            }
-          }
-          .aspectRatio(1f)
-          .constrainAs(map) {
-            top.linkTo(parent.top, 16.dp)
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-              end.linkTo(parent.end, 16.dp)
-            } else {
-              end.linkTo(mapZoomControls.start, 5.dp)
-            }
-          }
     )
+  }
 
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    AnimatedVisibility(
+      visible = locationSunriseSunsetChange is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.constrainAs(mapZoomControls) {
+          start.linkTo(map.start)
+          end.linkTo(map.end)
+          top.linkTo(map.bottom, 5.dp)
+        }
+    ) {
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier =
-          Modifier.constrainAs(mapZoomControls) {
-            start.linkTo(map.start)
-            end.linkTo(map.end)
-            top.linkTo(map.bottom, 5.dp)
-          }
       ) {
         ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
         Spacer(modifier = Modifier.width(5.dp))
         ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
       }
-    } else {
+    }
+  } else {
+    AnimatedVisibility(
+      visible = locationSunriseSunsetChange is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.constrainAs(mapZoomControls) {
+          end.linkTo(parent.end, 16.dp)
+          top.linkTo(map.top)
+          bottom.linkTo(map.bottom)
+        }
+    ) {
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier =
-          Modifier.constrainAs(mapZoomControls) {
-            end.linkTo(parent.end, 16.dp)
-            top.linkTo(map.top)
-            bottom.linkTo(map.bottom)
-          }
       ) {
         ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
         Spacer(modifier = Modifier.height(5.dp))
@@ -332,15 +351,17 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    if (locationSunriseSunsetChange is Ready) {
-      ClockAndDayLengthCard(
-        locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(drawerMenuButton.bottom, 10.dp)
-            start.linkTo(parent.start, 16.dp)
-          },
-      )
+    AnimatedVisibility(
+      visible = locationSunriseSunsetChange is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.constrainAs(dayTimeCard) {
+          top.linkTo(drawerMenuButton.bottom, 10.dp)
+          start.linkTo(parent.start, 16.dp)
+        },
+    ) {
+      ClockAndDayLengthCard(locationSunriseSunsetChange = locationSunriseSunsetChange)
     }
 
     SunriseSunsetNavigationBar(
@@ -364,59 +385,62 @@ private fun ConstraintLayoutScope.SunriseSunset(
       onDayModeChange = onDayModeNavClick,
     )
 
-    if (locationSunriseSunsetChange is Ready) {
-      ClockAndDayLengthCard(
-        locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(parent.top, 16.dp)
-            start.linkTo(navigation.end, 16.dp)
-          },
-      )
+    AnimatedVisibility(
+      visible = locationSunriseSunsetChange is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.constrainAs(dayTimeCard) {
+          top.linkTo(parent.top, 16.dp)
+          start.linkTo(navigation.end, 16.dp)
+        },
+    ) {
+      ClockAndDayLengthCard(locationSunriseSunsetChange = locationSunriseSunsetChange)
     }
   }
 }
 
 @Composable
 private fun MapCard(
-  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
   mapZoom: Double,
   modifier: Modifier = Modifier,
 ) {
-  val (location) = locationSunriseSunsetChange.value
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     modifier = modifier,
   ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-      val mapView = rememberMapViewWithLifecycle()
-      val darkMode = isSystemInDarkTheme()
-      AndroidView(
-        factory = { mapView },
-        update = {
-          it.setDefaultDisabledConfig(darkMode = darkMode)
-          it.setPosition(
-            latitude = location.latitude,
-            longitude = location.longitude,
-            zoom = mapZoom
-          )
-        }
-      )
-      Icon(
-        painter = painterResource(id = commonR.drawable.marker),
-        contentDescription = stringResource(id = commonR.string.location_marker),
-        modifier = Modifier.align(Alignment.Center).size(36.dp)
-      )
+    if (locationSunriseSunsetChange is WithData) {
+      Box(modifier = Modifier.fillMaxSize()) {
+        val (location) = locationSunriseSunsetChange.data.value
+        val mapView = rememberMapViewWithLifecycle()
+        val darkMode = isSystemInDarkTheme()
+        AndroidView(
+          factory = { mapView },
+          update = {
+            it.setDefaultDisabledConfig(darkMode = darkMode)
+            it.setPosition(
+              latitude = location.latitude,
+              longitude = location.longitude,
+              zoom = mapZoom
+            )
+          }
+        )
+        Icon(
+          painter = painterResource(id = commonR.drawable.marker),
+          contentDescription = stringResource(id = commonR.string.location_marker),
+          modifier = Modifier.align(Alignment.Center).size(36.dp)
+        )
+      }
     }
   }
 }
 
 @Composable
 private fun ClockAndDayLengthCard(
-  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
   modifier: Modifier = Modifier,
 ) {
-  val (_, today, yesterday) = locationSunriseSunsetChange.value
   Surface(
     shape = CardDefaults.shape,
     color = FloatingActionButtonDefaults.containerColor,
@@ -424,29 +448,32 @@ private fun ClockAndDayLengthCard(
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
-    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-      Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(modifier = Modifier.height(5.dp))
-        Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(horizontal = 8.dp))
-        Spacer(modifier = Modifier.height(5.dp))
-        DayLength(
-          today = today,
-          yesterday = yesterday,
-          modifier = Modifier.padding(horizontal = 8.dp)
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-      }
-    } else {
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.width(5.dp))
-        Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(vertical = 8.dp))
-        Spacer(modifier = Modifier.width(5.dp))
-        DayLength(
-          today = today,
-          yesterday = yesterday,
-          modifier = Modifier.padding(vertical = 8.dp)
-        )
-        Spacer(modifier = Modifier.width(5.dp))
+    if (locationSunriseSunsetChange is WithData) {
+      val (_, today, yesterday) = locationSunriseSunsetChange.data.value
+      if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          Spacer(modifier = Modifier.height(5.dp))
+          Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(horizontal = 8.dp))
+          Spacer(modifier = Modifier.height(5.dp))
+          DayLength(
+            today = today,
+            yesterday = yesterday,
+            modifier = Modifier.padding(horizontal = 8.dp)
+          )
+          Spacer(modifier = Modifier.height(5.dp))
+        }
+      } else {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Spacer(modifier = Modifier.width(5.dp))
+          Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(vertical = 8.dp))
+          Spacer(modifier = Modifier.width(5.dp))
+          DayLength(
+            today = today,
+            yesterday = yesterday,
+            modifier = Modifier.padding(vertical = 8.dp)
+          )
+          Spacer(modifier = Modifier.width(5.dp))
+        }
       }
     }
   }
