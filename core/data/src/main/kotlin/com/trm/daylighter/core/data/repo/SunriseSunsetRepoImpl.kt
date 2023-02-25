@@ -9,16 +9,20 @@ import com.trm.daylighter.core.data.util.timezoneAdjusted
 import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.dao.SunriseSunsetDao
+import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
-import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
+import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.transformLatest
 
 class SunriseSunsetRepoImpl
 @Inject
@@ -80,6 +84,41 @@ constructor(
       }
         ?: return null
 
+    return mapToSunriseSunsetChange(location, existingSunriseSunsets)
+  }
+
+  override suspend fun deleteForEachLocationExceptMostRecent(limit: Int) {
+    sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
+  }
+
+  override suspend fun getDefaultLocationSunriseSunsetChange():
+    Flow<Loadable<LocationSunriseSunsetChange>> =
+    sunriseSunsetDao.selectMostRecentForDefaultLocation(limit = 2).transformLatest {
+      emit(LoadingFirst)
+      val (location, existingSunriseSunsets) =
+        it
+          .mapValues { (_, sunriseSunsets) ->
+            sunriseSunsets.associateBy(SunriseSunsetEntity::date)
+          }
+          .entries
+          .firstOrNull()
+          ?: run {
+            emit(Empty)
+            return@transformLatest
+          }
+      try {
+        emit(mapToSunriseSunsetChange(location, existingSunriseSunsets).asLoadable())
+      } catch (ex: CancellationException) {
+        throw ex
+      } catch (ex: Exception) {
+        emit(FailedFirst(ex))
+      }
+    }
+
+  private suspend fun mapToSunriseSunsetChange(
+    location: LocationEntity,
+    existingSunriseSunsets: Map<LocalDate, SunriseSunsetEntity>
+  ): LocationSunriseSunsetChange {
     val today = LocalDate.now(location.zoneId)
     val yesterday = today.minusDays(1L)
     val dates = listOf(yesterday, today)
@@ -92,34 +131,11 @@ constructor(
       )
     }
 
-    val results =
-      coroutineScope {
-          dates
-            .filter { !existingSunriseSunsets.keys.contains(it) }
-            .map { date ->
-              async {
-                date to
-                  network.getSunriseSunset(
-                    lat = location.latitude,
-                    lng = location.longitude,
-                    date = date
-                  )
-              }
-            }
-        }
-        .awaitAll()
-        .toMap()
-    if (results.any { (_, result) -> result == null }) {
-      Log.e("Sync", "One of the results from API was null.")
-      throw EmptyAPIResultException
-    }
-
     val downloadedSunriseSunsets =
-      results.mapValues { (date, result) ->
-        requireNotNull(result)
-          .timezoneAdjusted(zoneId = location.zoneId)
-          .asEntity(locationId = location.id, date = date)
-      }
+      getSunriseSunsetsFromNetworkFor(
+        dates = dates.filterNot(existingSunriseSunsets::containsKey),
+        location = location
+      )
     sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
 
     return LocationSunriseSunsetChange(
@@ -133,7 +149,34 @@ constructor(
     )
   }
 
-  override suspend fun deleteForEachLocationExceptMostRecent(limit: Int) {
-    sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
+  private suspend fun getSunriseSunsetsFromNetworkFor(
+    dates: List<LocalDate>,
+    location: LocationEntity
+  ): Map<LocalDate, SunriseSunsetEntity> {
+    val results =
+      coroutineScope {
+          dates.map { date ->
+            async {
+              date to
+                network.getSunriseSunset(
+                  lat = location.latitude,
+                  lng = location.longitude,
+                  date = date
+                )
+            }
+          }
+        }
+        .awaitAll()
+        .toMap()
+    if (results.any { (_, result) -> result == null }) {
+      Log.e("Sync", "One of the results from API was null.")
+      throw EmptyAPIResultException
+    }
+
+    return results.mapValues { (date, result) ->
+      requireNotNull(result)
+        .timezoneAdjusted(zoneId = location.zoneId)
+        .asEntity(locationId = location.id, date = date)
+    }
   }
 }

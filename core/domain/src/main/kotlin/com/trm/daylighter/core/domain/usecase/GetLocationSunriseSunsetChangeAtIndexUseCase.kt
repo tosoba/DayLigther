@@ -17,8 +17,8 @@ constructor(private val repo: SunriseSunsetRepo, private val manager: SyncWorkMa
         emit(LoadingFirst)
         try {
           emit(repo.getLocationSunriseSunsetChangeAtIndex(index).asLoadable())
-        } catch (cancellationException: CancellationException) {
-          throw cancellationException
+        } catch (ex: CancellationException) {
+          throw ex
         } catch (ex: Exception) {
           emit(FailedFirst(ex))
         }

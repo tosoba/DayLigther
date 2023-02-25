@@ -9,14 +9,15 @@ import androidx.datastore.dataStoreFile
 import androidx.glance.state.GlanceStateDefinition
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
-import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
-object SunriseSunsetWidgetStateDefinition : GlanceStateDefinition<Loadable<Location>> {
+object SunriseSunsetWidgetStateDefinition :
+  GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
   private const val DATA_STORE_FILENAME = "sunriseSunsetWidget"
 
   private val Context.datastore by dataStore(DATA_STORE_FILENAME, LocationLoadableSerializer)
@@ -24,28 +25,29 @@ object SunriseSunsetWidgetStateDefinition : GlanceStateDefinition<Loadable<Locat
   override suspend fun getDataStore(
     context: Context,
     fileKey: String
-  ): DataStore<Loadable<Location>> = context.datastore
+  ): DataStore<Loadable<LocationSunriseSunsetChange>> = context.datastore
 
   override fun getLocation(context: Context, fileKey: String): File =
     context.dataStoreFile(DATA_STORE_FILENAME)
 
-  private object LocationLoadableSerializer : Serializer<Loadable<Location>> {
+  private object LocationLoadableSerializer : Serializer<Loadable<LocationSunriseSunsetChange>> {
     override val defaultValue = Empty
 
-    override suspend fun readFrom(input: InputStream): Loadable<Location> =
+    override suspend fun readFrom(input: InputStream): Loadable<LocationSunriseSunsetChange> =
       try {
         Json.decodeFromString(
-          Loadable.serializer(Location.serializer()),
+          Loadable.serializer(LocationSunriseSunsetChange.serializer()),
           input.readBytes().decodeToString()
         )
       } catch (exception: SerializationException) {
         throw CorruptionException("Could not read weather data: ${exception.message}")
       }
 
-    override suspend fun writeTo(t: Loadable<Location>, output: OutputStream) {
+    override suspend fun writeTo(t: Loadable<LocationSunriseSunsetChange>, output: OutputStream) {
       output.use {
         it.write(
-          Json.encodeToString(Loadable.serializer(Location.serializer()), t).encodeToByteArray()
+          Json.encodeToString(Loadable.serializer(LocationSunriseSunsetChange.serializer()), t)
+            .encodeToByteArray()
         )
       }
     }

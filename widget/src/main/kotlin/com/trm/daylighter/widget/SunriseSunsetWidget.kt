@@ -21,13 +21,13 @@ class SunriseSunsetWidget : GlanceAppWidget() {
 
   @Composable
   override fun Content() {
-    val location = currentState<Loadable<Location>>()
+    val loadable = currentState<Loadable<LocationSunriseSunsetChange>>()
     DayLighterTheme(darkTheme = false, tweakStatusBarAppearance = false) {
       AppWidgetBox(contentAlignment = Alignment.Center) {
-        when (location) {
+        when (loadable) {
           is Failed -> Text(text = "Failed")
           is Loading -> CircularProgressIndicator()
-          is Ready -> Text(text = location.data.id.toString())
+          is Ready -> Text(text = loadable.data.location.id.toString())
           is Empty -> Text(text = "Empty")
         }
       }

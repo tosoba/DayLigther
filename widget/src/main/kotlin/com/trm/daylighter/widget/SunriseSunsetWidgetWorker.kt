@@ -9,19 +9,15 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.trm.daylighter.core.common.di.DaylighterDispatchers
 import com.trm.daylighter.core.common.di.Dispatcher
-import com.trm.daylighter.core.domain.model.Loadable
-import com.trm.daylighter.core.domain.model.LoadingFirst
-import com.trm.daylighter.core.domain.model.Location
-import com.trm.daylighter.core.domain.model.asLoadable
-import com.trm.daylighter.core.domain.repo.LocationRepo
+import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.work.worker.DelegatingWorker
 import com.trm.daylighter.work.worker.delegatedData
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 @HiltWorker
 class SunriseSunsetWidgetWorker
@@ -30,20 +26,22 @@ constructor(
   @Assisted private val context: Context,
   @Assisted workerParameters: WorkerParameters,
   @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-  private val locationRepo: LocationRepo,
+  private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
     val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(SunriseSunsetWidget::class.java)
-    locationRepo
-      .getDefaultLocationFlow()
+    sunriseSunsetRepo
+      .getDefaultLocationSunriseSunsetChange()
+      .distinctUntilChanged()
       .flowOn(ioDispatcher)
-      .map(Location?::asLoadable)
-      .onStart { emit(LoadingFirst) }
       .collect { setWidgetState(glanceIds = glanceIds, newState = it) }
     return Result.success()
   }
 
-  private suspend fun setWidgetState(glanceIds: List<GlanceId>, newState: Loadable<Location>) {
+  private suspend fun setWidgetState(
+    glanceIds: List<GlanceId>,
+    newState: Loadable<LocationSunriseSunsetChange>
+  ) {
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,

@@ -1,6 +1,8 @@
 package com.trm.daylighter.core.data.repo
 
 import androidx.room.withTransaction
+import com.trm.daylighter.core.common.di.DaylighterDispatchers
+import com.trm.daylighter.core.common.di.Dispatcher
 import com.trm.daylighter.core.data.di.TimeZoneEngineAsyncProvider
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.database.DaylighterDatabase
@@ -11,19 +13,22 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.repo.LocationRepo
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 class LocationRepoImpl
 @Inject
 constructor(
+  private val db: DaylighterDatabase,
   private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
-  private val db: DaylighterDatabase,
   private val timeZoneEngineAsyncProvider: TimeZoneEngineAsyncProvider,
+  @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double) {
-    val zoneId = getTimeZoneId(latitude, longitude)
+    val zoneId = withContext(defaultDispatcher) { getTimeZoneId(latitude, longitude) }
     locationDao.insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
   }
 
