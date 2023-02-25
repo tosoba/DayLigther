@@ -242,24 +242,28 @@ private fun ConstraintLayoutScope.SunriseSunset(
       }
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
-      when (locationSunriseSunsetChange) {
-        is Loading -> {
-          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-        is Failed -> {
-          Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-            Text(stringResource(R.string.retry))
+      Box(modifier = Modifier.fillMaxSize()) {
+        when (locationSunriseSunsetChange) {
+          is Loading -> {
+            LinearProgressIndicator(
+              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+            )
           }
+          is Failed -> {
+            Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+              Text(stringResource(R.string.retry))
+            }
+          }
+          is Ready -> {
+            SunriseSunsetChart(
+              locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+              dayMode = dayMode,
+              now = now,
+              modifier = Modifier.fillMaxSize()
+            )
+          }
+          else -> {}
         }
-        is Ready -> {
-          SunriseSunsetChart(
-            locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-            dayMode = dayMode,
-            now = now,
-            modifier = Modifier.fillMaxSize()
-          )
-        }
-        else -> {}
       }
     }
 
