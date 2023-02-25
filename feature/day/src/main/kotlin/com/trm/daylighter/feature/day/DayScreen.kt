@@ -167,6 +167,12 @@ private fun DayScreen(
           }
         )
       }
+      LaunchedEffect(locationSunriseSunsetChange) {
+        if (locationSunriseSunsetChange is WithData) {
+          dayMode = initialDayMode(locationSunriseSunsetChange.data.value.today)
+        }
+      }
+
       SunriseSunset(
         locationSunriseSunsetChange = locationSunriseSunsetChange,
         dayMode = dayMode,
