@@ -21,7 +21,7 @@ interface SunriseSunsetDao {
   suspend fun selectMostRecentByLocationId(locationId: Long, limit: Int): List<SunriseSunsetEntity>
 
   @Query(
-    "SELECT * FROM location l " +
+    "SELECT l.*, ss.* FROM location l " +
       "LEFT JOIN sunrise_sunset ss ON ss.location_id = l.id " +
       "WHERE l.is_default = TRUE " +
       "ORDER BY date DESC LIMIT :limit"
@@ -31,7 +31,7 @@ interface SunriseSunsetDao {
   ): Flow<Map<LocationEntity, List<SunriseSunsetEntity>>>
 
   @Query(
-    "SELECT * FROM location l " +
+    "SELECT l.*, ss.* FROM location l " +
       "LEFT JOIN sunrise_sunset ss ON ss.location_id = l.id " +
       "AND ss.date IN (SELECT ssi.date FROM sunrise_sunset ssi WHERE location_id = l.id ORDER BY ssi.date DESC LIMIT :limit)"
   )
