@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -653,14 +654,15 @@ private fun SunriseSunsetChart(
   val chartSegmentGlowPaint = remember {
     Paint().apply {
       style = PaintingStyle.Stroke
-      strokeWidth = 30f
+      strokeWidth = 75f
     }
   }
+
+  val glowColor = colorResource(id = R.color.sun_outline)
   remember {
     chartSegmentGlowPaint.asFrameworkPaint().apply {
-      val glowColor = Color.Yellow
       color = glowColor.copy(alpha = 0f).toArgb()
-      setShadowLayer(30f, 0f, 0f, glowColor.copy(alpha = .5f).toArgb())
+      setShadowLayer(60f, 0f, 0f, glowColor.copy(alpha = .5f).toArgb())
     }
   }
 
@@ -682,19 +684,31 @@ private fun SunriseSunsetChart(
             now.isAfter(segment.sunsetPeriodStart) &&
             now.isBefore(segment.sunsetPeriodEnd))
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-        if (isCurrent) {
-          drawIntoCanvas {
-            it.drawArc(
-              left = topLeftOffset.x,
-              top = topLeftOffset.y,
-              bottom = topLeftOffset.y + segmentSize.height,
-              right = topLeftOffset.x + segmentSize.width,
-              startAngle = startAngle,
-              sweepAngle = segment.sweepAngleDegrees,
-              useCenter = false,
-              paint = chartSegmentGlowPaint,
-            )
-          }
+        drawIntoCanvas {
+          it.drawArc(
+            left = topLeftOffset.x,
+            top = topLeftOffset.y,
+            bottom = topLeftOffset.y + segmentSize.height,
+            right = topLeftOffset.x + segmentSize.width,
+            startAngle = startAngle,
+            sweepAngle = segment.sweepAngleDegrees,
+            useCenter = false,
+            paint =
+              if (isCurrent) {
+                chartSegmentGlowPaint
+              } else {
+                val paint =
+                  Paint().apply {
+                    style = PaintingStyle.Stroke
+                    strokeWidth = 50f
+                  }
+                paint.asFrameworkPaint().apply {
+                  color = segment.color.copy(alpha = 0f).toArgb()
+                  setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
+                }
+                paint
+              },
+          )
         }
         drawArc(
           color = segment.color,
