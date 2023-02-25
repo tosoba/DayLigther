@@ -104,17 +104,33 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val sunrisePeriodStart: ZonedDateTime,
-  val sunrisePeriodEnd: ZonedDateTime,
-  val sunsetPeriodStart: ZonedDateTime,
-  val sunsetPeriodEnd: ZonedDateTime,
+  val sunrisePeriodStart: ZonedDateTime?,
+  val sunrisePeriodEnd: ZonedDateTime?,
+  val sunsetPeriodStart: ZonedDateTime?,
+  val sunsetPeriodEnd: ZonedDateTime?,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
   val sunsetTimeLabel: (() -> String)? = null,
   val sunriseDiffLabel: (() -> String)? = null,
   val sunsetDiffLabel: (() -> String)? = null,
-)
+) {
+  fun isCurrent(now: ZonedDateTime, dayMode: DayMode): Boolean =
+    hasAllTimestamps && (isInSunrisePeriod(now, dayMode) || isInSunsetPeriod(now, dayMode))
+
+  private val hasAllTimestamps: Boolean
+    get() =
+      sunrisePeriodStart != null &&
+        sunrisePeriodEnd != null &&
+        sunsetPeriodStart != null &&
+        sunsetPeriodEnd != null
+
+  private fun isInSunrisePeriod(now: ZonedDateTime, dayMode: DayMode): Boolean =
+    dayMode == DayMode.SUNRISE && now.isAfter(sunrisePeriodStart) && now.isBefore(sunrisePeriodEnd)
+
+  private fun isInSunsetPeriod(now: ZonedDateTime, dayMode: DayMode): Boolean =
+    dayMode == DayMode.SUNSET && now.isAfter(sunsetPeriodStart) && now.isBefore(sunsetPeriodEnd)
+}
 
 private fun initialDayMode(today: SunriseSunset): DayMode {
   val now = ZonedDateTime.now(today.sunrise.zone)
@@ -243,26 +259,22 @@ private fun ConstraintLayoutScope.SunriseSunset(
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
       Box(modifier = Modifier.fillMaxSize()) {
-        when (locationSunriseSunsetChange) {
-          is Loading -> {
+        if (locationSunriseSunsetChange is Failed) {
+          Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+            Text(stringResource(R.string.retry))
+          }
+        } else {
+          SunriseSunsetChart(
+            locationSunriseSunsetChange = locationSunriseSunsetChange,
+            dayMode = dayMode,
+            now = now,
+            modifier = Modifier.fillMaxSize()
+          )
+          if (locationSunriseSunsetChange is Loading) {
             LinearProgressIndicator(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             )
           }
-          is Failed -> {
-            Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-              Text(stringResource(R.string.retry))
-            }
-          }
-          is Ready -> {
-            SunriseSunsetChart(
-              locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-              dayMode = dayMode,
-              now = now,
-              modifier = Modifier.fillMaxSize()
-            )
-          }
-          else -> {}
         }
       }
     }
@@ -633,13 +645,18 @@ private fun SunriseSunsetNavigationRail(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(
-  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
   dayMode: DayMode,
   now: ZonedDateTime,
   modifier: Modifier = Modifier
 ) {
   val orientation = LocalConfiguration.current.orientation
-  val (_, today, yesterday) = locationSunriseSunsetChange.value
+  val today =
+    if (locationSunriseSunsetChange is WithData) locationSunriseSunsetChange.data.value.today
+    else null
+  val yesterday =
+    if (locationSunriseSunsetChange is WithData) locationSunriseSunsetChange.data.value.yesterday
+    else null
 
   val chartSegments =
     dayChartSegments(
@@ -661,7 +678,6 @@ private fun SunriseSunsetChart(
       strokeWidth = 75f
     }
   }
-
   val glowColor = colorResource(id = R.color.sun_outline)
   remember {
     chartSegmentGlowPaint.asFrameworkPaint().apply {
@@ -680,13 +696,7 @@ private fun SunriseSunsetChart(
     var startAngle = -180f
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
-      val isCurrent =
-        (dayMode == DayMode.SUNRISE &&
-          now.isAfter(segment.sunrisePeriodStart) &&
-          now.isBefore(segment.sunrisePeriodEnd)) ||
-          (dayMode == DayMode.SUNSET &&
-            now.isAfter(segment.sunsetPeriodStart) &&
-            now.isBefore(segment.sunsetPeriodEnd))
+      val isCurrent = segment.isCurrent(now, dayMode)
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
         drawIntoCanvas {
           it.drawArc(
@@ -920,8 +930,8 @@ private fun SunriseSunsetChart(
 
 @Composable
 private fun dayChartSegments(
-  today: SunriseSunset,
-  yesterday: SunriseSunset,
+  today: SunriseSunset?,
+  yesterday: SunriseSunset?,
   orientation: Int,
   using24HFormat: Boolean
 ): List<DayChartSegment> {
@@ -933,100 +943,133 @@ private fun dayChartSegments(
         sweepAngleDegrees = 180f,
         color = Color(0xFFB9D9E5),
         periodLabel = "Day",
-        sunrisePeriodStart = today.sunrise,
-        sunrisePeriodEnd = today.sunset,
-        sunsetPeriodStart = today.sunrise,
-        sunsetPeriodEnd = today.sunset,
+        sunrisePeriodStart = today?.sunrise,
+        sunrisePeriodEnd = today?.sunset,
+        sunsetPeriodStart = today?.sunrise,
+        sunsetPeriodEnd = today?.sunset,
         sunriseEndingEdgeLabel = sunrise,
         sunsetEndingEdgeLabel = sunset,
-        sunriseTimeLabel = today.sunrise.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.sunset.timeLabel(using24HFormat),
+        sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
+        sunsetTimeLabel = today?.sunset?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          timeDifferenceLabel(yesterday.sunrise.toLocalTime(), today.sunrise.toLocalTime())
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(yesterday.sunrise.toLocalTime(), today.sunrise.toLocalTime())
+          } else {
+            ""
+          }
         },
         sunsetDiffLabel = {
-          timeDifferenceLabel(yesterday.sunset.toLocalTime(), today.sunset.toLocalTime())
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(yesterday.sunset.toLocalTime(), today.sunset.toLocalTime())
+          } else {
+            ""
+          }
         }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF76B3CC),
         periodLabel = "Civil twilight",
-        sunrisePeriodStart = today.civilTwilightBegin,
-        sunrisePeriodEnd = today.sunrise,
-        sunsetPeriodStart = today.sunset,
-        sunsetPeriodEnd = today.civilTwilightEnd,
+        sunrisePeriodStart = today?.civilTwilightBegin,
+        sunrisePeriodEnd = today?.sunrise,
+        sunsetPeriodStart = today?.sunset,
+        sunsetPeriodEnd = today?.civilTwilightEnd,
         sunriseEndingEdgeLabel =
           "Civil dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
         sunsetEndingEdgeLabel =
           "Civil dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 6º below",
-        sunriseTimeLabel = today.civilTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.civilTwilightEnd.timeLabel(using24HFormat),
+        sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
+        sunsetTimeLabel = today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.civilTwilightBegin.toLocalTime(),
-            today.civilTwilightBegin.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(
+              yesterday.civilTwilightBegin.toLocalTime(),
+              today.civilTwilightBegin.toLocalTime()
+            )
+          } else {
+            ""
+          }
         },
         sunsetDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.civilTwilightEnd.toLocalTime(),
-            today.civilTwilightEnd.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(
+              yesterday.civilTwilightEnd.toLocalTime(),
+              today.civilTwilightEnd.toLocalTime()
+            )
+          } else {
+            ""
+          }
         }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF3D6475),
         periodLabel = "Nautical twilight",
-        sunrisePeriodStart = today.nauticalTwilightBegin,
-        sunrisePeriodEnd = today.civilTwilightBegin,
-        sunsetPeriodStart = today.civilTwilightEnd,
-        sunsetPeriodEnd = today.nauticalTwilightEnd,
+        sunrisePeriodStart = today?.nauticalTwilightBegin,
+        sunrisePeriodEnd = today?.civilTwilightBegin,
+        sunsetPeriodStart = today?.civilTwilightEnd,
+        sunsetPeriodEnd = today?.nauticalTwilightEnd,
         sunriseEndingEdgeLabel =
           "Nautical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
         sunsetEndingEdgeLabel =
           "Nautical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 12º below",
-        sunriseTimeLabel = today.nauticalTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.nauticalTwilightEnd.timeLabel(using24HFormat),
+        sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
+        sunsetTimeLabel = today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.nauticalTwilightBegin.toLocalTime(),
-            today.nauticalTwilightBegin.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(
+              yesterday.nauticalTwilightBegin.toLocalTime(),
+              today.nauticalTwilightBegin.toLocalTime()
+            )
+          } else {
+            ""
+          }
         },
         sunsetDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.nauticalTwilightEnd.toLocalTime(),
-            today.nauticalTwilightEnd.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(
+              yesterday.nauticalTwilightEnd.toLocalTime(),
+              today.nauticalTwilightEnd.toLocalTime()
+            )
+          } else {
+            ""
+          }
         }
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
         color = Color(0xFF223F4D),
         periodLabel = "Astronomical twilight",
-        sunrisePeriodStart = today.astronomicalTwilightBegin,
-        sunrisePeriodEnd = today.nauticalTwilightBegin,
-        sunsetPeriodStart = today.nauticalTwilightEnd,
-        sunsetPeriodEnd = today.astronomicalTwilightEnd,
+        sunrisePeriodStart = today?.astronomicalTwilightBegin,
+        sunrisePeriodEnd = today?.nauticalTwilightBegin,
+        sunsetPeriodStart = today?.nauticalTwilightEnd,
+        sunsetPeriodEnd = today?.astronomicalTwilightEnd,
         sunriseEndingEdgeLabel =
           "Astronomical dawn ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
         sunsetEndingEdgeLabel =
           "Astronomical dusk ${if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "} 18º below",
-        sunriseTimeLabel = today.astronomicalTwilightBegin.timeLabel(using24HFormat),
-        sunsetTimeLabel = today.astronomicalTwilightEnd.timeLabel(using24HFormat),
+        sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
+        sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.astronomicalTwilightBegin.toLocalTime(),
-            today.astronomicalTwilightBegin.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+
+            timeDifferenceLabel(
+              yesterday.astronomicalTwilightBegin.toLocalTime(),
+              today.astronomicalTwilightBegin.toLocalTime()
+            )
+          } else {
+            ""
+          }
         },
         sunsetDiffLabel = {
-          timeDifferenceLabel(
-            yesterday.astronomicalTwilightEnd.toLocalTime(),
-            today.astronomicalTwilightEnd.toLocalTime()
-          )
+          if (today != null && yesterday != null) {
+            timeDifferenceLabel(
+              yesterday.astronomicalTwilightEnd.toLocalTime(),
+              today.astronomicalTwilightEnd.toLocalTime()
+            )
+          } else {
+            ""
+          }
         }
       ),
       DayChartSegment(
@@ -1034,11 +1077,13 @@ private fun dayChartSegments(
         color = Color(0xFF172A33),
         periodLabel = "Night",
         sunrisePeriodStart =
-          ZonedDateTime.ofLocal(today.date.atStartOfDay(), today.sunrise.zone, null),
-        sunrisePeriodEnd = today.astronomicalTwilightBegin,
-        sunsetPeriodStart = today.astronomicalTwilightEnd,
+          today?.let { ZonedDateTime.ofLocal(it.date.atStartOfDay(), it.sunrise.zone, null) },
+        sunrisePeriodEnd = today?.astronomicalTwilightBegin,
+        sunsetPeriodStart = today?.astronomicalTwilightEnd,
         sunsetPeriodEnd =
-          ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), today.sunrise.zone, null),
+          today?.let {
+            ZonedDateTime.ofLocal(it.date.plusDays(1L).atStartOfDay(), it.sunrise.zone, null)
+          },
       ),
     )
   }
