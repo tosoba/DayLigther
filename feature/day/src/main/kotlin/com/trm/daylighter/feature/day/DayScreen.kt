@@ -137,86 +137,50 @@ private fun DayScreen(
   var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
   ConstraintLayout(modifier = modifier) {
-    when (locationSunriseSunsetChange) {
-      is Empty -> {
-        val (drawerMenuButton, addLocationButton) = createRefs()
-        DrawerMenuButton(
-          onDrawerMenuClick = onDrawerMenuClick,
-          modifier =
-            Modifier.constrainAs(drawerMenuButton) {
-              start.linkTo(parent.start, 16.dp)
-              top.linkTo(parent.top, 16.dp)
-            }
-        )
-        Button(
-          onClick = onAddLocationClick,
-          modifier =
-            Modifier.constrainAs(addLocationButton) {
-              linkTo(parent.start, parent.end)
-              linkTo(parent.top, parent.bottom)
-            }
-        ) {
-          Text(text = "Add location")
-        }
+    if (locationSunriseSunsetChange is Empty) {
+      val (emptyDrawerMenuButton, addLocationButton) = createRefs()
+      DrawerMenuButton(
+        onDrawerMenuClick = onDrawerMenuClick,
+        modifier =
+          Modifier.constrainAs(emptyDrawerMenuButton) {
+            start.linkTo(parent.start, 16.dp)
+            top.linkTo(parent.top, 16.dp)
+          }
+      )
+      Button(
+        onClick = onAddLocationClick,
+        modifier =
+          Modifier.constrainAs(addLocationButton) {
+            linkTo(parent.start, parent.end)
+            linkTo(parent.top, parent.bottom)
+          }
+      ) {
+        Text(text = stringResource(R.string.add_location))
       }
-      is Ready -> {
-        var dayMode by rememberSaveable {
-          mutableStateOf(initialDayMode(locationSunriseSunsetChange.data.value.today))
-        }
-        SunriseSunset(
-          locationSunriseSunsetChange = locationSunriseSunsetChange.data,
-          dayMode = dayMode,
-          now = now,
-          locationsCount = locationsCount,
-          currentLocationIndex = currentLocationIndex,
-          onChangeLocationIndex = onChangeLocationIndex,
-          mapZoom = mapZoom,
-          onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
-          onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
-          onDayModeNavClick = { dayMode = it },
-          onDrawerMenuClick = onDrawerMenuClick
+    } else {
+      var dayMode by rememberSaveable {
+        mutableStateOf(
+          if (locationSunriseSunsetChange is WithData) {
+            initialDayMode(locationSunriseSunsetChange.data.value.today)
+          } else {
+            DayMode.SUNRISE
+          }
         )
       }
-      is Failed -> {
-        val (drawerMenuButton, retryButton) = createRefs()
-        DrawerMenuButton(
-          onDrawerMenuClick = onDrawerMenuClick,
-          modifier =
-            Modifier.constrainAs(drawerMenuButton) {
-              start.linkTo(parent.start, 16.dp)
-              top.linkTo(parent.top, 16.dp)
-            }
-        )
-        Button(
-          onClick = onRetryClick,
-          modifier =
-            Modifier.constrainAs(retryButton) {
-              linkTo(parent.start, parent.end)
-              linkTo(parent.top, parent.bottom)
-            }
-        ) {
-          Text("Retry")
-        }
-      }
-      is Loading -> {
-        val (drawerMenuButton, loadingIndicator) = createRefs()
-        DrawerMenuButton(
-          onDrawerMenuClick = onDrawerMenuClick,
-          modifier =
-            Modifier.constrainAs(drawerMenuButton) {
-              start.linkTo(parent.start, 16.dp)
-              top.linkTo(parent.top, 16.dp)
-            }
-        )
-
-        CircularProgressIndicator(
-          modifier =
-            Modifier.constrainAs(loadingIndicator) {
-              linkTo(parent.start, parent.end)
-              linkTo(parent.top, parent.bottom)
-            }
-        )
-      }
+      SunriseSunset(
+        locationSunriseSunsetChange = locationSunriseSunsetChange,
+        dayMode = dayMode,
+        now = now,
+        locationsCount = locationsCount,
+        currentLocationIndex = currentLocationIndex,
+        onChangeLocationIndex = onChangeLocationIndex,
+        mapZoom = mapZoom,
+        onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
+        onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
+        onDrawerMenuClick = onDrawerMenuClick,
+        onDayModeNavClick = { dayMode = it },
+        onRetryClick = onRetryClick,
+      )
     }
   }
 }
@@ -231,7 +195,7 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ConstraintLayoutScope.SunriseSunset(
-  locationSunriseSunsetChange: StableValue<LocationSunriseSunsetChange>,
+  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
   dayMode: DayMode,
   now: ZonedDateTime,
   locationsCount: Int,
@@ -242,6 +206,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onZoomOutClick: () -> Unit,
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
+  onRetryClick: () -> Unit,
 ) {
   val (drawerMenuButton, pagerBox, navigation, dayTimeCard, map, mapZoomControls) = createRefs()
   val orientation = LocalConfiguration.current.orientation
@@ -266,12 +231,25 @@ private fun ConstraintLayoutScope.SunriseSunset(
       }
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
-      SunriseSunsetChart(
-        locationSunriseSunsetChange = locationSunriseSunsetChange,
-        dayMode = dayMode,
-        now = now,
-        modifier = Modifier.fillMaxSize()
-      )
+      when (locationSunriseSunsetChange) {
+        is Loading -> {
+          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        is Failed -> {
+          Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+            Text(stringResource(R.string.retry))
+          }
+        }
+        is Ready -> {
+          SunriseSunsetChart(
+            locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+            dayMode = dayMode,
+            now = now,
+            modifier = Modifier.fillMaxSize()
+          )
+        }
+        else -> {}
+      }
     }
 
     HorizontalPagerIndicator(
@@ -281,57 +259,59 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
   }
 
-  MapCard(
-    locationSunriseSunsetChange = locationSunriseSunsetChange,
-    mapZoom = mapZoom,
-    modifier =
-      Modifier.run {
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            width((LocalConfiguration.current.screenWidthDp * .4f).dp)
-          } else {
-            height((LocalConfiguration.current.screenHeightDp * .35f).dp)
+  if (locationSunriseSunsetChange is Ready) {
+    MapCard(
+      locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+      mapZoom = mapZoom,
+      modifier =
+        Modifier.run {
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+              width((LocalConfiguration.current.screenWidthDp * .4f).dp)
+            } else {
+              height((LocalConfiguration.current.screenHeightDp * .35f).dp)
+            }
           }
-        }
-        .aspectRatio(1f)
-        .constrainAs(map) {
-          top.linkTo(parent.top, 16.dp)
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            end.linkTo(parent.end, 16.dp)
-          } else {
-            end.linkTo(mapZoomControls.start, 5.dp)
+          .aspectRatio(1f)
+          .constrainAs(map) {
+            top.linkTo(parent.top, 16.dp)
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+              end.linkTo(parent.end, 16.dp)
+            } else {
+              end.linkTo(mapZoomControls.start, 5.dp)
+            }
           }
-        }
-  )
+    )
 
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center,
-      modifier =
-        Modifier.constrainAs(mapZoomControls) {
-          start.linkTo(map.start)
-          end.linkTo(map.end)
-          top.linkTo(map.bottom, 5.dp)
-        }
-    ) {
-      ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-      Spacer(modifier = Modifier.width(5.dp))
-      ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
-    }
-  } else {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier =
-        Modifier.constrainAs(mapZoomControls) {
-          end.linkTo(parent.end, 16.dp)
-          top.linkTo(map.top)
-          bottom.linkTo(map.bottom)
-        }
-    ) {
-      ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-      Spacer(modifier = Modifier.height(5.dp))
-      ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier =
+          Modifier.constrainAs(mapZoomControls) {
+            start.linkTo(map.start)
+            end.linkTo(map.end)
+            top.linkTo(map.bottom, 5.dp)
+          }
+      ) {
+        ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+        Spacer(modifier = Modifier.width(5.dp))
+        ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+      }
+    } else {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier =
+          Modifier.constrainAs(mapZoomControls) {
+            end.linkTo(parent.end, 16.dp)
+            top.linkTo(map.top)
+            bottom.linkTo(map.bottom)
+          }
+      ) {
+        ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+        Spacer(modifier = Modifier.height(5.dp))
+        ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+      }
     }
   }
 
@@ -345,14 +325,16 @@ private fun ConstraintLayoutScope.SunriseSunset(
         }
     )
 
-    ClockAndDayLengthCard(
-      locationSunriseSunsetChange = locationSunriseSunsetChange,
-      modifier =
-        Modifier.constrainAs(dayTimeCard) {
-          top.linkTo(drawerMenuButton.bottom, 10.dp)
-          start.linkTo(parent.start, 16.dp)
-        },
-    )
+    if (locationSunriseSunsetChange is Ready) {
+      ClockAndDayLengthCard(
+        locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(drawerMenuButton.bottom, 10.dp)
+            start.linkTo(parent.start, 16.dp)
+          },
+      )
+    }
 
     SunriseSunsetNavigationBar(
       modifier =
@@ -372,17 +354,19 @@ private fun ConstraintLayoutScope.SunriseSunset(
         },
       onDrawerMenuClick = onDrawerMenuClick,
       dayMode = dayMode,
-      onDayModeChange = onDayModeNavClick
+      onDayModeChange = onDayModeNavClick,
     )
 
-    ClockAndDayLengthCard(
-      locationSunriseSunsetChange = locationSunriseSunsetChange,
-      modifier =
-        Modifier.constrainAs(dayTimeCard) {
-          top.linkTo(parent.top, 16.dp)
-          start.linkTo(navigation.end, 16.dp)
-        },
-    )
+    if (locationSunriseSunsetChange is Ready) {
+      ClockAndDayLengthCard(
+        locationSunriseSunsetChange = locationSunriseSunsetChange.data,
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(parent.top, 16.dp)
+            start.linkTo(navigation.end, 16.dp)
+          },
+      )
+    }
   }
 }
 

@@ -2,4 +2,6 @@
 <resources>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
+    <string name="retry">Retry</string>
+    <string name="add_location">Add location</string>
 </resources>
