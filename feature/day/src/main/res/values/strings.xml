@@ -4,4 +4,17 @@
     <string name="sunset">Sunset</string>
     <string name="retry">Retry</string>
     <string name="add_location">Add location</string>
+    <string name="day">Day</string>
+    <string name="civil_twilight">Civil twilight</string>
+    <string name="nautical_twilight">Nautical twilight</string>
+    <string name="astronomical_twilight">Astronomical twilight</string>
+    <string name="night">Night</string>
+    <string name="civil_dawn">Civil dawn %1$s 6º below</string>
+    <string name="civil_dusk">Civil dusk %1$s 6º below</string>
+    <string name="nautical_dawn">Nautical dawn %1$s 12º below</string>
+    <string name="nautical_dusk">Nautical dusk %1$s 12º below</string>
+    <string name="astronomical_dawn">Astronomical dawn %1$s 18º below</string>
+    <string name="astronomical_dusk">Astronomical dusk %1$s 18º below</string>
+    <string name="application_menu">Application menu</string>
+    <string name="horizon">Horizon</string>
 </resources>
