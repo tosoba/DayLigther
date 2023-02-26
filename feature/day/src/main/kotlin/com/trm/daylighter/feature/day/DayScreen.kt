@@ -61,6 +61,7 @@ import com.trm.daylighter.core.ui.composable.ZoomInButton
 import com.trm.daylighter.core.ui.composable.ZoomOutButton
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.model.DayMode
 import java.lang.Float.max
 import java.time.*
@@ -941,7 +942,7 @@ private fun dayChartSegments(
     listOf(
       DayChartSegment(
         sweepAngleDegrees = 180f,
-        color = Color(0xFFB9D9E5),
+        color = dayColor,
         periodLabel = "Day",
         sunrisePeriodStart = today?.sunrise,
         sunrisePeriodEnd = today?.sunset,
@@ -968,7 +969,7 @@ private fun dayChartSegments(
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color(0xFF76B3CC),
+        color = civilTwilightColor,
         periodLabel = "Civil twilight",
         sunrisePeriodStart = today?.civilTwilightBegin,
         sunrisePeriodEnd = today?.sunrise,
@@ -1003,7 +1004,7 @@ private fun dayChartSegments(
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color(0xFF3D6475),
+        color = nauticalTwilightColor,
         periodLabel = "Nautical twilight",
         sunrisePeriodStart = today?.nauticalTwilightBegin,
         sunrisePeriodEnd = today?.civilTwilightBegin,
@@ -1038,7 +1039,7 @@ private fun dayChartSegments(
       ),
       DayChartSegment(
         sweepAngleDegrees = 6f,
-        color = Color(0xFF223F4D),
+        color = astronomicalTwilightColor,
         periodLabel = "Astronomical twilight",
         sunrisePeriodStart = today?.astronomicalTwilightBegin,
         sunrisePeriodEnd = today?.nauticalTwilightBegin,
@@ -1052,7 +1053,6 @@ private fun dayChartSegments(
         sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
           if (today != null && yesterday != null) {
-
             timeDifferenceLabel(
               yesterday.astronomicalTwilightBegin.toLocalTime(),
               today.astronomicalTwilightBegin.toLocalTime()
@@ -1074,7 +1074,7 @@ private fun dayChartSegments(
       ),
       DayChartSegment(
         sweepAngleDegrees = 72f,
-        color = Color(0xFF172A33),
+        color = nightColor,
         periodLabel = "Night",
         sunrisePeriodStart =
           today?.let { ZonedDateTime.ofLocal(it.date.atStartOfDay(), it.sunrise.zone, null) },
