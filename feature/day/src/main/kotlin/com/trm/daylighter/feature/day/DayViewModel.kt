@@ -49,13 +49,14 @@ constructor(
   private val retryFlow = MutableSharedFlow<Unit>()
 
   val currentLocationSunriseSunsetChangeFlow:
-    SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> =
+    SharedFlow<StableValue<Loadable<LocationSunriseSunsetChange>>> =
     buildCurrentLocationSunriseSunsetChangeFlow()
 
   val nowAtCurrentLocation: SharedFlow<ZonedDateTime> =
     currentLocationSunriseSunsetChangeFlow
-      .filterIsInstance<Ready<StableValue<LocationSunriseSunsetChange>>>()
-      .map { it.data.value.today }
+      .map { it.value }
+      .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
+      .map { it.data.today }
       .transformLatest { today ->
         val initialNow = today.now()
         emit(initialNow)
@@ -97,7 +98,7 @@ constructor(
   }
 
   private fun buildCurrentLocationSunriseSunsetChangeFlow():
-    SharedFlow<Loadable<StableValue<LocationSunriseSunsetChange>>> {
+    SharedFlow<StableValue<Loadable<LocationSunriseSunsetChange>>> {
     val atCurrentIndexFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
       currentLocationIndexFlow
         .combine(locationCountFlow, ::Pair)
@@ -142,7 +143,7 @@ constructor(
         currentLocationSunriseSunsetChangeFlow,
         loadNextLocationSunriseSunsetChangeAfterMidnightFlow
       )
-      .map { it.map(LocationSunriseSunsetChange::asStable) }
+      .map(Loadable<LocationSunriseSunsetChange>::asStable)
       .debounce(250L)
       .shareIn(
         scope = viewModelScope,

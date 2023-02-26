@@ -80,9 +80,9 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val locationSunriseSunsetChange =
+  val locationSunriseSunsetChange: State<StableValue<Loadable<LocationSunriseSunsetChange>>> =
     viewModel.currentLocationSunriseSunsetChangeFlow.collectAsStateWithLifecycle(
-      initialValue = LoadingFirst
+      initialValue = StableValue(LoadingFirst)
     )
   val now =
     viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = ZonedDateTime.now())
@@ -103,7 +103,7 @@ fun DayRoute(
 
 @Composable
 private fun DayScreen(
-  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  locationSunriseSunsetChange: StableValue<Loadable<LocationSunriseSunsetChange>>,
   now: ZonedDateTime,
   locationsCount: Int,
   currentLocationIndex: Int,
@@ -114,9 +114,10 @@ private fun DayScreen(
   modifier: Modifier = Modifier,
 ) {
   var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
+  val changeValue = locationSunriseSunsetChange.value
 
   ConstraintLayout(modifier = modifier) {
-    if (locationSunriseSunsetChange is Empty) {
+    if (changeValue is Empty) {
       val (emptyDrawerMenuButton, addLocationButton) = createRefs()
       DrawerMenuButton(
         onDrawerMenuClick = onDrawerMenuClick,
@@ -139,16 +140,16 @@ private fun DayScreen(
     } else {
       var dayMode by rememberSaveable {
         mutableStateOf(
-          if (locationSunriseSunsetChange is WithData) {
-            initialDayMode(locationSunriseSunsetChange.data.value.today)
+          if (changeValue is WithData) {
+            initialDayMode(changeValue.data.today)
           } else {
             DayMode.SUNRISE
           }
         )
       }
       LaunchedEffect(locationSunriseSunsetChange) {
-        if (locationSunriseSunsetChange is WithData) {
-          dayMode = initialDayMode(locationSunriseSunsetChange.data.value.today)
+        if (changeValue is WithData) {
+          dayMode = initialDayMode(changeValue.data.today)
         }
       }
 
@@ -183,7 +184,7 @@ private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier =
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ConstraintLayoutScope.SunriseSunset(
-  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  locationSunriseSunsetChange: StableValue<Loadable<LocationSunriseSunsetChange>>,
   dayMode: DayMode,
   now: ZonedDateTime,
   locationsCount: Int,
@@ -204,6 +205,8 @@ private fun ConstraintLayoutScope.SunriseSunset(
     snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
   }
 
+  val changeValue = locationSunriseSunsetChange.value
+
   Box(
     modifier =
       Modifier.constrainAs(pagerBox) {
@@ -220,7 +223,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   ) {
     HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
       Box(modifier = Modifier.fillMaxSize()) {
-        if (locationSunriseSunsetChange is Failed) {
+        if (changeValue is Failed) {
           Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
             Text(stringResource(R.string.retry))
           }
@@ -231,7 +234,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
             now = now,
             modifier = Modifier.fillMaxSize()
           )
-          if (locationSunriseSunsetChange is Loading) {
+          if (changeValue is Loading) {
             LinearProgressIndicator(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             )
@@ -248,7 +251,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
   }
 
   AnimatedVisibility(
-    visible = locationSunriseSunsetChange is Ready,
+    visible = changeValue is Ready,
     enter = fadeIn(),
     exit = fadeOut(),
     modifier =
@@ -277,7 +280,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     AnimatedVisibility(
-      visible = locationSunriseSunsetChange is Ready,
+      visible = changeValue is Ready,
       enter = fadeIn(),
       exit = fadeOut(),
       modifier =
@@ -298,7 +301,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     }
   } else {
     AnimatedVisibility(
-      visible = locationSunriseSunsetChange is Ready,
+      visible = changeValue is Ready,
       enter = fadeIn(),
       exit = fadeOut(),
       modifier =
@@ -330,7 +333,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
 
     AnimatedVisibility(
-      visible = locationSunriseSunsetChange is Ready,
+      visible = changeValue is Ready,
       enter = fadeIn(),
       exit = fadeOut(),
       modifier =
@@ -364,7 +367,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
     )
 
     AnimatedVisibility(
-      visible = locationSunriseSunsetChange is Ready,
+      visible = changeValue is Ready,
       enter = fadeIn(),
       exit = fadeOut(),
       modifier =
@@ -380,17 +383,19 @@ private fun ConstraintLayoutScope.SunriseSunset(
 
 @Composable
 private fun MapCard(
-  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  locationSunriseSunsetChange: StableValue<Loadable<LocationSunriseSunsetChange>>,
   mapZoom: Double,
   modifier: Modifier = Modifier,
 ) {
+  val changeValue = locationSunriseSunsetChange.value
+
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     modifier = modifier,
   ) {
-    if (locationSunriseSunsetChange is WithData) {
+    if (changeValue is WithData) {
       Box(modifier = Modifier.fillMaxSize()) {
-        val (location) = locationSunriseSunsetChange.data.value
+        val (location) = changeValue.data
         val mapView = rememberMapViewWithLifecycle()
         val darkMode = isSystemInDarkTheme()
         AndroidView(
@@ -416,9 +421,11 @@ private fun MapCard(
 
 @Composable
 private fun ClockAndDayLengthCard(
-  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  locationSunriseSunsetChange: StableValue<Loadable<LocationSunriseSunsetChange>>,
   modifier: Modifier = Modifier,
 ) {
+  val changeValue = locationSunriseSunsetChange.value
+
   Surface(
     shape = CardDefaults.shape,
     color = FloatingActionButtonDefaults.containerColor,
@@ -426,8 +433,8 @@ private fun ClockAndDayLengthCard(
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
-    if (locationSunriseSunsetChange is WithData) {
-      val (_, today, yesterday) = locationSunriseSunsetChange.data.value
+    if (changeValue is WithData) {
+      val (_, today, yesterday) = changeValue.data
       if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           Spacer(modifier = Modifier.height(5.dp))
@@ -606,18 +613,16 @@ private fun SunriseSunsetNavigationRail(
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun SunriseSunsetChart(
-  locationSunriseSunsetChange: Loadable<StableValue<LocationSunriseSunsetChange>>,
+  locationSunriseSunsetChange: StableValue<Loadable<LocationSunriseSunsetChange>>,
   dayMode: DayMode,
   now: ZonedDateTime,
   modifier: Modifier = Modifier
 ) {
+  val changeValue = locationSunriseSunsetChange.value
+
   val orientation = LocalConfiguration.current.orientation
-  val today =
-    if (locationSunriseSunsetChange is WithData) locationSunriseSunsetChange.data.value.today
-    else null
-  val yesterday =
-    if (locationSunriseSunsetChange is WithData) locationSunriseSunsetChange.data.value.yesterday
-    else null
+  val today = if (changeValue is WithData) changeValue.data.today else null
+  val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
 
   val chartSegments =
     dayChartSegments(
