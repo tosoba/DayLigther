@@ -8,7 +8,7 @@ import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
-import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
 import com.trm.daylighter.feature.day.ext.getUpcomingTimestampsSorted
@@ -49,7 +49,7 @@ constructor(
   private val retryFlow = MutableSharedFlow<Unit>()
 
   val currentLocationSunriseSunsetChangeFlow:
-    SharedFlow<StableValue<Loadable<LocationSunriseSunsetChange>>> =
+    SharedFlow<StableLoadable<LocationSunriseSunsetChange>> =
     buildCurrentLocationSunriseSunsetChangeFlow()
 
   val nowAtCurrentLocation: SharedFlow<ZonedDateTime> =
@@ -98,7 +98,7 @@ constructor(
   }
 
   private fun buildCurrentLocationSunriseSunsetChangeFlow():
-    SharedFlow<StableValue<Loadable<LocationSunriseSunsetChange>>> {
+    SharedFlow<StableLoadable<LocationSunriseSunsetChange>> {
     val atCurrentIndexFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
       currentLocationIndexFlow
         .combine(locationCountFlow, ::Pair)
