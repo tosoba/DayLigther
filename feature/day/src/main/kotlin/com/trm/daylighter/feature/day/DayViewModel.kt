@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.usecase.EnqueueSyncUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -32,6 +33,7 @@ constructor(
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
   private val getLocationSunriseSunsetChangeAtIndexUseCase:
     GetLocationSunriseSunsetChangeAtIndexUseCase,
+  private val enqueueSyncUseCase: EnqueueSyncUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
     getLocationsCountFlowUseCase()
@@ -145,6 +147,14 @@ constructor(
       )
       .map(Loadable<LocationSunriseSunsetChange>::asStable)
       .debounce(250L)
+      .onEach {
+        if (it.value is Ready) {
+          viewModelScope.launch {
+            delay(1_000L)
+            enqueueSyncUseCase()
+          }
+        }
+      }
       .shareIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
