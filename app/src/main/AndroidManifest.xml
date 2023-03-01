@@ -26,6 +26,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="@string/add_location_deep_link_host"
+                    android:scheme="@string/nav_scheme" />
+            </intent-filter>
+
         </activity>
 
         <receiver

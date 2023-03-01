@@ -32,9 +32,8 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 
 const val locationRoute = "location_route"
-
-const val locationIdParam = "locationId"
-const val editLocationRoute = "location_route/{${locationIdParam}}"
+const val locationIdParam = "location_id"
+const val editLocationRoute = "$locationRoute/{$locationIdParam}"
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable

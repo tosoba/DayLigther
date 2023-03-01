@@ -136,7 +136,7 @@ private fun DayScreen(
             linkTo(parent.top, parent.bottom)
           }
       ) {
-        Text(text = stringResource(R.string.add_location))
+        Text(text = stringResource(commonR.string.add_location))
       }
     } else {
       var dayMode by rememberSaveable {

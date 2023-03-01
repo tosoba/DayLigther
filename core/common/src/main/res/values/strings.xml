@@ -4,4 +4,9 @@
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="back">Back</string>
+    <string name="add_location">Add location</string>
+
+    <string name="nav_scheme">daylighter</string>
+    <string name="add_location_deep_link_host">location_deep_link</string>
+    <string name="add_location_deep_link_uri">daylighter://location_deep_link</string>
 </resources>

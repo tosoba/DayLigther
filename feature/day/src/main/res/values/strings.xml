@@ -3,7 +3,6 @@
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
     <string name="retry">Retry</string>
-    <string name="add_location">Add location</string>
     <string name="day">Day</string>
     <string name="civil_twilight">Civil twilight</string>
     <string name="nautical_twilight">Nautical twilight</string>

@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -22,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.R
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
@@ -152,6 +152,8 @@ private fun DaylighterNavHost(
     )
   }
 
+  val addLocationDeepLinkUri = stringResource(id = commonR.string.add_location_deep_link_uri)
+
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
     composable(dayRoute) {
       DayRoute(
@@ -163,7 +165,10 @@ private fun DaylighterNavHost(
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
-    composable(locationRoute) {
+    composable(
+      locationRoute,
+      deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUri })
+    ) {
       LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
     }
 
