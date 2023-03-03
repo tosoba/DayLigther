@@ -43,18 +43,23 @@ fun LocationRoute(
   viewModel: LocationViewModel = hiltViewModel()
 ) {
   LaunchedEffect(Unit) { viewModel.savedFlow.collect { onBackClick() } }
+
   val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
+  val isLoading = viewModel.isLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
+
   LocationScreen(
     mapPosition = mapPosition.value,
+    isLoading = isLoading.value,
     onSaveLocationClick = viewModel::saveLocation,
-    modifier = modifier,
-    onBackClick = onBackClick
+    onBackClick = onBackClick,
+    modifier = modifier
   )
 }
 
 @Composable
 private fun LocationScreen(
   mapPosition: MapPosition,
+  isLoading: Boolean,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -104,21 +109,26 @@ private fun LocationScreen(
       modifier = Modifier.align(Alignment.Center)
     )
 
-    Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
-      FloatingActionButton(onClick = {}) {
-        Icon(
-          imageVector = Icons.Filled.MyLocation,
-          contentDescription = stringResource(R.string.my_location),
-        )
-      }
-      Spacer(modifier = Modifier.height(10.dp))
-      FloatingActionButton(
-        onClick = { onSaveLocationClick(mapView.mapCenter.latitude, mapView.mapCenter.longitude) }
-      ) {
-        Icon(
-          imageVector = Icons.Filled.Done,
-          contentDescription = stringResource(R.string.save_location)
-        )
+    AnimatedVisibility(
+      visible = !isLoading,
+      modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
+    ) {
+      Column {
+        FloatingActionButton(onClick = {}) {
+          Icon(
+            imageVector = Icons.Filled.MyLocation,
+            contentDescription = stringResource(R.string.my_location),
+          )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        FloatingActionButton(
+          onClick = { onSaveLocationClick(mapView.mapCenter.latitude, mapView.mapCenter.longitude) }
+        ) {
+          Icon(
+            imageVector = Icons.Filled.Done,
+            contentDescription = stringResource(R.string.save_location)
+          )
+        }
       }
     }
 
@@ -163,6 +173,13 @@ private fun LocationScreen(
           }
         }
       }
+    }
+
+    AnimatedVisibility(
+      visible = isLoading,
+      modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+    ) {
+      LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
   }
 }

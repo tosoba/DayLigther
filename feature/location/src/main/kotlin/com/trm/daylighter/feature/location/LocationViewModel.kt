@@ -4,6 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.ext.MapDefaults
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.LoadingFirst
+import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.GetLocationById
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.model.MapPosition
@@ -20,8 +24,10 @@ constructor(
   private val getLocationById: GetLocationById,
   private val saveLocationUseCase: SaveLocationUseCase,
 ) : ViewModel() {
-  private val _savedFlow = MutableSharedFlow<Unit>(replay = 1)
-  val savedFlow = _savedFlow.asSharedFlow()
+  private val _savingFlow = MutableSharedFlow<Loadable<Unit>>(replay = 1)
+  val savedFlow: Flow<Unit> =
+    _savingFlow.asSharedFlow().filterIsInstance<Ready<Unit>>().map { it.data }
+  val isLoadingFlow: Flow<Boolean> = _savingFlow.asSharedFlow().map { it is Loading }
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
@@ -40,13 +46,14 @@ constructor(
 
   fun saveLocation(latitude: Double, longitude: Double) {
     viewModelScope.launch {
+      _savingFlow.emit(LoadingFirst)
       val locationId = savedStateHandle.get<Long>(locationIdParam)
       if (locationId == null) {
         saveLocationUseCase(latitude = latitude, longitude = longitude)
       } else {
         saveLocationUseCase(id = locationId, latitude = latitude, longitude = longitude)
       }
-      _savedFlow.emit(Unit)
+      _savingFlow.emit(Ready(Unit))
     }
   }
 }

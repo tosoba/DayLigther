@@ -72,7 +72,7 @@ constructor(
         )
         .getOverlappingTimeZone(degreesLatitude = latitude, degreesLongitude = longitude)
         ?.zoneId
-        ?.run { ZoneId.of(this) }
+        ?.let(ZoneId::of)
         ?: ZoneId.systemDefault()
     }
 }
