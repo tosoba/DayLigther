@@ -3,7 +3,6 @@ package com.trm.daylighter.core.data.repo
 import androidx.room.withTransaction
 import com.trm.daylighter.core.common.di.DaylighterDispatchers
 import com.trm.daylighter.core.common.di.Dispatcher
-import com.trm.daylighter.core.data.di.TimeZoneEngineAsyncProvider
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
@@ -17,6 +16,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import us.dustinj.timezonemap.TimeZoneMap
 
 class LocationRepoImpl
 @Inject
@@ -24,11 +24,10 @@ constructor(
   private val db: DaylighterDatabase,
   private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
-  private val timeZoneEngineAsyncProvider: TimeZoneEngineAsyncProvider,
   @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double) {
-    val zoneId = withContext(defaultDispatcher) { getTimeZoneId(latitude, longitude) }
+    val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
     locationDao.insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
   }
 
@@ -51,7 +50,7 @@ constructor(
     locationDao.selectById(id).asDomainModel()
 
   override suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double) {
-    val zoneId = getTimeZoneId(latitude, longitude)
+    val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
     db.withTransaction {
       locationDao.updateLocationLatLngById(
         id = id,
@@ -64,8 +63,16 @@ constructor(
   }
 
   private suspend fun getTimeZoneId(latitude: Double, longitude: Double): ZoneId =
-    timeZoneEngineAsyncProvider.engine
-      .await()
-      .query(latitude, longitude)
-      .orElse(ZoneId.systemDefault())
+    withContext(defaultDispatcher) {
+      TimeZoneMap.forRegion(
+          minDegreesLatitude = latitude - 1.0,
+          minDegreesLongitude = longitude - 1.0,
+          maxDegreesLatitude = latitude + 1.0,
+          maxDegreesLongitude = longitude + 1.0
+        )
+        .getOverlappingTimeZone(degreesLatitude = latitude, degreesLongitude = longitude)
+        ?.zoneId
+        ?.run { ZoneId.of(this) }
+        ?: ZoneId.systemDefault()
+    }
 }
