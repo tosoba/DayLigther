@@ -45,14 +45,20 @@ constructor(
           val dates = listOf(today.minusDays(1L), today)
 
           var sunriseSunsets =
-            sunriseSunsetDao.selectMostRecentByLocationId(locationId = location.id, 2)
+            sunriseSunsetDao.selectMostRecentByLocationId(
+              locationId = location.id,
+              limit = RECENT_LOCATIONS_LIMIT
+            )
           var sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
           val datesToDownload = dates.filterNot(sunriseSunsetsDates::contains)
           if (datesToDownload.isEmpty()) return@forEach
 
           mutex.withLock {
             sunriseSunsets =
-              sunriseSunsetDao.selectMostRecentByLocationId(locationId = location.id, 2)
+              sunriseSunsetDao.selectMostRecentByLocationId(
+                locationId = location.id,
+                limit = RECENT_LOCATIONS_LIMIT
+              )
             sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
             val downloaded =
               dates.filterNot(sunriseSunsetsDates::contains).associateWith { date ->
@@ -91,7 +97,7 @@ constructor(
           locationDao.selectLocationAtOffset(offset = index) ?: return@withTransaction null
         val sunriseSunsets =
           sunriseSunsetDao
-            .selectMostRecentByLocationId(locationId = location.id, limit = 2)
+            .selectMostRecentByLocationId(locationId = location.id, limit = RECENT_LOCATIONS_LIMIT)
             .associateBy(SunriseSunsetEntity::date)
         location to sunriseSunsets
       }
@@ -106,27 +112,29 @@ constructor(
 
   override suspend fun getDefaultLocationSunriseSunsetChange():
     Flow<Loadable<LocationSunriseSunsetChange>> =
-    sunriseSunsetDao.selectMostRecentForDefaultLocation(limit = 2).transformLatest {
-      emit(LoadingFirst)
-      val (location, existingSunriseSunsets) =
-        it
-          .mapValues { (_, sunriseSunsets) ->
-            sunriseSunsets.associateBy(SunriseSunsetEntity::date)
-          }
-          .entries
-          .firstOrNull()
-          ?: run {
-            emit(Empty)
-            return@transformLatest
-          }
-      try {
-        emit(mapToSunriseSunsetChange(location, existingSunriseSunsets).asLoadable())
-      } catch (ex: CancellationException) {
-        throw ex
-      } catch (ex: Exception) {
-        emit(FailedFirst(ex))
+    sunriseSunsetDao
+      .selectMostRecentForDefaultLocation(limit = RECENT_LOCATIONS_LIMIT)
+      .transformLatest {
+        emit(LoadingFirst)
+        val (location, existingSunriseSunsets) =
+          it
+            .mapValues { (_, sunriseSunsets) ->
+              sunriseSunsets.associateBy(SunriseSunsetEntity::date)
+            }
+            .entries
+            .firstOrNull()
+            ?: run {
+              emit(Empty)
+              return@transformLatest
+            }
+        try {
+          emit(mapToSunriseSunsetChange(location, existingSunriseSunsets).asLoadable())
+        } catch (ex: CancellationException) {
+          throw ex
+        } catch (ex: Exception) {
+          emit(FailedFirst(ex))
+        }
       }
-    }
 
   private suspend fun mapToSunriseSunsetChange(
     location: LocationEntity,
@@ -147,7 +155,7 @@ constructor(
     return mutex.withLock {
       val existing =
         sunriseSunsetDao
-          .selectMostRecentByLocationId(location.id, limit = 2)
+          .selectMostRecentByLocationId(location.id, limit = RECENT_LOCATIONS_LIMIT)
           .associateBy(SunriseSunsetEntity::date)
       val downloadedSunriseSunsets =
         getSunriseSunsetsFromNetworkFor(
@@ -198,5 +206,6 @@ constructor(
 
   companion object {
     private const val TAG = "SYNC"
+    private const val RECENT_LOCATIONS_LIMIT = 2
   }
 }
