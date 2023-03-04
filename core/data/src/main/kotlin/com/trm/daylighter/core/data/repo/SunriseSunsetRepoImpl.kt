@@ -16,14 +16,18 @@ import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import java.time.LocalDate
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
+@Singleton
 class SunriseSunsetRepoImpl
 @Inject
 constructor(
@@ -32,37 +36,46 @@ constructor(
   private val sunriseSunsetDao: SunriseSunsetDao,
   private val network: DaylighterNetworkDataSource,
 ) : SunriseSunsetRepo {
+  private val mutex = Mutex()
+
   override suspend fun sync(): Boolean =
     suspendRunCatching {
-        val existingLocationsSunriseSunsetsList =
-          sunriseSunsetDao.selectMostRecentForEachLocation(limit = 2)
-        existingLocationsSunriseSunsetsList.forEach { (location, sunriseSunsets) ->
+        locationDao.selectAll().forEach { location ->
           val today = LocalDate.now(location.zoneId)
           val dates = listOf(today.minusDays(1L), today)
 
-          val sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
-          val downloaded =
-            dates.filterNot(sunriseSunsetsDates::contains).associateWith { date ->
-              network.getSunriseSunset(
-                lat = location.latitude,
-                lng = location.longitude,
-                date = date
-              )
-            }
-          if (downloaded.isEmpty()) return@forEach
+          var sunriseSunsets =
+            sunriseSunsetDao.selectMostRecentByLocationId(locationId = location.id, 2)
+          var sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
+          val datesToDownload = dates.filterNot(sunriseSunsetsDates::contains)
+          if (datesToDownload.isEmpty()) return@forEach
 
-          if (downloaded.any { (_, result) -> result == null }) {
-            Timber.tag(TAG).e("One of the results from API was null.")
-            return@suspendRunCatching false
+          mutex.withLock {
+            sunriseSunsets =
+              sunriseSunsetDao.selectMostRecentByLocationId(locationId = location.id, 2)
+            sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
+            val downloaded =
+              dates.filterNot(sunriseSunsetsDates::contains).associateWith { date ->
+                network.getSunriseSunset(
+                  lat = location.latitude,
+                  lng = location.longitude,
+                  date = date
+                )
+              }
+
+            if (downloaded.any { (_, result) -> result == null }) {
+              Timber.tag(TAG).e("One of the results from API was null.")
+              return@suspendRunCatching false
+            }
+
+            sunriseSunsetDao.insertMany(
+              downloaded.map { (date, result) ->
+                requireNotNull(result)
+                  .timezoneAdjusted(zoneId = location.zoneId)
+                  .asEntity(locationId = location.id, date = date)
+              }
+            )
           }
-
-          sunriseSunsetDao.insertMany(
-            downloaded.map { (date, result) ->
-              requireNotNull(result)
-                .timezoneAdjusted(zoneId = location.zoneId)
-                .asEntity(locationId = location.id, date = date)
-            }
-          )
         }
 
         true
@@ -131,22 +144,25 @@ constructor(
       )
     }
 
-    val downloadedSunriseSunsets =
-      getSunriseSunsetsFromNetworkFor(
-        dates = dates.filterNot(existingSunriseSunsets::containsKey),
-        location = location
-      )
-    sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
+    return mutex.withLock {
+      val existing =
+        sunriseSunsetDao
+          .selectMostRecentByLocationId(location.id, limit = 2)
+          .associateBy(SunriseSunsetEntity::date)
+      val downloadedSunriseSunsets =
+        getSunriseSunsetsFromNetworkFor(
+          dates = dates.filterNot(existing::containsKey),
+          location = location
+        )
+      sunriseSunsetDao.insertMany(downloadedSunriseSunsets.values)
 
-    return LocationSunriseSunsetChange(
-      location = location.asDomainModel(),
-      today =
-        requireNotNull(existingSunriseSunsets[today] ?: downloadedSunriseSunsets[today])
-          .asDomainModel(),
-      yesterday =
-        requireNotNull(existingSunriseSunsets[yesterday] ?: downloadedSunriseSunsets[yesterday])
-          .asDomainModel()
-    )
+      LocationSunriseSunsetChange(
+        location = location.asDomainModel(),
+        today = requireNotNull(existing[today] ?: downloadedSunriseSunsets[today]).asDomainModel(),
+        yesterday =
+          requireNotNull(existing[yesterday] ?: downloadedSunriseSunsets[yesterday]).asDomainModel()
+      )
+    }
   }
 
   private suspend fun getSunriseSunsetsFromNetworkFor(
