@@ -70,7 +70,7 @@ constructor(
               }
 
             if (downloaded.any { (_, result) -> result == null }) {
-              Timber.tag(TAG).e("One of the results from API was null.")
+              Timber.tag(API_TAG).e("One of the results from API was null.")
               return@suspendRunCatching false
             }
 
@@ -193,7 +193,7 @@ constructor(
         .awaitAll()
         .toMap()
     if (results.any { (_, result) -> result == null }) {
-      Timber.tag(TAG).e("One of the results from API was null.")
+      Timber.tag(API_TAG).e("One of the results from API was null.")
       throw EmptyAPIResultException
     }
 
@@ -205,7 +205,7 @@ constructor(
   }
 
   companion object {
-    private const val TAG = "SYNC"
+    private const val API_TAG = "SS_API"
     private const val RECENT_LOCATIONS_LIMIT = 2
   }
 }
