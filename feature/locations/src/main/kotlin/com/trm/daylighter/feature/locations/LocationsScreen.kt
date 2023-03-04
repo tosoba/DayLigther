@@ -2,11 +2,14 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -15,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -83,14 +87,43 @@ private fun LocationsScreen(
   onDeleteLocationClick: (Location) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier) {
+  BoxWithConstraints(modifier = modifier) {
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
+
+    val gridState = rememberLazyGridState()
+    val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
+    val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
+    val bottomActionsVisible =
+      remember(locations) {
+        derivedStateOf {
+          val layoutInfo = gridState.layoutInfo
+          val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
+          val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+          if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
+            return@derivedStateOf false
+          }
+
+          val lastItemFullyVisible =
+            lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+              lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
+          if (!lastItemFullyVisible) return@derivedStateOf false
+
+          val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
+          val canScrollAtAll =
+            visibleRows * lastVisibleItem.size.height +
+              visibleRows * itemPaddingVerticalPx +
+              layoutInfo.beforeContentPadding +
+              layoutInfo.afterContentPadding > boxHeightPx
+          canScrollAtAll
+        }
+      }
 
     when (locations) {
       is WithData -> {
         if (locations.data.isNotEmpty()) {
           LazyVerticalGrid(
+            state = gridState,
             contentPadding = PaddingValues(10.dp),
             columns =
               GridCells.Fixed(
@@ -109,10 +142,17 @@ private fun LocationsScreen(
             }
           }
 
-          Row(modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)) {
-            ZoomInButton(mapZoom = zoom, onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom })
-            Spacer(modifier = Modifier.width(5.dp))
-            ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
+          AnimatedVisibility(
+            visible = !bottomActionsVisible.value,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)
+          ) {
+            Row {
+              ZoomInButton(mapZoom = zoom, onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom })
+              Spacer(modifier = Modifier.width(5.dp))
+              ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
+            }
           }
         } else {
           Text(
@@ -121,14 +161,18 @@ private fun LocationsScreen(
           )
         }
 
-        FloatingActionButton(
-          modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-          onClick = onAddLocationClick
+        AnimatedVisibility(
+          visible = !bottomActionsVisible.value,
+          enter = fadeIn(),
+          exit = fadeOut(),
+          modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
         ) {
-          Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(id = R.string.add_a_location)
-          )
+          FloatingActionButton(onClick = onAddLocationClick) {
+            Icon(
+              imageVector = Icons.Filled.Add,
+              contentDescription = stringResource(id = R.string.add_a_location)
+            )
+          }
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
