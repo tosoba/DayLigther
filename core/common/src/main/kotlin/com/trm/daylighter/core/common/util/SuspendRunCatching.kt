@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.common.util
 
-import android.util.Log
 import kotlinx.coroutines.CancellationException
+import timber.log.Timber
 
 suspend fun <T> suspendRunCatching(block: suspend () -> T): Result<T> =
   try {
@@ -9,10 +9,6 @@ suspend fun <T> suspendRunCatching(block: suspend () -> T): Result<T> =
   } catch (cancellationException: CancellationException) {
     throw cancellationException
   } catch (exception: Exception) {
-    Log.e(
-      "suspendRunCatching",
-      "Failed to evaluate a suspendRunCatchingBlock. Returning failure Result",
-      exception
-    )
+    Timber.tag("suspendRunCatching").e(exception)
     Result.failure(exception)
   }

@@ -28,6 +28,8 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
 
+  implementation(libs.timber)
+
   implementation("us.dustinj.timezonemap:timezonemap:4.5") {
     exclude(group = "com.github.luben", module = "zstd-jni")
   }

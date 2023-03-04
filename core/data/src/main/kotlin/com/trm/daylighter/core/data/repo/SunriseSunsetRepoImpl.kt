@@ -1,6 +1,5 @@
 package com.trm.daylighter.core.data.repo
 
-import android.util.Log
 import androidx.room.withTransaction
 import com.trm.daylighter.core.common.util.suspendRunCatching
 import com.trm.daylighter.core.data.mapper.asDomainModel
@@ -23,6 +22,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transformLatest
+import timber.log.Timber
 
 class SunriseSunsetRepoImpl
 @Inject
@@ -52,7 +52,7 @@ constructor(
           if (downloaded.isEmpty()) return@forEach
 
           if (downloaded.any { (_, result) -> result == null }) {
-            Log.e("Sync", "One of the results from API was null.")
+            Timber.tag(TAG).e("One of the results from API was null.")
             return@suspendRunCatching false
           }
 
@@ -169,7 +169,7 @@ constructor(
         .awaitAll()
         .toMap()
     if (results.any { (_, result) -> result == null }) {
-      Log.e("Sync", "One of the results from API was null.")
+      Timber.tag(TAG).e("One of the results from API was null.")
       throw EmptyAPIResultException
     }
 
@@ -178,5 +178,9 @@ constructor(
         .timezoneAdjusted(zoneId = location.zoneId)
         .asEntity(locationId = location.id, date = date)
     }
+  }
+
+  companion object {
+    private const val TAG = "SYNC"
   }
 }

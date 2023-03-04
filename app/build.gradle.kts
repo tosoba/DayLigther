@@ -76,4 +76,6 @@ dependencies {
   implementation(libs.androidx.profileinstaller)
 
   implementation(libs.osmdroid)
+
+  implementation(libs.timber)
 }

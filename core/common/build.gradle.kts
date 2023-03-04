@@ -11,4 +11,6 @@ dependencies {
 
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.osmdroid)
+
+  implementation(libs.timber)
 }
