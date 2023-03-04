@@ -6,7 +6,6 @@ import androidx.room.Upsert
 import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import java.time.LocalDate
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SunriseSunsetDao {
@@ -26,9 +25,9 @@ interface SunriseSunsetDao {
       "WHERE l.is_default = TRUE " +
       "ORDER BY date DESC LIMIT :limit"
   )
-  fun selectMostRecentForDefaultLocation(
+  suspend fun selectMostRecentForDefaultLocation(
     limit: Int
-  ): Flow<Map<LocationEntity, List<SunriseSunsetEntity>>>
+  ): Map<LocationEntity, List<SunriseSunsetEntity>>
 
   @Query(
     "SELECT l.*, ss.* FROM location l " +

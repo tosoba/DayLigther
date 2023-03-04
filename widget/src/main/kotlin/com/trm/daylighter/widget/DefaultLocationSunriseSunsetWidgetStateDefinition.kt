@@ -16,7 +16,7 @@ import java.io.OutputStream
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
-object SunriseSunsetWidgetStateDefinition :
+object DefaultLocationSunriseSunsetWidgetStateDefinition :
   GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
   private const val DATA_STORE_FILENAME = "sunriseSunsetWidget"
 

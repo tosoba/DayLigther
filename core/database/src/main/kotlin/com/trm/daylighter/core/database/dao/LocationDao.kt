@@ -11,9 +11,9 @@ interface LocationDao {
   @Insert suspend fun insert(entity: LocationEntity)
 
   @Transaction
-  suspend fun insert(latitude: Double, longitude: Double, zoneId: ZoneId) {
+  suspend fun insert(latitude: Double, longitude: Double, zoneId: ZoneId): LocationEntity {
     val anyExists = selectAnyExists()
-    insert(
+    val entity =
       LocationEntity(
         latitude = latitude,
         longitude = longitude,
@@ -21,7 +21,8 @@ interface LocationDao {
         updatedAt = ZonedDateTime.now(),
         zoneId = zoneId,
       )
-    )
+    insert(entity)
+    return entity
   }
 
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)

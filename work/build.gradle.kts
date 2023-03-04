@@ -19,6 +19,8 @@ dependencies {
   implementation(libs.androidx.startup)
   implementation(libs.androidx.work.ktx)
 
+  implementation(libs.timber)
+
   implementation(libs.hilt.ext.work)
   kapt(libs.hilt.ext.compiler)
 

@@ -16,11 +16,10 @@ import com.trm.daylighter.work.worker.delegatedData
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 @HiltWorker
-class SunriseSunsetWidgetWorker
+class DefaultLocationSunriseSunsetWidgetWorker
 @AssistedInject
 constructor(
   @Assisted private val context: Context,
@@ -29,12 +28,18 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(SunriseSunsetWidget::class.java)
-    sunriseSunsetRepo
-      .getDefaultLocationSunriseSunsetChange()
-      .distinctUntilChanged()
-      .flowOn(ioDispatcher)
-      .collect { setWidgetState(glanceIds = glanceIds, newState = it) }
+    val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(DefaultLocationSunriseSunsetWidget::class.java)
+    setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
+    try {
+      setWidgetState(
+        glanceIds = glanceIds,
+        newState =
+          withContext(ioDispatcher) { sunriseSunsetRepo.getDefaultLocationSunriseSunsetChange() }
+            .asLoadable()
+      )
+    } catch (ex: Exception) {
+      setWidgetState(glanceIds = glanceIds, newState = FailedFirst(ex))
+    }
     return Result.success()
   }
 
@@ -45,26 +50,26 @@ constructor(
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,
-        definition = SunriseSunsetWidgetStateDefinition,
+        definition = DefaultLocationSunriseSunsetWidgetStateDefinition,
         glanceId = glanceId,
         updateState = { newState }
       )
     }
-    SunriseSunsetWidget().updateAll(context)
+    DefaultLocationSunriseSunsetWidget().updateAll(context)
   }
 
   internal companion object {
     private const val WORK_NAME = "SunriseSunsetWidgetWork"
 
     fun enqueue(context: Context) {
-      val manager = WorkManager.getInstance(context)
-      manager.enqueueUniqueWork(
-        WORK_NAME,
-        ExistingWorkPolicy.KEEP,
-        OneTimeWorkRequestBuilder<DelegatingWorker>()
-          .setInputData(SunriseSunsetWidgetWorker::class.delegatedData())
-          .build()
-      )
+      WorkManager.getInstance(context)
+        .enqueueUniqueWork(
+          WORK_NAME,
+          ExistingWorkPolicy.KEEP,
+          OneTimeWorkRequestBuilder<DelegatingWorker>()
+            .setInputData(DefaultLocationSunriseSunsetWidgetWorker::class.delegatedData())
+            .build()
+        )
     }
 
     fun cancel(context: Context) {

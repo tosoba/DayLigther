@@ -19,8 +19,8 @@ import com.trm.daylighter.core.ui.theme.DayLighterTheme
 import com.trm.daylighter.widget.util.AppWidgetBox
 import com.trm.daylighter.widget.util.stringResource
 
-class SunriseSunsetWidget : GlanceAppWidget() {
-  override val stateDefinition = SunriseSunsetWidgetStateDefinition
+class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
+  override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
 
   override val sizeMode: SizeMode =
     SizeMode.Responsive(setOf(thinMode, smallMode, mediumMode, largeMode))

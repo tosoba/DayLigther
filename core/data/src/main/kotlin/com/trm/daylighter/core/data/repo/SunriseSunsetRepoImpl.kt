@@ -17,12 +17,9 @@ import com.trm.daylighter.core.network.DaylighterNetworkDataSource
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
@@ -110,31 +107,16 @@ constructor(
     sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
   }
 
-  override suspend fun getDefaultLocationSunriseSunsetChange():
-    Flow<Loadable<LocationSunriseSunsetChange>> =
-    sunriseSunsetDao
-      .selectMostRecentForDefaultLocation(limit = RECENT_LOCATIONS_LIMIT)
-      .transformLatest {
-        emit(LoadingFirst)
-        val (location, existingSunriseSunsets) =
-          it
-            .mapValues { (_, sunriseSunsets) ->
-              sunriseSunsets.associateBy(SunriseSunsetEntity::date)
-            }
-            .entries
-            .firstOrNull()
-            ?: run {
-              emit(Empty)
-              return@transformLatest
-            }
-        try {
-          emit(mapToSunriseSunsetChange(location, existingSunriseSunsets).asLoadable())
-        } catch (ex: CancellationException) {
-          throw ex
-        } catch (ex: Exception) {
-          emit(FailedFirst(ex))
-        }
-      }
+  override suspend fun getDefaultLocationSunriseSunsetChange(): LocationSunriseSunsetChange? {
+    val (location, existingSunriseSunsets) =
+      sunriseSunsetDao
+        .selectMostRecentForDefaultLocation(limit = RECENT_LOCATIONS_LIMIT)
+        .mapValues { (_, sunriseSunsets) -> sunriseSunsets.associateBy(SunriseSunsetEntity::date) }
+        .entries
+        .firstOrNull()
+        ?: return null
+    return mapToSunriseSunsetChange(location, existingSunriseSunsets)
+  }
 
   private suspend fun mapToSunriseSunsetChange(
     location: LocationEntity,

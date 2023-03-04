@@ -20,8 +20,9 @@ interface HiltWorkerFactoryEntryPoint {
 
 private const val WORKER_CLASS_NAME = "RouterWorkerDelegateClassName"
 
-fun KClass<out CoroutineWorker>.delegatedData(): Data =
-  Data.Builder().putString(WORKER_CLASS_NAME, qualifiedName).build()
+fun KClass<out CoroutineWorker>.delegatedData(
+  putArgs: Data.Builder.() -> Data.Builder = { this }
+): Data = Data.Builder().putString(WORKER_CLASS_NAME, qualifiedName).putArgs().build()
 
 class DelegatingWorker(
   appContext: Context,
