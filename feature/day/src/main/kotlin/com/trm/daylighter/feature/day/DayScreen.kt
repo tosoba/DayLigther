@@ -469,8 +469,8 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
   AndroidView(
     factory = { context ->
       TextClock(context).apply {
-        format24Hour = "HH:mm:ss \n zz"
-        format12Hour = "hh:mm:ss a \n zz"
+        format24Hour = context.getString(commonR.string.time_format_24_h)
+        format12Hour = context.getString(commonR.string.time_format_12_h)
         resolver
           .resolve(
             fontFamily = labelMediumStyle.fontFamily,

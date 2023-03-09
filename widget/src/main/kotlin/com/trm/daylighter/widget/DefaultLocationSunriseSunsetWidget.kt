@@ -1,12 +1,14 @@
 package com.trm.daylighter.widget
 
 import android.content.Intent
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.Button
 import androidx.glance.LocalContext
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -14,12 +16,12 @@ import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
-import androidx.glance.text.Text
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.theme.DayLighterTheme
 import com.trm.daylighter.widget.util.AppWidgetBox
 import com.trm.daylighter.widget.util.stringResource
+import java.time.ZoneId
 
 class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
@@ -35,7 +37,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
         when (loadable) {
           is Empty -> AddLocationButton()
           is Loading -> CircularProgressIndicator()
-          is Ready -> Text(text = loadable.data.location.id.toString())
+          is Ready -> Clock(zoneId = loadable.data.location.zoneId)
           is Failed -> RetryButton()
         }
       }
@@ -48,6 +50,15 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
     private val mediumMode = DpSize(260.dp, 200.dp)
     private val largeMode = DpSize(260.dp, 280.dp)
   }
+}
+
+@Composable
+private fun Clock(zoneId: ZoneId) {
+  AndroidRemoteViews(
+    remoteViews =
+      RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
+        .apply { setString(R.id.location_clock, "setTimeZone", zoneId.id) }
+  )
 }
 
 @Composable
