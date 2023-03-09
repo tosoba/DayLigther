@@ -28,7 +28,8 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(DefaultLocationSunriseSunsetWidget::class.java)
+    val glanceIds =
+      GlanceAppWidgetManager(context).getGlanceIds(DefaultLocationSunriseSunsetWidget::class.java)
     setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
     try {
       setWidgetState(

@@ -6,9 +6,11 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.Button
+import androidx.glance.LocalContext
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -31,10 +33,10 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
     DayLighterTheme(darkTheme = false, tweakStatusBarAppearance = false) {
       AppWidgetBox(contentAlignment = Alignment.Center) {
         when (loadable) {
-          is Failed -> Text(text = "Failed")
+          is Empty -> AddLocationButton()
           is Loading -> CircularProgressIndicator()
           is Ready -> Text(text = loadable.data.location.id.toString())
-          is Empty -> AddLocationButton()
+          is Failed -> RetryButton()
         }
       }
     }
@@ -58,6 +60,17 @@ private fun AddLocationButton() {
           Intent.ACTION_VIEW,
           stringResource(commonR.string.add_location_deep_link_uri).toUri()
         )
+      )
+  )
+}
+
+@Composable
+private fun RetryButton() {
+  Button(
+    text = stringResource(id = commonR.string.retry),
+    onClick =
+      actionSendBroadcast(
+        DefaultLocationSunriseSunsetWidgetReceiver.updateIntent(LocalContext.current)
       )
   )
 }

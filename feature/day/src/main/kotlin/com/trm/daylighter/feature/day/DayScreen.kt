@@ -220,7 +220,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
       Box(modifier = Modifier.fillMaxSize()) {
         if (changeValue is Failed) {
           Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-            Text(stringResource(R.string.retry))
+            Text(stringResource(commonR.string.retry))
           }
         } else {
           SunriseSunsetChart(
