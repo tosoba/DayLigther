@@ -57,10 +57,6 @@ abstract class NetworkModule {
     @Provides
     @Singleton
     fun jsonNominatimClient(httpClient: CloseableHttpClient): JsonNominatimClient =
-      JsonNominatimClient(
-        "https://nominatim.openstreetmap.org/",
-        httpClient,
-        "therealmerengue@gmail.com"
-      )
+      JsonNominatimClient(httpClient, "therealmerengue@gmail.com")
   }
 }
