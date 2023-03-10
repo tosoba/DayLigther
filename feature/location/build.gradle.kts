@@ -6,4 +6,7 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.location" }
 
-dependencies { implementation(libs.osmdroid) }
+dependencies {
+  implementation(libs.osmdroid)
+  implementation("com.google.accompanist:accompanist-permissions:0.29.2-rc")
+}

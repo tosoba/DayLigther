@@ -1,5 +1,6 @@
 package com.trm.daylighter.feature.location
 
+import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,8 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
@@ -35,7 +37,6 @@ const val locationRoute = "location_route"
 const val locationIdParam = "location_id"
 const val editLocationRoute = "$locationRoute/{$locationIdParam}"
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun LocationRoute(
   onBackClick: () -> Unit,
@@ -66,6 +67,7 @@ private fun LocationScreen(
 ) {
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
+  var locationProcessingInProgress by rememberSaveable { mutableStateOf(false) }
   val darkMode = isSystemInDarkTheme()
 
   val mapView =
@@ -182,4 +184,13 @@ private fun LocationScreen(
       LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
   }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun GetUserLocation() {
+  val locationPermissionsState =
+    rememberMultiplePermissionsState(
+      listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    )
 }

@@ -47,7 +47,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -73,7 +72,6 @@ import kotlin.math.sin
 
 const val dayRoute = "day_route"
 
-@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
 fun DayRoute(
   onDrawerMenuClick: () -> Unit,
