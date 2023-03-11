@@ -73,7 +73,10 @@ fun DaylighterMainContent() {
             title = { Text(stringResource(id = R.string.app_name)) },
             navigationIcon = {
               IconButton(onClick = navController::popBackStack) {
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back_arrow")
+                Icon(
+                  imageVector = Icons.Filled.ArrowBack,
+                  contentDescription = stringResource(id = commonR.string.back)
+                )
               }
             }
           )
@@ -86,11 +89,18 @@ fun DaylighterMainContent() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
+  val widgetsLabel = stringResource(R.string.widgets_drawer_item)
+  val locationsLabel = stringResource(R.string.locations_drawer_item)
+  val aboutLabel = stringResource(R.string.about_drawer_item)
   val drawerDestinations = remember {
     sequenceOf(
-      DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, "Widgets"),
-      DrawerDestination(route = locationsGraphRoute, icon = Icons.Filled.LocationOn, "Locations"),
-      DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, "About")
+      DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, label = widgetsLabel),
+      DrawerDestination(
+        route = locationsGraphRoute,
+        icon = Icons.Filled.LocationOn,
+        label = locationsLabel
+      ),
+      DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, label = aboutLabel)
     )
   }
 
@@ -98,12 +108,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
     Spacer(Modifier.height(12.dp))
     drawerDestinations.forEach { destination ->
       NavigationDrawerItem(
-        icon = {
-          Icon(
-            imageVector = destination.icon,
-            contentDescription = "drawer_item_${destination.label.lowercase()}"
-          )
-        },
+        icon = { Icon(imageVector = destination.icon, contentDescription = destination.label) },
         label = { Text(text = destination.label) },
         selected = false,
         onClick = { onItemClick(destination) }
@@ -134,7 +139,7 @@ private fun DayLighterScaffold(
       navController = navController,
       onDrawerMenuClick = onDrawerMenuClick,
       modifier =
-        Modifier.padding(it).consumedWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
+        Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
     )
   }
 }

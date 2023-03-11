@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">DayLighter</string>
+
+    <string name="widgets_drawer_item">Widgets</string>
+    <string name="locations_drawer_item">Locations</string>
+    <string name="about_drawer_item">About</string>
 </resources>
