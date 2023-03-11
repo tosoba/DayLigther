@@ -32,6 +32,7 @@ import com.trm.daylighter.feature.location.util.setDefaultConfig
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import timber.log.Timber
 
 const val locationRoute = "location_route"
 const val locationIdParam = "location_id"
@@ -116,7 +117,7 @@ private fun LocationScreen(
       modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
     ) {
       Column {
-        FloatingActionButton(onClick = {}) {
+        FloatingActionButton(onClick = { locationProcessingInProgress = true }) {
           Icon(
             imageVector = Icons.Filled.MyLocation,
             contentDescription = stringResource(R.string.my_location),
@@ -183,14 +184,74 @@ private fun LocationScreen(
     ) {
       LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
+
+    if (locationProcessingInProgress) {
+      var dialogVisible by rememberSaveable { mutableStateOf(false) }
+      RequestLocationPermission(
+        dialogVisible = dialogVisible,
+        modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
+        onGranted = {
+          Timber.tag("LOCATION").e("Granted.")
+          locationProcessingInProgress = false
+        },
+        onNotGranted = { dialogVisible = true },
+        onDismiss = { locationProcessingInProgress = false }
+      )
+    }
   }
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun GetUserLocation() {
+private fun RequestLocationPermission(
+  dialogVisible: Boolean,
+  modifier: Modifier = Modifier,
+  onGranted: () -> Unit,
+  onNotGranted: () -> Unit,
+  onDismiss: () -> Unit
+) {
   val locationPermissionsState =
     rememberMultiplePermissionsState(
       listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     )
+
+  AnimatedVisibility(visible = dialogVisible) {
+    AlertDialog(
+      modifier = modifier,
+      onDismissRequest = onDismiss,
+      confirmButton = {
+        TextButton(onClick = locationPermissionsState::launchMultiplePermissionRequest) {
+          Text(text = stringResource(id = android.R.string.ok))
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismiss) {
+          Text(text = stringResource(id = android.R.string.cancel))
+        }
+      },
+      title = {
+        Text(
+          text = stringResource(R.string.location_permissions_dialog_title),
+          textAlign = TextAlign.Center
+        )
+      },
+      text = {
+        Text(
+          text =
+            if (locationPermissionsState.shouldShowRationale) {
+              stringResource(R.string.location_permissions_dialog_rationale_text)
+            } else {
+              stringResource(R.string.location_permissions_dialog_text)
+            }
+        )
+      }
+    )
+  }
+
+  fun atLeastOnePermissionGranted() =
+    locationPermissionsState.revokedPermissions.size != locationPermissionsState.permissions.size
+
+  LaunchedEffect(atLeastOnePermissionGranted()) {
+    if (atLeastOnePermissionGranted()) onGranted() else onNotGranted()
+  }
 }

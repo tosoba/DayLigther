@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -183,7 +184,7 @@ private fun LocationsScreen(
         locationBeingDeleted = null
       },
       onDismissRequest = { locationBeingDeleted = null },
-      modifier = Modifier.align(Alignment.Center)
+      modifier = Modifier.align(Alignment.Center).wrapContentHeight()
     )
   }
 }
@@ -208,7 +209,9 @@ private fun DeleteLocationConfirmationDialog(
           Text(text = stringResource(id = android.R.string.cancel))
         }
       },
-      title = { Text(text = stringResource(R.string.delete_location)) },
+      title = {
+        Text(text = stringResource(R.string.delete_location), textAlign = TextAlign.Center)
+      },
       text = { Text(text = stringResource(R.string.delete_location_prompt)) },
     )
   }
