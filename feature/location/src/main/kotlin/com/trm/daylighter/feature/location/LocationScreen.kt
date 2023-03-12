@@ -1,9 +1,13 @@
 package com.trm.daylighter.feature.location
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.activity.compose.ManagedActivityResultLauncher
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +68,18 @@ fun LocationRoute(
   )
 }
 
+private fun Context.getActivity(): Activity? =
+  when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
+  }
+
+private enum class PermissionRequestMode {
+  PERMISSION_REQUEST_DIALOG,
+  APP_DETAILS_SETTINGS
+}
+
 @Composable
 private fun LocationScreen(
   mapPosition: MapPosition,
@@ -75,21 +92,45 @@ private fun LocationScreen(
   val locationPermissions =
     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
   var permissionInfoDialogVisible by rememberSaveable { mutableStateOf(false) }
-  val launcherMultiplePermissions =
+  var permissionRequestMode by rememberSaveable {
+    mutableStateOf(PermissionRequestMode.PERMISSION_REQUEST_DIALOG)
+  }
+
+  val locationPermissionsRequestLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
       permissionsMap ->
       val areGranted = permissionsMap.values.all { it }
       if (areGranted) {
         Timber.tag("PERM").e("Granted")
       } else {
+        val shouldShowRationale =
+          locationPermissions.any { permission ->
+            ActivityCompat.shouldShowRequestPermissionRationale(context.getActivity()!!, permission)
+          }
+        permissionRequestMode =
+          if (shouldShowRationale) PermissionRequestMode.PERMISSION_REQUEST_DIALOG
+          else PermissionRequestMode.APP_DETAILS_SETTINGS
         permissionInfoDialogVisible = true
       }
     }
+
   fun Context.checkAndRequestLocationPermissions() {
     checkAndRequestLocationPermissions(
       permissions = locationPermissions,
-      requestLauncher = launcherMultiplePermissions,
-      onGranted = { Timber.tag("PERM").e("Already granted") }
+      onGranted = { Timber.tag("PERM").e("Already granted") },
+      onNotGranted = {
+        when (permissionRequestMode) {
+          PermissionRequestMode.PERMISSION_REQUEST_DIALOG -> {
+            locationPermissionsRequestLauncher.launch(locationPermissions)
+          }
+          PermissionRequestMode.APP_DETAILS_SETTINGS -> {
+            context.startActivity(
+              Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.fromParts("package", context.packageName, null))
+            )
+          }
+        }
+      }
     )
   }
 
@@ -214,7 +255,10 @@ private fun LocationScreen(
 
     LocationPermissionInfoDialog(
       dialogVisible = permissionInfoDialogVisible,
-      onOkClick = context::checkAndRequestLocationPermissions,
+      onOkClick = {
+        permissionInfoDialogVisible = false
+        context.checkAndRequestLocationPermissions()
+      },
       onDismiss = { permissionInfoDialogVisible = false },
       modifier = Modifier.align(Alignment.Center).wrapContentHeight()
     )
@@ -253,16 +297,12 @@ private fun LocationPermissionInfoDialog(
 
 private fun Context.checkAndRequestLocationPermissions(
   permissions: Array<String>,
-  requestLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
   onGranted: () -> Unit,
+  onNotGranted: () -> Unit
 ) {
   val allGranted =
     permissions.all { permission ->
       ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
-  if (allGranted) {
-    onGranted()
-  } else {
-    requestLauncher.launch(permissions)
-  }
+  if (allGranted) onGranted() else onNotGranted()
 }
