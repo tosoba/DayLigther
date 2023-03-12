@@ -9,5 +9,4 @@ android { namespace = "com.trm.daylighter.feature.location" }
 dependencies {
   implementation(libs.osmdroid)
   implementation(libs.timber)
-  implementation("com.google.accompanist:accompanist-permissions:0.29.2-rc")
 }

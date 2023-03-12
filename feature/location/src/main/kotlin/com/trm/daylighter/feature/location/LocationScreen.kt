@@ -1,6 +1,11 @@
 package com.trm.daylighter.feature.location
 
 import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -15,15 +20,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
@@ -66,9 +71,31 @@ private fun LocationScreen(
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
+  val context = LocalContext.current
+  val locationPermissions =
+    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+  var permissionInfoDialogVisible by rememberSaveable { mutableStateOf(false) }
+  val launcherMultiplePermissions =
+    rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+      permissionsMap ->
+      val areGranted = permissionsMap.values.all { it }
+      if (areGranted) {
+        Timber.tag("PERM").e("Granted")
+      } else {
+        permissionInfoDialogVisible = true
+      }
+    }
+  fun Context.checkAndRequestLocationPermissions() {
+    checkAndRequestLocationPermissions(
+      permissions = locationPermissions,
+      requestLauncher = launcherMultiplePermissions,
+      onGranted = { Timber.tag("PERM").e("Already granted") }
+    )
+  }
+
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
-  var locationProcessingInProgress by rememberSaveable { mutableStateOf(false) }
+
   val darkMode = isSystemInDarkTheme()
 
   val mapView =
@@ -117,7 +144,7 @@ private fun LocationScreen(
       modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
     ) {
       Column {
-        FloatingActionButton(onClick = { locationProcessingInProgress = true }) {
+        FloatingActionButton(onClick = context::checkAndRequestLocationPermissions) {
           Icon(
             imageVector = Icons.Filled.MyLocation,
             contentDescription = stringResource(R.string.my_location),
@@ -185,44 +212,28 @@ private fun LocationScreen(
       LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
 
-    if (locationProcessingInProgress) {
-      var dialogVisible by rememberSaveable { mutableStateOf(false) }
-      RequestLocationPermission(
-        dialogVisible = dialogVisible,
-        modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
-        onGranted = {
-          Timber.tag("LOCATION").e("Granted.")
-          locationProcessingInProgress = false
-        },
-        onNotGranted = { dialogVisible = true },
-        onDismiss = { locationProcessingInProgress = false }
-      )
-    }
+    LocationPermissionInfoDialog(
+      dialogVisible = permissionInfoDialogVisible,
+      onOkClick = context::checkAndRequestLocationPermissions,
+      onDismiss = { permissionInfoDialogVisible = false },
+      modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+    )
   }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun RequestLocationPermission(
+private fun LocationPermissionInfoDialog(
   dialogVisible: Boolean,
-  modifier: Modifier = Modifier,
-  onGranted: () -> Unit,
-  onNotGranted: () -> Unit,
-  onDismiss: () -> Unit
+  onOkClick: () -> Unit,
+  onDismiss: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
-  val locationPermissionsState =
-    rememberMultiplePermissionsState(
-      listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
-    )
-
   AnimatedVisibility(visible = dialogVisible) {
     AlertDialog(
       modifier = modifier,
       onDismissRequest = onDismiss,
       confirmButton = {
-        TextButton(onClick = locationPermissionsState::launchMultiplePermissionRequest) {
-          Text(text = stringResource(id = android.R.string.ok))
-        }
+        TextButton(onClick = onOkClick) { Text(text = stringResource(id = android.R.string.ok)) }
       },
       dismissButton = {
         TextButton(onClick = onDismiss) {
@@ -235,23 +246,23 @@ private fun RequestLocationPermission(
           textAlign = TextAlign.Center
         )
       },
-      text = {
-        Text(
-          text =
-            if (locationPermissionsState.shouldShowRationale) {
-              stringResource(R.string.location_permissions_dialog_rationale_text)
-            } else {
-              stringResource(R.string.location_permissions_dialog_text)
-            }
-        )
-      }
+      text = { Text(text = stringResource(R.string.location_permissions_dialog_text)) }
     )
   }
+}
 
-  fun atLeastOnePermissionGranted() =
-    locationPermissionsState.revokedPermissions.size != locationPermissionsState.permissions.size
-
-  LaunchedEffect(atLeastOnePermissionGranted()) {
-    if (atLeastOnePermissionGranted()) onGranted() else onNotGranted()
+private fun Context.checkAndRequestLocationPermissions(
+  permissions: Array<String>,
+  requestLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>,
+  onGranted: () -> Unit,
+) {
+  val allGranted =
+    permissions.all { permission ->
+      ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    }
+  if (allGranted) {
+    onGranted()
+  } else {
+    requestLauncher.launch(permissions)
   }
 }

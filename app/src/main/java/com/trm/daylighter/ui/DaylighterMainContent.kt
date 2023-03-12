@@ -139,7 +139,7 @@ private fun DayLighterScaffold(
       navController = navController,
       onDrawerMenuClick = onDrawerMenuClick,
       modifier =
-        Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
+        Modifier.padding(it).consumedWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
     )
   }
 }
