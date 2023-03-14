@@ -1,9 +1,7 @@
 package com.trm.daylighter.feature.location
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -35,6 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
@@ -68,13 +67,6 @@ fun LocationRoute(
   )
 }
 
-private fun Context.getActivity(): Activity? =
-  when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
-  }
-
 private enum class PermissionRequestMode {
   PERMISSION_REQUEST_DIALOG,
   APP_DETAILS_SETTINGS
@@ -99,13 +91,16 @@ private fun LocationScreen(
   val locationPermissionsRequestLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
       permissionsMap ->
-      val areGranted = permissionsMap.values.all { it }
-      if (areGranted) {
+      val allGranted = permissionsMap.values.all { it }
+      if (allGranted) {
         Timber.tag("PERM").e("Granted")
       } else {
         val shouldShowRationale =
           locationPermissions.any { permission ->
-            ActivityCompat.shouldShowRequestPermissionRationale(context.getActivity()!!, permission)
+            ActivityCompat.shouldShowRequestPermissionRationale(
+              requireNotNull(context.getActivity()),
+              permission
+            )
           }
         permissionRequestMode =
           if (shouldShowRationale) PermissionRequestMode.PERMISSION_REQUEST_DIALOG

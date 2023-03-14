@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.common.util.ext
+package com.trm.daylighter.core.common.util
 
 import android.annotation.SuppressLint
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
