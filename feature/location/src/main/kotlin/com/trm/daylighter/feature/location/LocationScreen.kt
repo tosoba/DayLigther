@@ -3,7 +3,6 @@ package com.trm.daylighter.feature.location
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -29,10 +28,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.checkPermissions
 import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
@@ -110,9 +109,8 @@ private fun LocationScreen(
     }
 
   fun Context.checkAndRequestLocationPermissions() {
-    checkAndRequestLocationPermissions(
+    checkPermissions(
       permissions = locationPermissions,
-      onGranted = { Timber.tag("PERM").e("Already granted") },
       onNotGranted = {
         when (permissionRequestMode) {
           PermissionRequestMode.PERMISSION_REQUEST_DIALOG -> {
@@ -125,7 +123,8 @@ private fun LocationScreen(
             )
           }
         }
-      }
+      },
+      onGranted = { Timber.tag("PERM").e("Already granted") }
     )
   }
 
@@ -302,16 +301,4 @@ private fun LocationPermissionInfoDialog(
       }
     )
   }
-}
-
-private fun Context.checkAndRequestLocationPermissions(
-  permissions: Array<String>,
-  onGranted: () -> Unit,
-  onNotGranted: () -> Unit
-) {
-  val allGranted =
-    permissions.all { permission ->
-      ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-    }
-  if (allGranted) onGranted() else onNotGranted()
 }
