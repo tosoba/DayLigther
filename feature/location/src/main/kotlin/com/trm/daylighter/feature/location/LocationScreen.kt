@@ -4,12 +4,10 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -34,20 +32,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.Priority
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.CheckLocationSettingsResult
+import com.trm.daylighter.core.common.util.ext.checkLocationSettings
 import com.trm.daylighter.core.common.util.ext.checkPermissions
 import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -348,45 +341,4 @@ private fun LocationPermissionInfoDialog(
       }
     )
   }
-}
-
-private suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult {
-  val locationRequest =
-    LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 0L)
-      .setMinUpdateIntervalMillis(0L)
-      .setMaxUpdates(1)
-      .build()
-
-  return suspendCoroutine { continuation ->
-    LocationServices.getSettingsClient(this)
-      .checkLocationSettings(
-        LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
-      )
-      .addOnSuccessListener { continuation.resume(CheckLocationSettingsResult.Enabled) }
-      .addOnFailureListener { exception ->
-        if (exception is ResolvableApiException) {
-          try {
-            continuation.resume(
-              CheckLocationSettingsResult.DisabledResolvable(
-                IntentSenderRequest.Builder(exception.resolution).build()
-              )
-            )
-          } catch (sendEx: IntentSender.SendIntentException) {
-            continuation.resume(CheckLocationSettingsResult.DisabledNonResolvable)
-          }
-        } else {
-          continuation.resume(CheckLocationSettingsResult.DisabledNonResolvable)
-        }
-      }
-  }
-}
-
-private sealed interface CheckLocationSettingsResult {
-  object Enabled : CheckLocationSettingsResult
-
-  data class DisabledResolvable(
-    val intentSenderRequest: IntentSenderRequest,
-  ) : CheckLocationSettingsResult
-
-  object DisabledNonResolvable : CheckLocationSettingsResult
 }
