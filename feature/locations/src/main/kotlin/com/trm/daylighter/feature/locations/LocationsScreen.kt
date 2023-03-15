@@ -30,9 +30,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.ext.MapDefaults
-import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
-import com.trm.daylighter.core.common.util.ext.setPosition
+import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
+import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.ZoomInButton
 import com.trm.daylighter.core.ui.composable.ZoomOutButton

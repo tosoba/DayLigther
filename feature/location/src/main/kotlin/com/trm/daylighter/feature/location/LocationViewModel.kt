@@ -3,7 +3,7 @@ package com.trm.daylighter.feature.location
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trm.daylighter.core.common.util.ext.MapDefaults
+import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.LoadingFirst

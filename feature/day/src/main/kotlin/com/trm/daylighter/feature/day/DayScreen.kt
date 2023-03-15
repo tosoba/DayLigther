@@ -53,7 +53,10 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
+import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
+import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.ZoomInButton

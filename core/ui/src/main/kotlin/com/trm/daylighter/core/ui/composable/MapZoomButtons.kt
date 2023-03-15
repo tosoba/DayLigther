@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.ext.MapDefaults
+import com.trm.daylighter.core.common.util.MapDefaults
 
 @Composable
 fun ZoomOutButton(mapZoom: Double, onClick: () -> Unit, modifier: Modifier = Modifier) {
