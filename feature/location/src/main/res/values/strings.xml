@@ -5,5 +5,6 @@
     <string name="save_location">Save location</string>
 
     <string name="location_permissions_dialog_title">Location permissions</string>
-    <string name="location_permissions_dialog_text">This feature requires location permissions. Use application settings to enable them.</string>
+    <string name="location_permissions_dialog_rationale_text">This feature requires location permissions. Enable them using the permission dialog.</string>
+    <string name="location_permissions_dialog_settings_text">This feature requires location permissions which you have permanently denied. Use application settings to enable them.</string>
 </resources>

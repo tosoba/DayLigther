@@ -250,6 +250,7 @@ private fun LocationScreen(
 
     LocationPermissionInfoDialog(
       dialogVisible = permissionInfoDialogVisible,
+      permissionRequestMode = permissionRequestMode,
       onOkClick = {
         permissionInfoDialogVisible = false
         context.checkAndRequestLocationPermissions()
@@ -263,6 +264,7 @@ private fun LocationScreen(
 @Composable
 private fun LocationPermissionInfoDialog(
   dialogVisible: Boolean,
+  permissionRequestMode: PermissionRequestMode,
   onOkClick: () -> Unit,
   onDismiss: () -> Unit,
   modifier: Modifier = Modifier
@@ -285,7 +287,19 @@ private fun LocationPermissionInfoDialog(
           textAlign = TextAlign.Center
         )
       },
-      text = { Text(text = stringResource(R.string.location_permissions_dialog_text)) }
+      text = {
+        Text(
+          text =
+            when (permissionRequestMode) {
+              PermissionRequestMode.PERMISSION_REQUEST_DIALOG -> {
+                stringResource(R.string.location_permissions_dialog_rationale_text)
+              }
+              PermissionRequestMode.APP_DETAILS_SETTINGS -> {
+                stringResource(R.string.location_permissions_dialog_settings_text)
+              }
+            }
+        )
+      }
     )
   }
 }
