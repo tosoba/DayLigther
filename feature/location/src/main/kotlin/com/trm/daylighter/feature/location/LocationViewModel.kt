@@ -4,15 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.MapDefaults
-import com.trm.daylighter.core.domain.model.Loadable
-import com.trm.daylighter.core.domain.model.Loading
-import com.trm.daylighter.core.domain.model.LoadingFirst
-import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
+import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.MapPosition
+import com.trm.daylighter.feature.location.model.SaveLocationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -23,11 +24,39 @@ constructor(
   private val savedStateHandle: SavedStateHandle,
   private val getLocationById: GetLocationById,
   private val saveLocationUseCase: SaveLocationUseCase,
+  private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
 ) : ViewModel() {
-  private val _savingFlow = MutableSharedFlow<Loadable<Unit>>(replay = 1)
-  val savedFlow: Flow<Unit> =
-    _savingFlow.asSharedFlow().filterIsInstance<Ready<Unit>>().map { it.data }
-  val isLoadingFlow: Flow<Boolean> = _savingFlow.asSharedFlow().map { it is Loading }
+  private val _saveLocationTypeFlow = MutableSharedFlow<SaveLocationType>()
+  private val savingFlow: SharedFlow<Loadable<Unit>> =
+    _saveLocationTypeFlow
+      .transformLatest {
+        emit(LoadingFirst)
+        when (it) {
+          is SaveLocationType.Specified -> {
+            invokeSaveLocation(it.latitude, it.longitude)
+            emit(Ready(Unit))
+          }
+          is SaveLocationType.User -> {
+            val userLatLng = getCurrentUserLatLngUseCase()
+            if (userLatLng == null) {
+              emit(FailedFirst(UserLatLngNotFound))
+              delay(5_000L)
+              emit(Empty)
+            } else {
+              invokeSaveLocation(userLatLng.latitude, userLatLng.longitude)
+              emit(Ready(Unit))
+            }
+          }
+        }
+      }
+      .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
+
+  val savedFlow: Flow<Unit> = savingFlow.filterIsInstance<Ready<Unit>>().map { it.data }
+  val loadingFlow: Flow<Boolean> = savingFlow.map { it is Loading }
+  val locationFailedFlow: Flow<Unit> =
+    savingFlow
+      .filter { it.isFailedWith<UserLatLngNotFound>() }
+      .map {} // TODO: use to display error and hide it on any other state
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
@@ -42,18 +71,30 @@ constructor(
           )
         }
       }
-      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), MapPosition())
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = MapPosition()
+      )
 
   fun saveLocation(latitude: Double, longitude: Double) {
     viewModelScope.launch {
-      _savingFlow.emit(LoadingFirst)
-      val locationId = savedStateHandle.get<Long>(locationIdParam)
-      if (locationId == null) {
-        saveLocationUseCase(latitude = latitude, longitude = longitude)
-      } else {
-        saveLocationUseCase(id = locationId, latitude = latitude, longitude = longitude)
-      }
-      _savingFlow.emit(Ready(Unit))
+      _saveLocationTypeFlow.emit(
+        SaveLocationType.Specified(latitude = latitude, longitude = longitude)
+      )
+    }
+  }
+
+  fun getAndSaveUserLocation() {
+    viewModelScope.launch { _saveLocationTypeFlow.emit(SaveLocationType.User) }
+  }
+
+  private suspend fun invokeSaveLocation(latitude: Double, longitude: Double) {
+    val locationId = savedStateHandle.get<Long>(locationIdParam)
+    if (locationId == null) {
+      saveLocationUseCase(latitude = latitude, longitude = longitude)
+    } else {
+      saveLocationUseCase(id = locationId, latitude = latitude, longitude = longitude)
     }
   }
 }

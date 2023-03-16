@@ -1,19 +1,20 @@
 package com.trm.daylighter.core.common.util.ext
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.Location
 import androidx.activity.result.IntentSenderRequest
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.Priority
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.tasks.await
 
 fun Context.getActivity(): Activity? =
   when (this) {
@@ -73,4 +74,20 @@ sealed interface CheckLocationSettingsResult {
   ) : CheckLocationSettingsResult
 
   object DisabledNonResolvable : CheckLocationSettingsResult
+}
+
+@SuppressLint("MissingPermission")
+suspend fun Context.getCurrentUserLocation(): Location? {
+  val cancellationTokenSource = CancellationTokenSource()
+  return LocationServices.getFusedLocationProviderClient(this)
+    .getCurrentLocation(
+      CurrentLocationRequest.Builder()
+        .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+        .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+        .setDurationMillis(5_000L)
+        .setMaxUpdateAgeMillis(60_000L)
+        .build(),
+      cancellationTokenSource.token
+    )
+    .await(cancellationTokenSource)
 }

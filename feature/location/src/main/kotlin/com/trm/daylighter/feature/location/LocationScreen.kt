@@ -59,12 +59,13 @@ fun LocationRoute(
   LaunchedEffect(Unit) { viewModel.savedFlow.collect { onBackClick() } }
 
   val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
-  val isLoading = viewModel.isLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
+  val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
     mapPosition = mapPosition.value,
     isLoading = isLoading.value,
     onSaveLocationClick = viewModel::saveLocation,
+    getAndSaveUserLocation = viewModel::getAndSaveUserLocation,
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -80,6 +81,7 @@ private fun LocationScreen(
   mapPosition: MapPosition,
   isLoading: Boolean,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
+  getAndSaveUserLocation: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -97,7 +99,7 @@ private fun LocationScreen(
       permissionsMap ->
       val allGranted = permissionsMap.values.all { it }
       if (allGranted) {
-        Timber.tag("PERM").e("Granted")
+        Timber.tag("USER_LOCATION_PERMISSIONS").d("Location permissions are granted.")
         userLocationRequestedAndPermissionsGranted = true
       } else {
         val shouldShowRationale =
@@ -139,33 +141,38 @@ private fun LocationScreen(
       contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { activityResult ->
       if (activityResult.resultCode == Activity.RESULT_OK) {
-        Timber.tag("SETTINGS").e("ENABLED AFTER USER ACTION")
+        Timber.tag("USER_LOCATION_DIALOG")
+          .d("Location was enabled after showing location settings dialog.")
+        getAndSaveUserLocation()
       } else {
-        Timber.tag("SETTINGS").e("NOT ENABLED AFTER USER ACTION")
+        Timber.tag("USER_LOCATION_DIALOG")
+          .d("Location was NOT enabled after showing location settings dialog.")
       }
     }
 
   LaunchedEffect(userLocationRequestedAndPermissionsGranted) {
-    if (userLocationRequestedAndPermissionsGranted) {
-      when (val result = context.checkLocationSettings()) {
-        is CheckLocationSettingsResult.DisabledNonResolvable -> {
-          Toast.makeText(
-              context,
-              R.string.location_disabled_non_resolvable_message,
-              Toast.LENGTH_LONG
-            )
-            .show()
-          Timber.tag("SETTINGS").e("DISABLED NON RESOLVABLE")
-        }
-        is CheckLocationSettingsResult.DisabledResolvable -> {
-          locationSettingsResultRequest.launch(result.intentSenderRequest)
-        }
-        is CheckLocationSettingsResult.Enabled -> {
-          Timber.tag("SETTINGS").e("ALREADY ENABLED")
-        }
+    if (!userLocationRequestedAndPermissionsGranted) return@LaunchedEffect
+
+    when (val result = context.checkLocationSettings()) {
+      is CheckLocationSettingsResult.DisabledNonResolvable -> {
+        Toast.makeText(
+            context,
+            R.string.location_disabled_non_resolvable_message,
+            Toast.LENGTH_LONG
+          )
+          .show()
+        Timber.tag("USER_LOCATION_CHECK").d("Location is disabled after check - NON resolvable.")
       }
-      userLocationRequestedAndPermissionsGranted = false
+      is CheckLocationSettingsResult.DisabledResolvable -> {
+        locationSettingsResultRequest.launch(result.intentSenderRequest)
+      }
+      is CheckLocationSettingsResult.Enabled -> {
+        Timber.tag("USER_LOCATION_CHECK").d("Location is enabled after check.")
+        getAndSaveUserLocation()
+      }
     }
+
+    userLocationRequestedAndPermissionsGranted = false
   }
 
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
@@ -227,7 +234,10 @@ private fun LocationScreen(
         }
         Spacer(modifier = Modifier.height(10.dp))
         FloatingActionButton(
-          onClick = { onSaveLocationClick(mapView.mapCenter.latitude, mapView.mapCenter.longitude) }
+          onClick = {
+            val mapCenter = mapView.mapCenter
+            onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
+          }
         ) {
           Icon(
             imageVector = Icons.Filled.Done,
