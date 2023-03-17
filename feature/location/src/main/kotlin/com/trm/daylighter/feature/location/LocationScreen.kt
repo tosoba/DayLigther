@@ -60,10 +60,13 @@ fun LocationRoute(
 
   val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
+  val userLocationNotFound =
+    viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
     mapPosition = mapPosition.value,
     isLoading = isLoading.value,
+    userLocationNotFound = userLocationNotFound.value,
     onSaveLocationClick = viewModel::saveLocation,
     getAndSaveUserLocation = viewModel::getAndSaveUserLocation,
     onBackClick = onBackClick,
@@ -80,6 +83,7 @@ private enum class PermissionRequestMode {
 private fun LocationScreen(
   mapPosition: MapPosition,
   isLoading: Boolean,
+  userLocationNotFound: Boolean,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
   getAndSaveUserLocation: () -> Unit,
   onBackClick: () -> Unit,
@@ -92,7 +96,7 @@ private fun LocationScreen(
   var permissionRequestMode by rememberSaveable {
     mutableStateOf(PermissionRequestMode.PERMISSION_REQUEST_DIALOG)
   }
-  var userLocationRequestedAndPermissionsGranted by rememberSaveable { mutableStateOf(false) }
+  var shouldCheckIfLocationEnabled by rememberSaveable { mutableStateOf(false) }
 
   val locationPermissionsRequestLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -100,7 +104,7 @@ private fun LocationScreen(
       val allGranted = permissionsMap.values.all { it }
       if (allGranted) {
         Timber.tag("USER_LOCATION_PERMISSIONS").d("Location permissions are granted.")
-        userLocationRequestedAndPermissionsGranted = true
+        shouldCheckIfLocationEnabled = true
       } else {
         val shouldShowRationale =
           locationPermissions.any { permission ->
@@ -132,7 +136,7 @@ private fun LocationScreen(
           }
         }
       },
-      onGranted = { userLocationRequestedAndPermissionsGranted = true }
+      onGranted = { shouldCheckIfLocationEnabled = true }
     )
   }
 
@@ -150,10 +154,17 @@ private fun LocationScreen(
       }
     }
 
-  LaunchedEffect(userLocationRequestedAndPermissionsGranted) {
-    if (!userLocationRequestedAndPermissionsGranted) return@LaunchedEffect
+  LaunchedEffect(shouldCheckIfLocationEnabled) {
+    if (!shouldCheckIfLocationEnabled) return@LaunchedEffect
 
     when (val result = context.checkLocationSettings()) {
+      is CheckLocationSettingsResult.Enabled -> {
+        Timber.tag("USER_LOCATION_CHECK").d("Location is enabled after check.")
+        getAndSaveUserLocation()
+      }
+      is CheckLocationSettingsResult.DisabledResolvable -> {
+        locationSettingsResultRequest.launch(result.intentSenderRequest)
+      }
       is CheckLocationSettingsResult.DisabledNonResolvable -> {
         Toast.makeText(
             context,
@@ -163,16 +174,20 @@ private fun LocationScreen(
           .show()
         Timber.tag("USER_LOCATION_CHECK").d("Location is disabled after check - NON resolvable.")
       }
-      is CheckLocationSettingsResult.DisabledResolvable -> {
-        locationSettingsResultRequest.launch(result.intentSenderRequest)
-      }
-      is CheckLocationSettingsResult.Enabled -> {
-        Timber.tag("USER_LOCATION_CHECK").d("Location is enabled after check.")
-        getAndSaveUserLocation()
-      }
     }
 
-    userLocationRequestedAndPermissionsGranted = false
+    shouldCheckIfLocationEnabled = false
+  }
+
+  var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
+  LaunchedEffect(userLocationNotFound) {
+    userLocationNotFoundToast =
+      if (userLocationNotFound) {
+        Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_SHORT).apply { show() }
+      } else {
+        userLocationNotFoundToast?.cancel()
+        null
+      }
   }
 
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }

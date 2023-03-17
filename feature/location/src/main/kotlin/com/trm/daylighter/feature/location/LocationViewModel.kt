@@ -40,7 +40,7 @@ constructor(
             val userLatLng = getCurrentUserLatLngUseCase()
             if (userLatLng == null) {
               emit(FailedFirst(UserLatLngNotFound))
-              delay(5_000L)
+              delay(2_000L)
               emit(Empty)
             } else {
               invokeSaveLocation(userLatLng.latitude, userLatLng.longitude)
@@ -53,10 +53,8 @@ constructor(
 
   val savedFlow: Flow<Unit> = savingFlow.filterIsInstance<Ready<Unit>>().map { it.data }
   val loadingFlow: Flow<Boolean> = savingFlow.map { it is Loading }
-  val locationFailedFlow: Flow<Unit> =
-    savingFlow
-      .filter { it.isFailedWith<UserLatLngNotFound>() }
-      .map {} // TODO: use to display error and hide it on any other state
+  val userLocationNotFoundFlow: Flow<Boolean> =
+    savingFlow.map { it.isFailedWith<UserLatLngNotFound>() }
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {

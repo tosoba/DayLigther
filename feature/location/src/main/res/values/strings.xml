@@ -9,4 +9,5 @@
     <string name="location_permissions_dialog_settings_text">This feature requires location permissions which you have permanently denied. Use application settings to enable them.</string>
 
     <string name="location_disabled_non_resolvable_message">Location is disabled. You have to enable it manually from location settings.</string>
+    <string name="location_not_found">Unable to retrieve your location. Please try again.</string>
 </resources>
