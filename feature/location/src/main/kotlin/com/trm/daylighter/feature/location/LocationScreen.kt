@@ -183,7 +183,7 @@ private fun LocationScreen(
   LaunchedEffect(userLocationNotFound) {
     userLocationNotFoundToast =
       if (userLocationNotFound) {
-        Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_SHORT).apply { show() }
+        Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_LONG).apply { show() }
       } else {
         userLocationNotFoundToast?.cancel()
         null

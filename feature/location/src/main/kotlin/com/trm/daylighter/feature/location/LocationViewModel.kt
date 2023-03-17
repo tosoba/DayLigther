@@ -40,7 +40,7 @@ constructor(
             val userLatLng = getCurrentUserLatLngUseCase()
             if (userLatLng == null) {
               emit(FailedFirst(UserLatLngNotFound))
-              delay(2_000L)
+              delay(3_500L)
               emit(Empty)
             } else {
               invokeSaveLocation(userLatLng.latitude, userLatLng.longitude)
