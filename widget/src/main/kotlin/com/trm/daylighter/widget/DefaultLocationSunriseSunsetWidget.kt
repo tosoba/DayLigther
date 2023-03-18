@@ -26,8 +26,7 @@ import java.time.ZoneId
 class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
 
-  override val sizeMode: SizeMode =
-    SizeMode.Responsive(setOf(thinMode, smallMode, mediumMode, largeMode))
+  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(smallMode, wideMode, squareMode))
 
   @Composable
   override fun Content() {
@@ -45,10 +44,9 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private val thinMode = DpSize(120.dp, 120.dp)
-    private val smallMode = DpSize(184.dp, 184.dp)
-    private val mediumMode = DpSize(260.dp, 200.dp)
-    private val largeMode = DpSize(260.dp, 280.dp)
+    private val smallMode = DpSize(120.dp, 46.dp)
+    private val wideMode = DpSize(200.dp, 46.dp)
+    private val squareMode = DpSize(120.dp, 120.dp)
   }
 }
 
