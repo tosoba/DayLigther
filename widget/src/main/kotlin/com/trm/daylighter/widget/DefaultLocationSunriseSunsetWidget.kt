@@ -100,15 +100,14 @@ private fun Clock(zoneId: ZoneId) {
     val context = LocalContext.current
     AndroidRemoteViews(
       remoteViews =
-        RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
-          .apply {
-            setString(R.id.location_clock, "setTimeZone", zoneId.id)
-            setInt(
-              R.id.location_clock,
-              "setTextColor",
-              GlanceTheme.colors.textColorPrimary.getColor(context).toArgb()
-            )
-          }
+        RemoteViews(context.packageName, R.layout.location_text_clock_remote_view).apply {
+          setString(R.id.location_clock, "setTimeZone", zoneId.id)
+          setInt(
+            R.id.location_clock,
+            "setTextColor",
+            GlanceTheme.colors.textColorPrimary.getColor(context).toArgb()
+          )
+        }
     )
   }
 }
