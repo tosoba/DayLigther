@@ -120,7 +120,7 @@ private fun LocationScreen(
       }
     }
 
-  fun Context.checkAndRequestLocationPermissions() {
+  fun Context.checkLocationPermissions() {
     checkPermissions(
       permissions = locationPermissions,
       onNotGranted = {
@@ -179,16 +179,7 @@ private fun LocationScreen(
     shouldCheckIfLocationEnabled = false
   }
 
-  var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
-  LaunchedEffect(userLocationNotFound) {
-    userLocationNotFoundToast =
-      if (userLocationNotFound) {
-        Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_LONG).apply { show() }
-      } else {
-        userLocationNotFoundToast?.cancel()
-        null
-      }
-  }
+  UserLocationNotFoundToast(userLocationNotFound = userLocationNotFound)
 
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
@@ -241,7 +232,7 @@ private fun LocationScreen(
       modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
     ) {
       Column {
-        FloatingActionButton(onClick = context::checkAndRequestLocationPermissions) {
+        FloatingActionButton(onClick = context::checkLocationPermissions) {
           Icon(
             imageVector = Icons.Filled.MyLocation,
             contentDescription = stringResource(R.string.my_location),
@@ -317,11 +308,27 @@ private fun LocationScreen(
       permissionRequestMode = permissionRequestMode,
       onOkClick = {
         permissionInfoDialogVisible = false
-        context.checkAndRequestLocationPermissions()
+        context.checkLocationPermissions()
       },
       onDismiss = { permissionInfoDialogVisible = false },
       modifier = Modifier.align(Alignment.Center).wrapContentHeight()
     )
+  }
+}
+
+@Composable
+private fun UserLocationNotFoundToast(userLocationNotFound: Boolean) {
+  val context = LocalContext.current
+  var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
+
+  LaunchedEffect(userLocationNotFound) {
+    userLocationNotFoundToast =
+      if (userLocationNotFound) {
+        Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_LONG).apply { show() }
+      } else {
+        userLocationNotFoundToast?.cancel()
+        null
+      }
   }
 }
 
