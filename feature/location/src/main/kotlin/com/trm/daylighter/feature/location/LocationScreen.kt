@@ -14,10 +14,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -67,7 +64,8 @@ fun LocationRoute(
     mapPosition = mapPosition.value,
     isLoading = isLoading.value,
     userLocationNotFound = userLocationNotFound.value,
-    onSaveLocationClick = viewModel::saveLocation,
+    onSaveLocationClick = viewModel::saveSpecifiedLocation,
+    cancelSaveLocation = viewModel::cancelSaveLocation,
     getAndSaveUserLocation = viewModel::getAndSaveUserLocation,
     onBackClick = onBackClick,
     modifier = modifier
@@ -85,6 +83,7 @@ private fun LocationScreen(
   isLoading: Boolean,
   userLocationNotFound: Boolean,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
+  cancelSaveLocation: () -> Unit,
   getAndSaveUserLocation: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -227,29 +226,32 @@ private fun LocationScreen(
       modifier = Modifier.align(Alignment.Center)
     )
 
-    AnimatedVisibility(
-      visible = !isLoading,
-      modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
-    ) {
-      Column {
+    Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
+      AnimatedVisibility(visible = !isLoading) {
         FloatingActionButton(onClick = context::checkLocationPermissions) {
           Icon(
             imageVector = Icons.Filled.MyLocation,
             contentDescription = stringResource(R.string.my_location),
           )
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        FloatingActionButton(
-          onClick = {
+      }
+
+      Spacer(modifier = Modifier.height(10.dp))
+
+      FloatingActionButton(
+        onClick = {
+          if (!isLoading) {
             val mapCenter = mapView.mapCenter
             onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
+          } else {
+            cancelSaveLocation()
           }
-        ) {
-          Icon(
-            imageVector = Icons.Filled.Done,
-            contentDescription = stringResource(R.string.save_location)
-          )
         }
+      ) {
+        Icon(
+          imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel,
+          contentDescription = stringResource(R.string.save_location)
+        )
       }
     }
 
