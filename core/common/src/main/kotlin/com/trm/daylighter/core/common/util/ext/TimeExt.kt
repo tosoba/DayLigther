@@ -29,3 +29,13 @@ fun timeDifferenceLabel(from: LocalTime, to: LocalTime): String {
 
 fun formatTimeDifference(prefix: String, diff: LocalTime): String =
   "$prefix${diff.format(DateTimeFormatter.ISO_LOCAL_TIME).run { if (startsWith("00:")) substring(3) else this }}"
+
+fun dayLengthDiffTime(dayLengthSeconds1: Int, dayLengthSeconds2: Int): LocalTime =
+  LocalTime.ofSecondOfDay(abs(dayLengthSeconds1 - dayLengthSeconds2).toLong())
+
+fun dayLengthDiffPrefix(todayLengthSeconds: Int, yesterdayLengthSeconds: Int): String =
+  when {
+    todayLengthSeconds > yesterdayLengthSeconds -> "+"
+    todayLengthSeconds < yesterdayLengthSeconds -> "-"
+    else -> ""
+  }

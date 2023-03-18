@@ -3,6 +3,7 @@ package com.trm.daylighter.widget.util
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -11,12 +12,7 @@ import androidx.glance.LocalContext
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
-import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
-import androidx.glance.layout.Column
-import androidx.glance.layout.ColumnScope
-import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.padding
+import androidx.glance.layout.*
 
 @Composable
 fun AppWidgetBox(
@@ -39,6 +35,21 @@ fun AppWidgetColumn(
   content: @Composable ColumnScope.() -> Unit
 ) {
   Column(
+    modifier = appWidgetBackgroundModifier().then(modifier),
+    verticalAlignment = verticalAlignment,
+    horizontalAlignment = horizontalAlignment,
+    content = content,
+  )
+}
+
+@Composable
+fun AppWidgetRow(
+  modifier: GlanceModifier = GlanceModifier,
+  verticalAlignment: Alignment.Vertical = Alignment.Top,
+  horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+  content: @Composable RowScope.() -> Unit
+) {
+  Row(
     modifier = appWidgetBackgroundModifier().then(modifier),
     verticalAlignment = verticalAlignment,
     horizontalAlignment = horizontalAlignment,

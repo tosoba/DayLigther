@@ -9,7 +9,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -59,16 +58,13 @@ import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.common.util.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.ui.composable.ZoomInButton
-import com.trm.daylighter.core.ui.composable.ZoomOutButton
-import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.model.DayMode
 import java.lang.Float.max
 import java.time.*
-import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -499,35 +495,20 @@ private fun DayLength(
   modifier: Modifier = Modifier
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-    Box(modifier = Modifier.size(50.dp)) {
-      val sunPainter =
-        rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
-      Image(
-        painter = sunPainter,
-        contentDescription = "",
-        modifier = Modifier.align(Alignment.Center).size(40.dp)
-      )
-      Icon(
-        painter = painterResource(id = R.drawable.clock),
-        contentDescription = "",
-        modifier = Modifier.align(Alignment.BottomEnd)
-      )
-    }
+    DayLengthSymbol()
+    DayLengthInfo(today = today, yesterday = yesterday)
+  }
+}
 
-    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
-      val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
-      val diffLength =
-        LocalTime.ofSecondOfDay(abs(today.dayLengthSeconds - yesterday.dayLengthSeconds).toLong())
-      val diffPrefix =
-        when {
-          today.dayLengthSeconds > yesterday.dayLengthSeconds -> "+"
-          today.dayLengthSeconds < yesterday.dayLengthSeconds -> "-"
-          else -> ""
-        }
+@Composable
+private fun DayLengthSymbol() {
+  Box(modifier = Modifier.size(50.dp)) { DayLengthSymbolContent() }
+}
 
-      Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
-      Text(text = formatTimeDifference(diffPrefix, diffLength))
-    }
+@Composable
+private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
+  Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
+    DayLengthInfoContent(today = today, yesterday = yesterday)
   }
 }
 
@@ -632,7 +613,8 @@ private fun SunriseSunsetChart(
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
-  val sunPainter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.sun))
+  val sunPainter =
+    rememberVectorPainter(image = ImageVector.vectorResource(id = commonR.drawable.sun))
 
   val chartSegmentGlowPaint = remember {
     Paint().apply {
