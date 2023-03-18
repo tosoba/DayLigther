@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
 
-private val LightColorScheme =
+val LightColorScheme =
   lightColorScheme(
     primary = light_primary,
     onPrimary = light_onPrimary,
@@ -44,7 +44,7 @@ private val LightColorScheme =
     scrim = light_scrim,
   )
 
-private val DarkColorScheme =
+val DarkColorScheme =
   darkColorScheme(
     primary = dark_primary,
     onPrimary = dark_onPrimary,

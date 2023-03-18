@@ -1,10 +1,8 @@
-package com.trm.daylighter.widget.util
+package com.trm.daylighter.widget.ui
 
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
@@ -62,7 +60,7 @@ fun appWidgetBackgroundModifier() =
   GlanceModifier.fillMaxSize()
     .padding(16.dp)
     .appWidgetBackground()
-    .background(MaterialTheme.colorScheme.background)
+    .background(GlanceTheme.colors.primaryContainer)
     .appWidgetBackgroundCornerRadius()
 
 fun GlanceModifier.appWidgetBackgroundCornerRadius(): GlanceModifier {

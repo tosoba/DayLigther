@@ -3,6 +3,7 @@ package com.trm.daylighter.widget
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -15,16 +16,13 @@ import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.layout.*
 import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.formatTimeDifference
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.ui.theme.DayLighterTheme
-import com.trm.daylighter.widget.util.AppWidgetBox
-import com.trm.daylighter.widget.util.AppWidgetColumn
-import com.trm.daylighter.widget.util.AppWidgetRow
-import com.trm.daylighter.widget.util.stringResource
+import com.trm.daylighter.widget.ui.*
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -36,7 +34,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   @Composable
   override fun Content() {
     val change = currentState<Loadable<LocationSunriseSunsetChange>>()
-    DayLighterTheme(darkTheme = false, tweakStatusBarAppearance = false) {
+    GlanceTheme {
       when (change) {
         is Empty -> AddLocationButton()
         is Loading -> CircularProgressIndicator()
@@ -62,7 +60,11 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
       Spacer(modifier = GlanceModifier.height(5.dp))
       Clock(zoneId = location.zoneId)
       Spacer(modifier = GlanceModifier.height(5.dp))
-      Row(modifier = GlanceModifier.padding(horizontal = 8.dp)) {
+      Row(
+        modifier = GlanceModifier.padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
         DayLengthSymbol()
         DayLengthInfo(today = today, yesterday = yesterday)
       }
@@ -95,10 +97,18 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
 @Composable
 private fun Clock(zoneId: ZoneId) {
   Box {
+    val context = LocalContext.current
     AndroidRemoteViews(
       remoteViews =
         RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
-          .apply { setString(R.id.location_clock, "setTimeZone", zoneId.id) }
+          .apply {
+            setString(R.id.location_clock, "setTimeZone", zoneId.id)
+            setInt(
+              R.id.location_clock,
+              "setTextColor",
+              GlanceTheme.colors.textColorPrimary.getColor(context).toArgb()
+            )
+          }
     )
   }
 }
@@ -143,8 +153,9 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
         todayLengthSeconds = today.dayLengthSeconds,
         yesterdayLengthSeconds = yesterday.dayLengthSeconds
       )
-    Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
-    Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime))
+    val textStyle = TextStyle(color = GlanceTheme.colors.textColorPrimary)
+    Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME), style = textStyle)
+    Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime), style = textStyle)
   }
 }
 
