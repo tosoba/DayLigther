@@ -126,6 +126,7 @@ private fun DayLengthSmall(today: SunriseSunset, yesterday: SunriseSunset) {
 
 @Composable
 private fun DayLengthSymbol() {
+  val context = LocalContext.current
   Box(modifier = GlanceModifier.size(50.dp), contentAlignment = Alignment.BottomEnd) {
     Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
       Image(
@@ -135,7 +136,12 @@ private fun DayLengthSymbol() {
       )
     }
     Box(modifier = GlanceModifier.wrapContentSize(), contentAlignment = Alignment.Center) {
-      Image(provider = ImageProvider(commonR.drawable.clock), contentDescription = null)
+      Image(
+        provider =
+          if (context.isNightMode) ImageProvider(R.drawable.clock_white)
+          else ImageProvider(R.drawable.clock_black),
+        contentDescription = null
+      )
     }
   }
 }

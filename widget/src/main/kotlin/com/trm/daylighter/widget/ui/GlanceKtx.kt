@@ -1,5 +1,7 @@
 package com.trm.daylighter.widget.ui
 
+import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
@@ -87,3 +89,8 @@ fun stringResource(@StringRes id: Int, vararg args: Any): String =
 
 val Float.toPx
   get() = this * Resources.getSystem().displayMetrics.density
+
+val Context.isNightMode: Boolean
+  get() =
+    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+      Configuration.UI_MODE_NIGHT_YES
