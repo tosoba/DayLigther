@@ -9,6 +9,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -65,6 +66,7 @@ import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.model.DayMode
 import java.lang.Float.max
 import java.time.*
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -510,6 +512,35 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
   Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
     DayLengthInfoContent(today = today, yesterday = yesterday)
   }
+}
+
+@Composable
+private fun BoxScope.DayLengthSymbolContent() {
+  val sunPainter =
+    rememberVectorPainter(image = ImageVector.vectorResource(id = commonR.drawable.sun))
+  Image(
+    painter = sunPainter,
+    contentDescription = null,
+    modifier = Modifier.align(Alignment.Center).size(40.dp)
+  )
+  Icon(
+    painter = painterResource(id = commonR.drawable.clock),
+    contentDescription = null,
+    modifier = Modifier.align(Alignment.BottomEnd)
+  )
+}
+
+@Composable
+private fun DayLengthInfoContent(today: SunriseSunset, yesterday: SunriseSunset) {
+  val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
+  val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
+  val diffPrefix =
+    dayLengthDiffPrefix(
+      todayLengthSeconds = today.dayLengthSeconds,
+      yesterdayLengthSeconds = yesterday.dayLengthSeconds
+    )
+  Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
+  Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime))
 }
 
 @Composable
