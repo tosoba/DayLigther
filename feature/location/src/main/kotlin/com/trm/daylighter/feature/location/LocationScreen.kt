@@ -7,7 +7,10 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -139,19 +142,8 @@ private fun LocationScreen(
     )
   }
 
-  val locationSettingsResultRequest =
-    rememberLauncherForActivityResult(
-      contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) { activityResult ->
-      if (activityResult.resultCode == Activity.RESULT_OK) {
-        Timber.tag("USER_LOCATION_DIALOG")
-          .d("Location was enabled after showing location settings dialog.")
-        getAndSaveUserLocation()
-      } else {
-        Timber.tag("USER_LOCATION_DIALOG")
-          .d("Location was NOT enabled after showing location settings dialog.")
-      }
-    }
+  val locationSettingsRequestLauncher =
+    rememberLocationSettingsActivityResultLauncher(onLocationEnabled = getAndSaveUserLocation)
 
   LaunchedEffect(shouldCheckIfLocationEnabled) {
     if (!shouldCheckIfLocationEnabled) return@LaunchedEffect
@@ -162,7 +154,7 @@ private fun LocationScreen(
         getAndSaveUserLocation()
       }
       is CheckLocationSettingsResult.DisabledResolvable -> {
-        locationSettingsResultRequest.launch(result.intentSenderRequest)
+        locationSettingsRequestLauncher.launch(result.intentSenderRequest)
       }
       is CheckLocationSettingsResult.DisabledNonResolvable -> {
         Toast.makeText(
@@ -182,7 +174,6 @@ private fun LocationScreen(
 
   var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
   var infoExpanded by rememberSaveable { mutableStateOf(true) }
-
   val darkMode = isSystemInDarkTheme()
 
   val mapView =
@@ -317,6 +308,23 @@ private fun LocationScreen(
     )
   }
 }
+
+@Composable
+private fun rememberLocationSettingsActivityResultLauncher(
+  onLocationEnabled: () -> Unit
+): ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult> =
+  rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.StartIntentSenderForResult()
+  ) { activityResult ->
+    if (activityResult.resultCode == Activity.RESULT_OK) {
+      Timber.tag("USER_LOCATION_DIALOG")
+        .d("Location was enabled after showing location settings dialog.")
+      onLocationEnabled()
+    } else {
+      Timber.tag("USER_LOCATION_DIALOG")
+        .d("Location was NOT enabled after showing location settings dialog.")
+    }
+  }
 
 @Composable
 private fun UserLocationNotFoundToast(userLocationNotFound: Boolean) {
