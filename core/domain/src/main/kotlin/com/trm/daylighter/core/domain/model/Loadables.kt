@@ -1,6 +1,8 @@
 package com.trm.daylighter.core.domain.model
 
 import com.trm.daylighter.core.domain.serializer.LoadableSerializer
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlinx.serialization.Serializable
 
 @Serializable(with = LoadableSerializer::class)
@@ -16,7 +18,11 @@ sealed interface Loadable<out T : Any> {
   fun <R : Any> map(block: (T) -> R): Loadable<R>
 }
 
-inline fun <reified E> Loadable<*>.isFailedWith(): Boolean = (this as? Failed)?.throwable is E
+@OptIn(ExperimentalContracts::class)
+inline fun <reified E> Loadable<*>.isFailedWith(): Boolean {
+  contract { returns(true) implies (this@isFailedWith is Failed) }
+  return (this as? Failed)?.throwable is E
+}
 
 sealed interface WithData<T : Any> : Loadable<T> {
   val data: T
