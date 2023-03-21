@@ -1,6 +1,7 @@
 package com.trm.daylighter.widget
 
 import android.content.Context
+import android.content.Intent
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -9,6 +10,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.trm.daylighter.core.common.di.DaylighterDispatchers
 import com.trm.daylighter.core.common.di.Dispatcher
+import com.trm.daylighter.core.common.di.MainActivityIntent
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.work.worker.DelegatingWorker
@@ -25,6 +27,7 @@ constructor(
   @Assisted private val context: Context,
   @Assisted workerParameters: WorkerParameters,
   @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+  @MainActivityIntent private val mainActivityIntent: Intent,
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
@@ -56,7 +59,7 @@ constructor(
         updateState = { newState }
       )
     }
-    DefaultLocationSunriseSunsetWidget().updateAll(context)
+    DefaultLocationSunriseSunsetWidget(mainActivityIntent).updateAll(context)
   }
 
   internal companion object {

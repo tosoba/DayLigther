@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.glance.*
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
@@ -27,7 +28,9 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
+class DefaultLocationSunriseSunsetWidget(
+  private val widgetClickActionIntent: Intent,
+) : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(smallMode, wideMode, squareMode))
 
@@ -41,9 +44,29 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
         is Ready -> {
           val (location, today, yesterday) = change.data
           when (LocalSize.current) {
-            smallMode -> DayLengthSmall(today = today, yesterday = yesterday)
-            wideMode -> DayLengthWide(location = location, today = today, yesterday = yesterday)
-            squareMode -> DayLengthSquare(location = location, today = today, yesterday = yesterday)
+            smallMode -> {
+              DayLengthSmall(
+                today = today,
+                yesterday = yesterday,
+                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+              )
+            }
+            wideMode -> {
+              DayLengthWide(
+                location = location,
+                today = today,
+                yesterday = yesterday,
+                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+              )
+            }
+            squareMode -> {
+              DayLengthSquare(
+                location = location,
+                today = today,
+                yesterday = yesterday,
+                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+              )
+            }
           }
         }
         is Failed -> RetryButton()
@@ -51,46 +74,74 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
     }
   }
 
-  @Composable
-  private fun DayLengthSquare(location: Location, today: SunriseSunset, yesterday: SunriseSunset) {
-    AppWidgetColumn(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Spacer(modifier = GlanceModifier.height(5.dp))
-      Clock(zoneId = location.zoneId)
-      Spacer(modifier = GlanceModifier.height(5.dp))
-      Row(
-        modifier = GlanceModifier.padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        DayLengthSymbol()
-        DayLengthInfo(today = today, yesterday = yesterday)
-      }
-      Spacer(modifier = GlanceModifier.height(5.dp))
-    }
-  }
-
-  @Composable
-  private fun DayLengthWide(location: Location, today: SunriseSunset, yesterday: SunriseSunset) {
-    AppWidgetRow(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Spacer(modifier = GlanceModifier.width(5.dp))
-      Clock(zoneId = location.zoneId)
-      Spacer(modifier = GlanceModifier.width(5.dp))
-      DayLengthSymbol()
-      DayLengthInfo(today = today, yesterday = yesterday)
-      Spacer(modifier = GlanceModifier.width(5.dp))
-    }
-  }
-
   companion object {
     private val smallMode = DpSize(120.dp, 50.dp)
     private val wideMode = DpSize(200.dp, 50.dp)
     private val squareMode = DpSize(120.dp, 120.dp)
+  }
+}
+
+@Composable
+private fun DayLengthSmall(
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
+  modifier: GlanceModifier = GlanceModifier
+) {
+  AppWidgetRow(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+    modifier = modifier
+  ) {
+    DayLengthSymbol()
+    DayLengthInfo(today, yesterday)
+  }
+}
+
+@Composable
+private fun DayLengthSquare(
+  location: Location,
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
+  modifier: GlanceModifier = GlanceModifier
+) {
+  AppWidgetColumn(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = modifier
+  ) {
+    Spacer(modifier = GlanceModifier.height(5.dp))
+    Clock(zoneId = location.zoneId)
+    Spacer(modifier = GlanceModifier.height(5.dp))
+    Row(
+      modifier = GlanceModifier.padding(horizontal = 8.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      DayLengthSymbol()
+      DayLengthInfo(today = today, yesterday = yesterday)
+    }
+    Spacer(modifier = GlanceModifier.height(5.dp))
+  }
+}
+
+@Composable
+private fun DayLengthWide(
+  location: Location,
+  today: SunriseSunset,
+  yesterday: SunriseSunset,
+  modifier: GlanceModifier = GlanceModifier
+) {
+  AppWidgetRow(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = modifier
+  ) {
+    Spacer(modifier = GlanceModifier.width(5.dp))
+    Clock(zoneId = location.zoneId)
+    Spacer(modifier = GlanceModifier.width(5.dp))
+    DayLengthSymbol()
+    DayLengthInfo(today = today, yesterday = yesterday)
+    Spacer(modifier = GlanceModifier.width(5.dp))
   }
 }
 
@@ -109,17 +160,6 @@ private fun Clock(zoneId: ZoneId) {
           )
         }
     )
-  }
-}
-
-@Composable
-private fun DayLengthSmall(today: SunriseSunset, yesterday: SunriseSunset) {
-  AppWidgetRow(
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalAlignment = Alignment.Horizontal.CenterHorizontally
-  ) {
-    DayLengthSymbol()
-    DayLengthInfo(today, yesterday)
   }
 }
 

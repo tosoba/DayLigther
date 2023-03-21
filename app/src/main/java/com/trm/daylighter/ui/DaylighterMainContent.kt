@@ -171,7 +171,7 @@ private fun DaylighterNavHost(
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
     composable(
-      locationRoute,
+      route = locationRoute,
       deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUri })
     ) {
       LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
