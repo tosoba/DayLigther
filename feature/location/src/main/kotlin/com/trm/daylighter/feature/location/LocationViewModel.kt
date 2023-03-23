@@ -31,10 +31,15 @@ constructor(
     _saveLocationTypeFlow
       .transformLatest { saveLocationType ->
         when (saveLocationType) {
-          is SaveLocationType.Specified ->
+          is SaveLocationType.Specified -> {
             emitSaveSpecifiedLocation(saveLocationType.latitude, saveLocationType.longitude)
-          is SaveLocationType.User -> emitSaveUserLocation()
-          is SaveLocationType.CanceCurrent -> emit(Empty)
+          }
+          is SaveLocationType.User -> {
+            emitSaveUserLocation()
+          }
+          is SaveLocationType.CanceCurrent -> {
+            emit(Empty)
+          }
         }
       }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
