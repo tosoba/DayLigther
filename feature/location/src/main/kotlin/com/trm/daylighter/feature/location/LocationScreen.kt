@@ -41,6 +41,8 @@ import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
+import eu.wewox.modalsheet.ExperimentalSheetApi
+import eu.wewox.modalsheet.ModalSheet
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -80,6 +82,7 @@ private enum class PermissionRequestMode {
   APP_DETAILS_SETTINGS
 }
 
+@OptIn(ExperimentalSheetApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationScreen(
   mapPosition: MapPosition,
@@ -199,113 +202,121 @@ private fun LocationScreen(
     }
   }
 
-  Box(modifier = modifier) {
-    AndroidView(
-      factory = { mapView },
-      update = {
-        it.setDefaultConfig(darkMode = darkMode)
-        it.removeMapListener(mapListener)
-        it.restorePosition(savedMapPosition)
-        it.addMapListener(mapListener)
-      },
-      modifier = Modifier.fillMaxSize(),
-    )
+  var sheetVisible by rememberSaveable { mutableStateOf(false) }
 
-    Icon(
-      painter = painterResource(id = commonR.drawable.marker),
-      contentDescription = stringResource(id = commonR.string.location_marker),
-      modifier = Modifier.align(Alignment.Center)
-    )
+  Scaffold(modifier = modifier) { padding ->
+    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+      AndroidView(
+        factory = { mapView },
+        update = {
+          it.setDefaultConfig(darkMode = darkMode)
+          it.removeMapListener(mapListener)
+          it.restorePosition(savedMapPosition)
+          it.addMapListener(mapListener)
+        },
+        modifier = Modifier.fillMaxSize(),
+      )
 
-    Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
-      AnimatedVisibility(visible = !isLoading) {
-        FloatingActionButton(onClick = context::checkLocationPermissions) {
-          Icon(
-            imageVector = Icons.Filled.MyLocation,
-            contentDescription = stringResource(R.string.my_location),
-          )
-        }
-      }
+      Icon(
+        painter = painterResource(id = commonR.drawable.marker),
+        contentDescription = stringResource(id = commonR.string.location_marker),
+        modifier = Modifier.align(Alignment.Center)
+      )
 
-      Spacer(modifier = Modifier.height(10.dp))
-
-      FloatingActionButton(
-        onClick = {
-          if (!isLoading) {
-            val mapCenter = mapView.mapCenter
-            onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
-          } else {
-            cancelSaveLocation()
+      Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
+        AnimatedVisibility(visible = !isLoading) {
+          FloatingActionButton(onClick = context::checkLocationPermissions) {
+            Icon(
+              imageVector = Icons.Filled.MyLocation,
+              contentDescription = stringResource(R.string.my_location),
+            )
           }
         }
-      ) {
-        Icon(
-          imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel,
-          contentDescription = stringResource(R.string.save_location)
-        )
-      }
-    }
 
-    Row(modifier = Modifier.padding(20.dp)) {
-      SmallFloatingActionButton(onClick = onBackClick, modifier = Modifier.padding(end = 5.dp)) {
-        Icon(
-          imageVector = Icons.Filled.ArrowBack,
-          contentDescription = stringResource(id = commonR.string.back)
-        )
-      }
+        Spacer(modifier = Modifier.height(10.dp))
 
-      Spacer(modifier = Modifier.weight(1f))
-
-      val infoContainerColor =
-        animateColorAsState(
-          targetValue =
-            if (infoExpanded) MaterialTheme.colorScheme.background
-            else FloatingActionButtonDefaults.containerColor
-        )
-      FloatingActionButton(
-        modifier = Modifier.padding(start = 5.dp),
-        containerColor = infoContainerColor.value,
-        onClick = { infoExpanded = !infoExpanded }
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 16.dp),
-          verticalAlignment = Alignment.CenterVertically
+        FloatingActionButton(
+          onClick = {
+            if (!isLoading) {
+              val mapCenter = mapView.mapCenter
+              onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
+            } else {
+              cancelSaveLocation()
+            }
+          }
         ) {
           Icon(
-            imageVector = Icons.Filled.Info,
-            contentDescription = stringResource(R.string.center_map_on_location)
+            imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel,
+            contentDescription = stringResource(R.string.save_location)
           )
-          AnimatedVisibility(visible = infoExpanded) {
-            Row {
-              Spacer(modifier = Modifier.width(12.dp))
-              Text(
-                text = stringResource(R.string.center_map_on_location),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-              )
+        }
+      }
+
+      Row(modifier = Modifier.padding(20.dp)) {
+        SmallFloatingActionButton(onClick = onBackClick, modifier = Modifier.padding(end = 5.dp)) {
+          Icon(
+            imageVector = Icons.Filled.ArrowBack,
+            contentDescription = stringResource(id = commonR.string.back)
+          )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        val infoContainerColor =
+          animateColorAsState(
+            targetValue =
+              if (infoExpanded) MaterialTheme.colorScheme.background
+              else FloatingActionButtonDefaults.containerColor
+          )
+        FloatingActionButton(
+          modifier = Modifier.padding(start = 5.dp),
+          containerColor = infoContainerColor.value,
+          onClick = { infoExpanded = !infoExpanded }
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              imageVector = Icons.Filled.Info,
+              contentDescription = stringResource(R.string.center_map_on_location)
+            )
+            AnimatedVisibility(visible = infoExpanded) {
+              Row {
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                  text = stringResource(R.string.center_map_on_location),
+                  style = MaterialTheme.typography.bodyLarge,
+                  textAlign = TextAlign.Center
+                )
+              }
             }
           }
         }
       }
+
+      AnimatedVisibility(
+        visible = isLoading,
+        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+      ) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+      }
+
+      LocationPermissionInfoDialog(
+        dialogVisible = permissionInfoDialogVisible,
+        permissionRequestMode = permissionRequestMode,
+        onOkClick = {
+          permissionInfoDialogVisible = false
+          context.checkLocationPermissions()
+        },
+        onDismiss = { permissionInfoDialogVisible = false },
+        modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+      )
     }
 
-    AnimatedVisibility(
-      visible = isLoading,
-      modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-    ) {
-      LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+    ModalSheet(visible = sheetVisible, onVisibleChange = { sheetVisible = it }) {
+      Text(text = "YO", modifier = Modifier.padding(50.dp))
     }
-
-    LocationPermissionInfoDialog(
-      dialogVisible = permissionInfoDialogVisible,
-      permissionRequestMode = permissionRequestMode,
-      onOkClick = {
-        permissionInfoDialogVisible = false
-        context.checkLocationPermissions()
-      },
-      onDismiss = { permissionInfoDialogVisible = false },
-      modifier = Modifier.align(Alignment.Center).wrapContentHeight()
-    )
   }
 }
 

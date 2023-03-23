@@ -5,8 +5,8 @@ androidGradlePlugin = "7.4.0"
 androidxActivity = "1.6.1"
 androidxAppCompat = "1.5.1"
 androidxBrowser = "1.4.0"
-androidxComposeBom = "2023.03.00"
-androidxComposeCompiler = "1.4.4"
+androidxComposeBom = "2023.01.00"
+androidxComposeCompiler = "1.4.3"
 androidxComposeRuntimeTracing = "1.0.0-alpha01"
 androidxConstraintLayout = "1.0.1"
 androidxCore = "1.9.0"
@@ -42,6 +42,7 @@ kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.4.1"
 ksp = "1.8.10-1.0.9"
 lint = "30.3.1"
+modalSheet = "0.3.0"
 nominatim = "3.4"
 okhttp = "4.10.0"
 osmdroid = "6.1.14"
@@ -125,6 +126,8 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lint-api = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
+material = { group = "androidx.compose.material", name = "material" }
+modalsheet = { group = "io.github.oleksandrbalan", name = "modalsheet", version.ref = "modalSheet" }
 nominatim-api = { group = "fr.dudie", name = "nominatim-api", version.ref = "nominatim" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
