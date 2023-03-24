@@ -118,7 +118,7 @@ private fun LocationScreen(
             backgroundColor = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
           ) {
-            ModalSheetContent()
+            ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxWidth())
           }
         }
       },
@@ -139,7 +139,9 @@ private fun LocationScreen(
 
     ModalNavigationDrawer(
       drawerState = drawerState,
-      drawerContent = { ModalDrawerSheet { ModalSheetContent() } }
+      drawerContent = {
+        ModalDrawerSheet { ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxHeight()) }
+      }
     ) {
       LocationScaffold()
     }
@@ -148,8 +150,14 @@ private fun LocationScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColumnScope.ModalSheetContent() {
-  TextField(value = "KEKW", onValueChange = {}, modifier = Modifier.padding(50.dp))
+private fun ModalSheetContent(modifier: Modifier = Modifier) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+    modifier = modifier
+  ) {
+    TextField(value = "KEKW", onValueChange = {})
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
