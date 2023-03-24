@@ -118,7 +118,7 @@ private fun LocationScreen(
             backgroundColor = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
           ) {
-            Text(text = "YO", modifier = Modifier.padding(50.dp))
+            ModalSheetContent()
           }
         }
       },
@@ -139,7 +139,7 @@ private fun LocationScreen(
 
     ModalNavigationDrawer(
       drawerState = drawerState,
-      drawerContent = { ModalDrawerSheet { Text(text = "YO", modifier = Modifier.padding(50.dp)) } }
+      drawerContent = { ModalDrawerSheet { ModalSheetContent() } }
     ) {
       LocationScaffold()
     }
@@ -148,7 +148,13 @@ private fun LocationScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocationScaffold(
+private fun ColumnScope.ModalSheetContent() {
+  TextField(value = "KEKW", onValueChange = {}, modifier = Modifier.padding(50.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LocationScaffold(
   mapPosition: MapPosition,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
