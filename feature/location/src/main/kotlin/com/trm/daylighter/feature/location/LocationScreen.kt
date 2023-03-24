@@ -45,6 +45,7 @@ import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
 import eu.wewox.modalsheet.ExperimentalSheetApi
 import eu.wewox.modalsheet.ModalSheet
+import kotlinx.coroutines.flow.filter
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -340,11 +341,13 @@ private fun LocationScreen(
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     LocationScaffold()
   } else {
-    val drawerState =
-      rememberDrawerState(initialValue = if (sheetVisible) DrawerValue.Open else DrawerValue.Closed)
-    LaunchedEffect(Unit) {
-      snapshotFlow { sheetVisible }.collect { if (it) drawerState.open() else drawerState.close() }
+    val drawerState = remember {
+      DrawerState(initialValue = if (sheetVisible) DrawerValue.Open else DrawerValue.Closed)
     }
+    LaunchedEffect(Unit) {
+      snapshotFlow { sheetVisible }.filter { it }.collect { drawerState.open() }
+    }
+    LaunchedEffect(drawerState.currentValue) { if (drawerState.isClosed) sheetVisible = false }
 
     ModalNavigationDrawer(
       drawerState = drawerState,
