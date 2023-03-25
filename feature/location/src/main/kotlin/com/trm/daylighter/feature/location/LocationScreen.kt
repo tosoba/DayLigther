@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.location
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -39,15 +38,11 @@ import com.trm.daylighter.core.common.util.ext.CheckLocationSettingsResult
 import com.trm.daylighter.core.common.util.ext.checkLocationSettings
 import com.trm.daylighter.core.common.util.ext.checkPermissions
 import com.trm.daylighter.core.common.util.ext.getActivity
-import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
-import com.trm.daylighter.feature.location.model.MapPosition
+import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
 import eu.wewox.modalsheet.ExperimentalSheetApi
 import eu.wewox.modalsheet.ModalSheet
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import timber.log.Timber
 
 const val locationRoute = "location_route"
@@ -79,11 +74,6 @@ fun LocationRoute(
   )
 }
 
-private enum class PermissionRequestMode {
-  PERMISSION_REQUEST_DIALOG,
-  APP_DETAILS_SETTINGS
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSheetApi::class)
 @Composable
 private fun LocationScreen(
@@ -96,19 +86,63 @@ private fun LocationScreen(
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
+  val context = LocalContext.current
+  val userLocationRequestState = rememberUserLocationRequestState()
+  val locationPermissionsRequestLauncher =
+    rememberLocationPermissionsResultLauncher(userLocationRequestState = userLocationRequestState)
+
+  fun Context.checkLocationPermissions() {
+    checkPermissions(
+      permissions = userLocationRequestState.locationPermissions,
+      onNotGranted = {
+        when (userLocationRequestState.permissionRequestMode) {
+          PermissionRequestMode.PERMISSION_REQUEST_DIALOG -> {
+            locationPermissionsRequestLauncher.launch(userLocationRequestState.locationPermissions)
+          }
+          PermissionRequestMode.APP_DETAILS_SETTINGS -> {
+            context.startActivity(
+              Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.fromParts("package", context.packageName, null))
+            )
+          }
+        }
+      },
+      onGranted = { userLocationRequestState.shouldCheckIfLocationEnabled = true }
+    )
+  }
+
+  CheckLocationSettingsEffect(
+    userLocationRequestState = userLocationRequestState,
+    onLocationEnabled = getAndSaveUserLocation
+  )
+
+  UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
+
   val orientation = LocalConfiguration.current.orientation
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
+  val locationMap = rememberLocationMap(mapPosition = mapPosition)
 
   @Composable
   fun LocationScaffold() {
     LocationScaffold(
-      mapPosition = mapPosition,
       isLoading = isLoading,
-      userLocationNotFound = userLocationNotFound,
       onSaveLocationClick = onSaveLocationClick,
       cancelSaveLocation = cancelSaveLocation,
-      getAndSaveUserLocation = getAndSaveUserLocation,
+      onUserLocationClick = context::checkLocationPermissions,
       onBackClick = onBackClick,
+      locationMap = locationMap,
+      locationPermissionDialog = {
+        LocationPermissionInfoDialog(
+          dialogVisible = userLocationRequestState.permissionInfoDialogVisible,
+          permissionRequestMode = userLocationRequestState.permissionRequestMode,
+          onOkClick = {
+            userLocationRequestState.permissionInfoDialogVisible = false
+            context.checkLocationPermissions()
+          },
+          onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
+          modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+        )
+      },
       modalSheet = {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
           ModalSheet(
@@ -148,147 +182,28 @@ private fun LocationScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ModalSheetContent(modifier: Modifier = Modifier) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center,
-    modifier = modifier
-  ) {
-    TextField(value = "KEKW", onValueChange = {})
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 private fun LocationScaffold(
-  mapPosition: MapPosition,
   isLoading: Boolean,
-  userLocationNotFound: Boolean,
   onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
   cancelSaveLocation: () -> Unit,
-  getAndSaveUserLocation: () -> Unit,
+  onUserLocationClick: () -> Unit,
   onBackClick: () -> Unit,
+  locationMap: LocationMap,
+  locationPermissionDialog: @Composable BoxScope.() -> Unit,
   modalSheet: @Composable () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val context = LocalContext.current
-
-  val locationPermissions =
-    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-  var permissionInfoDialogVisible by rememberSaveable { mutableStateOf(false) }
-  var permissionRequestMode by rememberSaveable {
-    mutableStateOf(PermissionRequestMode.PERMISSION_REQUEST_DIALOG)
-  }
-  var shouldCheckIfLocationEnabled by rememberSaveable { mutableStateOf(false) }
-
-  val locationPermissionsRequestLauncher =
-    rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-      permissionsMap ->
-      val allGranted = permissionsMap.values.all { it }
-      if (allGranted) {
-        Timber.tag("USER_LOCATION_PERMISSIONS").d("Location permissions are granted.")
-        shouldCheckIfLocationEnabled = true
-      } else {
-        val shouldShowRationale =
-          locationPermissions.any { permission ->
-            ActivityCompat.shouldShowRequestPermissionRationale(
-              requireNotNull(context.getActivity()),
-              permission
-            )
-          }
-        permissionRequestMode =
-          if (shouldShowRationale) PermissionRequestMode.PERMISSION_REQUEST_DIALOG
-          else PermissionRequestMode.APP_DETAILS_SETTINGS
-        permissionInfoDialogVisible = true
-      }
-    }
-
-  fun Context.checkLocationPermissions() {
-    checkPermissions(
-      permissions = locationPermissions,
-      onNotGranted = {
-        when (permissionRequestMode) {
-          PermissionRequestMode.PERMISSION_REQUEST_DIALOG -> {
-            locationPermissionsRequestLauncher.launch(locationPermissions)
-          }
-          PermissionRequestMode.APP_DETAILS_SETTINGS -> {
-            context.startActivity(
-              Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                .setData(Uri.fromParts("package", context.packageName, null))
-            )
-          }
-        }
-      },
-      onGranted = { shouldCheckIfLocationEnabled = true }
-    )
-  }
-
-  val locationSettingsRequestLauncher =
-    rememberLocationSettingsActivityResultLauncher(onLocationEnabled = getAndSaveUserLocation)
-
-  LaunchedEffect(shouldCheckIfLocationEnabled) {
-    if (!shouldCheckIfLocationEnabled) return@LaunchedEffect
-
-    when (val result = context.checkLocationSettings()) {
-      is CheckLocationSettingsResult.Enabled -> {
-        Timber.tag("USER_LOCATION_CHECK").d("Location is enabled after check.")
-        getAndSaveUserLocation()
-      }
-      is CheckLocationSettingsResult.DisabledResolvable -> {
-        locationSettingsRequestLauncher.launch(result.intentSenderRequest)
-      }
-      is CheckLocationSettingsResult.DisabledNonResolvable -> {
-        Toast.makeText(
-            context,
-            R.string.location_disabled_non_resolvable_message,
-            Toast.LENGTH_LONG
-          )
-          .show()
-        Timber.tag("USER_LOCATION_CHECK").d("Location is disabled after check - NON resolvable.")
-      }
-    }
-
-    shouldCheckIfLocationEnabled = false
-  }
-
-  UserLocationNotFoundToast(userLocationNotFound = userLocationNotFound)
-
-  var savedMapPosition by rememberSaveable(mapPosition) { mutableStateOf(mapPosition) }
-  var infoExpanded by rememberSaveable { mutableStateOf(true) }
   val darkMode = isSystemInDarkTheme()
-
-  val mapView =
-    rememberMapViewWithLifecycle(
-      onPause = {
-        savedMapPosition =
-          MapPosition(
-            latitude = it.mapCenter.latitude,
-            longitude = it.mapCenter.longitude,
-            zoom = it.zoomLevelDouble,
-            orientation = it.mapOrientation
-          )
-      }
-    )
-  val mapListener = remember {
-    object : MapListener {
-      override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
-      override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
-      private fun onMapInteraction(): Boolean {
-        infoExpanded = false
-        return false
-      }
-    }
-  }
 
   Scaffold(modifier = modifier) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       AndroidView(
-        factory = { mapView },
+        factory = { locationMap.view },
         update = {
           it.setDefaultConfig(darkMode = darkMode)
-          it.removeMapListener(mapListener)
-          it.restorePosition(savedMapPosition)
-          it.addMapListener(mapListener)
+          it.removeMapListener(locationMap.listener)
+          it.restorePosition(position = locationMap.state.savedMapPosition)
+          it.addMapListener(locationMap.listener)
         },
         modifier = Modifier.fillMaxSize(),
       )
@@ -301,7 +216,7 @@ private fun LocationScaffold(
 
       Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
         AnimatedVisibility(visible = !isLoading) {
-          FloatingActionButton(onClick = context::checkLocationPermissions) {
+          FloatingActionButton(onClick = onUserLocationClick) {
             Icon(
               imageVector = Icons.Filled.MyLocation,
               contentDescription = stringResource(R.string.my_location),
@@ -314,8 +229,8 @@ private fun LocationScaffold(
         FloatingActionButton(
           onClick = {
             if (!isLoading) {
-              infoExpanded = false
-              val mapCenter = mapView.mapCenter
+              locationMap.state.infoExpanded = false
+              val mapCenter = locationMap.view.mapCenter
               onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
             } else {
               cancelSaveLocation()
@@ -342,13 +257,13 @@ private fun LocationScaffold(
         val infoContainerColor =
           animateColorAsState(
             targetValue =
-              if (infoExpanded) MaterialTheme.colorScheme.background
+              if (locationMap.state.infoExpanded) MaterialTheme.colorScheme.background
               else FloatingActionButtonDefaults.containerColor
           )
         FloatingActionButton(
           modifier = Modifier.padding(start = 5.dp),
           containerColor = infoContainerColor.value,
-          onClick = { infoExpanded = !infoExpanded }
+          onClick = locationMap.state::toggleInfoExpanded
         ) {
           Row(
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -358,7 +273,7 @@ private fun LocationScaffold(
               imageVector = Icons.Filled.Info,
               contentDescription = stringResource(R.string.center_map_on_location)
             )
-            AnimatedVisibility(visible = infoExpanded) {
+            AnimatedVisibility(visible = locationMap.state.infoExpanded) {
               Row {
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
@@ -379,19 +294,84 @@ private fun LocationScaffold(
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
       }
 
-      LocationPermissionInfoDialog(
-        dialogVisible = permissionInfoDialogVisible,
-        permissionRequestMode = permissionRequestMode,
-        onOkClick = {
-          permissionInfoDialogVisible = false
-          context.checkLocationPermissions()
-        },
-        onDismiss = { permissionInfoDialogVisible = false },
-        modifier = Modifier.align(Alignment.Center).wrapContentHeight()
-      )
+      locationPermissionDialog()
     }
 
     modalSheet()
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModalSheetContent(modifier: Modifier = Modifier) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+    modifier = modifier
+  ) {
+    TextField(value = "KEKW", onValueChange = {})
+  }
+}
+
+@Composable
+private fun rememberLocationPermissionsResultLauncher(
+  userLocationRequestState: UserLocationRequestState,
+): ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>> {
+  val context = LocalContext.current
+  return rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+    permissionsMap ->
+    val allGranted = permissionsMap.values.all { it }
+    if (allGranted) {
+      Timber.tag("USER_LOCATION_PERMISSIONS").d("Location permissions are granted.")
+      userLocationRequestState.shouldCheckIfLocationEnabled = true
+    } else {
+      val shouldShowRationale =
+        userLocationRequestState.locationPermissions.any { permission ->
+          ActivityCompat.shouldShowRequestPermissionRationale(
+            requireNotNull(context.getActivity()),
+            permission
+          )
+        }
+      userLocationRequestState.permissionRequestMode =
+        if (shouldShowRationale) PermissionRequestMode.PERMISSION_REQUEST_DIALOG
+        else PermissionRequestMode.APP_DETAILS_SETTINGS
+      userLocationRequestState.permissionInfoDialogVisible = true
+    }
+  }
+}
+
+@Composable
+private fun CheckLocationSettingsEffect(
+  userLocationRequestState: UserLocationRequestState,
+  onLocationEnabled: () -> Unit,
+) {
+  val context = LocalContext.current
+  val locationSettingsRequestLauncher =
+    rememberLocationSettingsActivityResultLauncher(onLocationEnabled = onLocationEnabled)
+
+  LaunchedEffect(userLocationRequestState.shouldCheckIfLocationEnabled) {
+    if (!userLocationRequestState.shouldCheckIfLocationEnabled) return@LaunchedEffect
+
+    when (val result = context.checkLocationSettings()) {
+      is CheckLocationSettingsResult.Enabled -> {
+        Timber.tag("USER_LOCATION_CHECK").d("Location is enabled after check.")
+        onLocationEnabled()
+      }
+      is CheckLocationSettingsResult.DisabledResolvable -> {
+        locationSettingsRequestLauncher.launch(result.intentSenderRequest)
+      }
+      is CheckLocationSettingsResult.DisabledNonResolvable -> {
+        Toast.makeText(
+            context,
+            R.string.location_disabled_non_resolvable_message,
+            Toast.LENGTH_LONG
+          )
+          .show()
+        Timber.tag("USER_LOCATION_CHECK").d("Location is disabled after check - NON resolvable.")
+      }
+    }
+
+    userLocationRequestState.shouldCheckIfLocationEnabled = false
   }
 }
 
@@ -413,7 +393,7 @@ private fun rememberLocationSettingsActivityResultLauncher(
   }
 
 @Composable
-private fun UserLocationNotFoundToast(userLocationNotFound: Boolean) {
+private fun UserLocationNotFoundToastEffect(userLocationNotFound: Boolean) {
   val context = LocalContext.current
   var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
 

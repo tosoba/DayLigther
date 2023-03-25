@@ -12,9 +12,6 @@ internal fun MapView.setDefaultConfig(darkMode: Boolean) {
   isTilesScaledToDpi = true
   setMultiTouchControls(true)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-  val tileSystem = MapView.getTileSystem()
-  setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
-  setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
   minZoomLevel = MapDefaults.MIN_ZOOM
   if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
 }
