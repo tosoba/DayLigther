@@ -9,6 +9,7 @@ import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
+import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.model.SaveLocationType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 class LocationViewModel
 @Inject
 constructor(
-  private val savedStateHandle: SavedStateHandle,
+  savedStateHandle: SavedStateHandle,
   private val getLocationById: GetLocationById,
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
@@ -49,9 +50,11 @@ constructor(
   val userLocationNotFoundFlow: Flow<Boolean> =
     savingFlow.map { it.isFailedWith<UserLatLngNotFound>() }
 
+  private val locationIdArg: Long? = savedStateHandle.get<Long>(locationIdParam)
+
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
-        savedStateHandle.get<Long>(locationIdParam)?.let { id ->
+        locationIdArg?.let { id ->
           val location = getLocationById(id)
           emit(
             MapPosition(
@@ -67,6 +70,9 @@ constructor(
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = MapPosition()
       )
+
+  val screenMode: LocationScreenMode =
+    if (locationIdArg == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
   fun saveSpecifiedLocation(latitude: Double, longitude: Double) {
     viewModelScope.launch {
@@ -107,7 +113,7 @@ constructor(
   }
 
   private suspend fun saveLocation(latitude: Double, longitude: Double) {
-    val locationId = savedStateHandle.get<Long>(locationIdParam)
+    val locationId = locationIdArg
     if (locationId == null) {
       saveLocationUseCase(latitude = latitude, longitude = longitude)
     } else {

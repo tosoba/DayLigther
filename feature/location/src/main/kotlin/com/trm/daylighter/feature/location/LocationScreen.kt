@@ -63,6 +63,7 @@ fun LocationRoute(
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
+    screenMode = viewModel.screenMode,
     mapPosition = mapPosition.value,
     isLoading = isLoading.value,
     userLocationNotFound = userLocationNotFound.value,
@@ -77,6 +78,7 @@ fun LocationRoute(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSheetApi::class)
 @Composable
 private fun LocationScreen(
+  screenMode: LocationScreenMode,
   mapPosition: MapPosition,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
@@ -119,8 +121,14 @@ private fun LocationScreen(
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
 
   val orientation = LocalConfiguration.current.orientation
-  var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val locationMap = rememberLocationMap(mapPosition = mapPosition)
+
+  var sheetVisible by rememberSaveable { mutableStateOf(false) }
+  val sheetHeaderLabel =
+    when (screenMode) {
+      LocationScreenMode.ADD -> stringResource(R.string.add_location)
+      LocationScreenMode.EDIT -> stringResource(R.string.edit_location)
+    }
 
   @Composable
   fun LocationScaffold() {
@@ -151,7 +159,10 @@ private fun LocationScreen(
             backgroundColor = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
           ) {
-            ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxWidth())
+            ModalSheetContent(
+              headerLabel = sheetHeaderLabel,
+              modifier = Modifier.padding(20.dp).fillMaxWidth()
+            )
           }
         }
       },
@@ -172,7 +183,12 @@ private fun LocationScreen(
       gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = {
-        ModalDrawerSheet { ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxHeight()) }
+        ModalDrawerSheet {
+          ModalSheetContent(
+            headerLabel = sheetHeaderLabel,
+            modifier = Modifier.padding(20.dp).fillMaxHeight()
+          )
+        }
       }
     ) {
       LocationScaffold()
@@ -303,13 +319,37 @@ private fun LocationScaffold(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ModalSheetContent(modifier: Modifier = Modifier) {
+private fun ModalSheetContent(headerLabel: String, modifier: Modifier = Modifier) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center,
+    verticalArrangement = Arrangement.Top,
     modifier = modifier
   ) {
-    TextField(value = "KEKW", onValueChange = {})
+    Text(
+      text = headerLabel,
+      style = MaterialTheme.typography.headlineMedium,
+      maxLines = 2,
+      modifier = Modifier.padding(10.dp).fillMaxWidth()
+    )
+
+    TextField(
+      value = "KEKW",
+      onValueChange = {},
+      label = { Text(text = stringResource(R.string.name)) },
+      modifier = Modifier.padding(10.dp).fillMaxWidth()
+    )
+
+    Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+      OutlinedButton(onClick = {}, modifier = Modifier.weight(.5f)) {
+        Text(text = stringResource(R.string.geocode))
+      }
+      Spacer(modifier = Modifier.width(10.dp))
+      OutlinedButton(onClick = {}, modifier = Modifier.weight(.5f)) {
+        Text(text = stringResource(R.string.save))
+      }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
   }
 }
 
