@@ -74,7 +74,7 @@ constructor(
   val screenMode: LocationScreenMode =
     if (locationIdArg == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
-  fun saveSpecifiedLocation(latitude: Double, longitude: Double) {
+  fun saveSpecifiedLocation(latitude: Double, longitude: Double, name: String) {
     viewModelScope.launch {
       _saveLocationTypeFlow.emit(
         SaveLocationType.Specified(latitude = latitude, longitude = longitude)

@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -30,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,7 +82,7 @@ private fun LocationScreen(
   mapPosition: MapPosition,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
-  onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
+  onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
   cancelSaveLocation: () -> Unit,
   getAndSaveUserLocation: () -> Unit,
   onBackClick: () -> Unit,
@@ -120,6 +122,8 @@ private fun LocationScreen(
 
   val orientation = LocalConfiguration.current.orientation
   val locationMap = rememberLocationMap(mapPosition = mapPosition)
+  val saveLocationState =
+    rememberSaveLocationState(latitude = mapPosition.latitude, longitude = mapPosition.longitude)
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val sheetHeaderLabel =
@@ -129,10 +133,42 @@ private fun LocationScreen(
     }
 
   @Composable
+  fun ModalSheetContent(modifier: Modifier = Modifier) {
+    ModalSheetContent(
+      headerLabel = sheetHeaderLabel,
+      nameValue = saveLocationState.name,
+      onNameValueChange = {
+        saveLocationState.nameError = LocationNameError.NO_ERROR
+        saveLocationState.name = it
+      },
+      nameError = saveLocationState.nameError,
+      onGeocodeClick = {},
+      onSaveClick = {
+        if (saveLocationState.name.isBlank()) {
+          saveLocationState.nameError = LocationNameError.BLANK
+        } else {
+          saveLocationState.nameError = LocationNameError.NO_ERROR
+          sheetVisible = false
+          onSaveLocationClick(
+            saveLocationState.latitude,
+            saveLocationState.longitude,
+            saveLocationState.name
+          )
+        }
+      },
+      modifier = modifier
+    )
+  }
+
+  @Composable
   fun LocationScaffold() {
     LocationScaffold(
       isLoading = isLoading,
-      onSaveLocationClick = onSaveLocationClick,
+      onSaveLocationClick = { latitude, longitude ->
+        saveLocationState.latitude = latitude
+        saveLocationState.longitude = longitude
+        sheetVisible = true
+      },
       cancelSaveLocation = cancelSaveLocation,
       onUserLocationClick = context::checkLocationPermissions,
       onBackClick = onBackClick,
@@ -157,10 +193,7 @@ private fun LocationScreen(
             backgroundColor = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
           ) {
-            ModalSheetContent(
-              headerLabel = sheetHeaderLabel,
-              modifier = Modifier.padding(20.dp).fillMaxWidth()
-            )
+            ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxWidth())
           }
         }
       },
@@ -174,19 +207,16 @@ private fun LocationScreen(
     val drawerState = remember {
       DrawerState(initialValue = if (sheetVisible) DrawerValue.Open else DrawerValue.Closed)
     }
-    LaunchedEffect(sheetVisible) { if (sheetVisible) drawerState.open() }
-    LaunchedEffect(drawerState.currentValue) { if (drawerState.isClosed) sheetVisible = false }
+    LaunchedEffect(sheetVisible) { if (sheetVisible) drawerState.open() else drawerState.close() }
+    LaunchedEffect(drawerState.currentValue) {
+      if (drawerState.isClosed && !drawerState.isAnimationRunning) sheetVisible = false
+    }
 
     ModalNavigationDrawer(
       gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = {
-        ModalDrawerSheet {
-          ModalSheetContent(
-            headerLabel = sheetHeaderLabel,
-            modifier = Modifier.padding(20.dp).fillMaxHeight()
-          )
-        }
+        ModalDrawerSheet { ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxHeight()) }
       }
     ) {
       LocationScaffold()
@@ -317,7 +347,15 @@ private fun LocationScaffold(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ModalSheetContent(headerLabel: String, modifier: Modifier = Modifier) {
+private fun ModalSheetContent(
+  headerLabel: String,
+  nameValue: String,
+  onNameValueChange: (String) -> Unit,
+  nameError: LocationNameError,
+  onSaveClick: () -> Unit,
+  onGeocodeClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
   val context = LocalContext.current
 
   Column(
@@ -333,18 +371,33 @@ private fun ModalSheetContent(headerLabel: String, modifier: Modifier = Modifier
     )
 
     TextField(
-      value = "KEKW",
-      onValueChange = {},
+      value = nameValue,
+      onValueChange = onNameValueChange,
       label = { Text(text = stringResource(R.string.name)) },
+      singleLine = true,
+      isError = nameError != LocationNameError.NO_ERROR,
       modifier = Modifier.padding(10.dp).fillMaxWidth()
     )
 
+    AnimatedVisibility(visible = nameError != LocationNameError.NO_ERROR) {
+      Text(
+        modifier = Modifier.padding(horizontal = 10.dp),
+        text =
+          when (nameError) {
+            LocationNameError.BLANK -> "Location name cannot be blank."
+            LocationNameError.NO_ERROR -> ""
+          },
+        fontSize = 14.sp,
+        color = Color.Red
+      )
+    }
+
     Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-      OutlinedButton(onClick = {}, modifier = Modifier.weight(.5f)) {
+      OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
         Text(text = stringResource(R.string.geocode))
       }
       Spacer(modifier = Modifier.width(10.dp))
-      OutlinedButton(onClick = {}, modifier = Modifier.weight(.5f)) {
+      OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
         Text(text = stringResource(R.string.save))
       }
     }
