@@ -138,6 +138,7 @@ private fun LocationScreen(
     LaunchedEffect(drawerState.currentValue) { if (drawerState.isClosed) sheetVisible = false }
 
     ModalNavigationDrawer(
+      gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = {
         ModalDrawerSheet { ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxHeight()) }
@@ -316,7 +317,6 @@ private fun LocationScaffold(
         FloatingActionButton(
           onClick = {
             if (!isLoading) {
-              // sheetVisible = true
               val mapCenter = mapView.mapCenter
               onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
             } else {
