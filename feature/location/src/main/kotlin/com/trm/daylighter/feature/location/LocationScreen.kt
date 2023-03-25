@@ -314,6 +314,7 @@ private fun LocationScaffold(
         FloatingActionButton(
           onClick = {
             if (!isLoading) {
+              infoExpanded = false
               val mapCenter = mapView.mapCenter
               onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
             } else {
