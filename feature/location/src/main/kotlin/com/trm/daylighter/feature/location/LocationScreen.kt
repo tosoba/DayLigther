@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,10 +35,7 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.ext.CheckLocationSettingsResult
-import com.trm.daylighter.core.common.util.ext.checkLocationSettings
-import com.trm.daylighter.core.common.util.ext.checkPermissions
-import com.trm.daylighter.core.common.util.ext.getActivity
+import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -320,6 +318,8 @@ private fun LocationScaffold(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModalSheetContent(headerLabel: String, modifier: Modifier = Modifier) {
+  val context = LocalContext.current
+
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
@@ -349,7 +349,12 @@ private fun ModalSheetContent(headerLabel: String, modifier: Modifier = Modifier
       }
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+    Spacer(
+      modifier =
+        Modifier.height(
+          10.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
+        )
+    )
   }
 }
 

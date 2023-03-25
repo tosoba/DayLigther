@@ -6,7 +6,11 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.graphics.Point
 import android.location.Location
+import android.os.Build
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.activity.result.IntentSenderRequest
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.ResolvableApiException
@@ -91,3 +95,21 @@ suspend fun Context.getCurrentUserLocation(): Location? {
     )
     .await(cancellationTokenSource)
 }
+
+val Context.bottomNavigationBarInsetPx: Int
+  get() {
+    val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    return if (Build.VERSION.SDK_INT >= 30) {
+      windowManager.currentWindowMetrics.windowInsets
+        .getInsets(WindowInsets.Type.navigationBars())
+        .bottom
+    } else {
+      val appUsableSize = Point()
+      val realScreenSize = Point()
+      windowManager.defaultDisplay?.apply {
+        getSize(appUsableSize)
+        getRealSize(realScreenSize)
+      }
+      return if (appUsableSize.y < realScreenSize.y) realScreenSize.y - appUsableSize.y else 0
+    }
+  }
