@@ -38,7 +38,7 @@ constructor(
           is SaveLocationType.User -> {
             emitSaveUserLocation()
           }
-          is SaveLocationType.CanceCurrent -> {
+          is SaveLocationType.CancelCurrent -> {
             emit(Empty)
           }
         }
@@ -87,7 +87,7 @@ constructor(
   }
 
   fun cancelSaveLocation() {
-    viewModelScope.launch { _saveLocationTypeFlow.emit(SaveLocationType.CanceCurrent) }
+    viewModelScope.launch { _saveLocationTypeFlow.emit(SaveLocationType.CancelCurrent) }
   }
 
   private suspend fun FlowCollector<Loadable<Unit>>.emitSaveSpecifiedLocation(
