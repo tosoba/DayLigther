@@ -113,11 +113,10 @@ constructor(
   }
 
   private suspend fun saveLocation(latitude: Double, longitude: Double) {
-    val locationId = locationIdArg
-    if (locationId == null) {
+    if (locationIdArg == null) {
       saveLocationUseCase(latitude = latitude, longitude = longitude)
     } else {
-      saveLocationUseCase(id = locationId, latitude = latitude, longitude = longitude)
+      saveLocationUseCase(id = locationIdArg, latitude = latitude, longitude = longitude)
     }
   }
 }
