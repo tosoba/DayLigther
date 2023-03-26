@@ -142,6 +142,15 @@ private fun LocationScreen(
       LocationScreenMode.EDIT -> stringResource(R.string.edit_location)
     }
 
+  LaunchedEffect(locationPreparedToSave) {
+    if (locationPreparedToSave == null || !locationPreparedToSave.isUser) return@LaunchedEffect
+    sheetVisible = true
+    locationMap.state.updatePosition(
+      latitude = locationPreparedToSave.latitude,
+      longitude = locationPreparedToSave.longitude
+    )
+  }
+
   @Composable
   fun ModalSheetContent(modifier: Modifier = Modifier) {
     ModalSheetContent(

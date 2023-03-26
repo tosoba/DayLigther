@@ -64,6 +64,10 @@ internal class LocationMapState(mapPosition: MapPosition, infoExpanded: Boolean 
     infoExpanded = !infoExpanded
   }
 
+  fun updatePosition(latitude: Double, longitude: Double) {
+    savedMapPosition = savedMapPosition.copy(latitude = latitude, longitude = longitude)
+  }
+
   companion object {
     val Saver: Saver<LocationMapState, *> =
       listSaver(
