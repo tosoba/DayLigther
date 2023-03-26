@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -55,9 +56,11 @@ fun LocationRoute(
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()
 ) {
-  LaunchedEffect(Unit) { viewModel.savedFlow.collect { onBackClick() } }
+  LaunchedEffect(Unit) { viewModel.locationSavedFlow.collect { onBackClick() } }
 
   val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
+  val currentSaveLocationProcess =
+    viewModel.currentSaveLocationProcessFlow.collectAsStateWithLifecycle(initialValue = null)
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
@@ -65,11 +68,13 @@ fun LocationRoute(
   LocationScreen(
     screenMode = viewModel.screenMode,
     mapPosition = mapPosition.value,
+    currentSaveLocationProcess = currentSaveLocationProcess.value,
     isLoading = isLoading.value,
     userLocationNotFound = userLocationNotFound.value,
-    onSaveLocationClick = viewModel::saveSpecifiedLocation,
-    cancelSaveLocation = viewModel::cancelSaveLocation,
-    getAndSaveUserLocation = viewModel::getAndSaveUserLocation,
+    saveSpecifiedLocationClick = viewModel::onSaveSpecifiedLocationRequest,
+    requestGetAndSaveUserLocation = viewModel::onSaveUserLocationRequest,
+    cancelCurrentSaveLocation = viewModel::onCancelCurrentSaveLocation,
+    onSaveLocationClick = viewModel::saveLocation,
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -80,11 +85,13 @@ fun LocationRoute(
 private fun LocationScreen(
   screenMode: LocationScreenMode,
   mapPosition: MapPosition,
+  currentSaveLocationProcess: SaveLocationProcess?,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
+  saveSpecifiedLocationClick: (lat: Double, lng: Double) -> Unit,
+  requestGetAndSaveUserLocation: () -> Unit,
+  cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
-  cancelSaveLocation: () -> Unit,
-  getAndSaveUserLocation: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -115,7 +122,7 @@ private fun LocationScreen(
 
   CheckLocationSettingsEffect(
     userLocationRequestState = userLocationRequestState,
-    onLocationEnabled = getAndSaveUserLocation
+    onLocationEnabled = requestGetAndSaveUserLocation
   )
 
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
@@ -123,7 +130,10 @@ private fun LocationScreen(
   val orientation = LocalConfiguration.current.orientation
   val locationMap = rememberLocationMap(mapPosition = mapPosition)
   val saveLocationState =
-    rememberSaveLocationState(latitude = mapPosition.latitude, longitude = mapPosition.longitude)
+    rememberSaveLocationState(
+      latitude = currentSaveLocationProcess?.latitude ?: mapPosition.latitude,
+      longitude = currentSaveLocationProcess?.longitude ?: mapPosition.longitude
+    )
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val sheetHeaderLabel =
@@ -163,28 +173,15 @@ private fun LocationScreen(
   @Composable
   fun LocationScaffold() {
     LocationScaffold(
+      locationMap = locationMap,
       isLoading = isLoading,
-      onSaveLocationClick = { latitude, longitude ->
-        saveLocationState.latitude = latitude
-        saveLocationState.longitude = longitude
+      saveSpecifiedLocation = { latitude, longitude ->
+        saveSpecifiedLocationClick(latitude, longitude)
         sheetVisible = true
       },
-      cancelSaveLocation = cancelSaveLocation,
       onUserLocationClick = context::checkLocationPermissions,
+      cancelCurrentSaveLocation = cancelCurrentSaveLocation,
       onBackClick = onBackClick,
-      locationMap = locationMap,
-      locationPermissionDialog = {
-        LocationPermissionInfoDialog(
-          dialogVisible = userLocationRequestState.permissionInfoDialogVisible,
-          permissionRequestMode = userLocationRequestState.permissionRequestMode,
-          onOkClick = {
-            userLocationRequestState.permissionInfoDialogVisible = false
-            context.checkLocationPermissions()
-          },
-          onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
-          modifier = Modifier.align(Alignment.Center).wrapContentHeight()
-        )
-      },
       modalSheet = {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
           ModalSheet(
@@ -196,6 +193,18 @@ private fun LocationScreen(
             ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxWidth())
           }
         }
+      },
+      locationPermissionDialog = {
+        LocationPermissionInfoDialog(
+          dialogVisible = userLocationRequestState.permissionInfoDialogVisible,
+          permissionRequestMode = userLocationRequestState.permissionRequestMode,
+          onOkClick = {
+            userLocationRequestState.permissionInfoDialogVisible = false
+            context.checkLocationPermissions()
+          },
+          onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
+          modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+        )
       },
       modifier = modifier,
     )
@@ -227,122 +236,154 @@ private fun LocationScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationScaffold(
-  isLoading: Boolean,
-  onSaveLocationClick: (lat: Double, lng: Double) -> Unit,
-  cancelSaveLocation: () -> Unit,
-  onUserLocationClick: () -> Unit,
-  onBackClick: () -> Unit,
   locationMap: LocationMap,
-  locationPermissionDialog: @Composable BoxScope.() -> Unit,
+  isLoading: Boolean,
+  saveSpecifiedLocation: (lat: Double, lng: Double) -> Unit,
+  onUserLocationClick: () -> Unit,
+  cancelCurrentSaveLocation: () -> Unit,
+  onBackClick: () -> Unit,
   modalSheet: @Composable () -> Unit,
+  locationPermissionDialog: @Composable BoxScope.() -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val darkMode = isSystemInDarkTheme()
-
   Scaffold(modifier = modifier) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-      AndroidView(
-        factory = { locationMap.view },
-        update = {
-          it.setDefaultConfig(darkMode = darkMode)
-          it.removeMapListener(locationMap.listener)
-          it.restorePosition(position = locationMap.state.savedMapPosition)
-          it.addMapListener(locationMap.listener)
-        },
-        modifier = Modifier.fillMaxSize(),
-      )
-
-      Icon(
-        painter = painterResource(id = commonR.drawable.marker),
-        contentDescription = stringResource(id = commonR.string.location_marker),
-        modifier = Modifier.align(Alignment.Center)
-      )
+      MapView(locationMap = locationMap, modifier = Modifier.fillMaxSize())
+      MarkerIcon(modifier = Modifier.align(Alignment.Center))
 
       Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
-        AnimatedVisibility(visible = !isLoading) {
-          FloatingActionButton(onClick = onUserLocationClick) {
-            Icon(
-              imageVector = Icons.Filled.MyLocation,
-              contentDescription = stringResource(R.string.my_location),
-            )
-          }
-        }
+        UserLocationButton(visible = !isLoading, onUserLocationClick = onUserLocationClick)
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        FloatingActionButton(
-          onClick = {
-            if (!isLoading) {
-              locationMap.state.infoExpanded = false
-              val mapCenter = locationMap.view.mapCenter
-              onSaveLocationClick(mapCenter.latitude, mapCenter.longitude)
-            } else {
-              cancelSaveLocation()
-            }
-          }
+        SaveSpecifiedLocationButton(
+          imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel
         ) {
-          Icon(
-            imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel,
-            contentDescription = stringResource(R.string.save_location)
-          )
+          if (!isLoading) {
+            locationMap.state.infoExpanded = false
+            val mapCenter = locationMap.view.mapCenter
+            saveSpecifiedLocation(mapCenter.latitude, mapCenter.longitude)
+          } else {
+            cancelCurrentSaveLocation()
+          }
         }
       }
 
       Row(modifier = Modifier.padding(20.dp)) {
-        SmallFloatingActionButton(onClick = onBackClick, modifier = Modifier.padding(end = 5.dp)) {
-          Icon(
-            imageVector = Icons.Filled.ArrowBack,
-            contentDescription = stringResource(id = commonR.string.back)
-          )
-        }
-
+        BackButton(onClick = onBackClick)
         Spacer(modifier = Modifier.weight(1f))
-
-        val infoContainerColor =
-          animateColorAsState(
-            targetValue =
-              if (locationMap.state.infoExpanded) MaterialTheme.colorScheme.background
-              else FloatingActionButtonDefaults.containerColor
-          )
-        FloatingActionButton(
-          modifier = Modifier.padding(start = 5.dp),
-          containerColor = infoContainerColor.value,
+        InfoButton(
+          isExpanded = locationMap.state.infoExpanded,
           onClick = locationMap.state::toggleInfoExpanded
-        ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Icon(
-              imageVector = Icons.Filled.Info,
-              contentDescription = stringResource(R.string.center_map_on_location)
-            )
-            AnimatedVisibility(visible = locationMap.state.infoExpanded) {
-              Row {
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                  text = stringResource(R.string.center_map_on_location),
-                  style = MaterialTheme.typography.bodyLarge,
-                  textAlign = TextAlign.Center
-                )
-              }
-            }
-          }
-        }
+        )
       }
 
-      AnimatedVisibility(
-        visible = isLoading,
+      LoadingProgressIndicator(
+        isLoading = isLoading,
         modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-      ) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-      }
+      )
 
       locationPermissionDialog()
     }
 
     modalSheet()
   }
+}
+
+@Composable
+private fun BackButton(onClick: () -> Unit) {
+  SmallFloatingActionButton(onClick = onClick, modifier = Modifier.padding(end = 5.dp)) {
+    Icon(
+      imageVector = Icons.Filled.ArrowBack,
+      contentDescription = stringResource(id = commonR.string.back)
+    )
+  }
+}
+
+@Composable
+private fun InfoButton(isExpanded: Boolean, onClick: () -> Unit) {
+  val infoContainerColor =
+    animateColorAsState(
+      targetValue =
+        if (isExpanded) MaterialTheme.colorScheme.background
+        else FloatingActionButtonDefaults.containerColor
+    )
+
+  FloatingActionButton(
+    modifier = Modifier.padding(start = 5.dp),
+    containerColor = infoContainerColor.value,
+    onClick = onClick
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Icon(
+        imageVector = Icons.Filled.Info,
+        contentDescription = stringResource(R.string.center_map_on_location)
+      )
+      AnimatedVisibility(visible = isExpanded) {
+        Row {
+          Spacer(modifier = Modifier.width(12.dp))
+          Text(
+            text = stringResource(R.string.center_map_on_location),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun SaveSpecifiedLocationButton(imageVector: ImageVector, onClick: () -> Unit) {
+  FloatingActionButton(onClick = onClick) {
+    Icon(imageVector = imageVector, contentDescription = stringResource(R.string.save_location))
+  }
+}
+
+@Composable
+private fun ColumnScope.UserLocationButton(visible: Boolean, onUserLocationClick: () -> Unit) {
+  AnimatedVisibility(visible = visible) {
+    FloatingActionButton(onClick = onUserLocationClick) {
+      Icon(
+        imageVector = Icons.Filled.MyLocation,
+        contentDescription = stringResource(R.string.my_location),
+      )
+    }
+  }
+}
+
+@Composable
+private fun LoadingProgressIndicator(isLoading: Boolean, modifier: Modifier = Modifier) {
+  AnimatedVisibility(visible = isLoading, modifier = modifier) {
+    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+  }
+}
+
+@Composable
+private fun MapView(locationMap: LocationMap, modifier: Modifier = Modifier) {
+  val darkMode = isSystemInDarkTheme()
+  AndroidView(
+    factory = { locationMap.view },
+    update = {
+      it.setDefaultConfig(darkMode = darkMode)
+      it.removeMapListener(locationMap.listener)
+      it.restorePosition(position = locationMap.state.savedMapPosition)
+      it.addMapListener(locationMap.listener)
+    },
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun MarkerIcon(modifier: Modifier = Modifier) {
+  Icon(
+    painter = painterResource(id = commonR.drawable.marker),
+    contentDescription = stringResource(id = commonR.string.location_marker),
+    modifier = modifier
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

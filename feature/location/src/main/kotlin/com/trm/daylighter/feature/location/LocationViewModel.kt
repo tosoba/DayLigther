@@ -11,7 +11,8 @@ import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
-import com.trm.daylighter.feature.location.model.SaveLocationType
+import com.trm.daylighter.feature.location.model.SaveLocationProcess
+import com.trm.daylighter.feature.location.model.SaveLocationRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -27,34 +28,38 @@ constructor(
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
 ) : ViewModel() {
-  private val _saveLocationTypeFlow = MutableSharedFlow<SaveLocationType>()
-  private val savingFlow: SharedFlow<Loadable<Unit>> =
-    _saveLocationTypeFlow
+  private val _saveLocationRequestFlow = MutableSharedFlow<SaveLocationRequest>()
+  private val saveLocationProcessFlow: SharedFlow<Loadable<SaveLocationProcess>> =
+    _saveLocationRequestFlow
       .transformLatest { saveLocationType ->
         when (saveLocationType) {
-          is SaveLocationType.Specified -> {
-            emitSaveSpecifiedLocation(saveLocationType.latitude, saveLocationType.longitude)
+          is SaveLocationRequest.Specified -> {
+            emitSpecifiedLocation(saveLocationType.latitude, saveLocationType.longitude)
           }
-          is SaveLocationType.User -> {
-            emitSaveUserLocation()
+          is SaveLocationRequest.User -> {
+            emitUserLocation()
           }
-          is SaveLocationType.CancelCurrent -> {
+          is SaveLocationRequest.CancelCurrent -> {
             emit(Empty)
           }
         }
       }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
 
-  val savedFlow: Flow<Unit> = savingFlow.filterIsInstance<Ready<Unit>>().map { it.data }
-  val loadingFlow: Flow<Boolean> = savingFlow.map { it is Loading }
+  val loadingFlow: Flow<Boolean> = saveLocationProcessFlow.map { it is Loading }
   val userLocationNotFoundFlow: Flow<Boolean> =
-    savingFlow.map { it.isFailedWith<UserLatLngNotFound>() }
+    saveLocationProcessFlow.map { it.isFailedWith<UserLatLngNotFound>() }
+  val currentSaveLocationProcessFlow: Flow<SaveLocationProcess?> =
+    saveLocationProcessFlow.map { if (it is Ready) it.data else null }
 
-  private val locationIdArg: Long? = savedStateHandle.get<Long>(locationIdParam)
+  private val _locationSavedFlow = MutableSharedFlow<Unit>(replay = 1)
+  val locationSavedFlow = _locationSavedFlow.asSharedFlow()
+
+  private val initialLocationId: Long? = savedStateHandle.get<Long>(locationIdParam)
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
-        locationIdArg?.let { id ->
+        initialLocationId?.let { id ->
           val location = getLocationById(id)
           emit(
             MapPosition(
@@ -72,34 +77,46 @@ constructor(
       )
 
   val screenMode: LocationScreenMode =
-    if (locationIdArg == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
+    if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
-  fun saveSpecifiedLocation(latitude: Double, longitude: Double, name: String) {
+  fun onSaveSpecifiedLocationRequest(latitude: Double, longitude: Double) {
     viewModelScope.launch {
-      _saveLocationTypeFlow.emit(
-        SaveLocationType.Specified(latitude = latitude, longitude = longitude)
+      _saveLocationRequestFlow.emit(
+        SaveLocationRequest.Specified(latitude = latitude, longitude = longitude)
       )
     }
   }
 
-  fun getAndSaveUserLocation() {
-    viewModelScope.launch { _saveLocationTypeFlow.emit(SaveLocationType.User) }
+  fun onSaveUserLocationRequest() {
+    viewModelScope.launch { _saveLocationRequestFlow.emit(SaveLocationRequest.User) }
   }
 
-  fun cancelSaveLocation() {
-    viewModelScope.launch { _saveLocationTypeFlow.emit(SaveLocationType.CancelCurrent) }
+  fun onCancelCurrentSaveLocation() {
+    viewModelScope.launch { _saveLocationRequestFlow.emit(SaveLocationRequest.CancelCurrent) }
   }
 
-  private suspend fun FlowCollector<Loadable<Unit>>.emitSaveSpecifiedLocation(
+  fun saveLocation(latitude: Double, longitude: Double, name: String) {
+    viewModelScope.launch {
+      if (initialLocationId == null) {
+        saveLocationUseCase(latitude = latitude, longitude = longitude)
+      } else {
+        saveLocationUseCase(id = initialLocationId, latitude = latitude, longitude = longitude)
+      }
+      _locationSavedFlow.emit(Unit)
+    }
+  }
+
+  private suspend fun FlowCollector<Loadable<SaveLocationProcess>>.emitSpecifiedLocation(
     latitude: Double,
     longitude: Double
   ) {
     emit(LoadingFirst)
-    saveLocation(latitude = latitude, longitude = longitude)
-    emit(Ready(Unit))
+    emit(
+      SaveLocationProcess(latitude = latitude, longitude = longitude, isUser = false).asLoadable()
+    )
   }
 
-  private suspend fun FlowCollector<Loadable<Unit>>.emitSaveUserLocation() {
+  private suspend fun FlowCollector<Loadable<SaveLocationProcess>>.emitUserLocation() {
     emit(LoadingFirst)
     val userLatLng = getCurrentUserLatLngUseCase()
     if (userLatLng == null) {
@@ -107,16 +124,14 @@ constructor(
       delay(3_500L)
       emit(Empty)
     } else {
-      saveLocation(latitude = userLatLng.latitude, longitude = userLatLng.longitude)
-      emit(Ready(Unit))
-    }
-  }
-
-  private suspend fun saveLocation(latitude: Double, longitude: Double) {
-    if (locationIdArg == null) {
-      saveLocationUseCase(latitude = latitude, longitude = longitude)
-    } else {
-      saveLocationUseCase(id = locationIdArg, latitude = latitude, longitude = longitude)
+      emit(
+        SaveLocationProcess(
+            latitude = userLatLng.latitude,
+            longitude = userLatLng.longitude,
+            isUser = true
+          )
+          .asLoadable()
+      )
     }
   }
 }

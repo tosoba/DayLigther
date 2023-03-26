@@ -45,7 +45,7 @@ internal fun rememberLocationMap(
       }
     }
 
-  return LocationMap(state = locationMapState, view = mapView, listener = mapListener)
+  return remember { LocationMap(state = locationMapState, view = mapView, listener = mapListener) }
 }
 
 @Stable
