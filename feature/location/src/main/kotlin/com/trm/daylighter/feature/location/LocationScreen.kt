@@ -59,8 +59,8 @@ fun LocationRoute(
   LaunchedEffect(Unit) { viewModel.locationSavedFlow.collect { onBackClick() } }
 
   val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
-  val currentSaveLocationProcess =
-    viewModel.currentSaveLocationProcessFlow.collectAsStateWithLifecycle(initialValue = null)
+  val locationPreparedToSave =
+    viewModel.locationPreparedToSaveFlow.collectAsStateWithLifecycle(initialValue = null)
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
@@ -68,12 +68,12 @@ fun LocationRoute(
   LocationScreen(
     screenMode = viewModel.screenMode,
     mapPosition = mapPosition.value,
-    currentSaveLocationProcess = currentSaveLocationProcess.value,
+    locationPreparedToSave = locationPreparedToSave.value,
     isLoading = isLoading.value,
     userLocationNotFound = userLocationNotFound.value,
-    saveSpecifiedLocationClick = viewModel::onSaveSpecifiedLocationRequest,
-    requestGetAndSaveUserLocation = viewModel::onSaveUserLocationRequest,
-    cancelCurrentSaveLocation = viewModel::onCancelCurrentSaveLocation,
+    saveSpecifiedLocationClick = viewModel::requestSaveSpecifiedLocation,
+    requestGetAndSaveUserLocation = viewModel::requestGetAndSaveUserLocation,
+    cancelCurrentSaveLocation = viewModel::cancelCurrentSaveLocationRequest,
     onSaveLocationClick = viewModel::saveLocation,
     onBackClick = onBackClick,
     modifier = modifier
@@ -85,7 +85,7 @@ fun LocationRoute(
 private fun LocationScreen(
   screenMode: LocationScreenMode,
   mapPosition: MapPosition,
-  currentSaveLocationProcess: SaveLocationProcess?,
+  locationPreparedToSave: LocationPreparedToSave?,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
   saveSpecifiedLocationClick: (lat: Double, lng: Double) -> Unit,
@@ -131,8 +131,8 @@ private fun LocationScreen(
   val locationMap = rememberLocationMap(mapPosition = mapPosition)
   val saveLocationState =
     rememberSaveLocationState(
-      latitude = currentSaveLocationProcess?.latitude ?: mapPosition.latitude,
-      longitude = currentSaveLocationProcess?.longitude ?: mapPosition.longitude
+      latitude = locationPreparedToSave?.latitude ?: mapPosition.latitude,
+      longitude = locationPreparedToSave?.longitude ?: mapPosition.longitude
     )
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
