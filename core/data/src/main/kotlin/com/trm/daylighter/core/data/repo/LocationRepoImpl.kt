@@ -26,10 +26,10 @@ constructor(
   private val sunriseSunsetDao: SunriseSunsetDao,
   @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
-  override suspend fun saveLocation(latitude: Double, longitude: Double): Location {
+  override suspend fun saveLocation(latitude: Double, longitude: Double, name: String): Location {
     val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
     return locationDao
-      .insert(latitude = latitude, longitude = longitude, zoneId = zoneId)
+      .insert(latitude = latitude, longitude = longitude, name = name, zoneId = zoneId)
       .asDomainModel()
   }
 
@@ -54,7 +54,8 @@ constructor(
   override suspend fun updateLocationLatLngById(
     id: Long,
     latitude: Double,
-    longitude: Double
+    longitude: Double,
+    name: String
   ): Location {
     val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
     return db.withTransaction {
@@ -62,6 +63,7 @@ constructor(
         id = id,
         latitude = latitude,
         longitude = longitude,
+        name = name,
         zoneId = zoneId
       )
       sunriseSunsetDao.deleteByLocationId(locationId = id)

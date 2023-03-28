@@ -43,6 +43,7 @@ fun LocationEntity.asDomainModel(): Location =
     id = id,
     latitude = latitude,
     longitude = longitude,
+    name = name,
     isDefault = isDefault,
     updatedAt = updatedAt,
     zoneId = zoneId,

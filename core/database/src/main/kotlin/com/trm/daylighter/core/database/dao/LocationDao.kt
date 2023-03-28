@@ -11,12 +11,13 @@ interface LocationDao {
   @Insert suspend fun insert(entity: LocationEntity)
 
   @Transaction
-  suspend fun insert(latitude: Double, longitude: Double, zoneId: ZoneId): LocationEntity {
+  suspend fun insert(latitude: Double, longitude: Double, name: String, zoneId: ZoneId): LocationEntity {
     val anyExists = selectAnyExists()
     val entity =
       LocationEntity(
         latitude = latitude,
         longitude = longitude,
+        name = name,
         isDefault = !anyExists,
         updatedAt = ZonedDateTime.now(),
         zoneId = zoneId,
@@ -66,12 +67,13 @@ interface LocationDao {
   suspend fun setDefaultToMostRecentlyAddedLocation()
 
   @Query(
-    "UPDATE location SET latitude = :latitude, longitude = :longitude, zone_id = :zoneId WHERE id = :id"
+    "UPDATE location SET latitude = :latitude, longitude = :longitude, name = :name, zone_id = :zoneId WHERE id = :id"
   )
   suspend fun updateLocationLatLngById(
     id: Long,
     latitude: Double,
     longitude: Double,
+    name: String,
     zoneId: ZoneId
   )
 

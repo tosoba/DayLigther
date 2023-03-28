@@ -11,6 +11,7 @@ data class LocationEntity(
   @PrimaryKey(autoGenerate = true) var id: Long = 0,
   val latitude: Double,
   val longitude: Double,
+  val name: String,
   @ColumnInfo(name = "is_default") val isDefault: Boolean,
   @ColumnInfo(name = "updated_at") val updatedAt: ZonedDateTime,
   @ColumnInfo(name = "zone_id") val zoneId: ZoneId,

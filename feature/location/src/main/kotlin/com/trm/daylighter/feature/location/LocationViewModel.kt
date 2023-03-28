@@ -110,9 +110,14 @@ constructor(
       saveLocationFlow.emit(LoadingFirst)
 
       if (initialLocationId == null) {
-        saveLocationUseCase(latitude = latitude, longitude = longitude)
+        saveLocationUseCase(latitude = latitude, longitude = longitude, name = name)
       } else {
-        saveLocationUseCase(id = initialLocationId, latitude = latitude, longitude = longitude)
+        saveLocationUseCase(
+          id = initialLocationId,
+          latitude = latitude,
+          longitude = longitude,
+          name = name
+        )
       }
 
       saveLocationFlow.emit(Unit.asLoadable())

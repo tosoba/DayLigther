@@ -4,7 +4,7 @@ import com.trm.daylighter.core.domain.model.Location
 import kotlinx.coroutines.flow.Flow
 
 interface LocationRepo {
-  suspend fun saveLocation(latitude: Double, longitude: Double): Location
+  suspend fun saveLocation(latitude: Double, longitude: Double, name: String): Location
 
   fun getAllLocationsFlow(): Flow<List<Location>>
 
@@ -18,5 +18,10 @@ interface LocationRepo {
 
   suspend fun getLocationById(id: Long): Location
 
-  suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double): Location
+  suspend fun updateLocationLatLngById(
+    id: Long,
+    latitude: Double,
+    longitude: Double,
+    name: String
+  ): Location
 }
