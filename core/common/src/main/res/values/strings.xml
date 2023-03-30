@@ -6,6 +6,7 @@
     <string name="back">Back</string>
     <string name="add_location">Add location</string>
     <string name="retry">Retry</string>
+    <string name="clear">Clear</string>
     <string name="time_format_12_h">hh:mm:ss \n zz</string>
     <string name="time_format_24_h">HH:mm:ss \n zz</string>
 
