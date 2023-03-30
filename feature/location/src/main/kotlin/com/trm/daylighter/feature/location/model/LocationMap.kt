@@ -16,7 +16,7 @@ internal fun rememberLocationMap(
   infoExpanded: Boolean = true
 ): LocationMap {
   val locationMapState =
-    rememberSaveable(mapPosition, saver = LocationMapState.Saver) {
+    rememberSaveable(mapPosition, infoExpanded, saver = LocationMapState.Saver) {
       LocationMapState(mapPosition = mapPosition, infoExpanded = infoExpanded)
     }
 
@@ -45,7 +45,9 @@ internal fun rememberLocationMap(
       }
     }
 
-  return remember { LocationMap(state = locationMapState, view = mapView, listener = mapListener) }
+  return remember(locationMapState) {
+    LocationMap(state = locationMapState, view = mapView, listener = mapListener)
+  }
 }
 
 @Stable
