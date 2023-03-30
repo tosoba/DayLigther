@@ -444,7 +444,7 @@ private fun ModalSheetContent(
         modifier = Modifier.padding(horizontal = 10.dp),
         text =
           when (nameError) {
-            LocationNameError.BLANK -> "Location name cannot be blank."
+            LocationNameError.BLANK -> stringResource(R.string.location_name_cannot_be_blank)
             LocationNameError.NO_ERROR -> ""
           },
         fontSize = 14.sp,

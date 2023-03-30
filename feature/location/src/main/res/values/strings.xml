@@ -15,4 +15,5 @@
     <string name="name">Name</string>
     <string name="geocode">Geocode</string>
     <string name="save">Save</string>
+    <string name="location_name_cannot_be_blank">Location name cannot be blank.</string>
 </resources>
