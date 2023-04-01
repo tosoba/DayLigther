@@ -29,6 +29,7 @@ import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.locationsGraph
 import com.trm.daylighter.feature.locations.locationsGraphRoute
+import com.trm.daylighter.feature.locations.locationsRoute
 import com.trm.daylighter.feature.widgets.WidgetsScreen
 import com.trm.daylighter.feature.widgets.widgetsRoute
 import kotlinx.coroutines.launch
@@ -70,7 +71,19 @@ fun DaylighterMainContent() {
           visible = currentRoute != dayRoute && !currentRoute.startsWith(locationRoute)
         ) {
           CenterAlignedTopAppBar(
-            title = { Text(stringResource(id = R.string.app_name)) },
+            title = {
+              Text(
+                stringResource(
+                  id =
+                    when (currentRoute) {
+                      aboutRoute -> R.string.about_item
+                      locationsRoute -> R.string.locations_item
+                      widgetsRoute -> R.string.widgets_item
+                      else -> R.string.empty
+                    }
+                )
+              )
+            },
             navigationIcon = {
               IconButton(onClick = navController::popBackStack) {
                 Icon(
@@ -89,9 +102,9 @@ fun DaylighterMainContent() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
-  val widgetsLabel = stringResource(R.string.widgets_drawer_item)
-  val locationsLabel = stringResource(R.string.locations_drawer_item)
-  val aboutLabel = stringResource(R.string.about_drawer_item)
+  val widgetsLabel = stringResource(R.string.widgets_item)
+  val locationsLabel = stringResource(R.string.locations_item)
+  val aboutLabel = stringResource(R.string.about_item)
   val drawerDestinations = remember {
     sequenceOf(
       DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, label = widgetsLabel),
