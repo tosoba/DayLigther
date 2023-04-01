@@ -496,28 +496,19 @@ private fun ClockAndDayLengthCard(
     if (changeValue is WithData) {
       val (_, today, yesterday) = changeValue.data
       if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.padding(8.dp)
+        ) {
+          Clock(zoneId = today.sunrise.zone)
           Spacer(modifier = Modifier.height(5.dp))
-          Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(horizontal = 8.dp))
-          Spacer(modifier = Modifier.height(5.dp))
-          DayLength(
-            today = today,
-            yesterday = yesterday,
-            modifier = Modifier.padding(horizontal = 8.dp)
-          )
-          Spacer(modifier = Modifier.height(5.dp))
+          DayLength(today = today, yesterday = yesterday)
         }
       } else {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+          Clock(zoneId = today.sunrise.zone)
           Spacer(modifier = Modifier.width(5.dp))
-          Clock(zoneId = today.sunrise.zone, modifier = Modifier.padding(vertical = 8.dp))
-          Spacer(modifier = Modifier.width(5.dp))
-          DayLength(
-            today = today,
-            yesterday = yesterday,
-            modifier = Modifier.padding(vertical = 8.dp)
-          )
-          Spacer(modifier = Modifier.width(5.dp))
+          DayLength(today = today, yesterday = yesterday)
         }
       }
     }
