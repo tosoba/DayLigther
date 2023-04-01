@@ -33,9 +33,7 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.ui.composable.ZoomInButton
-import com.trm.daylighter.core.ui.composable.ZoomOutButton
-import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
 
 const val locationsGraphRoute = "locations_graph"
@@ -239,18 +237,31 @@ private fun MapCard(
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       MapView(latitude = location.value.latitude, longitude = location.value.longitude, zoom = zoom)
+
+      LocationNameGradientOverlay()
+
       Icon(
         painter = painterResource(id = commonR.drawable.marker),
         contentDescription = stringResource(id = commonR.string.location_marker),
         modifier = Modifier.align(Alignment.Center).size(36.dp)
       )
-      LocationDropDrownMenu(
-        modifier = Modifier.align(Alignment.BottomEnd),
-        location = location,
-        onSetDefaultLocationClick = onSetDefaultLocationClick,
-        onEditLocationClick = onEditLocationClick,
-        onDeleteLocationClick = onDeleteLocationClick,
-      )
+
+      Row(
+        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        LocationNameLabel(
+          name = location.value.name,
+          modifier = Modifier.weight(1f).padding(horizontal = 5.dp)
+        )
+        LocationDropDrownMenu(
+          location = location,
+          onSetDefaultLocationClick = onSetDefaultLocationClick,
+          onEditLocationClick = onEditLocationClick,
+          onDeleteLocationClick = onDeleteLocationClick,
+        )
+      }
     }
   }
 }
