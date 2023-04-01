@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -78,6 +79,7 @@ const val dayRoute = "day_route"
 fun DayRoute(
   onDrawerMenuClick: () -> Unit,
   onAddLocation: () -> Unit,
+  onEditLocation: (Long) -> Unit,
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
@@ -97,6 +99,7 @@ fun DayRoute(
     onDrawerMenuClick = onDrawerMenuClick,
     onChangeLocationIndex = viewModel::changeLocation,
     onAddLocationClick = onAddLocation,
+    onEditLocationClick = onEditLocation,
     onRetryClick = viewModel::retry,
     modifier = modifier
   )
@@ -111,6 +114,7 @@ private fun DayScreen(
   onDrawerMenuClick: () -> Unit,
   onChangeLocationIndex: (Int) -> Unit,
   onAddLocationClick: () -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -121,7 +125,7 @@ private fun DayScreen(
     if (changeValue is Empty) {
       val (emptyDrawerMenuButton, addLocationButton) = createRefs()
       DrawerMenuButton(
-        onDrawerMenuClick = onDrawerMenuClick,
+        onClick = onDrawerMenuClick,
         modifier =
           Modifier.constrainAs(emptyDrawerMenuButton) {
             start.linkTo(parent.start, 16.dp)
@@ -159,6 +163,7 @@ private fun DayScreen(
         onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
         onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
         onDrawerMenuClick = onDrawerMenuClick,
+        onEditLocationClick = onEditLocationClick,
         onDayModeNavClick = { dayMode = it },
         onRetryClick = onRetryClick,
       )
@@ -167,12 +172,30 @@ private fun DayScreen(
 }
 
 @Composable
-private fun DrawerMenuButton(onDrawerMenuClick: () -> Unit, modifier: Modifier = Modifier) {
-  SmallFloatingActionButton(onClick = onDrawerMenuClick, modifier = modifier) {
+private fun DrawerMenuButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+  SmallFloatingActionButton(onClick = onClick, modifier = modifier) {
     Icon(
       imageVector = Icons.Filled.Menu,
       contentDescription = stringResource(R.string.application_menu)
     )
+  }
+}
+
+@Composable
+private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+  @Composable
+  fun EditLocationIcon() {
+    Icon(
+      imageVector = Icons.Filled.Edit,
+      contentDescription = stringResource(R.string.edit_location)
+    )
+  }
+
+  val orientation = LocalConfiguration.current.orientation
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    FloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
+  } else {
+    SmallFloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
   }
 }
 
@@ -190,9 +213,12 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onZoomOutClick: () -> Unit,
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   onRetryClick: () -> Unit,
 ) {
-  val (drawerMenuButton, pagerBox, navigation, dayTimeCard, map, mapZoomControls) = createRefs()
+  val (
+    drawerMenuButton, pagerBox, navigation, dayTimeCard, map, mapZoomControls, editLocationButton) =
+    createRefs()
   val orientation = LocalConfiguration.current.orientation
 
   val pagerState = rememberPagerState(initialPage = currentLocationIndex)
@@ -316,7 +342,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     DrawerMenuButton(
-      onDrawerMenuClick = onDrawerMenuClick,
+      onClick = onDrawerMenuClick,
       modifier =
         Modifier.constrainAs(drawerMenuButton) {
           start.linkTo(parent.start, 16.dp)
@@ -346,6 +372,19 @@ private fun ConstraintLayoutScope.SunriseSunset(
       dayMode = dayMode,
       onDayModeChange = onDayModeNavClick
     )
+
+    AnimatedVisibility(
+      visible = changeValue is Ready,
+      modifier =
+        Modifier.constrainAs(editLocationButton) {
+          bottom.linkTo(navigation.top, 16.dp)
+          end.linkTo(parent.end, 16.dp)
+        }
+    ) {
+      EditLocationButton(
+        onClick = { if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id) },
+      )
+    }
   } else {
     SunriseSunsetNavigationRail(
       modifier =
@@ -356,6 +395,18 @@ private fun ConstraintLayoutScope.SunriseSunset(
       onDrawerMenuClick = onDrawerMenuClick,
       dayMode = dayMode,
       onDayModeChange = onDayModeNavClick,
+      footer = {
+        AnimatedVisibility(
+          visible = changeValue is Ready,
+          modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+          EditLocationButton(
+            onClick = {
+              if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
+            }
+          )
+        }
+      },
     )
 
     AnimatedVisibility(
@@ -595,18 +646,17 @@ private fun SunriseSunsetNavigationRail(
   dayMode: DayMode,
   onDayModeChange: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
+  footer: @Composable () -> Unit,
   modifier: Modifier = Modifier
 ) {
   NavigationRail(
     header = {
-      DrawerMenuButton(
-        onDrawerMenuClick = onDrawerMenuClick,
-        modifier = Modifier.padding(top = 8.dp)
-      )
+      DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
     },
     modifier = modifier
   ) {
     Spacer(modifier = Modifier.weight(1f))
+
     NavigationRailItem(
       selected = dayMode == DayMode.SUNRISE,
       onClick = { onDayModeChange(DayMode.SUNRISE) },
@@ -618,6 +668,7 @@ private fun SunriseSunsetNavigationRail(
       },
       label = { Text(text = stringResource(R.string.sunrise)) }
     )
+
     NavigationRailItem(
       selected = dayMode == DayMode.SUNSET,
       onClick = { onDayModeChange(DayMode.SUNSET) },
@@ -629,7 +680,10 @@ private fun SunriseSunsetNavigationRail(
       },
       label = { Text(text = stringResource(R.string.sunset)) }
     )
+
     Spacer(modifier = Modifier.weight(1f))
+
+    footer()
   }
 }
 

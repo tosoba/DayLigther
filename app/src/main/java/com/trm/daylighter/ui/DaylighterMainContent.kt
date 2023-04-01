@@ -170,6 +170,22 @@ private fun DaylighterNavHost(
     )
   }
 
+  fun navigateToEditLocation(locationId: Long) {
+    navController.navigate(
+      route = "$locationRoute/$locationId",
+      navOptions = navOptions { launchSingleTop = true }
+    )
+  }
+
+  fun NavGraphBuilder.editLocationRoute() {
+    composable(
+      route = editLocationRoute,
+      arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
+    ) {
+      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
+    }
+  }
+
   val addLocationDeepLinkUri = stringResource(id = commonR.string.add_location_deep_link_uri)
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
@@ -177,7 +193,8 @@ private fun DaylighterNavHost(
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
-        onAddLocation = ::navigateToAddLocation
+        onAddLocation = ::navigateToAddLocation,
+        onEditLocation = ::navigateToEditLocation,
       )
     }
 
@@ -190,21 +207,13 @@ private fun DaylighterNavHost(
       LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
     }
 
+    editLocationRoute()
+
     locationsGraph(
       onAddLocationClick = ::navigateToAddLocation,
-      onEditLocationClick = {
-        navController.navigate(
-          route = "$locationRoute/$it",
-          navOptions = navOptions { launchSingleTop = true }
-        )
-      }
+      onEditLocationClick = ::navigateToEditLocation
     ) {
-      composable(
-        route = editLocationRoute,
-        arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
-      ) {
-        LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
-      }
+      editLocationRoute()
     }
 
     composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
