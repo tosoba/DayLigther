@@ -168,31 +168,29 @@ private fun BoxWithConstraintsScope.rememberGridBottomButtonsVisible(
 ): State<Boolean> {
   val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
   val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-  val bottomActionsVisible =
-    remember(locations) {
-      derivedStateOf {
-        val layoutInfo = gridState.layoutInfo
-        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
-        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-        if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
-          return@derivedStateOf false
-        }
-
-        val lastItemFullyVisible =
-          lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
-            lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
-        if (!lastItemFullyVisible) return@derivedStateOf false
-
-        val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
-        val canScrollAtAll =
-          visibleRows * lastVisibleItem.size.height +
-            visibleRows * itemPaddingVerticalPx +
-            layoutInfo.beforeContentPadding +
-            layoutInfo.afterContentPadding > boxHeightPx
-        canScrollAtAll
+  return remember(locations) {
+    derivedStateOf {
+      val layoutInfo = gridState.layoutInfo
+      val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
+      val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+      if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
+        return@derivedStateOf false
       }
+
+      val lastItemFullyVisible =
+        lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+          lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
+      if (!lastItemFullyVisible) return@derivedStateOf false
+
+      val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
+      val canScrollAtAll =
+        visibleRows * lastVisibleItem.size.height +
+          visibleRows * itemPaddingVerticalPx +
+          layoutInfo.beforeContentPadding +
+          layoutInfo.afterContentPadding > boxHeightPx
+      canScrollAtAll
     }
-  return bottomActionsVisible
+  }
 }
 
 @Composable
