@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -266,10 +267,7 @@ private fun ConstraintLayoutScope.SunriseSunset(
           }
         }
   ) {
-    MapCard(
-      change = change,
-      mapZoom = mapZoom,
-    )
+    MapCard(change = change, mapZoom = mapZoom)
   }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -403,6 +401,23 @@ private fun MapCard(
             )
           }
         )
+
+        Box(
+          modifier =
+            Modifier.matchParentSize()
+              .background(Brush.verticalGradient(0.7f to Color.Transparent, 1f to Color.Black))
+        )
+
+        Text(
+          text = changeValue.data.location.name,
+          color = Color.White,
+          style = MaterialTheme.typography.titleMedium,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.align(Alignment.BottomCenter).padding(5.dp)
+        )
+
         Icon(
           painter = painterResource(id = commonR.drawable.marker),
           contentDescription = stringResource(id = commonR.string.location_marker),
