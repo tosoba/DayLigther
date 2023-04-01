@@ -6,10 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
@@ -93,32 +90,7 @@ private fun LocationsScreen(
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
 
     val gridState = rememberLazyGridState()
-    val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
-    val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-    val bottomActionsVisible =
-      remember(locations) {
-        derivedStateOf {
-          val layoutInfo = gridState.layoutInfo
-          val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
-          val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-          if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
-            return@derivedStateOf false
-          }
-
-          val lastItemFullyVisible =
-            lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
-              lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
-          if (!lastItemFullyVisible) return@derivedStateOf false
-
-          val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
-          val canScrollAtAll =
-            visibleRows * lastVisibleItem.size.height +
-              visibleRows * itemPaddingVerticalPx +
-              layoutInfo.beforeContentPadding +
-              layoutInfo.afterContentPadding > boxHeightPx
-          canScrollAtAll
-        }
-      }
+    val bottomButtonsVisible = rememberGridBottomButtonsVisible(locations, gridState)
 
     when (locations) {
       is WithData -> {
@@ -144,7 +116,7 @@ private fun LocationsScreen(
           }
 
           AnimatedVisibility(
-            visible = !bottomActionsVisible.value,
+            visible = !bottomButtonsVisible.value,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)
@@ -163,7 +135,7 @@ private fun LocationsScreen(
         }
 
         AnimatedVisibility(
-          visible = !bottomActionsVisible.value,
+          visible = !bottomButtonsVisible.value,
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
@@ -189,6 +161,40 @@ private fun LocationsScreen(
       modifier = Modifier.align(Alignment.Center).wrapContentHeight()
     )
   }
+}
+
+@Composable
+private fun BoxWithConstraintsScope.rememberGridBottomButtonsVisible(
+  locations: Loadable<List<StableValue<Location>>>,
+  gridState: LazyGridState
+): State<Boolean> {
+  val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
+  val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
+  val bottomActionsVisible =
+    remember(locations) {
+      derivedStateOf {
+        val layoutInfo = gridState.layoutInfo
+        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
+        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+        if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
+          return@derivedStateOf false
+        }
+
+        val lastItemFullyVisible =
+          lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
+            lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
+        if (!lastItemFullyVisible) return@derivedStateOf false
+
+        val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
+        val canScrollAtAll =
+          visibleRows * lastVisibleItem.size.height +
+            visibleRows * itemPaddingVerticalPx +
+            layoutInfo.beforeContentPadding +
+            layoutInfo.afterContentPadding > boxHeightPx
+        canScrollAtAll
+      }
+    }
+  return bottomActionsVisible
 }
 
 @Composable
