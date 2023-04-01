@@ -11,5 +11,6 @@ data class MapPosition(
   val latitude: Double = MapDefaults.LATITUDE,
   val longitude: Double = MapDefaults.LONGITUDE,
   val zoom: Double = MapDefaults.MIN_ZOOM,
-  val orientation: Float = MapDefaults.ORIENTATION
+  val orientation: Float = MapDefaults.ORIENTATION,
+  val label: String = MapDefaults.LABEL
 ) : Parcelable

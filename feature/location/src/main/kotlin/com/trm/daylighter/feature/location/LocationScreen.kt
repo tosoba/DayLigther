@@ -13,7 +13,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -24,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -279,14 +283,7 @@ private fun LocationScaffold(
         }
       }
 
-      Row(modifier = Modifier.padding(20.dp)) {
-        BackButton(onClick = onBackClick)
-        Spacer(modifier = Modifier.weight(1f))
-        InfoButton(
-          isExpanded = locationMap.state.infoExpanded,
-          onClick = locationMap.state::toggleInfoExpanded
-        )
-      }
+      LocationAppBar(locationMap, onBackClick)
 
       LoadingProgressIndicator(
         isLoading = isLoading,
@@ -297,6 +294,45 @@ private fun LocationScaffold(
     }
 
     modalSheet()
+  }
+}
+
+@Composable
+private fun LocationAppBar(locationMap: LocationMap, onBackClick: () -> Unit) {
+  Box(modifier = Modifier.fillMaxWidth()) {
+    if (locationMap.state.savedMapPosition.label.isNotEmpty()) {
+      Box(
+        modifier =
+          Modifier.matchParentSize()
+            .background(Brush.verticalGradient(0.25f to Color.Black, 1f to Color.Transparent))
+      )
+    }
+
+    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+      BackButton(onClick = onBackClick)
+
+      Crossfade(targetState = locationMap.state.nameVisible, modifier = Modifier.weight(1f)) {
+        locationNameVisible ->
+        if (locationNameVisible) {
+          Text(
+            text = locationMap.state.savedMapPosition.label,
+            color = Color.White,
+            style = MaterialTheme.typography.headlineSmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+          )
+        } else {
+          Spacer(modifier = Modifier.fillMaxWidth())
+        }
+      }
+
+      InfoButton(
+        isExpanded = locationMap.state.infoExpanded,
+        onClick = locationMap.state::toggleInfoExpanded
+      )
+    }
   }
 }
 
@@ -334,7 +370,7 @@ private fun InfoButton(isExpanded: Boolean, onClick: () -> Unit) {
       )
       AnimatedVisibility(visible = isExpanded) {
         Row {
-          Spacer(modifier = Modifier.width(12.dp))
+          Spacer(modifier = Modifier.width(4.dp))
           Text(
             text = stringResource(R.string.center_map_on_location),
             style = MaterialTheme.typography.bodyLarge,

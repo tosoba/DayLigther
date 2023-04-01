@@ -75,7 +75,8 @@ constructor(
             MapPosition(
               latitude = location.latitude,
               longitude = location.longitude,
-              zoom = MapDefaults.INITIAL_LOCATION_ZOOM
+              zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
+              label = location.name
             )
           )
         }

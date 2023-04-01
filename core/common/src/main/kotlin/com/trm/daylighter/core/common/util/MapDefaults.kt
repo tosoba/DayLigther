@@ -38,6 +38,7 @@ object MapDefaults {
   const val LATITUDE = 0.0
   const val LONGITUDE = 0.0
   const val ORIENTATION = 0f
+  const val LABEL = ""
 }
 
 @SuppressLint("ClickableViewAccessibility")

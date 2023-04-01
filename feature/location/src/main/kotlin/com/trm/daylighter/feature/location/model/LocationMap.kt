@@ -62,6 +62,9 @@ internal class LocationMapState(mapPosition: MapPosition, infoExpanded: Boolean 
   var infoExpanded by mutableStateOf(infoExpanded)
   var savedMapPosition by mutableStateOf(mapPosition)
 
+  val nameVisible: Boolean
+    get() = !infoExpanded && savedMapPosition.label.isNotEmpty()
+
   fun toggleInfoExpanded() {
     infoExpanded = !infoExpanded
   }
