@@ -8,6 +8,7 @@ import com.trm.daylighter.core.common.util.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
+import com.trm.daylighter.core.domain.usecase.ReceiveLocationSavedEventUseCase
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
@@ -32,6 +33,7 @@ constructor(
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
   private val getLocationSunriseSunsetChangeAtIndexUseCase:
     GetLocationSunriseSunsetChangeAtIndexUseCase,
+  receiveLocationSavedEventUseCase: ReceiveLocationSavedEventUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
     getLocationsCountFlowUseCase()
@@ -46,7 +48,7 @@ constructor(
       savedStateHandle[SavedState.CURRENT_LOCATION_INDEX.name] = value
     }
 
-  private val retryFlow = MutableSharedFlow<Unit>()
+  private val reloadLocationFlow = MutableSharedFlow<Unit>()
 
   val currentLocationSunriseSunsetChangeFlow:
     SharedFlow<StableLoadable<LocationSunriseSunsetChange>> =
@@ -87,14 +89,27 @@ constructor(
           }
       }
       .launchIn(viewModelScope)
+
+    receiveLocationSavedEventUseCase()
+      .withLatestFrom(
+        currentLocationSunriseSunsetChangeFlow
+          .map { it.value }
+          .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
+          .map { it.data }
+      ) { id, (location, _, _) ->
+        if (id != location.id) null else Unit
+      }
+      .filterNotNull()
+      .onEach { reloadLocation() }
+      .launchIn(viewModelScope)
   }
 
   fun changeLocation(index: Int) {
     viewModelScope.launch { changeLocationIndexFlow.emit(index) }
   }
 
-  fun retry() {
-    viewModelScope.launch { retryFlow.emit(Unit) }
+  fun reloadLocation() {
+    viewModelScope.launch { reloadLocationFlow.emit(Unit) }
   }
 
   private fun buildCurrentLocationSunriseSunsetChangeFlow():
@@ -115,14 +130,14 @@ constructor(
           }
         }
 
-    val retriedFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
-      retryFlow
+    val reloadedFlow: Flow<Loadable<LocationSunriseSunsetChange>> =
+      reloadLocationFlow
         .map { currentLocationIndex }
         .withLatestFrom(locationCountFlow, ::Pair)
         .transformToLocationSunriseSunsetChange()
 
     val currentLocationSunriseSunsetChangeFlow: SharedFlow<Loadable<LocationSunriseSunsetChange>> =
-      merge(atCurrentIndexFlow, retriedFlow)
+      merge(atCurrentIndexFlow, reloadedFlow)
         .shareIn(scope = viewModelScope, started = SharingStarted.Eagerly)
 
     val loadNextLocationSunriseSunsetChangeAfterMidnightFlow =

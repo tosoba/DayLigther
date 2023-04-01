@@ -13,7 +13,7 @@ import timber.log.Timber
 
 @Module
 @InstallIn(SingletonComponent::class)
-object LocationModule {
+object UserLocationModule {
   @Provides
   fun getCurrentUserLocation(@ApplicationContext context: Context) = GetCurrentUserLatLngUseCase {
     try {

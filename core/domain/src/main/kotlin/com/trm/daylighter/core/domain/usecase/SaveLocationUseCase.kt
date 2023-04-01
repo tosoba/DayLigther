@@ -6,7 +6,11 @@ import javax.inject.Inject
 
 class SaveLocationUseCase
 @Inject
-constructor(private val locationRepo: LocationRepo, private val widgetManager: WidgetManager) {
+constructor(
+  private val locationRepo: LocationRepo,
+  private val widgetManager: WidgetManager,
+  private val sendLocationSavedEventUseCase: SendLocationSavedEventUseCase
+) {
   suspend operator fun invoke(latitude: Double, longitude: Double, name: String) {
     val location =
       locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
@@ -22,5 +26,6 @@ constructor(private val locationRepo: LocationRepo, private val widgetManager: W
         name = name
       )
     if (location.isDefault) widgetManager.enqueueDefaultLocationWidgetUpdate()
+    sendLocationSavedEventUseCase(id)
   }
 }

@@ -100,7 +100,7 @@ fun DayRoute(
     onChangeLocationIndex = viewModel::changeLocation,
     onAddLocationClick = onAddLocation,
     onEditLocationClick = onEditLocation,
-    onRetryClick = viewModel::retry,
+    onRetryClick = viewModel::reloadLocation,
     modifier = modifier
   )
 }
