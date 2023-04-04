@@ -64,7 +64,7 @@ fun DaylighterMainContent() {
     DayLighterScaffold(
       navController = navController,
       onDrawerMenuClick = {
-        scope.launch { if (drawerState.isOpen) drawerState.close() else drawerState.open() }
+        scope.launch { with(drawerState) { if (isOpen) close() else open() } }
       },
       topBar = {
         AnimatedVisibility(
