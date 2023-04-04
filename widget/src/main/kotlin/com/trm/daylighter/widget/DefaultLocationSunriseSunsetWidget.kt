@@ -42,8 +42,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
               DayLengthSmall(
                 today = today,
                 yesterday = yesterday,
-                modifier =
-                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
+                modifier = clickableDayDeepLinkModifier()
               )
             }
             wideMode -> {
@@ -51,8 +50,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
                 location = location,
                 today = today,
                 yesterday = yesterday,
-                modifier =
-                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
+                modifier = clickableDayDeepLinkModifier()
               )
             }
             squareMode -> {
@@ -60,8 +58,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
                 location = location,
                 today = today,
                 yesterday = yesterday,
-                modifier =
-                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
+                modifier = clickableDayDeepLinkModifier()
               )
             }
           }
@@ -70,6 +67,10 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
       }
     }
   }
+
+  @Composable
+  private fun clickableDayDeepLinkModifier() =
+    GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
 
   companion object {
     private val smallMode = DpSize(120.dp, 50.dp)
