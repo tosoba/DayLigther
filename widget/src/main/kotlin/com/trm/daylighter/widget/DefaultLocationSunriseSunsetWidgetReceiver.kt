@@ -5,19 +5,13 @@ import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import com.trm.daylighter.core.common.di.MainActivityIntent
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DefaultLocationSunriseSunsetWidgetReceiver : GlanceAppWidgetReceiver() {
-  @Inject @MainActivityIntent internal lateinit var mainActivityIntent: Intent
-
-  override val glanceAppWidget: GlanceAppWidget by lazy {
-    DefaultLocationSunriseSunsetWidget(mainActivityIntent)
-  }
+  override val glanceAppWidget: GlanceAppWidget = DefaultLocationSunriseSunsetWidget()
 
   override fun onEnabled(context: Context) {
     super.onEnabled(context)

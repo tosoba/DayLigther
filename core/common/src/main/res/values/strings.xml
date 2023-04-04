@@ -10,7 +10,8 @@
     <string name="time_format_12_h">hh:mm:ss \n zz</string>
     <string name="time_format_24_h">HH:mm:ss \n zz</string>
 
-    <string name="nav_scheme">daylighter</string>
-    <string name="add_location_deep_link_host">location_deep_link</string>
-    <string name="add_location_deep_link_uri">daylighter://location_deep_link</string>
+    <string name="nav_scheme">deeplink</string>
+    <string name="deep_link_host">daylighter</string>
+    <string name="add_location_deep_link_uri">deeplink://daylighter/location</string>
+    <string name="day_deep_link_uri">deeplink://daylighter/day</string>
 </resources>

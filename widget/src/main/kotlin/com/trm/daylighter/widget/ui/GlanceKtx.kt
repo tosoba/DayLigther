@@ -1,21 +1,25 @@
 package com.trm.daylighter.widget.ui
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
+import androidx.glance.action.Action
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.*
 
 @Composable
-fun AppWidgetBox(
+internal fun AppWidgetBox(
   modifier: GlanceModifier = GlanceModifier,
   contentAlignment: Alignment = Alignment.TopStart,
   content: @Composable () -> Unit
@@ -28,7 +32,7 @@ fun AppWidgetBox(
 }
 
 @Composable
-fun AppWidgetColumn(
+internal fun AppWidgetColumn(
   modifier: GlanceModifier = GlanceModifier,
   verticalAlignment: Alignment.Vertical = Alignment.Top,
   horizontalAlignment: Alignment.Horizontal = Alignment.Start,
@@ -43,7 +47,7 @@ fun AppWidgetColumn(
 }
 
 @Composable
-fun AppWidgetRow(
+internal fun AppWidgetRow(
   modifier: GlanceModifier = GlanceModifier,
   verticalAlignment: Alignment.Vertical = Alignment.Top,
   horizontalAlignment: Alignment.Horizontal = Alignment.Start,
@@ -58,14 +62,14 @@ fun AppWidgetRow(
 }
 
 @Composable
-fun appWidgetBackgroundModifier() =
+internal fun appWidgetBackgroundModifier() =
   GlanceModifier.fillMaxSize()
     .padding(16.dp)
     .appWidgetBackground()
     .background(GlanceTheme.colors.primaryContainer)
     .appWidgetBackgroundCornerRadius()
 
-fun GlanceModifier.appWidgetBackgroundCornerRadius(): GlanceModifier {
+internal fun GlanceModifier.appWidgetBackgroundCornerRadius(): GlanceModifier {
   if (Build.VERSION.SDK_INT >= 31) {
     cornerRadius(android.R.dimen.system_app_widget_background_radius)
   } else {
@@ -74,7 +78,7 @@ fun GlanceModifier.appWidgetBackgroundCornerRadius(): GlanceModifier {
   return this
 }
 
-fun GlanceModifier.appWidgetInnerCornerRadius(): GlanceModifier {
+internal fun GlanceModifier.appWidgetInnerCornerRadius(): GlanceModifier {
   if (Build.VERSION.SDK_INT >= 31) {
     cornerRadius(android.R.dimen.system_app_widget_inner_radius)
   } else {
@@ -84,13 +88,17 @@ fun GlanceModifier.appWidgetInnerCornerRadius(): GlanceModifier {
 }
 
 @Composable
-fun stringResource(@StringRes id: Int, vararg args: Any): String =
+internal fun stringResource(@StringRes id: Int, vararg args: Any): String =
   LocalContext.current.getString(id, args)
 
-val Float.toPx
+internal val Float.toPx
   get() = this * Resources.getSystem().displayMetrics.density
 
-val Context.isNightMode: Boolean
+internal val Context.isNightMode: Boolean
   get() =
     resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
       Configuration.UI_MODE_NIGHT_YES
+
+@Composable
+internal fun deepLinkAction(@StringRes uriRes: Int): Action =
+  actionStartActivity(Intent(Intent.ACTION_VIEW, stringResource(uriRes).toUri()))

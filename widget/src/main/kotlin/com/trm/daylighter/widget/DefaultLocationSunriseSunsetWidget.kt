@@ -1,12 +1,10 @@
 package com.trm.daylighter.widget
 
-import android.content.Intent
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.glance.*
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
@@ -14,7 +12,6 @@ import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
-import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.layout.*
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -28,17 +25,14 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class DefaultLocationSunriseSunsetWidget(
-  private val widgetClickActionIntent: Intent,
-) : GlanceAppWidget() {
+class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(smallMode, wideMode, squareMode))
 
   @Composable
   override fun Content() {
-    val change = currentState<Loadable<LocationSunriseSunsetChange>>()
     GlanceTheme {
-      when (change) {
+      when (val change = currentState<Loadable<LocationSunriseSunsetChange>>()) {
         is Empty -> AddLocationButton()
         is Loading -> CircularProgressIndicator()
         is Ready -> {
@@ -48,7 +42,8 @@ class DefaultLocationSunriseSunsetWidget(
               DayLengthSmall(
                 today = today,
                 yesterday = yesterday,
-                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+                modifier =
+                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
               )
             }
             wideMode -> {
@@ -56,7 +51,8 @@ class DefaultLocationSunriseSunsetWidget(
                 location = location,
                 today = today,
                 yesterday = yesterday,
-                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+                modifier =
+                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
               )
             }
             squareMode -> {
@@ -64,7 +60,8 @@ class DefaultLocationSunriseSunsetWidget(
                 location = location,
                 today = today,
                 yesterday = yesterday,
-                modifier = GlanceModifier.clickable(actionStartActivity(widgetClickActionIntent))
+                modifier =
+                  GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
               )
             }
           }
@@ -209,13 +206,7 @@ private fun AddLocationButton() {
   AppWidgetBox(contentAlignment = Alignment.Center) {
     Button(
       text = stringResource(id = commonR.string.add_location),
-      onClick =
-        actionStartActivity(
-          Intent(
-            Intent.ACTION_VIEW,
-            stringResource(commonR.string.add_location_deep_link_uri).toUri()
-          )
-        )
+      onClick = deepLinkAction(uriRes = commonR.string.add_location_deep_link_uri)
     )
   }
 }

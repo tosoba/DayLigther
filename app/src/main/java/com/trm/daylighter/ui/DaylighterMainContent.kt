@@ -186,10 +186,11 @@ private fun DaylighterNavHost(
     }
   }
 
+  val dayDeepLinkUri = stringResource(id = commonR.string.day_deep_link_uri)
   val addLocationDeepLinkUri = stringResource(id = commonR.string.add_location_deep_link_uri)
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
-    composable(dayRoute) {
+    composable(route = dayRoute, deepLinks = listOf(navDeepLink { uriPattern = dayDeepLinkUri })) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
