@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.network.retrofit
+package com.trm.daylighter.core.network.geocoding
 
 import com.trm.daylighter.core.network.di.DaggerNetworkTestComponent
 import com.trm.daylighter.core.network.di.NetworkTestComponent
