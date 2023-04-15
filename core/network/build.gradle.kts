@@ -23,7 +23,8 @@ dependencies {
   implementation(libs.retrofit.core)
   implementation(libs.retrofit.kotlin.serialization)
 
-  implementation(libs.nominatim.api)
+  implementation(files("../../libs/nominatim-api.jar"))
+  implementation("org.apache.httpcomponents:httpclient:4.5.13")
   implementation(libs.guava.listenablefuture.conflict)
 
   api(libs.junit4)

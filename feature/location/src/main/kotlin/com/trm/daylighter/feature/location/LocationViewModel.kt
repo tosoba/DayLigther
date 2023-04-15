@@ -7,12 +7,10 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
+import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
-import com.trm.daylighter.feature.location.model.LocationPreparedToSave
-import com.trm.daylighter.feature.location.model.LocationScreenMode
-import com.trm.daylighter.feature.location.model.MapPosition
-import com.trm.daylighter.feature.location.model.SaveLocationRequest
+import com.trm.daylighter.feature.location.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -27,6 +25,7 @@ constructor(
   private val getLocationById: GetLocationById,
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
+  private val getLocationDisplayName: GetLocationDisplayName,
 ) : ViewModel() {
   private val saveLocationRequestFlow = MutableSharedFlow<SaveLocationRequest>()
   private val prepareSaveLocationFlow: SharedFlow<Loadable<LocationPreparedToSave>> =
@@ -87,6 +86,25 @@ constructor(
         initialValue = MapPosition()
       )
 
+  private val geocodeRequestFlow = MutableSharedFlow<GeocodeRequest>()
+  val geocodedLocationDisplayNameFlow: Flow<Loadable<String>> =
+    geocodeRequestFlow
+      .flatMapLatest { request ->
+        when (request) {
+          GeocodeRequest.CancelCurrent -> {
+            flowOf(Empty)
+          }
+          is GeocodeRequest.GetDisplayName -> {
+            getLocationDisplayName(lat = request.lat, lng = request.lng)
+          }
+        }
+      }
+      .stateIn(
+        viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = Empty
+      )
+
   val screenMode: LocationScreenMode =
     if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
@@ -123,6 +141,16 @@ constructor(
 
       saveLocationFlow.emit(Unit.asLoadable())
     }
+  }
+
+  fun getLocationDisplayName(latitude: Double, longitude: Double) {
+    viewModelScope.launch {
+      geocodeRequestFlow.emit(GeocodeRequest.GetDisplayName(lat = latitude, lng = longitude))
+    }
+  }
+
+  fun cancelCurrentGeocodingRequest() {
+    viewModelScope.launch { geocodeRequestFlow.emit(GeocodeRequest.CancelCurrent) }
   }
 
   private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitSpecifiedLocation(

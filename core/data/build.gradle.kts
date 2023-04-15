@@ -28,7 +28,8 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
 
-  implementation(libs.nominatim.api)
+  implementation(files("../../libs/nominatim-api.jar"))
+  implementation("org.apache.httpcomponents:httpclient:4.5.13")
   implementation(libs.guava.listenablefuture.conflict)
 
   implementation(libs.timber)

@@ -20,6 +20,7 @@ dependencies {
   implementation(libs.androidx.work.ktx)
 
   implementation(libs.timber)
+  implementation(libs.guava.listenablefuture.conflict)
 
   implementation(libs.hilt.ext.work)
   kapt(libs.hilt.ext.compiler)

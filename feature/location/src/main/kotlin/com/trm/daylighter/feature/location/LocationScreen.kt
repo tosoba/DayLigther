@@ -44,6 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -69,6 +71,8 @@ fun LocationRoute(
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
+  val geocodedLocationDisplayName =
+    viewModel.geocodedLocationDisplayNameFlow.collectAsStateWithLifecycle(initialValue = Empty)
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -80,6 +84,9 @@ fun LocationRoute(
     requestGetAndSaveUserLocation = viewModel::requestGetAndSaveUserLocation,
     cancelCurrentSaveLocation = viewModel::cancelCurrentSaveLocationRequest,
     onSaveLocationClick = viewModel::saveLocation,
+    geocodedLocationDisplayName = geocodedLocationDisplayName.value,
+    onGeocodeClick = viewModel::getLocationDisplayName,
+    cancelCurrentGeocoding = viewModel::cancelCurrentGeocodingRequest,
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -97,6 +104,9 @@ private fun LocationScreen(
   requestGetAndSaveUserLocation: () -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
+  geocodedLocationDisplayName: Loadable<String>,
+  onGeocodeClick: (lat: Double, lng: Double) -> Unit,
+  cancelCurrentGeocoding: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -142,10 +152,13 @@ private fun LocationScreen(
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val sheetHeaderLabel =
-    when (screenMode) {
-      LocationScreenMode.ADD -> stringResource(R.string.add_location)
-      LocationScreenMode.EDIT -> stringResource(R.string.edit_location)
-    }
+    stringResource(
+      id =
+        when (screenMode) {
+          LocationScreenMode.ADD -> R.string.add_location
+          LocationScreenMode.EDIT -> R.string.edit_location
+        }
+    )
 
   LaunchedEffect(locationPreparedToSave) {
     if (locationPreparedToSave == null || !locationPreparedToSave.isUser) return@LaunchedEffect
@@ -166,7 +179,7 @@ private fun LocationScreen(
         saveLocationState.name = it
       },
       nameError = saveLocationState.nameError,
-      onGeocodeClick = {},
+      onGeocodeClick = { onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude) },
       onSaveClick = {
         if (saveLocationState.name.isBlank()) {
           saveLocationState.nameError = LocationNameError.BLANK
@@ -224,13 +237,15 @@ private fun LocationScreen(
     )
   }
 
+  LaunchedEffect(sheetVisible) { if (!sheetVisible) cancelCurrentGeocoding() }
+
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     LocationScaffold()
   } else {
     val drawerState = remember {
       DrawerState(initialValue = if (sheetVisible) DrawerValue.Open else DrawerValue.Closed)
     }
-    LaunchedEffect(sheetVisible) { if (sheetVisible) drawerState.open() else drawerState.close() }
+    LaunchedEffect(sheetVisible) { drawerState.run { if (sheetVisible) open() else close() } }
     LaunchedEffect(drawerState.currentValue) {
       if (drawerState.isClosed && !drawerState.isAnimationRunning) sheetVisible = false
     }
