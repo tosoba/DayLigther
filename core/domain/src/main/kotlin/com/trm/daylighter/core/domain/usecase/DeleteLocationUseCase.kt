@@ -13,7 +13,7 @@ constructor(
 ) {
   suspend operator fun invoke(location: Location) {
     if (
-      locationRepo.deleteLocationByIdAndGetCountAll(
+      locationRepo.deleteLocationByIdAndCountAll(
         id = location.id,
         isDefault = location.isDefault
       ) == 0

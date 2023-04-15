@@ -129,7 +129,6 @@ constructor(
     latitude: Double,
     longitude: Double
   ) {
-    emit(LoadingFirst)
     emit(
       LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false)
         .asLoadable()

@@ -41,7 +41,7 @@ constructor(
   override fun getDefaultLocationFlow(): Flow<Location?> =
     locationDao.selectDefaultFlow().map { it?.asDomainModel() }
 
-  override suspend fun deleteLocationByIdAndGetCountAll(id: Long, isDefault: Boolean): Int =
+  override suspend fun deleteLocationByIdAndCountAll(id: Long, isDefault: Boolean): Int =
     locationDao.deleteByIdAndSelectCountAll(id, isDefault)
 
   override suspend fun setDefaultLocationById(id: Long) {

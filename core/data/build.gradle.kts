@@ -28,6 +28,9 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
 
+  implementation(libs.nominatim.api)
+  implementation(libs.guava.listenablefuture.conflict)
+
   implementation(libs.timber)
 
   implementation("us.dustinj.timezonemap:timezonemap:4.5") {

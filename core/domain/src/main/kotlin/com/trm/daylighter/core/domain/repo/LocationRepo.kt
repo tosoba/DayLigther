@@ -12,7 +12,7 @@ interface LocationRepo {
 
   fun getDefaultLocationFlow(): Flow<Location?>
 
-  suspend fun deleteLocationByIdAndGetCountAll(id: Long, isDefault: Boolean): Int
+  suspend fun deleteLocationByIdAndCountAll(id: Long, isDefault: Boolean): Int
 
   suspend fun setDefaultLocationById(id: Long)
 
