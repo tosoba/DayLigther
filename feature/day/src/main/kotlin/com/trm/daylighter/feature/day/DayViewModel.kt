@@ -3,8 +3,8 @@ package com.trm.daylighter.feature.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trm.daylighter.core.common.util.takeIfInstance
-import com.trm.daylighter.core.common.util.withLatestFrom
+import com.trm.daylighter.core.common.util.ext.takeIfInstance
+import com.trm.daylighter.core.common.util.ext.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase

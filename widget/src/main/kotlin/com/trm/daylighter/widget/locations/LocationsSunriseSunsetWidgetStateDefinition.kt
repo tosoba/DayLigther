@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.locations
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -14,41 +14,47 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
-object DefaultLocationSunriseSunsetWidgetStateDefinition :
-  GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
-  private const val DATA_STORE_FILENAME = "DefaultLocationSunriseSunsetWidget"
+object LocationsSunriseSunsetWidgetStateDefinition :
+  GlanceStateDefinition<Loadable<List<LocationSunriseSunsetChange>>> {
+  private const val DATA_STORE_FILENAME = "LocationListSunriseSunsetWidget"
 
   private val Context.datastore by dataStore(DATA_STORE_FILENAME, LocationLoadableSerializer)
 
   override suspend fun getDataStore(
     context: Context,
     fileKey: String
-  ): DataStore<Loadable<LocationSunriseSunsetChange>> = context.datastore
+  ): DataStore<Loadable<List<LocationSunriseSunsetChange>>> = context.datastore
 
   override fun getLocation(context: Context, fileKey: String): File =
     context.dataStoreFile(DATA_STORE_FILENAME)
 
-  private object LocationLoadableSerializer : Serializer<Loadable<LocationSunriseSunsetChange>> {
+  private object LocationLoadableSerializer :
+    Serializer<Loadable<List<LocationSunriseSunsetChange>>> {
     override val defaultValue = Empty
 
-    override suspend fun readFrom(input: InputStream): Loadable<LocationSunriseSunsetChange> =
+    override suspend fun readFrom(input: InputStream): Loadable<List<LocationSunriseSunsetChange>> =
       try {
         Json.decodeFromString(
-          Loadable.serializer(LocationSunriseSunsetChange.serializer()),
+          Loadable.serializer(ListSerializer(LocationSunriseSunsetChange.serializer())),
           input.readBytes().decodeToString()
         )
       } catch (exception: SerializationException) {
-        throw CorruptionException(
-          "Could not read default location widget data: ${exception.message}"
-        )
+        throw CorruptionException("Could not read locations list widget data: ${exception.message}")
       }
 
-    override suspend fun writeTo(t: Loadable<LocationSunriseSunsetChange>, output: OutputStream) {
+    override suspend fun writeTo(
+      t: Loadable<List<LocationSunriseSunsetChange>>,
+      output: OutputStream
+    ) {
       output.use {
         it.write(
-          Json.encodeToString(Loadable.serializer(LocationSunriseSunsetChange.serializer()), t)
+          Json.encodeToString(
+              Loadable.serializer(ListSerializer(LocationSunriseSunsetChange.serializer())),
+              t
+            )
             .encodeToByteArray()
         )
       }

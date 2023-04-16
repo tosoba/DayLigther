@@ -34,8 +34,12 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
   override fun Content() {
     GlanceTheme {
       when (val change = currentState<Loadable<LocationSunriseSunsetChange>>()) {
-        is Empty -> AddLocationButton()
-        is Loading -> CircularProgressIndicator()
+        Empty -> {
+          AddLocationButton()
+        }
+        is Loading -> {
+          CircularProgressIndicator()
+        }
         is Ready -> {
           val (location, today, yesterday) = change.data
           when (LocalSize.current) {
@@ -64,7 +68,14 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
             }
           }
         }
-        is Failed -> RetryButton()
+        is Failed -> {
+          RetryButton(
+            onClick =
+              actionSendBroadcast(
+                DefaultLocationSunriseSunsetWidgetReceiver.updateIntent(LocalContext.current)
+              )
+          )
+        }
       }
     }
   }
@@ -200,28 +211,5 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
     val textStyle = TextStyle(color = GlanceTheme.colors.textColorPrimary)
     Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME), style = textStyle)
     Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime), style = textStyle)
-  }
-}
-
-@Composable
-private fun AddLocationButton() {
-  AppWidgetBox(contentAlignment = Alignment.Center) {
-    Button(
-      text = stringResource(id = commonR.string.add_location),
-      onClick = deepLinkAction(uriRes = commonR.string.add_location_deep_link_uri)
-    )
-  }
-}
-
-@Composable
-private fun RetryButton() {
-  AppWidgetBox(contentAlignment = Alignment.Center) {
-    Button(
-      text = stringResource(id = commonR.string.retry),
-      onClick =
-        actionSendBroadcast(
-          DefaultLocationSunriseSunsetWidgetReceiver.updateIntent(LocalContext.current)
-        )
-    )
   }
 }

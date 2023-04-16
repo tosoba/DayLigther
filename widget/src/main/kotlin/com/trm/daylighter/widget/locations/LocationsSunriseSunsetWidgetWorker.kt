@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.locations
 
 import android.content.Context
 import androidx.glance.GlanceId
@@ -19,7 +19,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 @HiltWorker
-class DefaultLocationSunriseSunsetWidgetWorker
+class LocationsSunriseSunsetWidgetWorker
 @AssistedInject
 constructor(
   @Assisted private val context: Context,
@@ -28,13 +28,15 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = context.getGlanceIds<DefaultLocationSunriseSunsetWidget>()
+    val glanceIds = context.getGlanceIds<LocationsSunriseSunsetWidget>()
     setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
     try {
       setWidgetState(
         glanceIds = glanceIds,
         newState =
-          withContext(ioDispatcher) { sunriseSunsetRepo.getDefaultLocationSunriseSunsetChange() }
+          withContext(ioDispatcher) {
+              listOfNotNull(sunriseSunsetRepo.getDefaultLocationSunriseSunsetChange()) // TODO:
+            }
             .asLoadable()
       )
     } catch (ex: Exception) {
@@ -45,23 +47,23 @@ constructor(
 
   private suspend fun setWidgetState(
     glanceIds: List<GlanceId>,
-    newState: Loadable<LocationSunriseSunsetChange>
+    newState: Loadable<List<LocationSunriseSunsetChange>>
   ) {
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,
-        definition = DefaultLocationSunriseSunsetWidgetStateDefinition,
+        definition = LocationsSunriseSunsetWidgetStateDefinition,
         glanceId = glanceId,
         updateState = { newState }
       )
     }
-    DefaultLocationSunriseSunsetWidget().updateAll(context)
+    LocationsSunriseSunsetWidget().updateAll(context)
   }
 
   internal companion object : WidgetWorkerManager() {
-    override val workName: String = "DefaultLocationSunriseSunsetWidgetWork"
+    override val workName: String = "LocationsSunriseSunsetWidgetWork"
 
     override val inputData: Data
-      get() = DefaultLocationSunriseSunsetWidgetWorker::class.delegatedData()
+      get() = LocationsSunriseSunsetWidgetWorker::class.delegatedData()
   }
 }

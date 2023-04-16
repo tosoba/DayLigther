@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.common.util
+package com.trm.daylighter.core.common.util.ext
 
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
