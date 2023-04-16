@@ -39,7 +39,7 @@
         </activity>
 
         <receiver
-            android:name=".widget.DefaultLocationSunriseSunsetWidgetReceiver"
+            android:name=".widget.defaultlocation.DefaultLocationSunriseSunsetWidgetReceiver"
             android:exported="false">
 
             <intent-filter>
