@@ -58,7 +58,7 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
-import com.trm.daylighter.core.common.util.takeIfInstance
+import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
