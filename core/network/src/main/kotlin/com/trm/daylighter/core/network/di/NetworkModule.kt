@@ -2,61 +2,69 @@ package com.trm.daylighter.core.network.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.trm.daylighter.core.common.BuildConfig
-import com.trm.daylighter.core.network.DaylighterNetworkDataSource
-import com.trm.daylighter.core.network.retrofit.DaylighterApi
-import com.trm.daylighter.core.network.retrofit.DaylighterRetrofitDataSource
+import com.trm.daylighter.core.network.SunriseSunsetNetworkDataSource
+import com.trm.daylighter.core.network.retrofit.NominatimEndpoint
+import com.trm.daylighter.core.network.retrofit.SunriseSunsetEndpoint
+import com.trm.daylighter.core.network.retrofit.SunriseSunsetRetrofitDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import fr.dudie.nominatim.client.JsonNominatimClient
 import javax.inject.Singleton
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
 import retrofit2.Retrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NetworkModule {
-  @Binds abstract fun DaylighterRetrofitDataSource.binds(): DaylighterNetworkDataSource
+  @Binds abstract fun SunriseSunsetRetrofitDataSource.binds(): SunriseSunsetNetworkDataSource
 
   companion object {
-    @Provides @Singleton fun networkJson(): Json = Json { ignoreUnknownKeys = true }
-
     @Provides
     @Singleton
-    fun daylighterApi(networkJson: Json): DaylighterApi =
+    fun sunriseSunsetEndpoint(
+      okHttpClient: OkHttpClient,
+      networkJson: Json
+    ): SunriseSunsetEndpoint =
       Retrofit.Builder()
-        .client(
-          OkHttpClient.Builder()
-            .addInterceptor(
-              HttpLoggingInterceptor().apply {
-                if (BuildConfig.DEBUG) setLevel(HttpLoggingInterceptor.Level.BODY)
-              }
-            )
-            .build()
-        )
+        .client(okHttpClient)
         .addConverterFactory(
           @OptIn(ExperimentalSerializationApi::class)
           networkJson.asConverterFactory("application/json".toMediaType())
         )
-        .baseUrl(DaylighterApi.BASE_URL)
+        .baseUrl(SunriseSunsetEndpoint.BASE_URL)
         .build()
-        .create(DaylighterApi::class.java)
+        .create(SunriseSunsetEndpoint::class.java)
 
     @Provides
     @Singleton
-    fun nominatimHttpClient(): CloseableHttpClient = HttpClients.createDefault()
+    fun nominatimEndpoint(okHttpClient: OkHttpClient, networkJson: Json): NominatimEndpoint =
+      Retrofit.Builder()
+        .client(okHttpClient)
+        .addConverterFactory(
+          @OptIn(ExperimentalSerializationApi::class)
+          networkJson.asConverterFactory("application/json".toMediaType())
+        )
+        .baseUrl(NominatimEndpoint.BASE_URL)
+        .build()
+        .create(NominatimEndpoint::class.java)
+
+    @Provides @Singleton fun networkJson(): Json = Json { ignoreUnknownKeys = true }
 
     @Provides
     @Singleton
-    fun jsonNominatimClient(httpClient: CloseableHttpClient): JsonNominatimClient =
-      JsonNominatimClient(httpClient, "therealmerengue@gmail.com")
+    fun okHttpClient(): OkHttpClient =
+      OkHttpClient.Builder()
+        .addInterceptor(
+          HttpLoggingInterceptor().apply {
+            if (BuildConfig.DEBUG) setLevel(HttpLoggingInterceptor.Level.BODY)
+          }
+        )
+        .build()
   }
 }

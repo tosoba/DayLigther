@@ -77,8 +77,4 @@ dependencies {
 
   implementation(libs.osmdroid)
   implementation(libs.timber)
-
-  implementation(files("../libs/nominatim-api.jar"))
-  implementation("org.apache.httpcomponents:httpclient:4.5.13")
-  implementation(libs.guava.listenablefuture.conflict)
 }

@@ -11,9 +11,9 @@ import com.trm.daylighter.core.database.dao.SunriseSunsetDao
 import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.database.entity.SunriseSunsetEntity
 import com.trm.daylighter.core.domain.exception.EmptyAPIResultException
-import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
-import com.trm.daylighter.core.network.DaylighterNetworkDataSource
+import com.trm.daylighter.core.network.SunriseSunsetNetworkDataSource
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,7 +31,7 @@ constructor(
   private val db: DaylighterDatabase,
   private val locationDao: LocationDao,
   private val sunriseSunsetDao: SunriseSunsetDao,
-  private val network: DaylighterNetworkDataSource,
+  private val network: SunriseSunsetNetworkDataSource,
 ) : SunriseSunsetRepo {
   private val mutex = Mutex()
 

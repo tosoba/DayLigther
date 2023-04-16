@@ -4,7 +4,7 @@ import com.trm.daylighter.core.network.model.SunriseSunsetResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface DaylighterApi {
+interface SunriseSunsetEndpoint {
   @GET("/json?formatted=0")
   suspend fun getSunriseSunset(
     @Query("lat") lat: Double,

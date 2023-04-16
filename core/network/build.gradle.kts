@@ -23,10 +23,6 @@ dependencies {
   implementation(libs.retrofit.core)
   implementation(libs.retrofit.kotlin.serialization)
 
-  implementation(files("../../libs/nominatim-api.jar"))
-  implementation("org.apache.httpcomponents:httpclient:4.5.13")
-  implementation(libs.guava.listenablefuture.conflict)
-
   api(libs.junit4)
   api(libs.kotlinx.coroutines.test)
 

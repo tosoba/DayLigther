@@ -1,14 +1,14 @@
 package com.trm.daylighter.core.data.repo
 
 import com.trm.daylighter.core.domain.repo.GeocodingRepo
-import fr.dudie.nominatim.client.JsonNominatimClient
+import com.trm.daylighter.core.network.retrofit.NominatimEndpoint
 import javax.inject.Inject
 
 class GeocodingRepoImpl
 @Inject
 constructor(
-  private val nominatim: JsonNominatimClient,
+  private val endpoint: NominatimEndpoint,
 ) : GeocodingRepo {
-  override fun getLocationDisplayName(lat: Double, lng: Double, zoom: Int): String? =
-    nominatim.getAddress(lng, lat, zoom)?.displayName
+  override suspend fun getLocationDisplayName(lat: Double, lng: Double): String? =
+    endpoint.getAddress(lat, lng, "therealmerengue@gmail.com").displayName
 }

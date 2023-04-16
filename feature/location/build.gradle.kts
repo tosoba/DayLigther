@@ -13,5 +13,4 @@ dependencies {
   implementation(libs.osmdroid)
   implementation(libs.timber)
   implementation(libs.play.services.location)
-  implementation(libs.guava.listenablefuture.conflict)
 }

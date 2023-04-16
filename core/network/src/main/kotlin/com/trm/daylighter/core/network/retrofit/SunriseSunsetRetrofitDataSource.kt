@@ -1,16 +1,16 @@
 package com.trm.daylighter.core.network.retrofit
 
-import com.trm.daylighter.core.network.DaylighterNetworkDataSource
+import com.trm.daylighter.core.network.SunriseSunsetNetworkDataSource
 import com.trm.daylighter.core.network.model.SunriseSunsetResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class DaylighterRetrofitDataSource
+class SunriseSunsetRetrofitDataSource
 @Inject
 constructor(
-  private val api: DaylighterApi,
-) : DaylighterNetworkDataSource {
+  private val api: SunriseSunsetEndpoint,
+) : SunriseSunsetNetworkDataSource {
   override suspend fun getSunriseSunset(
     lat: Double,
     lng: Double,

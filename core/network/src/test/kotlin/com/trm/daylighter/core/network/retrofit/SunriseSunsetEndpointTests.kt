@@ -7,14 +7,14 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-class DaylighterApiTests {
+class SunriseSunsetEndpointTests {
   private val component: NetworkTestComponent = DaggerNetworkTestComponent.builder().build()
-  private val api: DaylighterApi = component.daylighterApi()
+  private val endpoint: SunriseSunsetEndpoint = component.sunriseSunsetEndpoint()
 
   @Test
   fun getSunriseSunset() = runTest {
     println(
-      api.getSunriseSunset(
+      endpoint.getSunriseSunset(
         lat = WARSAW_LAT,
         lng = WARSAW_LNG,
         date = LocalDate.now().format(DateTimeFormatter.ISO_DATE)

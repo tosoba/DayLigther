@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class GetLocationDisplayName @Inject constructor(private val geocodingRepo: GeocodingRepo) {
-  operator fun invoke(lat: Double, lng: Double, zoom: Int = 5): Flow<Loadable<String>> = flow {
+  operator fun invoke(lat: Double, lng: Double): Flow<Loadable<String>> = flow {
     emit(LoadingFirst)
     try {
-      geocodingRepo.getLocationDisplayName(lat = lat, lng = lng, zoom = zoom)?.let { displayName ->
+      geocodingRepo.getLocationDisplayName(lat = lat, lng = lng)?.let { displayName ->
         emit(Ready(displayName))
       }
         ?: run { emit(FailedFirst(LocationDisplayNameNotFound)) }

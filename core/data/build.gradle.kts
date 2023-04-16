@@ -28,10 +28,6 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
 
-  implementation(files("../../libs/nominatim-api.jar"))
-  implementation("org.apache.httpcomponents:httpclient:4.5.13")
-  implementation(libs.guava.listenablefuture.conflict)
-
   implementation(libs.timber)
 
   implementation("us.dustinj.timezonemap:timezonemap:4.5") {
