@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -72,6 +73,8 @@ fun LocationRoute(
   val locationName = viewModel.locationNameReadyFlow.collectAsStateWithLifecycle(initialValue = "")
   val isLocationNameLoading =
     viewModel.locationNameLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
+  val locationNameFailureMessage =
+    viewModel.locationNameFailureMessageFlow.collectAsStateWithLifecycle(initialValue = null)
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -85,6 +88,7 @@ fun LocationRoute(
     onSaveLocationClick = viewModel::saveLocation,
     locationName = locationName.value,
     isLocationNameLoading = isLocationNameLoading.value,
+    locationNameFailureMessage = locationNameFailureMessage.value,
     onLocationNameChange = viewModel::inputLocationName,
     clearLocationName = viewModel::clearLocationName,
     onGeocodeClick = viewModel::getLocationDisplayName,
@@ -107,6 +111,7 @@ private fun LocationScreen(
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
   locationName: String,
   isLocationNameLoading: Boolean,
+  @StringRes locationNameFailureMessage: Int?,
   onLocationNameChange: (String) -> Unit,
   clearLocationName: () -> Unit,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
@@ -179,6 +184,7 @@ private fun LocationScreen(
       headerLabel = sheetHeaderLabel,
       nameValue = locationName,
       isNameLoading = isLocationNameLoading,
+      nameFailureMessage = locationNameFailureMessage,
       onNameValueChange = {
         locationNameError = LocationNameError.NO_ERROR
         onLocationNameChange(it)
@@ -454,6 +460,7 @@ private fun ModalSheetContent(
   headerLabel: String,
   nameValue: String,
   isNameLoading: Boolean,
+  @StringRes nameFailureMessage: Int?,
   onNameValueChange: (String) -> Unit,
   nameError: LocationNameError,
   onSaveClick: () -> Unit,
@@ -526,6 +533,24 @@ private fun ModalSheetContent(
           10.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
         )
     )
+  }
+
+  FailureMessageToastEffect(message = nameFailureMessage)
+}
+
+@Composable
+private fun FailureMessageToastEffect(@StringRes message: Int?) {
+  val context = LocalContext.current
+  var toast: Toast? by remember { mutableStateOf(null) }
+
+  LaunchedEffect(message) {
+    toast =
+      if (message != null) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).apply { show() }
+      } else {
+        toast?.cancel()
+        null
+      }
   }
 }
 
@@ -611,14 +636,14 @@ private fun rememberLocationSettingsActivityResultLauncher(
 @Composable
 private fun UserLocationNotFoundToastEffect(userLocationNotFound: Boolean) {
   val context = LocalContext.current
-  var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
+  var toast: Toast? by remember { mutableStateOf(null) }
 
   LaunchedEffect(userLocationNotFound) {
-    userLocationNotFoundToast =
+    toast =
       if (userLocationNotFound) {
         Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_LONG).apply { show() }
       } else {
-        userLocationNotFoundToast?.cancel()
+        toast?.cancel()
         null
       }
   }
