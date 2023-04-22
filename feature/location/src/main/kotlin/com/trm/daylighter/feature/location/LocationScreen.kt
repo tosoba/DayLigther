@@ -326,7 +326,14 @@ private fun LocationAppBar(locationMap: LocationMap, onBackClick: () -> Unit) {
       Box(
         modifier =
           Modifier.matchParentSize()
-            .background(Brush.verticalGradient(0.25f to Color.Black, 1f to Color.Transparent))
+            .background(
+              Brush.verticalGradient(
+                0f to Color.Black,
+                .25f to Color.DarkGray,
+                .75f to Color.LightGray,
+                1f to Color.Transparent
+              )
+            )
       )
     }
 
