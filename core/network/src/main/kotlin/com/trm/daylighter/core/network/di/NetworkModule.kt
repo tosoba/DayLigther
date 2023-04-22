@@ -54,7 +54,13 @@ abstract class NetworkModule {
         .build()
         .create(NominatimEndpoint::class.java)
 
-    @Provides @Singleton fun networkJson(): Json = Json { ignoreUnknownKeys = true }
+    @Provides
+    @Singleton
+    fun networkJson(): Json = Json {
+      ignoreUnknownKeys = true
+      @OptIn(ExperimentalSerializationApi::class)
+      explicitNulls = false
+    }
 
     @Provides
     @Singleton

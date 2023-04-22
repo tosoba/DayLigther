@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AddressResponse(
   @SerialName("address") val address: Address?,
-  @SerialName("addresstype") val addresstype: String?,
-  @SerialName("boundingbox") val boundingbox: List<String>?,
+  @SerialName("addresstype") val addressType: String?,
+  @SerialName("boundingbox") val boundingBox: List<String>?,
   @SerialName("category") val category: String?,
   @SerialName("display_name") val displayName: String?,
   @SerialName("importance") val importance: Double?,
