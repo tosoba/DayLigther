@@ -10,42 +10,24 @@ import com.trm.daylighter.core.common.util.MapDefaults
 internal fun rememberSaveLocationState(
   latitude: Double = MapDefaults.LATITUDE,
   longitude: Double = MapDefaults.LONGITUDE,
-  name: String = "",
-  nameError: LocationNameError = LocationNameError.NO_ERROR
 ): SaveLocationState =
-  rememberSaveable(latitude, longitude, name, nameError, saver = SaveLocationState.Saver) {
-    SaveLocationState(
-      latitude = latitude,
-      longitude = longitude,
-      name = name,
-      nameError = nameError
-    )
+  rememberSaveable(latitude, longitude, saver = SaveLocationState.Saver) {
+    SaveLocationState(latitude = latitude, longitude = longitude)
   }
 
 @Stable
 internal class SaveLocationState(
   latitude: Double = MapDefaults.LATITUDE,
   longitude: Double = MapDefaults.LONGITUDE,
-  name: String = "",
-  nameError: LocationNameError = LocationNameError.NO_ERROR
 ) {
   var latitude by mutableStateOf(latitude)
   var longitude by mutableStateOf(longitude)
-  var name by mutableStateOf(name)
-  var nameError by mutableStateOf(nameError)
 
   companion object {
     val Saver: Saver<SaveLocationState, *> =
       listSaver(
-        save = { listOf(it.latitude, it.longitude, it.name, it.nameError) },
-        restore = {
-          SaveLocationState(
-            it[0] as Double,
-            it[1] as Double,
-            it[2] as String,
-            it[3] as LocationNameError
-          )
-        }
+        save = { listOf(it.latitude, it.longitude) },
+        restore = { SaveLocationState(it[0], it[1]) }
       )
   }
 }

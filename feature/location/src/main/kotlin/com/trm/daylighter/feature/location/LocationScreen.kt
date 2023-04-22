@@ -44,8 +44,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
-import com.trm.daylighter.core.domain.model.Empty
-import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -71,8 +69,7 @@ fun LocationRoute(
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
-  val geocodedLocationDisplayName =
-    viewModel.geocodedLocationDisplayNameFlow.collectAsStateWithLifecycle(initialValue = Empty)
+  val locationName = viewModel.locationNameReadyFlow.collectAsStateWithLifecycle(initialValue = "")
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -84,9 +81,10 @@ fun LocationRoute(
     requestGetAndSaveUserLocation = viewModel::requestGetAndSaveUserLocation,
     cancelCurrentSaveLocation = viewModel::cancelCurrentSaveLocationRequest,
     onSaveLocationClick = viewModel::saveLocation,
-    geocodedLocationDisplayName = geocodedLocationDisplayName.value,
+    locationName = locationName.value,
+    onLocationNameChange = viewModel::inputLocationName,
+    clearLocationName = viewModel::clearLocationName,
     onGeocodeClick = viewModel::getLocationDisplayName,
-    cancelCurrentGeocoding = viewModel::cancelCurrentGeocodingRequest,
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -104,9 +102,10 @@ private fun LocationScreen(
   requestGetAndSaveUserLocation: () -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
-  geocodedLocationDisplayName: Loadable<String>,
+  locationName: String,
+  onLocationNameChange: (String) -> Unit,
+  clearLocationName: () -> Unit,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
-  cancelCurrentGeocoding: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -147,8 +146,9 @@ private fun LocationScreen(
   val saveLocationState =
     rememberSaveLocationState(
       latitude = locationPreparedToSave?.latitude ?: mapPosition.latitude,
-      longitude = locationPreparedToSave?.longitude ?: mapPosition.longitude
+      longitude = locationPreparedToSave?.longitude ?: mapPosition.longitude,
     )
+  var locationNameError by rememberSaveable { mutableStateOf(LocationNameError.NO_ERROR) }
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val sheetHeaderLabel =
@@ -173,24 +173,20 @@ private fun LocationScreen(
   fun ModalSheetContent(modifier: Modifier = Modifier) {
     ModalSheetContent(
       headerLabel = sheetHeaderLabel,
-      nameValue = saveLocationState.name,
+      nameValue = locationName,
       onNameValueChange = {
-        saveLocationState.nameError = LocationNameError.NO_ERROR
-        saveLocationState.name = it
+        locationNameError = LocationNameError.NO_ERROR
+        onLocationNameChange(it)
       },
-      nameError = saveLocationState.nameError,
+      nameError = locationNameError,
       onGeocodeClick = { onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude) },
       onSaveClick = {
-        if (saveLocationState.name.isBlank()) {
-          saveLocationState.nameError = LocationNameError.BLANK
+        if (locationName.isBlank()) {
+          locationNameError = LocationNameError.BLANK
         } else {
-          saveLocationState.nameError = LocationNameError.NO_ERROR
+          locationNameError = LocationNameError.NO_ERROR
           sheetVisible = false
-          onSaveLocationClick(
-            saveLocationState.latitude,
-            saveLocationState.longitude,
-            saveLocationState.name
-          )
+          onSaveLocationClick(saveLocationState.latitude, saveLocationState.longitude, locationName)
         }
       },
       modifier = modifier
@@ -237,7 +233,7 @@ private fun LocationScreen(
     )
   }
 
-  LaunchedEffect(sheetVisible) { if (!sheetVisible) cancelCurrentGeocoding() }
+  LaunchedEffect(sheetVisible) { if (!sheetVisible) clearLocationName() }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     LocationScaffold()
