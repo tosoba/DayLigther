@@ -70,6 +70,8 @@ fun LocationRoute(
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
   val locationName = viewModel.locationNameReadyFlow.collectAsStateWithLifecycle(initialValue = "")
+  val isLocationNameLoading =
+    viewModel.locationNameLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -82,6 +84,7 @@ fun LocationRoute(
     cancelCurrentSaveLocation = viewModel::cancelCurrentSaveLocationRequest,
     onSaveLocationClick = viewModel::saveLocation,
     locationName = locationName.value,
+    isLocationNameLoading = isLocationNameLoading.value,
     onLocationNameChange = viewModel::inputLocationName,
     clearLocationName = viewModel::clearLocationName,
     onGeocodeClick = viewModel::getLocationDisplayName,
@@ -103,6 +106,7 @@ private fun LocationScreen(
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
   locationName: String,
+  isLocationNameLoading: Boolean,
   onLocationNameChange: (String) -> Unit,
   clearLocationName: () -> Unit,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
@@ -174,6 +178,7 @@ private fun LocationScreen(
     ModalSheetContent(
       headerLabel = sheetHeaderLabel,
       nameValue = locationName,
+      isNameLoading = isLocationNameLoading,
       onNameValueChange = {
         locationNameError = LocationNameError.NO_ERROR
         onLocationNameChange(it)
@@ -294,10 +299,10 @@ private fun LocationScaffold(
         }
       }
 
-      LocationAppBar(locationMap, onBackClick)
+      LocationAppBar(locationMap = locationMap, onBackClick = onBackClick)
 
       LoadingProgressIndicator(
-        isLoading = isLoading,
+        visible = isLoading,
         modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
       )
 
@@ -413,8 +418,8 @@ private fun ColumnScope.UserLocationButton(visible: Boolean, onUserLocationClick
 }
 
 @Composable
-private fun LoadingProgressIndicator(isLoading: Boolean, modifier: Modifier = Modifier) {
-  AnimatedVisibility(visible = isLoading, modifier = modifier) {
+private fun LoadingProgressIndicator(visible: Boolean, modifier: Modifier = Modifier) {
+  AnimatedVisibility(visible = visible, modifier = modifier) {
     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
   }
 }
@@ -448,6 +453,7 @@ private fun MarkerIcon(modifier: Modifier = Modifier) {
 private fun ModalSheetContent(
   headerLabel: String,
   nameValue: String,
+  isNameLoading: Boolean,
   onNameValueChange: (String) -> Unit,
   nameError: LocationNameError,
   onSaveClick: () -> Unit,
@@ -484,6 +490,11 @@ private fun ModalSheetContent(
         }
       },
       modifier = Modifier.padding(10.dp).fillMaxWidth()
+    )
+
+    LoadingProgressIndicator(
+      visible = isNameLoading,
+      modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
     )
 
     AnimatedVisibility(visible = nameError != LocationNameError.NO_ERROR) {
