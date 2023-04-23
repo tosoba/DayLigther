@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -125,29 +124,27 @@ private fun DayScreen(
       if (changeValue is WithData) initialDayMode(changeValue.data.today) else DayMode.SUNRISE
     )
   }
-
-  ConstraintLayout(modifier = modifier) {
-    LaunchedEffect(change) {
-      if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today)
-    }
-
-    SunriseSunset(
-      change = change,
-      dayMode = dayMode,
-      now = now,
-      locationsCount = locationsCount,
-      currentLocationIndex = currentLocationIndex,
-      onChangeLocationIndex = onChangeLocationIndex,
-      mapZoom = mapZoom,
-      onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
-      onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
-      onDrawerMenuClick = onDrawerMenuClick,
-      onAddLocationClick = onAddLocationClick,
-      onEditLocationClick = onEditLocationClick,
-      onDayModeNavClick = { dayMode = it },
-      onRetryClick = onRetryClick,
-    )
+  LaunchedEffect(change) {
+    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today)
   }
+
+  SunriseSunset(
+    change = change,
+    dayMode = dayMode,
+    now = now,
+    locationsCount = locationsCount,
+    currentLocationIndex = currentLocationIndex,
+    onChangeLocationIndex = onChangeLocationIndex,
+    mapZoom = mapZoom,
+    onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
+    onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
+    onDrawerMenuClick = onDrawerMenuClick,
+    onAddLocationClick = onAddLocationClick,
+    onEditLocationClick = onEditLocationClick,
+    onDayModeNavClick = { dayMode = it },
+    onRetryClick = onRetryClick,
+    modifier = modifier,
+  )
 }
 
 @Composable
@@ -180,7 +177,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-private fun ConstraintLayoutScope.SunriseSunset(
+private fun SunriseSunset(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
   now: ZonedDateTime,
@@ -195,47 +192,75 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onRetryClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  val (
-    drawerMenuButton,
-    mainContent,
-    navigation,
-    dayTimeCard,
-    map,
-    mapZoomControls,
-    editLocationButton) =
-    createRefs()
+  ConstraintLayout(modifier = modifier) {
+    val (
+      drawerMenuButton,
+      mainContent,
+      navigation,
+      dayTimeCard,
+      map,
+      mapZoomControls,
+      editLocationButton) =
+      createRefs()
 
-  val orientation = LocalConfiguration.current.orientation
-  val changeValue = change.value
+    val orientation = LocalConfiguration.current.orientation
+    val changeValue = change.value
 
-  val pagerState = rememberPagerState(initialPage = currentLocationIndex)
-  LaunchedEffect(pagerState) {
-    snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
-  }
+    val pagerState = rememberPagerState(initialPage = currentLocationIndex)
+    LaunchedEffect(pagerState) {
+      snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
+    }
 
-  Box(
-    modifier =
-      Modifier.constrainAs(mainContent) {
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-          linkTo(parent.start, parent.end)
-          linkTo(parent.top, navigation.top)
-        } else {
-          linkTo(navigation.end, parent.end)
-          linkTo(parent.top, parent.bottom)
+    Box(
+      modifier =
+        Modifier.constrainAs(mainContent) {
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            linkTo(parent.start, parent.end)
+            linkTo(parent.top, navigation.top)
+          } else {
+            linkTo(navigation.end, parent.end)
+            linkTo(parent.top, parent.bottom)
+          }
+          height = Dimension.fillToConstraints
+          width = Dimension.fillToConstraints
         }
-        height = Dimension.fillToConstraints
-        width = Dimension.fillToConstraints
-      }
-  ) {
-    Crossfade(targetState = changeValue !is Empty, modifier = Modifier.fillMaxSize()) { pagerVisible
-      ->
-      if (pagerVisible) {
-        HorizontalPager(
-          count = locationsCount,
-          state = pagerState,
-          modifier = Modifier.fillMaxSize()
-        ) {
+    ) {
+      Crossfade(targetState = changeValue !is Empty, modifier = Modifier.fillMaxSize()) {
+        pagerVisible ->
+        if (pagerVisible) {
+          HorizontalPager(
+            count = locationsCount,
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+          ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+              SunriseSunsetChart(
+                change = change,
+                dayMode = dayMode,
+                now = now,
+                modifier = Modifier.fillMaxSize()
+              )
+
+              if (changeValue is Failed) {
+                Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+                  Text(stringResource(commonR.string.retry))
+                }
+              } else if (changeValue is Loading) {
+                LinearProgressIndicator(
+                  modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                )
+              }
+            }
+          }
+
+          HorizontalPagerIndicator(
+            pagerState = pagerState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+            activeColor = MaterialTheme.colorScheme.onBackground,
+          )
+        } else {
           Box(modifier = Modifier.fillMaxSize()) {
             SunriseSunsetChart(
               change = change,
@@ -244,201 +269,176 @@ private fun ConstraintLayoutScope.SunriseSunset(
               modifier = Modifier.fillMaxSize()
             )
 
-            if (changeValue is Failed) {
-              Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-                Text(stringResource(commonR.string.retry))
-              }
-            } else if (changeValue is Loading) {
-              LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-              )
+            Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
+              Text(text = stringResource(commonR.string.add_location))
             }
-          }
-        }
-
-        HorizontalPagerIndicator(
-          pagerState = pagerState,
-          modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-          activeColor = MaterialTheme.colorScheme.onBackground,
-        )
-      } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-          SunriseSunsetChart(
-            change = change,
-            dayMode = dayMode,
-            now = now,
-            modifier = Modifier.fillMaxSize()
-          )
-
-          Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
-            Text(text = stringResource(commonR.string.add_location))
           }
         }
       }
     }
-  }
 
-  AnimatedVisibility(
-    visible = changeValue is Ready,
-    enter = fadeIn(),
-    exit = fadeOut(),
-    modifier =
-      Modifier.run {
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            width((LocalConfiguration.current.screenWidthDp * .4f).dp)
-          } else {
-            height((LocalConfiguration.current.screenHeightDp * .35f).dp)
+    AnimatedVisibility(
+      visible = changeValue is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.run {
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+              width((LocalConfiguration.current.screenWidthDp * .4f).dp)
+            } else {
+              height((LocalConfiguration.current.screenHeightDp * .35f).dp)
+            }
           }
+          .aspectRatio(1f)
+          .constrainAs(map) {
+            top.linkTo(parent.top, 16.dp)
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+              end.linkTo(parent.end, 16.dp)
+            } else {
+              end.linkTo(mapZoomControls.start, 5.dp)
+            }
+          }
+    ) {
+      MapCard(change = change, mapZoom = mapZoom)
+    }
+
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      AnimatedVisibility(
+        visible = changeValue is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(mapZoomControls) {
+            start.linkTo(map.start)
+            end.linkTo(map.end)
+            top.linkTo(map.bottom, 5.dp)
+          }
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.Center,
+        ) {
+          ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+          Spacer(modifier = Modifier.width(5.dp))
+          ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
         }
-        .aspectRatio(1f)
-        .constrainAs(map) {
-          top.linkTo(parent.top, 16.dp)
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      }
+    } else {
+      AnimatedVisibility(
+        visible = changeValue is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(mapZoomControls) {
             end.linkTo(parent.end, 16.dp)
-          } else {
-            end.linkTo(mapZoomControls.start, 5.dp)
+            top.linkTo(map.top)
+            bottom.linkTo(map.bottom)
           }
-        }
-  ) {
-    MapCard(change = change, mapZoom = mapZoom)
-  }
-
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      enter = fadeIn(),
-      exit = fadeOut(),
-      modifier =
-        Modifier.constrainAs(mapZoomControls) {
-          start.linkTo(map.start)
-          end.linkTo(map.end)
-          top.linkTo(map.bottom, 5.dp)
-        }
-    ) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
       ) {
-        ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-        Spacer(modifier = Modifier.width(5.dp))
-        ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+        ) {
+          ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
+          Spacer(modifier = Modifier.height(5.dp))
+          ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
+        }
       }
     }
-  } else {
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      enter = fadeIn(),
-      exit = fadeOut(),
-      modifier =
-        Modifier.constrainAs(mapZoomControls) {
-          end.linkTo(parent.end, 16.dp)
-          top.linkTo(map.top)
-          bottom.linkTo(map.bottom)
-        }
-    ) {
-      Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-      ) {
-        ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-        Spacer(modifier = Modifier.height(5.dp))
-        ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
-      }
-    }
-  }
 
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-    DrawerMenuButton(
-      onClick = onDrawerMenuClick,
-      modifier =
-        Modifier.constrainAs(drawerMenuButton) {
-          start.linkTo(parent.start, 16.dp)
-          top.linkTo(parent.top, 16.dp)
-        }
-    )
-
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      enter = fadeIn(),
-      exit = fadeOut(),
-      modifier =
-        Modifier.constrainAs(dayTimeCard) {
-          top.linkTo(drawerMenuButton.bottom, 10.dp)
-          start.linkTo(parent.start, 16.dp)
-        },
-    ) {
-      ClockAndDayLengthCard(change = change)
-    }
-
-    NavigationBar(
-      content = {
-        SunriseSunsetNavigationBarContent(
-          dayMode = dayMode,
-          itemsEnabled = changeValue is Ready,
-          onDayModeChange = onDayModeNavClick
-        )
-      },
-      modifier =
-        Modifier.constrainAs(navigation) {
-          linkTo(mainContent.bottom, parent.bottom)
-          linkTo(parent.start, parent.end)
-        }
-    )
-
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      modifier =
-        Modifier.constrainAs(editLocationButton) {
-          bottom.linkTo(navigation.top, 16.dp)
-          end.linkTo(parent.end, 16.dp)
-        }
-    ) {
-      EditLocationButton(
-        onClick = { if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id) },
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      DrawerMenuButton(
+        onClick = onDrawerMenuClick,
+        modifier =
+          Modifier.constrainAs(drawerMenuButton) {
+            start.linkTo(parent.start, 16.dp)
+            top.linkTo(parent.top, 16.dp)
+          }
       )
-    }
-  } else {
-    NavigationRail(
-      header = {
-        DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
-      },
-      content = {
-        SunriseSunsetNavigationRailContent(
-          dayMode = dayMode,
-          itemsEnabled = changeValue is Ready,
-          onDayModeChange = onDayModeNavClick,
-          footer = {
-            AnimatedVisibility(
-              visible = changeValue is Ready,
-              modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-              EditLocationButton(
-                onClick = {
-                  if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
-                }
-              )
-            }
-          }
-        )
-      },
-      modifier =
-        Modifier.constrainAs(navigation) {
-          linkTo(parent.start, mainContent.start)
-          linkTo(parent.top, parent.bottom)
-        },
-    )
 
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      enter = fadeIn(),
-      exit = fadeOut(),
-      modifier =
-        Modifier.constrainAs(dayTimeCard) {
-          top.linkTo(parent.top, 16.dp)
-          start.linkTo(navigation.end, 16.dp)
+      AnimatedVisibility(
+        visible = changeValue is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(drawerMenuButton.bottom, 10.dp)
+            start.linkTo(parent.start, 16.dp)
+          },
+      ) {
+        ClockAndDayLengthCard(change = change)
+      }
+
+      NavigationBar(
+        content = {
+          SunriseSunsetNavigationBarContent(
+            dayMode = dayMode,
+            itemsEnabled = changeValue is Ready,
+            onDayModeChange = onDayModeNavClick
+          )
         },
-    ) {
-      ClockAndDayLengthCard(change = change)
+        modifier =
+          Modifier.constrainAs(navigation) {
+            linkTo(mainContent.bottom, parent.bottom)
+            linkTo(parent.start, parent.end)
+          }
+      )
+
+      AnimatedVisibility(
+        visible = changeValue is Ready,
+        modifier =
+          Modifier.constrainAs(editLocationButton) {
+            bottom.linkTo(navigation.top, 16.dp)
+            end.linkTo(parent.end, 16.dp)
+          }
+      ) {
+        EditLocationButton(
+          onClick = { if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id) },
+        )
+      }
+    } else {
+      NavigationRail(
+        header = {
+          DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+        },
+        content = {
+          SunriseSunsetNavigationRailContent(
+            dayMode = dayMode,
+            itemsEnabled = changeValue is Ready,
+            onDayModeChange = onDayModeNavClick,
+            footer = {
+              AnimatedVisibility(
+                visible = changeValue is Ready,
+                modifier = Modifier.padding(bottom = 8.dp)
+              ) {
+                EditLocationButton(
+                  onClick = {
+                    if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
+                  }
+                )
+              }
+            }
+          )
+        },
+        modifier =
+          Modifier.constrainAs(navigation) {
+            linkTo(parent.start, mainContent.start)
+            linkTo(parent.top, parent.bottom)
+          },
+      )
+
+      AnimatedVisibility(
+        visible = changeValue is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(parent.top, 16.dp)
+            start.linkTo(navigation.end, 16.dp)
+          },
+      ) {
+        ClockAndDayLengthCard(change = change)
+      }
     }
   }
 }
