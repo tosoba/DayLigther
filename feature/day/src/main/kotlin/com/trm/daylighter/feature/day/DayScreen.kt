@@ -269,8 +269,26 @@ private fun SunriseSunset(
               modifier = Modifier.fillMaxSize()
             )
 
-            Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
-              Text(text = stringResource(commonR.string.add_location))
+            Surface(
+              shape = CardDefaults.shape,
+              shadowElevation = 6.dp,
+              modifier = Modifier.align(Alignment.Center).padding(20.dp)
+            ) {
+              Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(10.dp)
+              ) {
+                Text(
+                  text = "You need to add a location to track its sunrise sunset times.",
+                  style = MaterialTheme.typography.titleLarge,
+                  textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(onClick = onAddLocationClick) {
+                  Text(text = stringResource(commonR.string.add_location))
+                }
+              }
             }
           }
         }
