@@ -237,22 +237,21 @@ private fun ConstraintLayoutScope.SunriseSunset(
           modifier = Modifier.fillMaxSize()
         ) {
           Box(modifier = Modifier.fillMaxSize()) {
+            SunriseSunsetChart(
+              change = change,
+              dayMode = dayMode,
+              now = now,
+              modifier = Modifier.fillMaxSize()
+            )
+
             if (changeValue is Failed) {
               Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
                 Text(stringResource(commonR.string.retry))
               }
-            } else {
-              SunriseSunsetChart(
-                change = change,
-                dayMode = dayMode,
-                now = now,
-                modifier = Modifier.fillMaxSize()
+            } else if (changeValue is Loading) {
+              LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
               )
-              if (changeValue is Loading) {
-                LinearProgressIndicator(
-                  modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                )
-              }
             }
           }
         }
@@ -264,6 +263,13 @@ private fun ConstraintLayoutScope.SunriseSunset(
         )
       } else {
         Box(modifier = Modifier.fillMaxSize()) {
+          SunriseSunsetChart(
+            change = change,
+            dayMode = dayMode,
+            now = now,
+            modifier = Modifier.fillMaxSize()
+          )
+
           Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
             Text(text = stringResource(commonR.string.add_location))
           }
@@ -468,6 +474,7 @@ private fun MapCard(
         )
 
         LocationNameGradientOverlay()
+
         LocationNameLabel(
           name = changeValue.data.location.name,
           modifier = Modifier.align(Alignment.BottomCenter).padding(5.dp)
@@ -798,6 +805,8 @@ private fun SunriseSunsetChart(
       drawChartSegment(segment)
       startAngle += segment.sweepAngleDegrees
     }
+
+    if (changeValue !is Ready) return@Canvas
 
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
