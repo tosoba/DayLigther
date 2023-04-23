@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import android.view.View
 import android.widget.TextClock
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
@@ -20,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -58,7 +60,6 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
-import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -119,54 +120,33 @@ private fun DayScreen(
 ) {
   var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
   val changeValue = change.value
+  var dayMode by rememberSaveable {
+    mutableStateOf(
+      if (changeValue is WithData) initialDayMode(changeValue.data.today) else DayMode.SUNRISE
+    )
+  }
 
   ConstraintLayout(modifier = modifier) {
-    if (changeValue is Empty) {
-      val (emptyDrawerMenuButton, addLocationButton) = createRefs()
-      DrawerMenuButton(
-        onClick = onDrawerMenuClick,
-        modifier =
-          Modifier.constrainAs(emptyDrawerMenuButton) {
-            start.linkTo(parent.start, 16.dp)
-            top.linkTo(parent.top, 16.dp)
-          }
-      )
-      Button(
-        onClick = onAddLocationClick,
-        modifier =
-          Modifier.constrainAs(addLocationButton) {
-            linkTo(parent.start, parent.end)
-            linkTo(parent.top, parent.bottom)
-          }
-      ) {
-        Text(text = stringResource(commonR.string.add_location))
-      }
-    } else {
-      var dayMode by rememberSaveable {
-        mutableStateOf(
-          if (changeValue is WithData) initialDayMode(changeValue.data.today) else DayMode.SUNRISE
-        )
-      }
-      LaunchedEffect(change) {
-        if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today)
-      }
-
-      SunriseSunset(
-        change = change,
-        dayMode = dayMode,
-        now = now,
-        locationsCount = locationsCount,
-        currentLocationIndex = currentLocationIndex,
-        onChangeLocationIndex = onChangeLocationIndex,
-        mapZoom = mapZoom,
-        onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
-        onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
-        onDrawerMenuClick = onDrawerMenuClick,
-        onEditLocationClick = onEditLocationClick,
-        onDayModeNavClick = { dayMode = it },
-        onRetryClick = onRetryClick,
-      )
+    LaunchedEffect(change) {
+      if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today)
     }
+
+    SunriseSunset(
+      change = change,
+      dayMode = dayMode,
+      now = now,
+      locationsCount = locationsCount,
+      currentLocationIndex = currentLocationIndex,
+      onChangeLocationIndex = onChangeLocationIndex,
+      mapZoom = mapZoom,
+      onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
+      onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
+      onDrawerMenuClick = onDrawerMenuClick,
+      onAddLocationClick = onAddLocationClick,
+      onEditLocationClick = onEditLocationClick,
+      onDayModeNavClick = { dayMode = it },
+      onRetryClick = onRetryClick,
+    )
   }
 }
 
@@ -212,24 +192,31 @@ private fun ConstraintLayoutScope.SunriseSunset(
   onZoomOutClick: () -> Unit,
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
+  onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onRetryClick: () -> Unit,
 ) {
   val (
-    drawerMenuButton, pagerBox, navigation, dayTimeCard, map, mapZoomControls, editLocationButton) =
+    drawerMenuButton,
+    mainContent,
+    navigation,
+    dayTimeCard,
+    map,
+    mapZoomControls,
+    editLocationButton) =
     createRefs()
+
   val orientation = LocalConfiguration.current.orientation
+  val changeValue = change.value
 
   val pagerState = rememberPagerState(initialPage = currentLocationIndex)
   LaunchedEffect(pagerState) {
     snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
   }
 
-  val changeValue = change.value
-
   Box(
     modifier =
-      Modifier.constrainAs(pagerBox) {
+      Modifier.constrainAs(mainContent) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
           linkTo(parent.start, parent.end)
           linkTo(parent.top, navigation.top)
@@ -241,33 +228,48 @@ private fun ConstraintLayoutScope.SunriseSunset(
         width = Dimension.fillToConstraints
       }
   ) {
-    HorizontalPager(count = locationsCount, state = pagerState, modifier = Modifier.fillMaxSize()) {
-      Box(modifier = Modifier.fillMaxSize()) {
-        if (changeValue is Failed) {
-          Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-            Text(stringResource(commonR.string.retry))
+    Crossfade(targetState = changeValue !is Empty, modifier = Modifier.fillMaxSize()) { pagerVisible
+      ->
+      if (pagerVisible) {
+        HorizontalPager(
+          count = locationsCount,
+          state = pagerState,
+          modifier = Modifier.fillMaxSize()
+        ) {
+          Box(modifier = Modifier.fillMaxSize()) {
+            if (changeValue is Failed) {
+              Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
+                Text(stringResource(commonR.string.retry))
+              }
+            } else {
+              SunriseSunsetChart(
+                change = change,
+                dayMode = dayMode,
+                now = now,
+                modifier = Modifier.fillMaxSize()
+              )
+              if (changeValue is Loading) {
+                LinearProgressIndicator(
+                  modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                )
+              }
+            }
           }
-        } else {
-          SunriseSunsetChart(
-            change = change,
-            dayMode = dayMode,
-            now = now,
-            modifier = Modifier.fillMaxSize()
-          )
-          if (changeValue is Loading) {
-            LinearProgressIndicator(
-              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-            )
+        }
+
+        HorizontalPagerIndicator(
+          pagerState = pagerState,
+          modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+          activeColor = MaterialTheme.colorScheme.onBackground,
+        )
+      } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Button(onClick = onAddLocationClick, modifier = Modifier.align(Alignment.Center)) {
+            Text(text = stringResource(commonR.string.add_location))
           }
         }
       }
     }
-
-    HorizontalPagerIndicator(
-      pagerState = pagerState,
-      modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-      activeColor = MaterialTheme.colorScheme.onBackground,
-    )
   }
 
   AnimatedVisibility(
@@ -362,14 +364,19 @@ private fun ConstraintLayoutScope.SunriseSunset(
       ClockAndDayLengthCard(change = change)
     }
 
-    SunriseSunsetNavigationBar(
+    NavigationBar(
+      content = {
+        SunriseSunsetNavigationBarContent(
+          dayMode = dayMode,
+          itemsEnabled = changeValue is Ready,
+          onDayModeChange = onDayModeNavClick
+        )
+      },
       modifier =
         Modifier.constrainAs(navigation) {
-          linkTo(pagerBox.bottom, parent.bottom)
+          linkTo(mainContent.bottom, parent.bottom)
           linkTo(parent.start, parent.end)
-        },
-      dayMode = dayMode,
-      onDayModeChange = onDayModeNavClick
+        }
     )
 
     AnimatedVisibility(
@@ -385,27 +392,34 @@ private fun ConstraintLayoutScope.SunriseSunset(
       )
     }
   } else {
-    SunriseSunsetNavigationRail(
+    NavigationRail(
+      header = {
+        DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+      },
+      content = {
+        SunriseSunsetNavigationRailContent(
+          dayMode = dayMode,
+          itemsEnabled = changeValue is Ready,
+          onDayModeChange = onDayModeNavClick,
+          footer = {
+            AnimatedVisibility(
+              visible = changeValue is Ready,
+              modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+              EditLocationButton(
+                onClick = {
+                  if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
+                }
+              )
+            }
+          }
+        )
+      },
       modifier =
         Modifier.constrainAs(navigation) {
-          linkTo(parent.start, pagerBox.start)
+          linkTo(parent.start, mainContent.start)
           linkTo(parent.top, parent.bottom)
         },
-      onDrawerMenuClick = onDrawerMenuClick,
-      dayMode = dayMode,
-      onDayModeChange = onDayModeNavClick,
-      footer = {
-        AnimatedVisibility(
-          visible = changeValue is Ready,
-          modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-          EditLocationButton(
-            onClick = {
-              if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
-            }
-          )
-        }
-      },
     )
 
     AnimatedVisibility(
@@ -591,81 +605,99 @@ private fun DayLengthInfoContent(today: SunriseSunset, yesterday: SunriseSunset)
 }
 
 @Composable
-private fun SunriseSunsetNavigationBar(
-  modifier: Modifier = Modifier,
+private fun RowScope.SunriseSunsetNavigationBarContent(
+  itemsEnabled: Boolean,
   dayMode: DayMode,
-  onDayModeChange: (DayMode) -> Unit,
+  onDayModeChange: (DayMode) -> Unit
 ) {
-  NavigationBar(modifier = modifier) {
-    NavigationBarItem(
-      selected = dayMode == DayMode.SUNRISE,
-      onClick = { onDayModeChange(DayMode.SUNRISE) },
-      icon = {
-        Icon(
-          painter = painterResource(R.drawable.sunrise),
-          contentDescription = stringResource(R.string.sunrise)
-        )
-      },
-      label = { Text(text = stringResource(R.string.sunrise)) }
-    )
-    NavigationBarItem(
-      selected = dayMode == DayMode.SUNSET,
-      onClick = { onDayModeChange(DayMode.SUNSET) },
-      icon = {
-        Icon(
-          painter = painterResource(R.drawable.sunset),
-          contentDescription = stringResource(R.string.sunset)
-        )
-      },
-      label = { Text(text = stringResource(R.string.sunset)) }
-    )
-  }
+  NavigationBarItem(
+    selected = itemsEnabled && dayMode == DayMode.SUNRISE,
+    enabled = itemsEnabled,
+    onClick = { onDayModeChange(DayMode.SUNRISE) },
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.sunrise),
+        contentDescription = stringResource(R.string.sunrise),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    },
+    label = {
+      Text(
+        text = stringResource(R.string.sunrise),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    }
+  )
+  NavigationBarItem(
+    selected = itemsEnabled && dayMode == DayMode.SUNSET,
+    enabled = itemsEnabled,
+    onClick = { onDayModeChange(DayMode.SUNSET) },
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.sunset),
+        contentDescription = stringResource(R.string.sunset),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    },
+    label = {
+      Text(
+        text = stringResource(R.string.sunset),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    }
+  )
 }
 
 @Composable
-private fun SunriseSunsetNavigationRail(
+private fun ColumnScope.SunriseSunsetNavigationRailContent(
+  itemsEnabled: Boolean,
   dayMode: DayMode,
   onDayModeChange: (DayMode) -> Unit,
-  onDrawerMenuClick: () -> Unit,
-  footer: @Composable () -> Unit,
-  modifier: Modifier = Modifier
+  footer: @Composable () -> Unit
 ) {
-  NavigationRail(
-    header = {
-      DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+  Spacer(modifier = Modifier.weight(1f))
+
+  NavigationRailItem(
+    selected = itemsEnabled && dayMode == DayMode.SUNRISE,
+    enabled = itemsEnabled,
+    onClick = { onDayModeChange(DayMode.SUNRISE) },
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.sunrise),
+        contentDescription = stringResource(R.string.sunrise),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
     },
-    modifier = modifier
-  ) {
-    Spacer(modifier = Modifier.weight(1f))
+    label = {
+      Text(
+        text = stringResource(R.string.sunrise),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    }
+  )
 
-    NavigationRailItem(
-      selected = dayMode == DayMode.SUNRISE,
-      onClick = { onDayModeChange(DayMode.SUNRISE) },
-      icon = {
-        Icon(
-          painter = painterResource(R.drawable.sunrise),
-          contentDescription = stringResource(R.string.sunrise)
-        )
-      },
-      label = { Text(text = stringResource(R.string.sunrise)) }
-    )
+  NavigationRailItem(
+    selected = itemsEnabled && dayMode == DayMode.SUNSET,
+    enabled = itemsEnabled,
+    onClick = { onDayModeChange(DayMode.SUNSET) },
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.sunset),
+        contentDescription = stringResource(R.string.sunset),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    },
+    label = {
+      Text(
+        text = stringResource(R.string.sunset),
+        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+      )
+    }
+  )
 
-    NavigationRailItem(
-      selected = dayMode == DayMode.SUNSET,
-      onClick = { onDayModeChange(DayMode.SUNSET) },
-      icon = {
-        Icon(
-          painter = painterResource(R.drawable.sunset),
-          contentDescription = stringResource(R.string.sunset)
-        )
-      },
-      label = { Text(text = stringResource(R.string.sunset)) }
-    )
+  Spacer(modifier = Modifier.weight(1f))
 
-    Spacer(modifier = Modifier.weight(1f))
-
-    footer()
-  }
+  footer()
 }
 
 @OptIn(ExperimentalTextApi::class)
