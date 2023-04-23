@@ -12,11 +12,8 @@ data class AddressResponse(
   @SerialName("display_name") val displayName: String?,
   @SerialName("importance") val importance: Double?,
   @SerialName("lat") val lat: String?,
-  @SerialName("licence") val licence: String?,
   @SerialName("lon") val lon: String?,
   @SerialName("name") val name: String?,
-  @SerialName("osm_id") val osmId: Int?,
-  @SerialName("osm_type") val osmType: String?,
   @SerialName("place_id") val placeId: Int?,
   @SerialName("place_rank") val placeRank: Int?,
   @SerialName("type") val type: String?
