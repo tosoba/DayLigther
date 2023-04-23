@@ -16,4 +16,5 @@
     <string name="application_menu">Application menu</string>
     <string name="horizon">Horizon</string>
     <string name="edit_location">Edit location</string>
+    <string name="no_saved_locations_add_one">No saved locations - add one to track its day periods.</string>
 </resources>
