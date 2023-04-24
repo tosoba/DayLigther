@@ -245,9 +245,12 @@ private fun SunriseSunset(
               )
 
               if (changeValue is Failed) {
-                Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-                  Text(stringResource(commonR.string.retry))
-                }
+                InfoButtonCard(
+                  infoText = stringResource(R.string.error_occurred),
+                  actionText = stringResource(commonR.string.retry),
+                  onButtonClick = onRetryClick,
+                  modifier = Modifier.align(Alignment.Center)
+                )
               } else if (changeValue is Loading) {
                 LinearProgressIndicator(
                   modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
