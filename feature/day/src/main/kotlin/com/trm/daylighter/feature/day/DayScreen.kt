@@ -45,6 +45,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -59,6 +60,7 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
+import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -244,9 +246,12 @@ private fun SunriseSunset(
               )
 
               if (changeValue is Failed) {
-                Button(onClick = onRetryClick, modifier = Modifier.align(Alignment.Center)) {
-                  Text(stringResource(commonR.string.retry))
-                }
+                InfoButtonCard(
+                  infoText = stringResource(R.string.error_occurred),
+                  actionText = stringResource(commonR.string.retry),
+                  onButtonClick = onRetryClick,
+                  modifier = Modifier.align(Alignment.Center)
+                )
               } else if (changeValue is Loading) {
                 LinearProgressIndicator(
                   modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
@@ -269,27 +274,12 @@ private fun SunriseSunset(
               modifier = Modifier.fillMaxSize()
             )
 
-            Surface(
-              shape = CardDefaults.shape,
-              shadowElevation = 6.dp,
+            InfoButtonCard(
+              infoText = stringResource(R.string.no_saved_locations_add_one),
+              actionText = stringResource(commonR.string.add_location),
+              onButtonClick = onAddLocationClick,
               modifier = Modifier.align(Alignment.Center).padding(20.dp)
-            ) {
-              Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(10.dp)
-              ) {
-                Text(
-                  text = "You need to add a location to track its sunrise sunset times.",
-                  style = MaterialTheme.typography.titleLarge,
-                  textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(onClick = onAddLocationClick) {
-                  Text(text = stringResource(commonR.string.add_location))
-                }
-              }
-            }
+            )
           }
         }
       }
@@ -457,6 +447,26 @@ private fun SunriseSunset(
       ) {
         ClockAndDayLengthCard(change = change)
       }
+    }
+  }
+}
+
+@Composable
+private fun InfoButtonCard(
+  infoText: String,
+  actionText: String,
+  onButtonClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Surface(shape = CardDefaults.shape, shadowElevation = 6.dp, modifier = modifier) {
+    Column(
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.padding(10.dp)
+    ) {
+      Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
+      Spacer(modifier = Modifier.height(10.dp))
+      Button(onClick = onButtonClick) { Text(text = actionText) }
     }
   }
 }
