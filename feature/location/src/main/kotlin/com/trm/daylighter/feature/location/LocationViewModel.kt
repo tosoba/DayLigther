@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.domain.exception.LocationDisplayNameNotFound
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
@@ -86,24 +87,45 @@ constructor(
         initialValue = MapPosition()
       )
 
-  private val geocodeRequestFlow = MutableSharedFlow<GeocodeRequest>()
-  val geocodedLocationDisplayNameFlow: Flow<Loadable<String>> =
-    geocodeRequestFlow
+  private val locationNameRequestFlow = MutableSharedFlow<LocationNameRequest>()
+  private val locationNameFlow: SharedFlow<Loadable<String>> =
+    locationNameRequestFlow
       .flatMapLatest { request ->
         when (request) {
-          GeocodeRequest.CancelCurrent -> {
-            flowOf(Empty)
+          is LocationNameRequest.Geocode -> {
+            channelFlow {
+              var failed = false
+              getLocationDisplayName(lat = request.lat, lng = request.lng).collectLatest {
+                failed = it is Failed
+                send(it)
+              }
+              if (failed) {
+                delay(3_500L)
+                send(Empty)
+              }
+            }
           }
-          is GeocodeRequest.GetDisplayName -> {
-            getLocationDisplayName(lat = request.lat, lng = request.lng)
+          is LocationNameRequest.UserInput -> {
+            flowOf(request.name.asLoadable())
+          }
+          LocationNameRequest.Clear -> {
+            flowOf(Empty)
           }
         }
       }
-      .stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = Empty
-      )
+      .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
+
+  val locationNameFailureMessageFlow: Flow<Int?> =
+    locationNameFlow.map {
+      when {
+        it.isFailedWith<LocationDisplayNameNotFound>() -> R.string.location_name_not_found
+        it is Failed -> R.string.geocoding_error
+        else -> null
+      }
+    }
+  val locationNameReadyFlow: Flow<String> =
+    locationNameFlow.map { if (it is Ready) it.data else "" }
+  val locationNameLoadingFlow: Flow<Boolean> = locationNameFlow.map { it is Loading }
 
   val screenMode: LocationScreenMode =
     if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
@@ -145,12 +167,18 @@ constructor(
 
   fun getLocationDisplayName(latitude: Double, longitude: Double) {
     viewModelScope.launch {
-      geocodeRequestFlow.emit(GeocodeRequest.GetDisplayName(lat = latitude, lng = longitude))
+      locationNameRequestFlow.emit(LocationNameRequest.Geocode(lat = latitude, lng = longitude))
     }
   }
 
-  fun cancelCurrentGeocodingRequest() {
-    viewModelScope.launch { geocodeRequestFlow.emit(GeocodeRequest.CancelCurrent) }
+  fun inputLocationName(name: String) {
+    viewModelScope.launch {
+      locationNameRequestFlow.emit(LocationNameRequest.UserInput(name = name))
+    }
+  }
+
+  fun clearLocationName() {
+    viewModelScope.launch { locationNameRequestFlow.emit(LocationNameRequest.Clear) }
   }
 
   private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitSpecifiedLocation(

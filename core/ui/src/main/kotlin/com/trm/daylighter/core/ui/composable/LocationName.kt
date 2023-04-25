@@ -17,7 +17,7 @@ fun BoxScope.LocationNameGradientOverlay() {
   Box(
     modifier =
       Modifier.matchParentSize()
-        .background(Brush.verticalGradient(0.7f to Color.Transparent, 1f to Color.Black))
+        .background(Brush.verticalGradient(.7f to Color.Transparent, 1f to Color.DarkGray))
   )
 }
 

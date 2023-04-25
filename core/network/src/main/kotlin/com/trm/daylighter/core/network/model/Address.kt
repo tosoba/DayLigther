@@ -9,7 +9,6 @@ data class Address(
   @SerialName("city") val city: String?,
   @SerialName("country") val country: String?,
   @SerialName("country_code") val countryCode: String?,
-  @SerialName("ISO3166-2-lvl4") val iSO31662Lvl4: String?,
   @SerialName("neighbourhood") val neighbourhood: String?,
   @SerialName("postcode") val postcode: String?,
   @SerialName("quarter") val quarter: String?,

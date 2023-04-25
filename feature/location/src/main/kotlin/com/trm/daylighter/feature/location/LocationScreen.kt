@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -44,8 +45,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
-import com.trm.daylighter.core.domain.model.Empty
-import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -71,8 +70,11 @@ fun LocationRoute(
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val userLocationNotFound =
     viewModel.userLocationNotFoundFlow.collectAsStateWithLifecycle(initialValue = false)
-  val geocodedLocationDisplayName =
-    viewModel.geocodedLocationDisplayNameFlow.collectAsStateWithLifecycle(initialValue = Empty)
+  val locationName = viewModel.locationNameReadyFlow.collectAsStateWithLifecycle(initialValue = "")
+  val isLocationNameLoading =
+    viewModel.locationNameLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
+  val locationNameFailureMessage =
+    viewModel.locationNameFailureMessageFlow.collectAsStateWithLifecycle(initialValue = null)
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -84,9 +86,12 @@ fun LocationRoute(
     requestGetAndSaveUserLocation = viewModel::requestGetAndSaveUserLocation,
     cancelCurrentSaveLocation = viewModel::cancelCurrentSaveLocationRequest,
     onSaveLocationClick = viewModel::saveLocation,
-    geocodedLocationDisplayName = geocodedLocationDisplayName.value,
+    locationName = locationName.value,
+    isLocationNameLoading = isLocationNameLoading.value,
+    locationNameFailureMessage = locationNameFailureMessage.value,
+    onLocationNameChange = viewModel::inputLocationName,
+    clearLocationName = viewModel::clearLocationName,
     onGeocodeClick = viewModel::getLocationDisplayName,
-    cancelCurrentGeocoding = viewModel::cancelCurrentGeocodingRequest,
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -104,9 +109,12 @@ private fun LocationScreen(
   requestGetAndSaveUserLocation: () -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
-  geocodedLocationDisplayName: Loadable<String>,
+  locationName: String,
+  isLocationNameLoading: Boolean,
+  @StringRes locationNameFailureMessage: Int?,
+  onLocationNameChange: (String) -> Unit,
+  clearLocationName: () -> Unit,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
-  cancelCurrentGeocoding: () -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -147,8 +155,9 @@ private fun LocationScreen(
   val saveLocationState =
     rememberSaveLocationState(
       latitude = locationPreparedToSave?.latitude ?: mapPosition.latitude,
-      longitude = locationPreparedToSave?.longitude ?: mapPosition.longitude
+      longitude = locationPreparedToSave?.longitude ?: mapPosition.longitude,
     )
+  var locationNameError by rememberSaveable { mutableStateOf(LocationNameError.NO_ERROR) }
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
   val sheetHeaderLabel =
@@ -173,24 +182,22 @@ private fun LocationScreen(
   fun ModalSheetContent(modifier: Modifier = Modifier) {
     ModalSheetContent(
       headerLabel = sheetHeaderLabel,
-      nameValue = saveLocationState.name,
+      nameValue = locationName,
+      isNameLoading = isLocationNameLoading,
+      nameFailureMessage = locationNameFailureMessage,
       onNameValueChange = {
-        saveLocationState.nameError = LocationNameError.NO_ERROR
-        saveLocationState.name = it
+        locationNameError = LocationNameError.NO_ERROR
+        onLocationNameChange(it)
       },
-      nameError = saveLocationState.nameError,
+      nameError = locationNameError,
       onGeocodeClick = { onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude) },
       onSaveClick = {
-        if (saveLocationState.name.isBlank()) {
-          saveLocationState.nameError = LocationNameError.BLANK
+        if (locationName.isBlank()) {
+          locationNameError = LocationNameError.BLANK
         } else {
-          saveLocationState.nameError = LocationNameError.NO_ERROR
+          locationNameError = LocationNameError.NO_ERROR
           sheetVisible = false
-          onSaveLocationClick(
-            saveLocationState.latitude,
-            saveLocationState.longitude,
-            saveLocationState.name
-          )
+          onSaveLocationClick(saveLocationState.latitude, saveLocationState.longitude, locationName)
         }
       },
       modifier = modifier
@@ -237,7 +244,7 @@ private fun LocationScreen(
     )
   }
 
-  LaunchedEffect(sheetVisible) { if (!sheetVisible) cancelCurrentGeocoding() }
+  LaunchedEffect(sheetVisible) { if (!sheetVisible) clearLocationName() }
 
   if (orientation == Configuration.ORIENTATION_PORTRAIT) {
     LocationScaffold()
@@ -298,10 +305,10 @@ private fun LocationScaffold(
         }
       }
 
-      LocationAppBar(locationMap, onBackClick)
+      LocationAppBar(locationMap = locationMap, onBackClick = onBackClick)
 
       LoadingProgressIndicator(
-        isLoading = isLoading,
+        visible = isLoading,
         modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
       )
 
@@ -319,7 +326,14 @@ private fun LocationAppBar(locationMap: LocationMap, onBackClick: () -> Unit) {
       Box(
         modifier =
           Modifier.matchParentSize()
-            .background(Brush.verticalGradient(0.25f to Color.Black, 1f to Color.Transparent))
+            .background(
+              Brush.verticalGradient(
+                0f to Color.Black,
+                .25f to Color.DarkGray,
+                .75f to Color.LightGray,
+                1f to Color.Transparent
+              )
+            )
       )
     }
 
@@ -417,8 +431,8 @@ private fun ColumnScope.UserLocationButton(visible: Boolean, onUserLocationClick
 }
 
 @Composable
-private fun LoadingProgressIndicator(isLoading: Boolean, modifier: Modifier = Modifier) {
-  AnimatedVisibility(visible = isLoading, modifier = modifier) {
+private fun LoadingProgressIndicator(visible: Boolean, modifier: Modifier = Modifier) {
+  AnimatedVisibility(visible = visible, modifier = modifier) {
     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
   }
 }
@@ -452,6 +466,8 @@ private fun MarkerIcon(modifier: Modifier = Modifier) {
 private fun ModalSheetContent(
   headerLabel: String,
   nameValue: String,
+  isNameLoading: Boolean,
+  @StringRes nameFailureMessage: Int?,
   onNameValueChange: (String) -> Unit,
   nameError: LocationNameError,
   onSaveClick: () -> Unit,
@@ -490,6 +506,11 @@ private fun ModalSheetContent(
       modifier = Modifier.padding(10.dp).fillMaxWidth()
     )
 
+    LoadingProgressIndicator(
+      visible = isNameLoading,
+      modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
+    )
+
     AnimatedVisibility(visible = nameError != LocationNameError.NO_ERROR) {
       Text(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -519,6 +540,24 @@ private fun ModalSheetContent(
           10.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
         )
     )
+  }
+
+  FailureMessageToastEffect(message = nameFailureMessage)
+}
+
+@Composable
+private fun FailureMessageToastEffect(@StringRes message: Int?) {
+  val context = LocalContext.current
+  var toast: Toast? by remember { mutableStateOf(null) }
+
+  LaunchedEffect(message) {
+    toast =
+      if (message != null) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).apply { show() }
+      } else {
+        toast?.cancel()
+        null
+      }
   }
 }
 
@@ -604,14 +643,14 @@ private fun rememberLocationSettingsActivityResultLauncher(
 @Composable
 private fun UserLocationNotFoundToastEffect(userLocationNotFound: Boolean) {
   val context = LocalContext.current
-  var userLocationNotFoundToast: Toast? by remember { mutableStateOf(null) }
+  var toast: Toast? by remember { mutableStateOf(null) }
 
   LaunchedEffect(userLocationNotFound) {
-    userLocationNotFoundToast =
+    toast =
       if (userLocationNotFound) {
         Toast.makeText(context, R.string.location_not_found, Toast.LENGTH_LONG).apply { show() }
       } else {
-        userLocationNotFoundToast?.cancel()
+        toast?.cancel()
         null
       }
   }
