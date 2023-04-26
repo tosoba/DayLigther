@@ -346,7 +346,7 @@ private fun LocationAppBar(locationMap: LocationMap, onBackClick: () -> Unit) {
           Text(
             text = locationMap.state.savedMapPosition.label,
             color = Color.White,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
