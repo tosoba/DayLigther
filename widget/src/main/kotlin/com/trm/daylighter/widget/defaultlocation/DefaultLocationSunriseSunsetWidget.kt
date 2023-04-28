@@ -209,7 +209,15 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
         yesterdayLengthSeconds = yesterday.dayLengthSeconds
       )
     val textStyle = TextStyle(color = GlanceTheme.colors.textColorPrimary)
-    Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME), style = textStyle)
-    Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime), style = textStyle)
+    Text(
+      text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+      style = textStyle,
+      maxLines = 1
+    )
+    Text(
+      text = formatTimeDifference(diffPrefix, dayLengthDiffTime),
+      style = textStyle,
+      maxLines = 1
+    )
   }
 }
