@@ -54,6 +54,21 @@
         </receiver>
 
         <receiver
+            android:name=".widget.defaultlocation.chart.DefaultLocationChartWidgetReceiver"
+            android:exported="false"
+            android:label="@string/default_location_chart">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/default_location_chart_widget" />
+
+        </receiver>
+
+        <receiver
             android:name=".widget.list.clock.LocationsClockListWidgetReceiver"
             android:exported="false"
             android:label="@string/locations_clock_list">

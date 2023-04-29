@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="default_location_clock_widget_description">Default location day length clock.</string>
+    <string name="default_location_chart_widget_description">Default location day length chart.</string>
     <string name="locations_clock_list_widget_description">Locations day length clocks.</string>
     <string name="locations_clock_list">Locations clock list</string>
     <string name="default_location_clock">Default location lock</string>
+    <string name="default_location_chart">Default location chart</string>
 </resources>
