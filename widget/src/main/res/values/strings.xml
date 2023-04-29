@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="default_location_sunrise_sunset_widget_description">Day length related information about default location.</string>
-    <string name="locations_sunrise_sunset_widget_description">Day length related information about multiple locations.</string>
+    <string name="default_location_sunrise_sunset_widget_description">Default location day length information.</string>
+    <string name="locations_sunrise_sunset_widget_description">Multiple locations day length information.</string>
+    <string name="all_locations">All locations</string>
+    <string name="default_location">Default locations</string>
 </resources>

@@ -40,7 +40,8 @@
 
         <receiver
             android:name=".widget.defaultlocation.DefaultLocationSunriseSunsetWidgetReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/default_location">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -54,7 +55,8 @@
 
         <receiver
             android:name=".widget.locations.LocationsSunriseSunsetWidgetReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/all_locations">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
