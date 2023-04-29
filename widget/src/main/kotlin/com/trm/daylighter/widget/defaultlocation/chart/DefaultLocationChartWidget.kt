@@ -2,6 +2,7 @@ package com.trm.daylighter.widget.defaultlocation.chart
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
@@ -25,6 +26,7 @@ import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
@@ -37,6 +39,7 @@ import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.lazyPaint
 import java.time.Duration
+import java.time.ZonedDateTime
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
@@ -87,28 +90,9 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
 
   @Composable
   private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
-    val (
-      astronomicalTwilightBegin,
-      astronomicalTwilightEnd,
-      civilTwilightBegin,
-      civilTwilightEnd,
-      dayLengthSeconds,
-      nauticalTwilightBegin,
-      nauticalTwilightEnd,
-      solarNoon,
-      sunrise,
-      sunset,
-      date) =
-      change.today
-
     val secondsInDay = (24 * 60 * 60).toFloat()
-    val nightToAstronomicalTwilightBeginSeconds =
-      Duration.between(
-          date.atStartOfDay(sunrise.zone).toInstant(),
-          astronomicalTwilightBegin.toInstant()
-        )
-        .seconds
-        .toFloat()
+    val durations = dayPeriodDurationsInSeconds(change.today)
+    val paints = dayPeriodPaints()
 
     val size = LocalSize.current
     val widthPx = size.width.value.toPx
@@ -116,24 +100,64 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
     val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
 
     Canvas(bitmap).apply {
-      drawRect(
-        0f,
-        0f,
-        nightToAstronomicalTwilightBeginSeconds / secondsInDay * widthPx,
-        heightPx,
-        nightPaint
-      )
-      drawRect(
-        nightToAstronomicalTwilightBeginSeconds / secondsInDay * widthPx,
-        0f,
-        widthPx,
-        heightPx,
-        dayPaint
-      )
+      var left = 0f
+      var right = left + durations.first() / secondsInDay * widthPx
+      durations.indices.forEach { index ->
+        drawRect(left, 0f, right, heightPx, paints[index])
+        left += durations[index] / secondsInDay * widthPx
+        if (index != durations.lastIndex) right += durations[index + 1] / secondsInDay * widthPx
+        else right = widthPx
+      }
     }
 
     return bitmap
   }
+
+  private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {
+    val (
+      astronomicalTwilightBegin,
+      astronomicalTwilightEnd,
+      civilTwilightBegin,
+      civilTwilightEnd,
+      _,
+      nauticalTwilightBegin,
+      nauticalTwilightEnd,
+      _,
+      sunrise,
+      sunset,
+      date) =
+      sunriseSunset
+    val periodInstants =
+      listOf(
+          date.atStartOfDay(sunrise.zone),
+          astronomicalTwilightBegin,
+          nauticalTwilightBegin,
+          civilTwilightBegin,
+          sunrise,
+          sunset,
+          civilTwilightEnd,
+          nauticalTwilightEnd,
+          astronomicalTwilightEnd,
+          date.atStartOfDay(sunrise.zone).plusDays(1L),
+        )
+        .map(ZonedDateTime::toInstant)
+    return periodInstants.indices.drop(1).map { index ->
+      Duration.between(periodInstants[index - 1], periodInstants[index]).seconds.toFloat()
+    }
+  }
+
+  private fun dayPeriodPaints(): List<Paint> =
+    listOf(
+      nightPaint,
+      astronomicalTwilightPaint,
+      nauticalTwilightPaint,
+      civilTwilightPaint,
+      dayPaint,
+      civilTwilightPaint,
+      nauticalTwilightPaint,
+      astronomicalTwilightPaint,
+      nightPaint
+    )
 
   companion object {
     private val wideMode = DpSize(200.dp, 50.dp)
