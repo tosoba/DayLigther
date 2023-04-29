@@ -48,7 +48,21 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/sunrise_sunset_widget" />
+                android:resource="@xml/default_location_sunrise_sunset_widget" />
+
+        </receiver>
+
+        <receiver
+            android:name=".widget.locations.LocationsSunriseSunsetWidgetReceiver"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/locations_sunrise_sunset_widget" />
 
         </receiver>
 

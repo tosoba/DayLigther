@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sunrise_sunset_widget_description">Widget for displaying sunrise sunset info</string>
+    <string name="default_location_sunrise_sunset_widget_description">Day length related information about default location.</string>
+    <string name="locations_sunrise_sunset_widget_description">Day length related information about multiple locations.</string>
 </resources>
