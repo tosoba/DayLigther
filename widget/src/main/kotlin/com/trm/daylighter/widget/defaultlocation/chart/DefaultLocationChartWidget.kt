@@ -2,7 +2,6 @@ package com.trm.daylighter.widget.defaultlocation.chart
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
@@ -20,36 +19,34 @@ import androidx.glance.currentState
 import androidx.glance.layout.Box
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.height
-import androidx.glance.layout.size
-import androidx.glance.layout.width
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
+import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
+import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
-import com.trm.daylighter.widget.defaultlocation.clock.DefaultLocationClockWidgetReceiver
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.toPx
+import com.trm.daylighter.widget.util.ext.lazyPaint
+import java.time.Duration
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(wideMode))
 
-  private val nightPaint by
-    lazy(LazyThreadSafetyMode.NONE) {
-      Paint(Paint.ANTI_ALIAS_FLAG).apply { color = nightColor.toArgb() }
-    }
-  private val dayPaint by
-    lazy(LazyThreadSafetyMode.NONE) {
-      Paint(Paint.ANTI_ALIAS_FLAG).apply { color = dayColor.toArgb() }
-    }
+  private val nightPaint by lazyPaint(color = nightColor.toArgb())
+  private val astronomicalTwilightPaint by lazyPaint(color = astronomicalTwilightColor.toArgb())
+  private val nauticalTwilightPaint by lazyPaint(color = nauticalTwilightColor.toArgb())
+  private val civilTwilightPaint by lazyPaint(color = civilTwilightColor.toArgb())
+  private val dayPaint by lazyPaint(color = dayColor.toArgb())
 
   @Composable
   override fun Content() {
@@ -62,20 +59,13 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
           CircularProgressIndicator()
         }
         is Ready -> {
-          Box(modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()) {
-            Image(
-              provider = BitmapImageProvider(createDayBitmap()),
-              contentDescription = null,
-              contentScale = ContentScale.FillBounds,
-              modifier = GlanceModifier.fillMaxSize()
-            )
-          }
+          DayChart(change = change)
         }
         is Failed -> {
           RetryButton(
             onClick =
               actionSendBroadcast(
-                DefaultLocationClockWidgetReceiver.updateIntent(LocalContext.current)
+                DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current)
               )
           )
         }
@@ -84,15 +74,64 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   }
 
   @Composable
-  private fun createDayBitmap(): Bitmap {
+  private fun DayChart(change: Ready<LocationSunriseSunsetChange>) {
+    Box(modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()) {
+      Image(
+        provider = BitmapImageProvider(dayChartBitmap(change.data)),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = GlanceModifier.fillMaxSize()
+      )
+    }
+  }
+
+  @Composable
+  private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
+    val (
+      astronomicalTwilightBegin,
+      astronomicalTwilightEnd,
+      civilTwilightBegin,
+      civilTwilightEnd,
+      dayLengthSeconds,
+      nauticalTwilightBegin,
+      nauticalTwilightEnd,
+      solarNoon,
+      sunrise,
+      sunset,
+      date) =
+      change.today
+
+    val secondsInDay = (24 * 60 * 60).toFloat()
+    val nightToAstronomicalTwilightBeginSeconds =
+      Duration.between(
+          date.atStartOfDay(sunrise.zone).toInstant(),
+          astronomicalTwilightBegin.toInstant()
+        )
+        .seconds
+        .toFloat()
+
     val size = LocalSize.current
     val widthPx = size.width.value.toPx
     val heightPx = size.height.value.toPx
     val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
+
     Canvas(bitmap).apply {
-      drawRect(0f, 0f, widthPx / 2, heightPx, nightPaint)
-      drawRect(widthPx / 2, 0f, widthPx, heightPx, dayPaint)
+      drawRect(
+        0f,
+        0f,
+        nightToAstronomicalTwilightBeginSeconds / secondsInDay * widthPx,
+        heightPx,
+        nightPaint
+      )
+      drawRect(
+        nightToAstronomicalTwilightBeginSeconds / secondsInDay * widthPx,
+        0f,
+        widthPx,
+        heightPx,
+        dayPaint
+      )
     }
+
     return bitmap
   }
 
