@@ -39,9 +39,9 @@
         </activity>
 
         <receiver
-            android:name=".widget.defaultlocation.DefaultLocationSunriseSunsetWidgetReceiver"
+            android:name=".widget.defaultlocation.clock.DefaultLocationClockWidgetReceiver"
             android:exported="false"
-            android:label="@string/default_location">
+            android:label="@string/default_location_clock">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -49,14 +49,14 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/default_location_sunrise_sunset_widget" />
+                android:resource="@xml/default_location_clock_widget" />
 
         </receiver>
 
         <receiver
-            android:name=".widget.locations.LocationsSunriseSunsetWidgetReceiver"
+            android:name=".widget.list.clock.LocationsClockListWidgetReceiver"
             android:exported="false"
-            android:label="@string/all_locations">
+            android:label="@string/locations_clock_list">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -64,7 +64,7 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/locations_sunrise_sunset_widget" />
+                android:resource="@xml/locations_clock_list_widget" />
 
         </receiver>
 

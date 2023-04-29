@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.locations
+package com.trm.daylighter.widget.list.clock
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -25,8 +25,8 @@ import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.toPx
 
-class LocationsSunriseSunsetWidget : GlanceAppWidget() {
-  override val stateDefinition = LocationsSunriseSunsetWidgetStateDefinition
+class LocationsClockListWidget : GlanceAppWidget() {
+  override val stateDefinition = LocationsClockListWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(wideMode))
 
   private val nightPaint by

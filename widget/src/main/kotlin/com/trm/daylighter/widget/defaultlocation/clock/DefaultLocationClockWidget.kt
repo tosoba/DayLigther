@@ -1,33 +1,60 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.defaultlocation.clock
 
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.glance.*
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
-import androidx.glance.layout.*
+import androidx.glance.currentState
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentSize
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.R
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.formatTimeDifference
-import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.widget.R
-import com.trm.daylighter.widget.ui.*
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.domain.model.Failed
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
+import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.widget.ui.AddLocationButton
+import com.trm.daylighter.widget.ui.AppWidgetColumn
+import com.trm.daylighter.widget.ui.AppWidgetRow
+import com.trm.daylighter.widget.ui.GlanceTheme
+import com.trm.daylighter.widget.ui.RetryButton
+import com.trm.daylighter.widget.ui.deepLinkAction
+import com.trm.daylighter.widget.ui.isNightMode
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
-  override val stateDefinition = DefaultLocationSunriseSunsetWidgetStateDefinition
+class DefaultLocationClockWidget : GlanceAppWidget() {
+  override val stateDefinition = DefaultLocationClockWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(smallMode, wideMode, squareMode))
 
   @Composable
@@ -72,7 +99,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
           RetryButton(
             onClick =
               actionSendBroadcast(
-                DefaultLocationSunriseSunsetWidgetReceiver.updateIntent(LocalContext.current)
+                DefaultLocationClockWidgetReceiver.updateIntent(LocalContext.current)
               )
           )
         }
@@ -82,7 +109,7 @@ class DefaultLocationSunriseSunsetWidget : GlanceAppWidget() {
 
   @Composable
   private fun clickableDayDeepLinkModifier() =
-    GlanceModifier.clickable(deepLinkAction(commonR.string.day_deep_link_uri))
+    GlanceModifier.clickable(deepLinkAction(R.string.day_deep_link_uri))
 
   companion object {
     private val smallMode = DpSize(120.dp, 50.dp)
@@ -161,14 +188,18 @@ private fun Clock(zoneId: ZoneId) {
     val context = LocalContext.current
     AndroidRemoteViews(
       remoteViews =
-        RemoteViews(context.packageName, R.layout.location_text_clock_remote_view).apply {
-          setString(R.id.location_clock, "setTimeZone", zoneId.id)
-          setInt(
-            R.id.location_clock,
-            "setTextColor",
-            GlanceTheme.colors.textColorPrimary.getColor(context).toArgb()
+        RemoteViews(
+            context.packageName,
+            com.trm.daylighter.widget.R.layout.location_text_clock_remote_view
           )
-        }
+          .apply {
+            setString(com.trm.daylighter.widget.R.id.location_clock, "setTimeZone", zoneId.id)
+            setInt(
+              com.trm.daylighter.widget.R.id.location_clock,
+              "setTextColor",
+              GlanceTheme.colors.textColorPrimary.getColor(context).toArgb()
+            )
+          }
     )
   }
 }
@@ -179,7 +210,7 @@ private fun DayLengthSymbol(modifier: GlanceModifier = GlanceModifier) {
   Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
     Box(modifier = GlanceModifier.padding(5.dp), contentAlignment = Alignment.Center) {
       Image(
-        provider = ImageProvider(commonR.drawable.sun),
+        provider = ImageProvider(R.drawable.sun),
         contentDescription = null,
         modifier = GlanceModifier.fillMaxSize()
       )
@@ -187,8 +218,8 @@ private fun DayLengthSymbol(modifier: GlanceModifier = GlanceModifier) {
     Box(modifier = GlanceModifier.size(20.dp), contentAlignment = Alignment.Center) {
       Image(
         provider =
-          if (context.isNightMode) ImageProvider(R.drawable.clock_white)
-          else ImageProvider(R.drawable.clock_black),
+          if (context.isNightMode) ImageProvider(com.trm.daylighter.widget.R.drawable.clock_white)
+          else ImageProvider(com.trm.daylighter.widget.R.drawable.clock_black),
         contentDescription = null
       )
     }

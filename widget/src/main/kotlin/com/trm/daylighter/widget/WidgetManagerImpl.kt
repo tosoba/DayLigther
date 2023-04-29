@@ -2,8 +2,8 @@ package com.trm.daylighter.widget
 
 import android.content.Context
 import com.trm.daylighter.core.domain.widget.WidgetManager
-import com.trm.daylighter.widget.defaultlocation.DefaultLocationSunriseSunsetWidgetReceiver
-import com.trm.daylighter.widget.locations.LocationsSunriseSunsetWidgetReceiver
+import com.trm.daylighter.widget.defaultlocation.clock.DefaultLocationClockWidgetReceiver
+import com.trm.daylighter.widget.list.clock.LocationsClockListWidgetReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -12,11 +12,11 @@ class WidgetManagerImpl
 constructor(
   @ApplicationContext private val context: Context,
 ) : WidgetManager {
-  override fun enqueueDefaultLocationWidgetUpdate() {
-    context.sendBroadcast(DefaultLocationSunriseSunsetWidgetReceiver.updateIntent(context))
+  override fun enqueueDefaultLocationWidgetsUpdate() {
+    context.sendBroadcast(DefaultLocationClockWidgetReceiver.updateIntent(context))
   }
 
-  override fun enqueueLocationsWidgetUpdate() {
-    context.sendBroadcast(LocationsSunriseSunsetWidgetReceiver.updateIntent(context))
+  override fun enqueueLocationsListWidgetsUpdate() {
+    context.sendBroadcast(LocationsClockListWidgetReceiver.updateIntent(context))
   }
 }

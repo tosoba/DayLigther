@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.defaultlocation.clock
 
 import android.content.Context
 import androidx.datastore.core.CorruptionException
@@ -16,9 +16,9 @@ import java.io.OutputStream
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
-object DefaultLocationSunriseSunsetWidgetStateDefinition :
+object DefaultLocationClockWidgetStateDefinition :
   GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
-  private const val DATA_STORE_FILENAME = "DefaultLocationSunriseSunsetWidget"
+  private const val DATA_STORE_FILENAME = "DefaultLocationClockWidget"
 
   private val Context.datastore by dataStore(DATA_STORE_FILENAME, LocationLoadableSerializer)
 

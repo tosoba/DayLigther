@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.locations
+package com.trm.daylighter.widget.list.clock
 
 import android.content.Context
 import androidx.glance.GlanceId
@@ -19,7 +19,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 @HiltWorker
-class LocationsSunriseSunsetWidgetWorker
+class LocationsClockListWidgetWorker
 @AssistedInject
 constructor(
   @Assisted private val context: Context,
@@ -28,7 +28,7 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = context.getGlanceIds<LocationsSunriseSunsetWidget>()
+    val glanceIds = context.getGlanceIds<LocationsClockListWidget>()
     setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
     try {
       setWidgetState(
@@ -52,18 +52,18 @@ constructor(
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,
-        definition = LocationsSunriseSunsetWidgetStateDefinition,
+        definition = LocationsClockListWidgetStateDefinition,
         glanceId = glanceId,
         updateState = { newState }
       )
     }
-    LocationsSunriseSunsetWidget().updateAll(context)
+    LocationsClockListWidget().updateAll(context)
   }
 
   internal companion object : WidgetWorkerManager() {
-    override val workName: String = "LocationsSunriseSunsetWidgetWork"
+    override val workName: String = "LocationsClockListWidgetWork"
 
     override val inputData: Data
-      get() = LocationsSunriseSunsetWidgetWorker::class.delegatedData()
+      get() = LocationsClockListWidgetWorker::class.delegatedData()
   }
 }

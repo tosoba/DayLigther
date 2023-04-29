@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.locations
+package com.trm.daylighter.widget.defaultlocation.clock
 
 import android.content.Context
 import android.content.Intent
@@ -11,17 +11,17 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class LocationsSunriseSunsetWidgetReceiver : GlanceAppWidgetReceiver() {
-  override val glanceAppWidget: GlanceAppWidget = LocationsSunriseSunsetWidget()
+class DefaultLocationClockWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = DefaultLocationClockWidget()
 
   override fun onEnabled(context: Context) {
     super.onEnabled(context)
-    LocationsSunriseSunsetWidgetWorker.enqueue(context)
+    DefaultLocationClockWidgetWorker.enqueue(context)
   }
 
   override fun onDisabled(context: Context) {
     super.onDisabled(context)
-    LocationsSunriseSunsetWidgetWorker.cancel(context)
+    DefaultLocationClockWidgetWorker.cancel(context)
   }
 
   override fun onReceive(context: Context, intent: Intent) {
@@ -33,8 +33,8 @@ class LocationsSunriseSunsetWidgetReceiver : GlanceAppWidgetReceiver() {
 
   private fun enqueueWidgetUpdateIfAnyExists(context: Context) {
     MainScope().launch {
-      if (context.anyWidgetExists<LocationsSunriseSunsetWidget>()) {
-        LocationsSunriseSunsetWidgetWorker.enqueue(context)
+      if (context.anyWidgetExists<DefaultLocationClockWidget>()) {
+        DefaultLocationClockWidgetWorker.enqueue(context)
       }
     }
   }
@@ -43,6 +43,6 @@ class LocationsSunriseSunsetWidgetReceiver : GlanceAppWidgetReceiver() {
     private const val ACTION_UPDATE = "ACTION_UPDATE"
 
     fun updateIntent(context: Context): Intent =
-      context.widgetReceiverIntent<LocationsSunriseSunsetWidgetReceiver>(ACTION_UPDATE)
+      context.widgetReceiverIntent<DefaultLocationClockWidgetReceiver>(ACTION_UPDATE)
   }
 }

@@ -1,14 +1,20 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.defaultlocation.clock
 
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.Data
+import androidx.work.WorkerParameters
 import com.trm.daylighter.core.common.di.DaylighterDispatchers
 import com.trm.daylighter.core.common.di.Dispatcher
-import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.model.FailedFirst
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.LoadingFirst
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
+import com.trm.daylighter.core.domain.model.asLoadable
 import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.widget.WidgetWorkerManager
 import com.trm.daylighter.widget.util.ext.getGlanceIds
@@ -19,7 +25,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 @HiltWorker
-class DefaultLocationSunriseSunsetWidgetWorker
+class DefaultLocationClockWidgetWorker
 @AssistedInject
 constructor(
   @Assisted private val context: Context,
@@ -28,7 +34,7 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = context.getGlanceIds<DefaultLocationSunriseSunsetWidget>()
+    val glanceIds = context.getGlanceIds<DefaultLocationClockWidget>()
     setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
     try {
       setWidgetState(
@@ -50,18 +56,18 @@ constructor(
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,
-        definition = DefaultLocationSunriseSunsetWidgetStateDefinition,
+        definition = DefaultLocationClockWidgetStateDefinition,
         glanceId = glanceId,
         updateState = { newState }
       )
     }
-    DefaultLocationSunriseSunsetWidget().updateAll(context)
+    DefaultLocationClockWidget().updateAll(context)
   }
 
   internal companion object : WidgetWorkerManager() {
-    override val workName: String = "DefaultLocationSunriseSunsetWidgetWork"
+    override val workName: String = "DefaultLocationClockWidgetWork"
 
     override val inputData: Data
-      get() = DefaultLocationSunriseSunsetWidgetWorker::class.delegatedData()
+      get() = DefaultLocationClockWidgetWorker::class.delegatedData()
   }
 }
