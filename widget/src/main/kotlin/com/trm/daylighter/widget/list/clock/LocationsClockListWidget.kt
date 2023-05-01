@@ -12,6 +12,7 @@ import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.GlanceTheme
 
 class LocationsClockListWidget : GlanceAppWidget() {
+  override val stateDefinition = LocationsClockListWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(smallMode, wideMode, squareMode))
 
   @Composable
