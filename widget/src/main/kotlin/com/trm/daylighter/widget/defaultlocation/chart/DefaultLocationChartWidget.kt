@@ -3,7 +3,9 @@ package com.trm.daylighter.widget.defaultlocation.chart
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -20,6 +22,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Box
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
@@ -37,6 +40,7 @@ import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.toPx
+import com.trm.daylighter.widget.util.ext.antialiasPaint
 import com.trm.daylighter.widget.util.ext.lazyPaint
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -90,27 +94,68 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
 
   @Composable
   private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
-    val secondsInDay = (24 * 60 * 60).toFloat()
-    val durations = dayPeriodDurationsInSeconds(change.today)
-    val paints = dayPeriodPaints()
-
     val size = LocalSize.current
     val widthPx = size.width.value.toPx
     val heightPx = size.height.value.toPx
     val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
 
     Canvas(bitmap).apply {
-      var left = 0f
-      var right = left + durations.first() / secondsInDay * widthPx
-      durations.indices.forEach { index ->
-        drawRect(left, 0f, right, heightPx, paints[index])
-        left += durations[index] / secondsInDay * widthPx
-        if (index != durations.lastIndex) right += durations[index + 1] / secondsInDay * widthPx
-        else right = widthPx
-      }
+      DrawDayPeriods(today = change.today)
+      DrawNowLine(today = change.today)
     }
 
     return bitmap
+  }
+
+  @Composable
+  private fun Canvas.DrawDayPeriods(today: SunriseSunset) {
+    val size = LocalSize.current
+    val widthPx = size.width.value.toPx
+    val heightPx = size.height.value.toPx
+
+    val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
+    val durations = dayPeriodDurationsInSeconds(today)
+    val paints = dayPeriodPaints()
+
+    var left = 0f
+    var right = left + durations.first() / secondsInDay * widthPx
+    durations.indices.forEach { index ->
+      drawRect(left, 0f, right, heightPx, paints[index])
+      left += durations[index] / secondsInDay * widthPx
+      if (index != durations.lastIndex) right += durations[index + 1] / secondsInDay * widthPx
+      else right = widthPx
+    }
+  }
+
+  @Composable
+  private fun Canvas.DrawNowLine(today: SunriseSunset) {
+    val context = LocalContext.current
+    val size = LocalSize.current
+    val widthPx = size.width.value.toPx
+    val heightPx = size.height.value.toPx
+
+    val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
+    val zone = today.sunrise.zone
+    val now = ZonedDateTime.now(zone)
+    val startOfDay = now.toLocalDate().atStartOfDay(zone)
+    val nowSecond = Duration.between(startOfDay, now).seconds
+    val linePosition = nowSecond / secondsInDay * widthPx
+    val lineWidth = 5.dp.value.toPx
+
+    drawRect(
+      linePosition - lineWidth / 2f,
+      0f,
+      linePosition - lineWidth + 2f,
+      heightPx,
+      antialiasPaint(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Color(context.resources.getColor(commonR.color.sun_outline, context.theme))
+          } else {
+            Color(context.resources.getColor(commonR.color.sun_outline))
+          }
+          .toArgb()
+      )
+    )
   }
 
   private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {

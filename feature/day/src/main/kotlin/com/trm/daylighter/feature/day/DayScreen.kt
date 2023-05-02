@@ -770,7 +770,7 @@ private fun SunriseSunsetChart(
       strokeWidth = 75f
     }
   }
-  val glowColor = colorResource(id = R.color.sun_outline)
+  val glowColor = colorResource(id = commonR.color.sun_outline)
   remember {
     chartSegmentGlowPaint.asFrameworkPaint().apply {
       color = glowColor.copy(alpha = 0f).toArgb()
