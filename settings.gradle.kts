@@ -45,6 +45,8 @@ include(":feature:location")
 
 include(":feature:locations")
 
+include(":feature:settings")
+
 include(":feature:widgets")
 
 include(":work")
