@@ -44,17 +44,16 @@ constructor(
           var sunriseSunsets =
             sunriseSunsetDao.selectMostRecentByLocationId(
               locationId = location.id,
-              limit = RECENT_LOCATIONS_LIMIT
+              limit = RECENT_SUNRISE_SUNSETS_LIMIT
             )
           var sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
-          val datesToDownload = dates.filterNot(sunriseSunsetsDates::contains)
-          if (datesToDownload.isEmpty()) return@forEach
+          if (dates.all(sunriseSunsetsDates::contains)) return@forEach
 
           mutex.withLock {
             sunriseSunsets =
               sunriseSunsetDao.selectMostRecentByLocationId(
                 locationId = location.id,
-                limit = RECENT_LOCATIONS_LIMIT
+                limit = RECENT_SUNRISE_SUNSETS_LIMIT
               )
             sunriseSunsetsDates = sunriseSunsets.map(SunriseSunsetEntity::date).toSet()
             val downloaded =
@@ -94,7 +93,10 @@ constructor(
           locationDao.selectLocationAtOffset(offset = index) ?: return@withTransaction null
         val sunriseSunsets =
           sunriseSunsetDao
-            .selectMostRecentByLocationId(locationId = location.id, limit = RECENT_LOCATIONS_LIMIT)
+            .selectMostRecentByLocationId(
+              locationId = location.id,
+              limit = RECENT_SUNRISE_SUNSETS_LIMIT
+            )
             .associateBy(SunriseSunsetEntity::date)
         location to sunriseSunsets
       }
@@ -110,7 +112,7 @@ constructor(
   override suspend fun getDefaultLocationSunriseSunsetChange(): LocationSunriseSunsetChange? {
     val (location, existingSunriseSunsets) =
       sunriseSunsetDao
-        .selectMostRecentForDefaultLocation(limit = RECENT_LOCATIONS_LIMIT)
+        .selectMostRecentForDefaultLocation(limit = RECENT_SUNRISE_SUNSETS_LIMIT)
         .mapValues { (_, sunriseSunsets) -> sunriseSunsets.associateBy(SunriseSunsetEntity::date) }
         .entries
         .firstOrNull()
@@ -137,7 +139,7 @@ constructor(
     return mutex.withLock {
       val existing =
         sunriseSunsetDao
-          .selectMostRecentByLocationId(location.id, limit = RECENT_LOCATIONS_LIMIT)
+          .selectMostRecentByLocationId(location.id, limit = RECENT_SUNRISE_SUNSETS_LIMIT)
           .associateBy(SunriseSunsetEntity::date)
       val downloadedSunriseSunsets =
         getSunriseSunsetsFromNetworkFor(
@@ -188,6 +190,6 @@ constructor(
 
   companion object {
     private const val API_TAG = "SS_API"
-    private const val RECENT_LOCATIONS_LIMIT = 2
+    private const val RECENT_SUNRISE_SUNSETS_LIMIT = 2
   }
 }
