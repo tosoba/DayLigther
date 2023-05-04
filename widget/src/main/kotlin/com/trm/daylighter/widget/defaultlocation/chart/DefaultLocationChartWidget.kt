@@ -15,6 +15,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -63,23 +64,10 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   override fun Content() {
     GlanceTheme {
       when (val change = currentState<Loadable<LocationSunriseSunsetChange>>()) {
-        Empty -> {
-          AddLocationButton()
-        }
-        is Loading -> {
-          CircularProgressIndicator()
-        }
-        is Ready -> {
-          DayChart(change = change)
-        }
-        is Failed -> {
-          RetryButton(
-            onClick =
-              actionSendBroadcast(
-                DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current)
-              )
-          )
-        }
+        Empty -> AddLocationButton()
+        is Loading -> CircularProgressIndicator()
+        is Ready -> DayChart(change = change)
+        is Failed -> RetryButton(onClick = updateWidgetAction())
       }
     }
   }
@@ -100,7 +88,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
       Image(
         provider = ImageProvider(commonR.drawable.refresh),
         contentDescription = stringResource(id = commonR.string.refresh),
-        modifier = GlanceModifier.padding(5.dp)
+        modifier = GlanceModifier.padding(5.dp).clickable(updateWidgetAction())
       )
     }
   }
@@ -216,6 +204,10 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
       astronomicalTwilightPaint,
       nightPaint
     )
+
+  @Composable
+  private fun updateWidgetAction() =
+    actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
 
   companion object {
     private val wideMode = DpSize(200.dp, 50.dp)
