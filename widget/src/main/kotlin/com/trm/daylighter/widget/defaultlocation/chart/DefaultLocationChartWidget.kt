@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -19,9 +20,11 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.currentState
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
@@ -39,6 +42,7 @@ import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
+import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antialiasPaint
 import com.trm.daylighter.widget.util.ext.lazyPaint
@@ -82,12 +86,21 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
 
   @Composable
   private fun DayChart(change: Ready<LocationSunriseSunsetChange>) {
-    Box(modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()) {
+    Box(
+      contentAlignment = Alignment.TopEnd,
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+    ) {
       Image(
         provider = BitmapImageProvider(dayChartBitmap(change.data)),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
         modifier = GlanceModifier.fillMaxSize()
+      )
+
+      Image(
+        provider = ImageProvider(commonR.drawable.refresh),
+        contentDescription = stringResource(id = commonR.string.refresh),
+        modifier = GlanceModifier.padding(5.dp)
       )
     }
   }
