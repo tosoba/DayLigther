@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.BitmapImageProvider
@@ -131,32 +132,36 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   @Composable
   private fun Canvas.DrawNowLine(today: SunriseSunset) {
     val context = LocalContext.current
-    val size = LocalSize.current
-    val widthPx = size.width.value.toPx
-    val heightPx = size.height.value.toPx
-
-    val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
-    val zone = today.sunrise.zone
-    val now = ZonedDateTime.now(zone)
-    val startOfDay = now.toLocalDate().atStartOfDay(zone)
-    val nowSecond = Duration.between(startOfDay, now).seconds
-    val linePosition = nowSecond / secondsInDay * widthPx
-    val lineWidth = 5.dp.value.toPx
-
-    drawRect(
-      linePosition - lineWidth / 2f,
-      0f,
-      linePosition - lineWidth + 2f,
-      heightPx,
-      antialiasPaint(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Color(context.resources.getColor(commonR.color.sun_outline, context.theme))
-          } else {
-            Color(context.resources.getColor(commonR.color.sun_outline))
-          }
-          .toArgb()
-      )
+    DrawTimeLine(
+      dateTime = ZonedDateTime.now(today.sunrise.zone),
+      paint =
+        antialiasPaint(
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+              Color(context.resources.getColor(commonR.color.sun_outline, context.theme))
+            } else {
+              Color(context.resources.getColor(commonR.color.sun_outline))
+            }
+            .toArgb()
+        )
     )
+  }
+
+  @Composable
+  private fun Canvas.DrawTimeLine(
+    dateTime: ZonedDateTime,
+    paint: Paint,
+    top: Float = 0f,
+    bottom: Float = LocalSize.current.height.value.toPx,
+    width: Dp = 5.dp
+  ) {
+    val widthPx = LocalSize.current.width.value.toPx
+    val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
+    val zone = dateTime.zone
+    val startOfDay = dateTime.toLocalDate().atStartOfDay(zone)
+    val secondOfDay = Duration.between(startOfDay, dateTime).seconds
+    val linePosition = secondOfDay / secondsInDay * widthPx
+    val lineWidth = width.value.toPx
+    drawRect(linePosition - lineWidth / 2f, top, linePosition - lineWidth + 2f, bottom, paint)
   }
 
   private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {
