@@ -91,7 +91,7 @@ internal fun GlanceModifier.appWidgetInnerCornerRadius(): GlanceModifier {
 internal fun stringResource(@StringRes id: Int, vararg args: Any): String =
   LocalContext.current.getString(id, args)
 
-internal val Float.toPx
+internal val Float.toPx: Float
   get() = this * Resources.getSystem().displayMetrics.density
 
 internal val Context.isNightMode: Boolean

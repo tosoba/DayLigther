@@ -38,6 +38,7 @@ import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
+import com.trm.daylighter.core.ui.theme.light_onDayColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
 import com.trm.daylighter.widget.ui.AddLocationButton
@@ -60,6 +61,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   private val nauticalTwilightPaint by lazyPaint(color = nauticalTwilightColor.toArgb())
   private val civilTwilightPaint by lazyPaint(color = civilTwilightColor.toArgb())
   private val dayPaint by lazyPaint(color = dayColor.toArgb())
+  private val timelinePaint by lazyPaint(color = light_onDayColor.toArgb())
 
   @Composable
   override fun Content() {
@@ -104,6 +106,9 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
     Canvas(bitmap).apply {
       DrawDayPeriods(today = change.today)
       DrawNowLine(today = change.today)
+      val timelineTop = heightPx - minOf(5.dp.value.toPx, 25f)
+      DrawTimeLine(dateTime = change.today.sunrise, paint = timelinePaint, top = timelineTop)
+      DrawTimeLine(dateTime = change.today.sunset, paint = timelinePaint, top = timelineTop)
     }
 
     return bitmap
@@ -152,16 +157,15 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
     paint: Paint,
     top: Float = 0f,
     bottom: Float = LocalSize.current.height.value.toPx,
-    width: Dp = 5.dp
+    width: Dp = 2.dp
   ) {
     val widthPx = LocalSize.current.width.value.toPx
     val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
-    val zone = dateTime.zone
-    val startOfDay = dateTime.toLocalDate().atStartOfDay(zone)
-    val secondOfDay = Duration.between(startOfDay, dateTime).seconds
+    val startOfDay = dateTime.toLocalDate().atStartOfDay(dateTime.zone)
+    val secondOfDay = Duration.between(startOfDay, dateTime).seconds.toFloat()
     val linePosition = secondOfDay / secondsInDay * widthPx
     val lineWidth = width.value.toPx
-    drawRect(linePosition - lineWidth / 2f, top, linePosition - lineWidth + 2f, bottom, paint)
+    drawRect(linePosition - lineWidth / 2f, top, linePosition + lineWidth / 2f, bottom, paint)
   }
 
   private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {
