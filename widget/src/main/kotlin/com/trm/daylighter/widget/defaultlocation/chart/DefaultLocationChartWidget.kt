@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -27,9 +28,15 @@ import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
+import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
@@ -72,37 +79,53 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
     }
   }
 
+  @Composable
+  private fun DayChart(change: LocationSunriseSunsetChange) {
+    Box(
+      contentAlignment = Alignment.TopEnd,
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+    ) {
+      Image(
+        provider = BitmapImageProvider(dayChartBitmap(change = change)),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = GlanceModifier.fillMaxSize()
+      )
+
+      Image(
+        provider = ImageProvider(commonR.drawable.refresh),
+        contentDescription = stringResource(id = commonR.string.refresh),
+        modifier = GlanceModifier.padding(5.dp).clickable(updateWidgetAction())
+      )
+
+      when (LocalSize.current) {
+        shortMode -> {
+          Row(
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+            modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+          ) {
+            Clock(zoneId = change.today.sunrise.zone)
+            DayLengthInfo()
+          }
+        }
+        tallMode -> {
+          Column(
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+            modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+          ) {
+            Clock(zoneId = change.today.sunrise.zone)
+            DayLengthInfo()
+          }
+        }
+      }
+    }
+  }
+
   companion object {
     private val shortMode = DpSize(200.dp, 50.dp)
     private val tallMode = DpSize(200.dp, 100.dp)
-  }
-}
-
-@Composable
-private fun DayChart(change: LocationSunriseSunsetChange) {
-  Box(
-    contentAlignment = Alignment.TopEnd,
-    modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
-  ) {
-    Image(
-      provider = BitmapImageProvider(dayChartBitmap(change = change)),
-      contentDescription = null,
-      contentScale = ContentScale.FillBounds,
-      modifier = GlanceModifier.fillMaxSize()
-    )
-
-    Image(
-      provider = ImageProvider(commonR.drawable.refresh),
-      contentDescription = stringResource(id = commonR.string.refresh),
-      modifier = GlanceModifier.padding(5.dp).clickable(updateWidgetAction())
-    )
-
-    Box(
-      contentAlignment = Alignment.Center,
-      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
-    ) {
-      Clock(zoneId = change.today.sunrise.zone)
-    }
   }
 }
 
@@ -223,12 +246,27 @@ private fun updateWidgetAction() =
 
 @Composable
 private fun Clock(zoneId: ZoneId) {
-  AndroidRemoteViews(
-    remoteViews =
-      RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
-        .apply {
-          setString(R.id.location_clock, "setTimeZone", zoneId.id)
-          setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
-        }
+  Box {
+    AndroidRemoteViews(
+      remoteViews =
+        RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
+          .apply {
+            setString(R.id.location_clock, "setTimeZone", zoneId.id)
+            setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
+          }
+    )
+  }
+}
+
+@Composable
+private fun DayLengthInfo() {
+  Text(
+    text = "Day length",
+    style =
+      TextStyle(
+        color = ColorProvider(light_onDayColor),
+        textAlign = TextAlign.Center,
+        fontSize = 16.sp
+      )
   )
 }

@@ -58,9 +58,9 @@ import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
+import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
 import com.trm.daylighter.core.common.util.setPosition
-import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -606,7 +606,15 @@ private fun DayLengthSymbol() {
 @Composable
 private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
   Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
-    DayLengthInfoContent(today = today, yesterday = yesterday)
+    val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
+    val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
+    val diffPrefix =
+      dayLengthDiffPrefix(
+        todayLengthSeconds = today.dayLengthSeconds,
+        yesterdayLengthSeconds = yesterday.dayLengthSeconds
+      )
+    Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
+    Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime))
   }
 }
 
@@ -624,19 +632,6 @@ private fun BoxScope.DayLengthSymbolContent() {
     contentDescription = null,
     modifier = Modifier.align(Alignment.BottomEnd)
   )
-}
-
-@Composable
-private fun DayLengthInfoContent(today: SunriseSunset, yesterday: SunriseSunset) {
-  val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
-  val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
-  val diffPrefix =
-    dayLengthDiffPrefix(
-      todayLengthSeconds = today.dayLengthSeconds,
-      yesterdayLengthSeconds = yesterday.dayLengthSeconds
-    )
-  Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
-  Text(text = formatTimeDifference(diffPrefix, dayLengthDiffTime))
 }
 
 @Composable
