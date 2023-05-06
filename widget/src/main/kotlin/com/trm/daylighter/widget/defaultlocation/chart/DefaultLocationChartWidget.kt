@@ -1,5 +1,6 @@
 package com.trm.daylighter.widget.defaultlocation.chart
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -95,67 +96,33 @@ private fun DayChart(change: LocationSunriseSunsetChange) {
 }
 
 @Composable
-private fun Canvas.DrawNowLine(today: SunriseSunset) {
-  val context = LocalContext.current
-  DrawTimeLine(
-    dateTime = ZonedDateTime.now(today.sunrise.zone),
-    paint =
-      antiAliasPaint(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Color(context.resources.getColor(commonR.color.sun_outline, context.theme))
-          } else {
-            Color(context.resources.getColor(commonR.color.sun_outline))
-          }
-          .toArgb()
-      )
-  )
-}
-
-@Composable
-private fun Canvas.DrawTimeLine(
-  dateTime: ZonedDateTime,
-  paint: Paint,
-  top: Float = 0f,
-  bottom: Float = LocalSize.current.height.value.toPx,
-  width: Dp = 2.dp
-) {
-  val widthPx = LocalSize.current.width.value.toPx
-  val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
-  val startOfDay = dateTime.toLocalDate().atStartOfDay(dateTime.zone)
-  val secondOfDay = Duration.between(startOfDay, dateTime).seconds.toFloat()
-  val linePosition = secondOfDay / secondsInDay * widthPx
-  val lineWidth = width.value.toPx
-  drawRect(linePosition - lineWidth / 2f, top, linePosition + lineWidth / 2f, bottom, paint)
-}
-
-@Composable
-private fun updateWidgetAction() =
-  actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
-
-@Composable
 private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
+  val context = LocalContext.current
   val size = LocalSize.current
   val widthPx = size.width.value.toPx
   val heightPx = size.height.value.toPx
   val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
-  val timelinePaint = antiAliasPaint(color = light_onDayColor.toArgb())
 
   Canvas(bitmap).apply {
-    DrawDayPeriods(today = change.today)
-    DrawNowLine(today = change.today)
+    drawDayPeriods(today = change.today)
+
+    drawTimeLine(
+      dateTime = ZonedDateTime.now(change.today.sunrise.zone),
+      paint = nowLinePaint(context)
+    )
+
     val timelineTop = heightPx - 10.dp.value.toPx
-    DrawTimeLine(dateTime = change.today.sunrise, paint = timelinePaint, top = timelineTop)
-    DrawTimeLine(dateTime = change.today.sunset, paint = timelinePaint, top = timelineTop)
+    val timelinePaint = antiAliasPaint(color = light_onDayColor.toArgb())
+    drawTimeLine(dateTime = change.today.sunrise, paint = timelinePaint, topPx = timelineTop)
+    drawTimeLine(dateTime = change.today.sunset, paint = timelinePaint, topPx = timelineTop)
   }
 
   return bitmap
 }
 
-@Composable
-private fun Canvas.DrawDayPeriods(today: SunriseSunset) {
-  val size = LocalSize.current
-  val widthPx = size.width.value.toPx
-  val heightPx = size.height.value.toPx
+private fun Canvas.drawDayPeriods(today: SunriseSunset) {
+  val widthPx = width.toFloat()
+  val heightPx = height.toFloat()
 
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
   val durations = dayPeriodDurationsInSeconds(today)
@@ -172,33 +139,22 @@ private fun Canvas.DrawDayPeriods(today: SunriseSunset) {
 }
 
 private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {
-  val (
-    astronomicalTwilightBegin,
-    astronomicalTwilightEnd,
-    civilTwilightBegin,
-    civilTwilightEnd,
-    _,
-    nauticalTwilightBegin,
-    nauticalTwilightEnd,
-    _,
-    sunrise,
-    sunset,
-    date) =
-    sunriseSunset
   val periodInstants =
-    listOf(
-        date.atStartOfDay(sunrise.zone),
-        astronomicalTwilightBegin,
-        nauticalTwilightBegin,
-        civilTwilightBegin,
-        sunrise,
-        sunset,
-        civilTwilightEnd,
-        nauticalTwilightEnd,
-        astronomicalTwilightEnd,
-        date.atStartOfDay(sunrise.zone).plusDays(1L),
-      )
-      .map(ZonedDateTime::toInstant)
+    sunriseSunset.run {
+      listOf(
+          date.atStartOfDay(sunrise.zone),
+          astronomicalTwilightBegin,
+          nauticalTwilightBegin,
+          civilTwilightBegin,
+          sunrise,
+          sunset,
+          civilTwilightEnd,
+          nauticalTwilightEnd,
+          astronomicalTwilightEnd,
+          date.atStartOfDay(sunrise.zone).plusDays(1L),
+        )
+        .map(ZonedDateTime::toInstant)
+    }
   return periodInstants.indices.drop(1).map { index ->
     Duration.between(periodInstants[index - 1], periodInstants[index]).seconds.toFloat()
   }
@@ -222,3 +178,32 @@ private fun dayPeriodPaints(): List<Paint> {
     nightPaint
   )
 }
+
+private fun Canvas.drawTimeLine(
+  dateTime: ZonedDateTime,
+  paint: Paint,
+  topPx: Float = 0f,
+  bottomPx: Float = height.toFloat(),
+  lineWidthDp: Dp = 2.dp
+) {
+  val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
+  val startOfDay = dateTime.toLocalDate().atStartOfDay(dateTime.zone)
+  val secondOfDay = Duration.between(startOfDay, dateTime).seconds.toFloat()
+  val linePosition = secondOfDay / secondsInDay * width.toFloat()
+  val lineWidthPx = lineWidthDp.value.toPx
+  drawRect(linePosition - lineWidthPx / 2f, topPx, linePosition + lineWidthPx / 2f, bottomPx, paint)
+}
+
+private fun nowLinePaint(context: Context): Paint =
+  antiAliasPaint(
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Color(context.resources.getColor(commonR.color.sun_inside, context.theme))
+      } else {
+        Color(context.resources.getColor(commonR.color.sun_inside))
+      }
+      .toArgb()
+  )
+
+@Composable
+private fun updateWidgetAction() =
+  actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
