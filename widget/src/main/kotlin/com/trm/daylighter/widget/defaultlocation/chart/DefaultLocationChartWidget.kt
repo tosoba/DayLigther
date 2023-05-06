@@ -53,7 +53,7 @@ import java.time.ZonedDateTime
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
-  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(wideMode))
+  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(shortMode, tallMode))
 
   @Composable
   override fun Content() {
@@ -68,7 +68,8 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private val wideMode = DpSize(200.dp, 50.dp)
+    private val shortMode = DpSize(200.dp, 50.dp)
+    private val tallMode = DpSize(200.dp, 100.dp)
   }
 }
 
@@ -142,7 +143,7 @@ private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
   Canvas(bitmap).apply {
     DrawDayPeriods(today = change.today)
     DrawNowLine(today = change.today)
-    val timelineTop = heightPx - minOf(5.dp.value.toPx, 25f)
+    val timelineTop = heightPx - 10.dp.value.toPx
     DrawTimeLine(dateTime = change.today.sunrise, paint = timelinePaint, top = timelineTop)
     DrawTimeLine(dateTime = change.today.sunset, paint = timelinePaint, top = timelineTop)
   }
