@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Build
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -18,6 +19,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -42,6 +44,7 @@ import com.trm.daylighter.core.ui.theme.dayColor
 import com.trm.daylighter.core.ui.theme.light_onDayColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
+import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.RetryButton
@@ -50,6 +53,7 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
@@ -92,6 +96,13 @@ private fun DayChart(change: LocationSunriseSunsetChange) {
       contentDescription = stringResource(id = commonR.string.refresh),
       modifier = GlanceModifier.padding(5.dp).clickable(updateWidgetAction())
     )
+
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+    ) {
+      Clock(zoneId = change.today.sunrise.zone)
+    }
   }
 }
 
@@ -102,19 +113,17 @@ private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
   val widthPx = size.width.value.toPx
   val heightPx = size.height.value.toPx
   val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
+  val (_, today, _) = change
 
   Canvas(bitmap).apply {
     drawDayPeriods(today = change.today)
 
-    drawTimeLine(
-      dateTime = ZonedDateTime.now(change.today.sunrise.zone),
-      paint = nowLinePaint(context)
-    )
+    drawTimeLine(dateTime = ZonedDateTime.now(today.sunrise.zone), paint = nowLinePaint(context))
 
     val timelineTop = heightPx - 10.dp.value.toPx
-    val timelinePaint = antiAliasPaint(color = light_onDayColor.toArgb())
-    drawTimeLine(dateTime = change.today.sunrise, paint = timelinePaint, topPx = timelineTop)
-    drawTimeLine(dateTime = change.today.sunset, paint = timelinePaint, topPx = timelineTop)
+    val timeLinePaint = antiAliasPaint(color = light_onDayColor.toArgb())
+    drawTimeLine(dateTime = today.sunrise, paint = timeLinePaint, topPx = timelineTop)
+    drawTimeLine(dateTime = today.sunset, paint = timeLinePaint, topPx = timelineTop)
   }
 
   return bitmap
@@ -186,12 +195,16 @@ private fun Canvas.drawTimeLine(
   bottomPx: Float = height.toFloat(),
   lineWidthDp: Dp = 2.dp
 ) {
+  val linePosition = timeXFor(dateTime)
+  val lineWidthPx = lineWidthDp.value.toPx
+  drawRect(linePosition - lineWidthPx / 2f, topPx, linePosition + lineWidthPx / 2f, bottomPx, paint)
+}
+
+private fun Canvas.timeXFor(dateTime: ZonedDateTime): Float {
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
   val startOfDay = dateTime.toLocalDate().atStartOfDay(dateTime.zone)
   val secondOfDay = Duration.between(startOfDay, dateTime).seconds.toFloat()
-  val linePosition = secondOfDay / secondsInDay * width.toFloat()
-  val lineWidthPx = lineWidthDp.value.toPx
-  drawRect(linePosition - lineWidthPx / 2f, topPx, linePosition + lineWidthPx / 2f, bottomPx, paint)
+  return secondOfDay / secondsInDay * width
 }
 
 private fun nowLinePaint(context: Context): Paint =
@@ -207,3 +220,15 @@ private fun nowLinePaint(context: Context): Paint =
 @Composable
 private fun updateWidgetAction() =
   actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
+
+@Composable
+private fun Clock(zoneId: ZoneId) {
+  AndroidRemoteViews(
+    remoteViews =
+      RemoteViews(LocalContext.current.packageName, R.layout.location_text_clock_remote_view)
+        .apply {
+          setString(R.id.location_clock, "setTimeZone", zoneId.id)
+          setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
+        }
+  )
+}

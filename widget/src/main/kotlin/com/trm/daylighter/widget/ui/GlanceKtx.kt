@@ -94,6 +94,9 @@ internal fun stringResource(@StringRes id: Int, vararg args: Any): String =
 internal val Float.toPx: Float
   get() = this * Resources.getSystem().displayMetrics.density
 
+internal val Float.toDp: Float
+  get() = this / Resources.getSystem().displayMetrics.density
+
 internal val Context.isNightMode: Boolean
   get() =
     resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
