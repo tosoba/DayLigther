@@ -146,13 +146,7 @@ private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
 
   Canvas(bitmap).apply {
     drawDayPeriods(today = change.today)
-
     drawTimeLine(dateTime = ZonedDateTime.now(today.sunrise.zone), paint = nowLinePaint(context))
-
-    val timelineTop = heightPx - 10.dp.value.toPx
-    val timeLinePaint = antiAliasPaint(color = light_onDayColor.toArgb())
-    drawTimeLine(dateTime = today.sunrise, paint = timeLinePaint, topPx = timelineTop)
-    drawTimeLine(dateTime = today.sunset, paint = timeLinePaint, topPx = timelineTop)
   }
 
   return bitmap
