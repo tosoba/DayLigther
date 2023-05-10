@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Build
+import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -38,6 +39,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
@@ -105,7 +107,13 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
             modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
           ) {
-            Clock(zoneId = change.today.sunrise.zone)
+            Column(
+              horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+              verticalAlignment = Alignment.Vertical.CenterVertically
+            ) {
+              Clock(zoneId = change.today.sunrise.zone)
+              NowTimezoneDiffText(dateTime = change.today.sunrise)
+            }
             DayLengthInfo()
           }
         }
@@ -116,6 +124,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
             modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
           ) {
             Clock(zoneId = change.today.sunrise.zone)
+            NowTimezoneDiffText(dateTime = change.today.sunrise)
             DayLengthInfo()
           }
         }
@@ -254,6 +263,25 @@ private fun Clock(zoneId: ZoneId) {
             setString(R.id.location_clock, "setTimeZone", zoneId.id)
             setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
           }
+    )
+  }
+}
+
+@Composable
+private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
+  val context = LocalContext.current
+  Box {
+    AndroidRemoteViews(
+      remoteViews =
+        RemoteViews(LocalContext.current.packageName, R.layout.shadow_text_remote_view).apply {
+          setCharSequence(
+            R.id.shadow_text_view,
+            "setText",
+            context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime)
+          )
+          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+        }
     )
   }
 }
