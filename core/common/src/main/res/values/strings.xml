@@ -8,8 +8,12 @@
     <string name="retry">Retry</string>
     <string name="clear">Clear</string>
     <string name="refresh">Refresh</string>
-    <string name="time_format_12_h">hh:mm:ss \n zz</string>
-    <string name="time_format_24_h">HH:mm:ss \n zz</string>
+    <string name="time_format_12_h">hh:mm:ss</string>
+    <string name="time_format_24_h">HH:mm:ss</string>
+
+    <string name="same_timezone_as_you">Same timezone as you</string>
+    <string name="timezone_ahead_of_you">You\'re %1$02d:%2$02d ahead</string>
+    <string name="timezone_behind_of_you">You\'re %1$02d:%2$02d behind</string>
 
     <string name="nav_scheme">deeplink</string>
     <string name="deep_link_host">daylighter</string>

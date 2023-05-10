@@ -1,5 +1,7 @@
 package com.trm.daylighter.core.common.util.ext
 
+import android.content.Context
+import com.trm.daylighter.core.common.R
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,3 +41,14 @@ fun dayLengthDiffPrefix(todayLengthSeconds: Int, yesterdayLengthSeconds: Int): S
     todayLengthSeconds < yesterdayLengthSeconds -> "-"
     else -> ""
   }
+
+fun Context.timeZoneDiffLabelBetween(from: ZonedDateTime, to: ZonedDateTime): String {
+  val offsetSeconds = from.offset.totalSeconds - to.offset.totalSeconds
+  if (offsetSeconds == 0) return getString(R.string.same_timezone_as_you)
+
+  val absTimeZoneOffset = abs(offsetSeconds)
+  val hours = absTimeZoneOffset / 3600
+  val minutes = absTimeZoneOffset % 3600 / 60
+  return if (offsetSeconds < 0) getString(R.string.timezone_behind_of_you, hours, minutes)
+  else getString(R.string.timezone_ahead_of_you, hours, minutes)
+}

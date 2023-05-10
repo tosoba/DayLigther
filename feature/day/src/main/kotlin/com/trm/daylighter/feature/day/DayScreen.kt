@@ -3,6 +3,7 @@ package com.trm.daylighter.feature.day
 import android.content.res.Configuration
 import android.graphics.Typeface
 import android.text.format.DateFormat
+import android.util.TypedValue
 import android.view.View
 import android.widget.TextClock
 import androidx.compose.animation.AnimatedVisibility
@@ -540,12 +541,19 @@ private fun ClockAndDayLengthCard(
           modifier = Modifier.padding(8.dp)
         ) {
           Clock(zoneId = today.sunrise.zone)
+          NowTimezoneDiffText(dateTime = today.sunrise)
           Spacer(modifier = Modifier.height(5.dp))
           DayLength(today = today, yesterday = yesterday)
         }
       } else {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-          Clock(zoneId = today.sunrise.zone)
+          Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+          ) {
+            Clock(zoneId = today.sunrise.zone)
+            NowTimezoneDiffText(dateTime = today.sunrise)
+          }
           Spacer(modifier = Modifier.width(5.dp))
           DayLength(today = today, yesterday = yesterday)
         }
@@ -556,10 +564,9 @@ private fun ClockAndDayLengthCard(
 
 @Composable
 private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
-  val labelMediumStyle = MaterialTheme.typography.labelMedium
+  val textStyle = MaterialTheme.typography.labelLarge
   val resolver = LocalFontFamilyResolver.current
   val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
-  val orientation = LocalConfiguration.current.orientation
 
   AndroidView(
     factory = { context ->
@@ -568,21 +575,32 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
         format12Hour = context.getString(commonR.string.time_format_12_h)
         resolver
           .resolve(
-            fontFamily = labelMediumStyle.fontFamily,
-            fontWeight = labelMediumStyle.fontWeight ?: FontWeight.Normal,
-            fontStyle = labelMediumStyle.fontStyle ?: FontStyle.Normal,
-            fontSynthesis = labelMediumStyle.fontSynthesis ?: FontSynthesis.All,
+            fontFamily = textStyle.fontFamily,
+            fontWeight = textStyle.fontWeight ?: FontWeight.Normal,
+            fontStyle = textStyle.fontStyle ?: FontStyle.Normal,
+            fontSynthesis = textStyle.fontSynthesis ?: FontSynthesis.All,
           )
           .value
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
-        textSize = if (orientation == Configuration.ORIENTATION_PORTRAIT) 18f else 16f
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
         setTextColor(textColor)
       }
     },
     update = { clockView -> clockView.timeZone = zoneId.id },
     modifier = modifier
+  )
+}
+
+@Composable
+private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
+  val context = LocalContext.current
+  Text(
+    text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime),
+    textAlign = TextAlign.Center,
+    fontSize = 12.sp,
+    overflow = TextOverflow.Ellipsis
   )
 }
 
