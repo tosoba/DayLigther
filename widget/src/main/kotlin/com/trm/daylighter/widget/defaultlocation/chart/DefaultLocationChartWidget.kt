@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -34,10 +33,6 @@ import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
-import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
@@ -62,8 +57,10 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
@@ -114,7 +111,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
               Clock(zoneId = change.today.sunrise.zone)
               NowTimezoneDiffText(dateTime = change.today.sunrise)
             }
-            DayLengthInfo()
+            DayLengthInfo(sunriseSunset = change.today)
           }
         }
         tallMode -> {
@@ -125,7 +122,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
           ) {
             Clock(zoneId = change.today.sunrise.zone)
             NowTimezoneDiffText(dateTime = change.today.sunrise)
-            DayLengthInfo()
+            DayLengthInfo(sunriseSunset = change.today)
           }
         }
       }
@@ -273,7 +270,7 @@ private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
   Box {
     AndroidRemoteViews(
       remoteViews =
-        RemoteViews(LocalContext.current.packageName, R.layout.shadow_text_remote_view).apply {
+        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
           setCharSequence(
             R.id.shadow_text_view,
             "setText",
@@ -287,14 +284,24 @@ private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
 }
 
 @Composable
-private fun DayLengthInfo() {
-  Text(
-    text = "Day length",
-    style =
-      TextStyle(
-        color = ColorProvider(light_onDayColor),
-        textAlign = TextAlign.Center,
-        fontSize = 16.sp
-      )
-  )
+private fun DayLengthInfo(sunriseSunset: SunriseSunset) {
+  val context = LocalContext.current
+  val todayLength = LocalTime.ofSecondOfDay(sunriseSunset.dayLengthSeconds.toLong())
+
+  Box {
+    AndroidRemoteViews(
+      remoteViews =
+        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+          setTextViewText(
+            R.id.shadow_text_view,
+            context.getString(
+              R.string.day_length,
+              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME)
+            )
+          )
+          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+        }
+    )
+  }
 }
