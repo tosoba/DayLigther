@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -30,10 +31,12 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import com.trm.daylighter.core.common.R as commonR
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
@@ -64,6 +67,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import com.trm.daylighter.core.common.R as commonR
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
@@ -295,7 +299,7 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
       yesterdayLengthSeconds = yesterday.dayLengthSeconds
     )
 
-  Box {
+  Row {
     AndroidRemoteViews(
       remoteViews =
         RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
@@ -303,13 +307,37 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
             R.id.shadow_text_view,
             context.getString(
               R.string.day_length,
-              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME)
+            ),
+          )
+          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+        }
+    )
+
+    Text(text = " ", style = TextStyle(fontSize = 14.sp))
+
+    AndroidRemoteViews(
+      remoteViews =
+        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+          setTextViewText(
+            R.id.shadow_text_view,
+            context.getString(
+              R.string.diff,
               diffPrefix,
               dayLengthDiffTime.minute,
               dayLengthDiffTime.second
             ),
           )
-          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+          setInt(
+            R.id.shadow_text_view,
+            "setTextColor",
+            when (diffPrefix) {
+              "+" -> Color.Green
+              "-" -> Color.Red
+              else -> light_onDayColor
+            }.toArgb()
+          )
           setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
         }
     )
