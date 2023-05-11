@@ -32,12 +32,14 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
@@ -103,6 +105,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
             modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
           ) {
+            LocationName(location = change.location)
             Clock(zoneId = change.today.sunrise.zone)
             NowTimezoneDiffText(dateTime = change.today.sunrise)
             DayLengthInfo(sunriseSunset = change.today)
@@ -229,6 +232,22 @@ private fun nowLinePaint(context: Context): Paint =
 @Composable
 private fun updateWidgetAction() =
   actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
+
+@Composable
+private fun LocationName(location: Location) {
+  val context = LocalContext.current
+  val size = LocalSize.current
+  Box(contentAlignment = Alignment.Center, modifier = GlanceModifier.width(size.width * .75f)) {
+    AndroidRemoteViews(
+      remoteViews =
+        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+          setCharSequence(R.id.shadow_text_view, "setText", location.name)
+          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+        }
+    )
+  }
+}
 
 @Composable
 private fun Clock(zoneId: ZoneId) {
