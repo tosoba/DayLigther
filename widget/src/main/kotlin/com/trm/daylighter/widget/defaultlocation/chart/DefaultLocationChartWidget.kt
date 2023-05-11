@@ -30,7 +30,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
-import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import com.trm.daylighter.core.common.R as commonR
@@ -64,7 +63,7 @@ import java.time.format.DateTimeFormatter
 
 class DefaultLocationChartWidget : GlanceAppWidget() {
   override val stateDefinition = DefaultLocationChartWidgetStateDefinition
-  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(shortMode, tallMode))
+  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
   @Composable
   override fun Content() {
@@ -98,22 +97,6 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
       )
 
       when (LocalSize.current) {
-        shortMode -> {
-          Row(
-            verticalAlignment = Alignment.Vertical.CenterVertically,
-            horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-            modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
-          ) {
-            Column(
-              horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-              verticalAlignment = Alignment.Vertical.CenterVertically
-            ) {
-              Clock(zoneId = change.today.sunrise.zone)
-              NowTimezoneDiffText(dateTime = change.today.sunrise)
-            }
-            DayLengthInfo(sunriseSunset = change.today)
-          }
-        }
         tallMode -> {
           Column(
             verticalAlignment = Alignment.Vertical.CenterVertically,
@@ -130,7 +113,6 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
   }
 
   companion object {
-    private val shortMode = DpSize(200.dp, 50.dp)
     private val tallMode = DpSize(200.dp, 100.dp)
   }
 }
