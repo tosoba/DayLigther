@@ -232,11 +232,15 @@ private fun Canvas.timeXFor(dateTime: ZonedDateTime): Float {
 
 private fun nowLinePaint(context: Context): Paint =
   antiAliasPaint(
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        Color(context.resources.getColor(commonR.color.sun_inside, context.theme))
-      } else {
-        Color(context.resources.getColor(commonR.color.sun_inside))
-      }
+    Color(
+        with(context.resources) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getColor(commonR.color.sun_inside, context.theme)
+          } else {
+            getColor(commonR.color.sun_inside)
+          }
+        }
+      )
       .toArgb()
   )
 
