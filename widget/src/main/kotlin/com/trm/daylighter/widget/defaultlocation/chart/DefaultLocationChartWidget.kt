@@ -34,6 +34,8 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
+import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
@@ -108,7 +110,7 @@ class DefaultLocationChartWidget : GlanceAppWidget() {
             LocationName(location = change.location)
             Clock(zoneId = change.today.sunrise.zone)
             NowTimezoneDiffText(dateTime = change.today.sunrise)
-            DayLengthInfo(sunriseSunset = change.today)
+            DayLengthInfo(today = change.today, yesterday = change.yesterday)
           }
         }
       }
@@ -283,9 +285,15 @@ private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
 }
 
 @Composable
-private fun DayLengthInfo(sunriseSunset: SunriseSunset) {
+private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
   val context = LocalContext.current
-  val todayLength = LocalTime.ofSecondOfDay(sunriseSunset.dayLengthSeconds.toLong())
+  val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
+  val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
+  val diffPrefix =
+    dayLengthDiffPrefix(
+      todayLengthSeconds = today.dayLengthSeconds,
+      yesterdayLengthSeconds = yesterday.dayLengthSeconds
+    )
 
   Box {
     AndroidRemoteViews(
@@ -295,8 +303,11 @@ private fun DayLengthInfo(sunriseSunset: SunriseSunset) {
             R.id.shadow_text_view,
             context.getString(
               R.string.day_length,
-              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME)
-            )
+              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+              diffPrefix,
+              dayLengthDiffTime.minute,
+              dayLengthDiffTime.second
+            ),
           )
           setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
           setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
