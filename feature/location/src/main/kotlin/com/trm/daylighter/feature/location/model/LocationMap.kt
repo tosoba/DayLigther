@@ -5,9 +5,6 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
 
 @Composable
@@ -17,7 +14,7 @@ internal fun rememberLocationMap(
 ): LocationMap {
   val locationMapState =
     rememberSaveable(mapPosition, infoExpanded, saver = LocationMapState.Saver) {
-      LocationMapState(mapPosition = mapPosition, infoExpanded = infoExpanded)
+      LocationMapState(mapPosition = mapPosition)
     }
 
   val mapView =
@@ -33,41 +30,14 @@ internal fun rememberLocationMap(
       }
     )
 
-  val mapListener =
-    remember(locationMapState) {
-      object : MapListener {
-        override fun onScroll(event: ScrollEvent?): Boolean = onMapInteraction()
-        override fun onZoom(event: ZoomEvent?): Boolean = onMapInteraction()
-        private fun onMapInteraction(): Boolean {
-          locationMapState.infoExpanded = false
-          return false
-        }
-      }
-    }
-
-  return remember(locationMapState) {
-    LocationMap(state = locationMapState, view = mapView, listener = mapListener)
-  }
+  return remember(locationMapState) { LocationMap(state = locationMapState, view = mapView) }
 }
 
-@Stable
-internal class LocationMap(
-  val state: LocationMapState,
-  val view: MapView,
-  val listener: MapListener
-)
+@Stable internal class LocationMap(val state: LocationMapState, val view: MapView)
 
 @Stable
-internal class LocationMapState(mapPosition: MapPosition, infoExpanded: Boolean = true) {
-  var infoExpanded by mutableStateOf(infoExpanded)
+internal class LocationMapState(mapPosition: MapPosition) {
   var savedMapPosition by mutableStateOf(mapPosition)
-
-  val nameVisible: Boolean
-    get() = !infoExpanded && savedMapPosition.label.isNotEmpty()
-
-  fun toggleInfoExpanded() {
-    infoExpanded = !infoExpanded
-  }
 
   fun updatePosition(latitude: Double, longitude: Double) {
     savedMapPosition = savedMapPosition.copy(latitude = latitude, longitude = longitude)
@@ -76,10 +46,8 @@ internal class LocationMapState(mapPosition: MapPosition, infoExpanded: Boolean 
   companion object {
     val Saver: Saver<LocationMapState, *> =
       listSaver(
-        save = { listOf(it.savedMapPosition, it.infoExpanded) },
-        restore = {
-          LocationMapState(mapPosition = it[0] as MapPosition, infoExpanded = it[1] as Boolean)
-        }
+        save = { listOf(it.savedMapPosition) },
+        restore = { LocationMapState(mapPosition = it[0]) }
       )
   }
 }

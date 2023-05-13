@@ -14,8 +14,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -296,7 +294,6 @@ private fun LocationScaffold(
           imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel
         ) {
           if (!isLoading) {
-            locationMap.state.infoExpanded = false
             val mapCenter = locationMap.view.mapCenter
             saveSpecifiedLocation(mapCenter.latitude, mapCenter.longitude)
           } else {
@@ -305,7 +302,19 @@ private fun LocationScaffold(
         }
       }
 
-      LocationAppBar(locationMap = locationMap, onBackClick = onBackClick)
+      val context = LocalContext.current
+      var infoToast: Toast? by remember { mutableStateOf(null) }
+      LocationAppBar(
+        locationMap = locationMap,
+        onBackClick = onBackClick,
+        onInfoClick = {
+          Toast.makeText(context, R.string.center_map_on_location, Toast.LENGTH_LONG).also {
+            it.show()
+            infoToast?.cancel()
+            infoToast = it
+          }
+        }
+      )
 
       LoadingProgressIndicator(
         visible = isLoading,
@@ -319,96 +328,51 @@ private fun LocationScaffold(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocationAppBar(locationMap: LocationMap, onBackClick: () -> Unit) {
-  Box(modifier = Modifier.fillMaxWidth()) {
-    if (locationMap.state.savedMapPosition.label.isNotEmpty()) {
-      Box(
-        modifier =
-          Modifier.matchParentSize()
-            .background(
-              Brush.verticalGradient(
-                0f to Color.Black,
-                .25f to Color.DarkGray,
-                .75f to Color.LightGray,
-                1f to Color.Transparent
-              )
-            )
+private fun LocationAppBar(
+  locationMap: LocationMap,
+  onBackClick: () -> Unit,
+  onInfoClick: () -> Unit
+) {
+  CenterAlignedTopAppBar(
+    modifier =
+      Modifier.background(
+        Brush.verticalGradient(
+          0f to MaterialTheme.colorScheme.surface,
+          .25f to MaterialTheme.colorScheme.surface,
+          1f to Color.Transparent
+        )
+      ),
+    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+    title = {
+      Text(
+        text = locationMap.state.savedMapPosition.label,
+        style = MaterialTheme.typography.titleMedium,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
       )
-    }
-
-    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-      BackButton(onClick = onBackClick)
-
-      Crossfade(targetState = locationMap.state.nameVisible, modifier = Modifier.weight(1f)) {
-        locationNameVisible ->
-        if (locationNameVisible) {
-          Text(
-            text = locationMap.state.savedMapPosition.label,
-            color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-          )
-        } else {
-          Spacer(modifier = Modifier.fillMaxWidth())
-        }
+    },
+    navigationIcon = {
+      IconButton(onClick = onBackClick) {
+        Icon(
+          imageVector = Icons.Filled.ArrowBack,
+          contentDescription = stringResource(id = commonR.string.back),
+          tint = MaterialTheme.colorScheme.onSurface
+        )
       }
-
-      InfoButton(
-        isExpanded = locationMap.state.infoExpanded,
-        onClick = locationMap.state::toggleInfoExpanded
-      )
-    }
-  }
-}
-
-@Composable
-private fun BackButton(onClick: () -> Unit) {
-  SmallFloatingActionButton(onClick = onClick, modifier = Modifier.padding(end = 5.dp)) {
-    Icon(
-      imageVector = Icons.Filled.ArrowBack,
-      contentDescription = stringResource(id = commonR.string.back)
-    )
-  }
-}
-
-@Composable
-private fun InfoButton(isExpanded: Boolean, onClick: () -> Unit) {
-  val infoContainerColor =
-    animateColorAsState(
-      targetValue =
-        if (isExpanded) MaterialTheme.colorScheme.background
-        else FloatingActionButtonDefaults.containerColor
-    )
-
-  FloatingActionButton(
-    modifier = Modifier.padding(start = 5.dp),
-    containerColor = infoContainerColor.value,
-    onClick = onClick
-  ) {
-    Row(
-      modifier = Modifier.padding(horizontal = 16.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Icon(
-        imageVector = Icons.Filled.Info,
-        contentDescription = stringResource(R.string.center_map_on_location)
-      )
-      AnimatedVisibility(visible = isExpanded) {
-        Row {
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = stringResource(R.string.center_map_on_location),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-          )
-        }
+    },
+    actions = {
+      IconButton(onClick = onInfoClick) {
+        Icon(
+          imageVector = Icons.Filled.Info,
+          contentDescription = stringResource(id = R.string.center_map_on_location),
+          tint = MaterialTheme.colorScheme.onSurface
+        )
       }
     }
-  }
+  )
 }
 
 @Composable
@@ -444,9 +408,7 @@ private fun MapView(locationMap: LocationMap, modifier: Modifier = Modifier) {
     factory = { locationMap.view },
     update = {
       it.setDefaultConfig(darkMode = darkMode)
-      it.removeMapListener(locationMap.listener)
       it.restorePosition(position = locationMap.state.savedMapPosition)
-      it.addMapListener(locationMap.listener)
     },
     modifier = modifier,
   )
@@ -542,11 +504,11 @@ private fun ModalSheetContent(
     )
   }
 
-  FailureMessageToastEffect(message = nameFailureMessage)
+  ToastMessageEffect(message = nameFailureMessage)
 }
 
 @Composable
-private fun FailureMessageToastEffect(@StringRes message: Int?) {
+private fun ToastMessageEffect(@StringRes message: Int?) {
   val context = LocalContext.current
   var toast: Toast? by remember { mutableStateOf(null) }
 
