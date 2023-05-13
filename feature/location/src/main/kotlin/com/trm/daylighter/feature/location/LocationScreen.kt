@@ -25,7 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -336,19 +337,11 @@ private fun LocationAppBar(
   onInfoClick: () -> Unit
 ) {
   CenterAlignedTopAppBar(
-    modifier =
-      Modifier.background(
-        Brush.verticalGradient(
-          0f to MaterialTheme.colorScheme.surface,
-          .25f to MaterialTheme.colorScheme.surface,
-          1f to Color.Transparent
-        )
-      ),
-    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+    modifier = Modifier.alpha(.9f),
     title = {
       Text(
         text = locationMap.state.savedMapPosition.label,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
