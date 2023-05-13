@@ -341,7 +341,7 @@ private fun LocationAppBar(
     title = {
       Text(
         text = locationMap.state.savedMapPosition.label,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
+        style = MaterialTheme.typography.titleMedium,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,

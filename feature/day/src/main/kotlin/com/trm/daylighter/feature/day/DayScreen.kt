@@ -56,7 +56,6 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
-import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -186,7 +185,7 @@ private fun SunriseSunset(
   modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(modifier = modifier) {
-    val (drawerMenuButton, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
+    val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
 
     val orientation = LocalConfiguration.current.orientation
     val changeValue = change.value
@@ -267,13 +266,15 @@ private fun SunriseSunset(
     }
 
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-      DrawerMenuButton(
-        onClick = onDrawerMenuClick,
+      DayTopAppBar(
+        change = change,
         modifier =
-          Modifier.constrainAs(drawerMenuButton) {
-            start.linkTo(parent.start, 16.dp)
-            top.linkTo(parent.top, 16.dp)
-          }
+          Modifier.constrainAs(topAppBar) {
+            start.linkTo(parent.start)
+            top.linkTo(parent.top)
+            end.linkTo(parent.end)
+          },
+        navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
       )
 
       AnimatedVisibility(
@@ -282,8 +283,8 @@ private fun SunriseSunset(
         exit = fadeOut(),
         modifier =
           Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(drawerMenuButton.bottom, 10.dp)
-            start.linkTo(parent.start, 16.dp)
+            top.linkTo(topAppBar.bottom)
+            end.linkTo(parent.end, 16.dp)
           },
       ) {
         ClockAndDayLengthCard(change = change)
@@ -317,6 +318,16 @@ private fun SunriseSunset(
         )
       }
     } else {
+      DayTopAppBar(
+        change = change,
+        modifier =
+          Modifier.constrainAs(topAppBar) {
+            start.linkTo(mainContent.start)
+            end.linkTo(parent.end)
+            top.linkTo(parent.top)
+          }
+      )
+
       NavigationRail(
         header = {
           DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
@@ -353,8 +364,8 @@ private fun SunriseSunset(
         exit = fadeOut(),
         modifier =
           Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(parent.top, 16.dp)
-            start.linkTo(navigation.end, 16.dp)
+            top.linkTo(topAppBar.bottom)
+            end.linkTo(parent.end, 16.dp)
           },
       ) {
         ClockAndDayLengthCard(change = change)
@@ -380,6 +391,44 @@ private fun InfoButtonCard(
       Spacer(modifier = Modifier.height(10.dp))
       Button(onClick = onButtonClick) { Text(text = actionText) }
     }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DayTopAppBar(
+  change: StableLoadable<LocationSunriseSunsetChange>,
+  modifier: Modifier = Modifier,
+  navigationIcon: @Composable () -> Unit = {}
+) {
+  @Composable
+  fun Title() {
+    AnimatedVisibility(visible = change.value is Ready, modifier = Modifier.fillMaxWidth()) {
+      Text(
+        text = (change.value as Ready).data.location.name,
+        style = MaterialTheme.typography.titleMedium,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
+      )
+    }
+  }
+
+  val colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+    TopAppBar(
+      modifier = modifier,
+      colors = colors,
+      title = { Title() },
+      navigationIcon = navigationIcon
+    )
+  } else {
+    CenterAlignedTopAppBar(
+      modifier = modifier,
+      colors = colors,
+      title = { Title() },
+      navigationIcon = navigationIcon
+    )
   }
 }
 
