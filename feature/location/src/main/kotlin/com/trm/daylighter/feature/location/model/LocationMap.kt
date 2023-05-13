@@ -8,12 +8,9 @@ import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import org.osmdroid.views.MapView
 
 @Composable
-internal fun rememberLocationMap(
-  mapPosition: MapPosition,
-  infoExpanded: Boolean = true
-): LocationMap {
+internal fun rememberLocationMap(mapPosition: MapPosition): LocationMap {
   val locationMapState =
-    rememberSaveable(mapPosition, infoExpanded, saver = LocationMapState.Saver) {
+    rememberSaveable(mapPosition, saver = LocationMapState.Saver) {
       LocationMapState(mapPosition = mapPosition)
     }
 
@@ -25,7 +22,8 @@ internal fun rememberLocationMap(
             latitude = it.mapCenter.latitude,
             longitude = it.mapCenter.longitude,
             zoom = it.zoomLevelDouble,
-            orientation = it.mapOrientation
+            orientation = it.mapOrientation,
+            label = locationMapState.savedMapPosition.label
           )
       }
     )
