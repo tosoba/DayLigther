@@ -11,6 +11,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -270,10 +271,17 @@ private fun SunriseSunset(
         change = change,
         modifier =
           Modifier.constrainAs(topAppBar) {
-            start.linkTo(parent.start)
-            top.linkTo(parent.top)
-            end.linkTo(parent.end)
-          },
+              start.linkTo(parent.start)
+              top.linkTo(parent.top)
+              end.linkTo(parent.end)
+            }
+            .background(
+              Brush.verticalGradient(
+                0f to MaterialTheme.colorScheme.surface,
+                .25f to MaterialTheme.colorScheme.surface,
+                1f to Color.Transparent
+              )
+            ),
         navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
       )
 
@@ -283,7 +291,7 @@ private fun SunriseSunset(
         exit = fadeOut(),
         modifier =
           Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom)
+            top.linkTo(topAppBar.bottom, 10.dp)
             end.linkTo(parent.end, 16.dp)
           },
       ) {
@@ -322,10 +330,16 @@ private fun SunriseSunset(
         change = change,
         modifier =
           Modifier.constrainAs(topAppBar) {
-            start.linkTo(mainContent.start)
-            end.linkTo(parent.end)
-            top.linkTo(parent.top)
-          }
+              start.linkTo(mainContent.start)
+              end.linkTo(parent.end)
+              top.linkTo(parent.top)
+            }
+            .background(
+              Brush.verticalGradient(
+                0f to MaterialTheme.colorScheme.surface,
+                1f to Color.Transparent
+              )
+            )
       )
 
       NavigationRail(
