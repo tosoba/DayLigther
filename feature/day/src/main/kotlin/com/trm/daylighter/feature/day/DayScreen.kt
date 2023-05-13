@@ -11,7 +11,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -56,11 +55,8 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.common.util.ext.takeIfInstance
-import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
-import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -119,7 +115,6 @@ private fun DayScreen(
   onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  var mapZoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
   val changeValue = change.value
   var dayMode by rememberSaveable {
     mutableStateOf(
@@ -137,13 +132,10 @@ private fun DayScreen(
     locationsCount = locationsCount,
     currentLocationIndex = currentLocationIndex,
     onChangeLocationIndex = onChangeLocationIndex,
-    mapZoom = mapZoom,
-    onZoomInClick = { if (mapZoom < MapDefaults.MAX_ZOOM) ++mapZoom },
-    onZoomOutClick = { if (mapZoom > MapDefaults.MIN_ZOOM) --mapZoom },
+    onDayModeNavClick = { dayMode = it },
     onDrawerMenuClick = onDrawerMenuClick,
     onAddLocationClick = onAddLocationClick,
     onEditLocationClick = onEditLocationClick,
-    onDayModeNavClick = { dayMode = it },
     onRetryClick = onRetryClick,
     modifier = modifier,
   )
@@ -186,9 +178,6 @@ private fun SunriseSunset(
   locationsCount: Int,
   currentLocationIndex: Int,
   onChangeLocationIndex: (Int) -> Unit,
-  mapZoom: Double,
-  onZoomInClick: () -> Unit,
-  onZoomOutClick: () -> Unit,
   onDayModeNavClick: (DayMode) -> Unit,
   onDrawerMenuClick: () -> Unit,
   onAddLocationClick: () -> Unit,
@@ -197,15 +186,7 @@ private fun SunriseSunset(
   modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(modifier = modifier) {
-    val (
-      drawerMenuButton,
-      mainContent,
-      navigation,
-      dayTimeCard,
-      map,
-      mapZoomControls,
-      editLocationButton) =
-      createRefs()
+    val (drawerMenuButton, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
 
     val orientation = LocalConfiguration.current.orientation
     val changeValue = change.value
@@ -281,75 +262,6 @@ private fun SunriseSunset(
               modifier = Modifier.align(Alignment.Center).padding(20.dp)
             )
           }
-        }
-      }
-    }
-
-    AnimatedVisibility(
-      visible = changeValue is Ready,
-      enter = fadeIn(),
-      exit = fadeOut(),
-      modifier =
-        Modifier.run {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-              width((LocalConfiguration.current.screenWidthDp * .4f).dp)
-            } else {
-              height((LocalConfiguration.current.screenHeightDp * .35f).dp)
-            }
-          }
-          .aspectRatio(1f)
-          .constrainAs(map) {
-            top.linkTo(parent.top, 16.dp)
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-              end.linkTo(parent.end, 16.dp)
-            } else {
-              end.linkTo(mapZoomControls.start, 5.dp)
-            }
-          }
-    ) {
-      MapCard(change = change, mapZoom = mapZoom)
-    }
-
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-      AnimatedVisibility(
-        visible = changeValue is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(mapZoomControls) {
-            start.linkTo(map.start)
-            end.linkTo(map.end)
-            top.linkTo(map.bottom, 5.dp)
-          }
-      ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.Center,
-        ) {
-          ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-          Spacer(modifier = Modifier.width(5.dp))
-          ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
-        }
-      }
-    } else {
-      AnimatedVisibility(
-        visible = changeValue is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(mapZoomControls) {
-            end.linkTo(parent.end, 16.dp)
-            top.linkTo(map.top)
-            bottom.linkTo(map.bottom)
-          }
-      ) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center,
-        ) {
-          ZoomInButton(mapZoom = mapZoom, onClick = onZoomInClick)
-          Spacer(modifier = Modifier.height(5.dp))
-          ZoomOutButton(mapZoom = mapZoom, onClick = onZoomOutClick)
         }
       }
     }
@@ -467,53 +379,6 @@ private fun InfoButtonCard(
       Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
       Spacer(modifier = Modifier.height(10.dp))
       Button(onClick = onButtonClick) { Text(text = actionText) }
-    }
-  }
-}
-
-@Composable
-private fun MapCard(
-  change: StableLoadable<LocationSunriseSunsetChange>,
-  mapZoom: Double,
-  modifier: Modifier = Modifier,
-) {
-  val changeValue = change.value
-
-  Card(
-    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier = modifier,
-  ) {
-    if (changeValue is WithData) {
-      Box(modifier = Modifier.fillMaxSize()) {
-        val (location) = changeValue.data
-        val mapView = rememberMapViewWithLifecycle()
-        val darkMode = isSystemInDarkTheme()
-
-        AndroidView(
-          factory = { mapView },
-          update = {
-            it.setDefaultDisabledConfig(darkMode = darkMode)
-            it.setPosition(
-              latitude = location.latitude,
-              longitude = location.longitude,
-              zoom = mapZoom
-            )
-          }
-        )
-
-        LocationNameGradientOverlay()
-
-        LocationNameLabel(
-          name = changeValue.data.location.name,
-          modifier = Modifier.align(Alignment.BottomCenter).padding(5.dp)
-        )
-
-        Icon(
-          painter = painterResource(id = commonR.drawable.marker),
-          contentDescription = stringResource(id = commonR.string.location_marker),
-          modifier = Modifier.align(Alignment.Center).size(36.dp)
-        )
-      }
     }
   }
 }
