@@ -412,13 +412,14 @@ private fun DayTopAppBar(
   modifier: Modifier = Modifier,
   navigationIcon: @Composable () -> Unit = {}
 ) {
+  val changeValue = change.value
   Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
     navigationIcon()
 
-    Crossfade(targetState = change.value is Ready, modifier = Modifier.weight(1f)) { changeReady ->
+    Crossfade(targetState = changeValue is Ready, modifier = Modifier.weight(1f)) { changeReady ->
       if (changeReady) {
         Text(
-          text = (change.value as Ready).data.location.name,
+          text = changeValue.map { (location) -> location.name }.dataOrElse(""),
           style = MaterialTheme.typography.titleMedium,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
