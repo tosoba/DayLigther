@@ -266,22 +266,23 @@ private fun SunriseSunset(
       }
     }
 
+    val topBarGradient =
+      Brush.verticalGradient(
+        0f to MaterialTheme.colorScheme.surface,
+        .25f to MaterialTheme.colorScheme.surface,
+        1f to Color.Transparent
+      )
+
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       DayTopAppBar(
         change = change,
         modifier =
           Modifier.constrainAs(topAppBar) {
-              start.linkTo(parent.start)
+              linkTo(mainContent.start, mainContent.end)
               top.linkTo(parent.top)
-              end.linkTo(parent.end)
             }
-            .background(
-              Brush.verticalGradient(
-                0f to MaterialTheme.colorScheme.surface,
-                .25f to MaterialTheme.colorScheme.surface,
-                1f to Color.Transparent
-              )
-            ),
+            .background(topBarGradient)
+            .padding(10.dp),
         navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
       )
 
@@ -330,16 +331,13 @@ private fun SunriseSunset(
         change = change,
         modifier =
           Modifier.constrainAs(topAppBar) {
-              start.linkTo(mainContent.start)
-              end.linkTo(parent.end)
+              linkTo(navigation.end, mainContent.end)
               top.linkTo(parent.top)
+              height = Dimension.wrapContent
+              width = Dimension.fillToConstraints
             }
-            .background(
-              Brush.verticalGradient(
-                0f to MaterialTheme.colorScheme.surface,
-                1f to Color.Transparent
-              )
-            )
+            .background(topBarGradient)
+            .padding(10.dp)
       )
 
       NavigationRail(
@@ -367,7 +365,7 @@ private fun SunriseSunset(
         },
         modifier =
           Modifier.constrainAs(navigation) {
-            linkTo(parent.start, mainContent.start)
+            start.linkTo(parent.start)
             linkTo(parent.top, parent.bottom)
           },
       )
@@ -408,41 +406,29 @@ private fun InfoButtonCard(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
   modifier: Modifier = Modifier,
   navigationIcon: @Composable () -> Unit = {}
 ) {
-  @Composable
-  fun Title() {
-    AnimatedVisibility(visible = change.value is Ready, modifier = Modifier.fillMaxWidth()) {
-      Text(
-        text = (change.value as Ready).data.location.name,
-        style = MaterialTheme.typography.titleMedium,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-      )
-    }
-  }
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+    navigationIcon()
 
-  val colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
-  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-    TopAppBar(
-      modifier = modifier,
-      colors = colors,
-      title = { Title() },
-      navigationIcon = navigationIcon
-    )
-  } else {
-    CenterAlignedTopAppBar(
-      modifier = modifier,
-      colors = colors,
-      title = { Title() },
-      navigationIcon = navigationIcon
-    )
+    Crossfade(targetState = change.value is Ready, modifier = Modifier.weight(1f)) { changeReady ->
+      if (changeReady) {
+        Text(
+          text = (change.value as Ready).data.location.name,
+          style = MaterialTheme.typography.titleMedium,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.fillMaxWidth()
+        )
+      } else {
+        Spacer(modifier = Modifier.weight(1f))
+      }
+    }
   }
 }
 
