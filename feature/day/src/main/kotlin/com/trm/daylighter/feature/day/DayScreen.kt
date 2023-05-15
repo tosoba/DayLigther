@@ -62,7 +62,12 @@ import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.theme.*
+import com.trm.daylighter.feature.day.ext.color
+import com.trm.daylighter.feature.day.ext.currentPeriod
+import com.trm.daylighter.feature.day.ext.textColor
+import com.trm.daylighter.feature.day.ext.textShadowColor
 import com.trm.daylighter.feature.day.model.DayMode
+import com.trm.daylighter.feature.day.model.DayPeriod
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -439,11 +444,11 @@ private fun ClockAndDayLengthCard(
   modifier: Modifier = Modifier,
 ) {
   val changeValue = change.value
+  val dayPeriod = changeValue.map { it.today.currentPeriod() }.dataOrElse(DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,
-    color = FloatingActionButtonDefaults.containerColor,
-    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
+    color = dayPeriod.color(),
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
@@ -454,10 +459,10 @@ private fun ClockAndDayLengthCard(
           horizontalAlignment = Alignment.CenterHorizontally,
           modifier = Modifier.padding(8.dp)
         ) {
-          Clock(zoneId = today.sunrise.zone)
-          NowTimezoneDiffText(dateTime = today.sunrise)
+          Clock(zoneId = today.sunrise.zone, dayPeriod = dayPeriod)
+          NowTimezoneDiffText(dateTime = today.sunrise, dayPeriod = dayPeriod)
           Spacer(modifier = Modifier.height(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday)
+          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
         }
       } else {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
@@ -465,11 +470,11 @@ private fun ClockAndDayLengthCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
           ) {
-            Clock(zoneId = today.sunrise.zone)
-            NowTimezoneDiffText(dateTime = today.sunrise)
+            Clock(zoneId = today.sunrise.zone, dayPeriod = dayPeriod)
+            NowTimezoneDiffText(dateTime = today.sunrise, dayPeriod = dayPeriod)
           }
           Spacer(modifier = Modifier.width(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday)
+          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
         }
       }
     }
@@ -477,7 +482,7 @@ private fun ClockAndDayLengthCard(
 }
 
 @Composable
-private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
+private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
   val textStyle = MaterialTheme.typography.labelLarge
   val resolver = LocalFontFamilyResolver.current
 
@@ -498,8 +503,8 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
           ?.let(this::setTypeface)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextColor(Color.Black.toArgb())
-        setShadowLayer(1f, 1f, 1f, Color.White.toArgb())
+        setTextColor(dayPeriod.textColor().toArgb())
+        setShadowLayer(1f, 1f, 1f, dayPeriod.textShadowColor().toArgb())
       }
     },
     update = { clockView -> clockView.timeZone = zoneId.id },
@@ -508,22 +513,24 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
+private fun NowTimezoneDiffText(dateTime: ZonedDateTime, dayPeriod: DayPeriod) {
   val context = LocalContext.current
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime),
     textAlign = TextAlign.Center,
     fontSize = 12.sp,
     overflow = TextOverflow.Ellipsis,
+    color = dayPeriod.textColor(),
     style =
       MaterialTheme.typography.bodySmall.copy(
-        shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+        shadow =
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
       )
   )
 }
 
 @Composable
-private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
+private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset, dayPeriod: DayPeriod) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
@@ -537,17 +544,21 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
       )
     Text(
       text = stringResource(id = R.string.day_length_label),
+      color = dayPeriod.textColor(),
       style =
         MaterialTheme.typography.bodyLarge.copy(
-          shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+          shadow =
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
         )
     )
     Row {
       Text(
         text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+        color = dayPeriod.textColor(),
         style =
           MaterialTheme.typography.bodyMedium.copy(
-            shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+            shadow =
+              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
       Text(text = " ")
@@ -561,7 +572,8 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
           },
         style =
           MaterialTheme.typography.bodyMedium.copy(
-            shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
+            shadow =
+              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
     }
