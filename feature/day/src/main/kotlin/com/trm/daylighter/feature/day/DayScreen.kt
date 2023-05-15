@@ -480,7 +480,6 @@ private fun ClockAndDayLengthCard(
 private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
   val textStyle = MaterialTheme.typography.labelLarge
   val resolver = LocalFontFamilyResolver.current
-  val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
 
   AndroidView(
     factory = { context ->
@@ -497,9 +496,10 @@ private fun Clock(zoneId: ZoneId, modifier: Modifier = Modifier) {
           .value
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextColor(textColor)
+        setTextColor(Color.Black.toArgb())
+        setShadowLayer(1f, 1f, 1f, Color.White.toArgb())
       }
     },
     update = { clockView -> clockView.timeZone = zoneId.id },
@@ -514,7 +514,11 @@ private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime),
     textAlign = TextAlign.Center,
     fontSize = 12.sp,
-    overflow = TextOverflow.Ellipsis
+    overflow = TextOverflow.Ellipsis,
+    style =
+      MaterialTheme.typography.bodySmall.copy(
+        shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+      )
   )
 }
 
@@ -531,9 +535,21 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
         todayLengthSeconds = today.dayLengthSeconds,
         yesterdayLengthSeconds = yesterday.dayLengthSeconds
       )
-    Text(text = stringResource(id = R.string.day_length_label))
+    Text(
+      text = stringResource(id = R.string.day_length_label),
+      style =
+        MaterialTheme.typography.bodyLarge.copy(
+          shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+        )
+    )
     Row {
-      Text(text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME))
+      Text(
+        text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+        style =
+          MaterialTheme.typography.bodyMedium.copy(
+            shadow = Shadow(color = Color.White, offset = Offset(1f, 1f), blurRadius = 1f)
+          )
+      )
       Text(text = " ")
       Text(
         text = formatTimeDifference(diffPrefix, dayLengthDiffTime),
@@ -542,7 +558,11 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
             "+" -> Color.Green
             "-" -> Color.Red
             else -> light_onDayColor
-          }
+          },
+        style =
+          MaterialTheme.typography.bodyMedium.copy(
+            shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
+          )
       )
     }
   }
