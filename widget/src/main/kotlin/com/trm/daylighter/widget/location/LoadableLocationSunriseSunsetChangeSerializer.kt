@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation
+package com.trm.daylighter.widget.location
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer

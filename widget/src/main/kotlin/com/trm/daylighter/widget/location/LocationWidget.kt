@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation.chart
+package com.trm.daylighter.widget.location
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -69,8 +69,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import com.trm.daylighter.core.common.R as commonR
 
-class DefaultLocationChartWidget : GlanceAppWidget() {
-  override val stateDefinition = DefaultLocationChartWidgetStateDefinition
+class LocationWidget : GlanceAppWidget() {
+  override val stateDefinition = LocationWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
   @Composable
@@ -237,7 +237,7 @@ private fun nowLinePaint(context: Context): Paint =
 
 @Composable
 private fun updateWidgetAction() =
-  actionSendBroadcast(DefaultLocationChartWidgetReceiver.updateIntent(LocalContext.current))
+  actionSendBroadcast(LocationWidgetReceiver.updateIntent(LocalContext.current))
 
 @Composable
 private fun LocationName(location: Location) {

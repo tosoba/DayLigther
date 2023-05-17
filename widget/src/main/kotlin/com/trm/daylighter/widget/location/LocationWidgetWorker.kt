@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation.chart
+package com.trm.daylighter.widget.location
 
 import android.content.Context
 import androidx.glance.GlanceId
@@ -25,7 +25,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 @HiltWorker
-class DefaultLocationChartWidgetWorker
+class LocationWidgetWorker
 @AssistedInject
 constructor(
   @Assisted private val context: Context,
@@ -34,7 +34,7 @@ constructor(
   private val sunriseSunsetRepo: SunriseSunsetRepo,
 ) : CoroutineWorker(context, workerParameters) {
   override suspend fun doWork(): Result {
-    val glanceIds = context.getGlanceIds<DefaultLocationChartWidget>()
+    val glanceIds = context.getGlanceIds<LocationWidget>()
     setWidgetState(glanceIds = glanceIds, newState = LoadingFirst)
     try {
       setWidgetState(
@@ -56,18 +56,18 @@ constructor(
     glanceIds.forEach { glanceId ->
       updateAppWidgetState(
         context = context,
-        definition = DefaultLocationChartWidgetStateDefinition,
+        definition = LocationWidgetStateDefinition,
         glanceId = glanceId,
         updateState = { newState }
       )
     }
-    DefaultLocationChartWidget().updateAll(context)
+    LocationWidget().updateAll(context)
   }
 
   internal companion object : WidgetWorkerManager() {
     override val workName: String = "DefaultLocationChartWidgetWork"
 
     override val inputData: Data
-      get() = DefaultLocationChartWidgetWorker::class.delegatedData()
+      get() = LocationWidgetWorker::class.delegatedData()
   }
 }
