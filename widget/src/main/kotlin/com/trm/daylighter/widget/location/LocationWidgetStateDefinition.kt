@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation.clock
+package com.trm.daylighter.widget.location
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -7,12 +7,11 @@ import androidx.datastore.dataStoreFile
 import androidx.glance.state.GlanceStateDefinition
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
-import com.trm.daylighter.widget.defaultlocation.LoadableLocationSunriseSunsetChangeSerializer
 import java.io.File
 
-object DefaultLocationClockWidgetStateDefinition :
+object LocationWidgetStateDefinition :
   GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
-  private const val DATA_STORE_FILENAME = "DefaultLocationClockWidget"
+  private const val DATA_STORE_FILENAME = "DefaultLocationChartWidget"
 
   private val Context.datastore by dataStore(DATA_STORE_FILENAME, LoadableLocationSunriseSunsetChangeSerializer)
 

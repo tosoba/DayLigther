@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.defaultlocation.chart
+package com.trm.daylighter.widget.location
 
 import android.content.Context
 import android.content.Intent
@@ -11,17 +11,17 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DefaultLocationChartWidgetReceiver : GlanceAppWidgetReceiver() {
-  override val glanceAppWidget: GlanceAppWidget = DefaultLocationChartWidget()
+class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
+  override val glanceAppWidget: GlanceAppWidget = LocationWidget()
 
   override fun onEnabled(context: Context) {
     super.onEnabled(context)
-    DefaultLocationChartWidgetWorker.enqueue(context)
+    LocationWidgetWorker.enqueue(context)
   }
 
   override fun onDisabled(context: Context) {
     super.onDisabled(context)
-    DefaultLocationChartWidgetWorker.cancel(context)
+    LocationWidgetWorker.cancel(context)
   }
 
   override fun onReceive(context: Context, intent: Intent) {
@@ -33,8 +33,8 @@ class DefaultLocationChartWidgetReceiver : GlanceAppWidgetReceiver() {
 
   private fun enqueueWidgetUpdateIfAnyExists(context: Context) {
     MainScope().launch {
-      if (context.anyWidgetExists<DefaultLocationChartWidget>()) {
-        DefaultLocationChartWidgetWorker.enqueue(context)
+      if (context.anyWidgetExists<LocationWidget>()) {
+        LocationWidgetWorker.enqueue(context)
       }
     }
   }
@@ -43,6 +43,6 @@ class DefaultLocationChartWidgetReceiver : GlanceAppWidgetReceiver() {
     private const val ACTION_UPDATE = "ACTION_UPDATE"
 
     fun updateIntent(context: Context): Intent =
-      context.widgetReceiverIntent<DefaultLocationChartWidgetReceiver>(ACTION_UPDATE)
+      context.widgetReceiverIntent<LocationWidgetReceiver>(ACTION_UPDATE)
   }
 }
