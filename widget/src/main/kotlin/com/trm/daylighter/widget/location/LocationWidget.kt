@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.BitmapImageProvider
+import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
@@ -26,6 +27,7 @@ import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
+import androidx.glance.appwidget.provideContent
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -37,6 +39,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
@@ -48,6 +51,8 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.core.domain.model.asLoadable
+import com.trm.daylighter.core.domain.repo.SunriseSunsetRepo
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
@@ -67,14 +72,24 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import com.trm.daylighter.core.common.R as commonR
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
-class LocationWidget : GlanceAppWidget() {
+class LocationWidget(
+  private val sunriseSunsetRepo: SunriseSunsetRepo,
+  private val ioDispatcher: CoroutineDispatcher,
+) : GlanceAppWidget() {
   override val stateDefinition = LocationWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
+    withContext(ioDispatcher) { sunriseSunsetRepo.getDefaultLocationSunriseSunsetChange() }
+      .asLoadable()
+    provideContent { Content() }
+  }
+
   @Composable
-  override fun Content() {
+  private fun Content() {
     GlanceTheme {
       when (val change = currentState<Loadable<LocationSunriseSunsetChange>>()) {
         Empty -> AddLocationButton()
