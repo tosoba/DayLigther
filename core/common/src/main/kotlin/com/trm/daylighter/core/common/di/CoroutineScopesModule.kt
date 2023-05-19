@@ -1,10 +1,12 @@
 package com.trm.daylighter.core.common.di
 
+import com.trm.daylighter.core.domain.di.ApplicationScope
+import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.Dispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -20,5 +22,3 @@ object CoroutineScopesModule {
     @Dispatcher(DaylighterDispatchers.DEFAULT) defaultDispatcher: CoroutineDispatcher
   ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 }
-
-@Retention(AnnotationRetention.RUNTIME) @Qualifier annotation class ApplicationScope

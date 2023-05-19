@@ -14,7 +14,9 @@ dependencies {
   implementation(project(":core:ui"))
   implementation(project(":work"))
 
-  implementation(libs.glance)
+  implementation(libs.material)
+  implementation(libs.glance.appwidget)
+  implementation(libs.glance.material3)
 
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.serialization.json)
