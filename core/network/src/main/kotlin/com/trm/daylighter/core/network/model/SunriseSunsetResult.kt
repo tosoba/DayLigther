@@ -1,34 +1,34 @@
 package com.trm.daylighter.core.network.model
 
-import com.trm.daylighter.core.network.serializer.ZonedDateTimeSerializer
-import java.time.ZonedDateTime
+import com.trm.daylighter.core.network.serializer.LocalDateTimeSerializer
+import java.time.LocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SunriseSunsetResult(
-  @Serializable(ZonedDateTimeSerializer::class)
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("astronomical_twilight_begin")
-  val astronomicalTwilightBegin: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class)
+  val astronomicalTwilightBegin: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("astronomical_twilight_end")
-  val astronomicalTwilightEnd: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class)
+  val astronomicalTwilightEnd: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("civil_twilight_begin")
-  val civilTwilightBegin: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class)
+  val civilTwilightBegin: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("civil_twilight_end")
-  val civilTwilightEnd: ZonedDateTime,
+  val civilTwilightEnd: LocalDateTime,
   @SerialName("day_length") val dayLengthSeconds: Int,
-  @Serializable(ZonedDateTimeSerializer::class)
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("nautical_twilight_begin")
-  val nauticalTwilightBegin: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class)
+  val nauticalTwilightBegin: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("nautical_twilight_end")
-  val nauticalTwilightEnd: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class)
+  val nauticalTwilightEnd: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class)
   @SerialName("solar_noon")
-  val solarNoon: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class) @SerialName("sunrise") val sunrise: ZonedDateTime,
-  @Serializable(ZonedDateTimeSerializer::class) @SerialName("sunset") val sunset: ZonedDateTime,
+  val solarNoon: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunrise") val sunrise: LocalDateTime,
+  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunset") val sunset: LocalDateTime,
 )

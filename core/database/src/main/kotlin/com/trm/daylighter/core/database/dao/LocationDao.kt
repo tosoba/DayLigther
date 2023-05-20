@@ -5,6 +5,7 @@ import com.trm.daylighter.core.database.entity.LocationEntity
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface LocationDao {
@@ -19,7 +20,7 @@ interface LocationDao {
         longitude = longitude,
         name = name,
         isDefault = !anyExists,
-        updatedAt = ZonedDateTime.now(),
+        updatedAt = LocalDateTime.now(),
         zoneId = zoneId,
       )
     insert(entity)

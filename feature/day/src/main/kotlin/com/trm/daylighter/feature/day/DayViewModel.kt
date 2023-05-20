@@ -15,6 +15,7 @@ import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsExceptio
 import com.trm.daylighter.feature.day.ext.getUpcomingTimestampsSorted
 import com.trm.daylighter.feature.day.ext.now
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.util.*
 import javax.inject.Inject
@@ -54,18 +55,18 @@ constructor(
     SharedFlow<StableLoadable<LocationSunriseSunsetChange>> =
     buildCurrentLocationSunriseSunsetChangeFlow()
 
-  val nowAtCurrentLocation: SharedFlow<ZonedDateTime> =
+  val nowAtCurrentLocation: SharedFlow<LocalDateTime> =
     currentLocationSunriseSunsetChangeFlow
       .map { it.value }
       .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
-      .map { it.data.today }
-      .transformLatest { today ->
-        val initialNow = today.now()
+      .map { it.data }
+      .transformLatest { (location, today) ->
+        val initialNow = today.now(location.zoneId)
         emit(initialNow)
 
         val remainingTimestamps = LinkedList(today.getUpcomingTimestampsSorted(initialNow))
         while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          val now = today.now()
+          val now = today.now(location.zoneId)
           if (remainingTimestamps.first().isBefore(now)) {
             remainingTimestamps.removeFirst()
             emit(now)

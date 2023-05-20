@@ -89,7 +89,7 @@ fun DayRoute(
       initialValue = StableValue(LoadingFirst)
     )
   val now =
-    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = ZonedDateTime.now())
+    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = LocalDateTime.now())
   val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
 
   DayScreen(
@@ -109,7 +109,7 @@ fun DayRoute(
 @Composable
 private fun DayScreen(
   change: StableLoadable<LocationSunriseSunsetChange>,
-  now: ZonedDateTime,
+  now: LocalDateTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onDrawerMenuClick: () -> Unit,
@@ -122,12 +122,12 @@ private fun DayScreen(
   val changeValue = change.value
   var dayMode by rememberSaveable {
     mutableStateOf(
-      if (changeValue is WithData) initialDayMode(changeValue.data.today.sunrise.zone)
+      if (changeValue is WithData) initialDayMode(changeValue.data.location.zoneId)
       else DayMode.SUNRISE
     )
   }
   LaunchedEffect(change) {
-    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today.sunrise.zone)
+    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.location.zoneId)
   }
 
   SunriseSunset(
@@ -179,7 +179,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 private fun SunriseSunset(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
-  now: ZonedDateTime,
+  now: LocalDateTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onChangeLocationIndex: (Int) -> Unit,
@@ -444,7 +444,10 @@ private fun ClockAndDayLengthCard(
   modifier: Modifier = Modifier,
 ) {
   val changeValue = change.value
-  val dayPeriod = changeValue.map { it.today.currentPeriod() }.dataOrElse(DayPeriod.DAY)
+  val dayPeriod =
+    changeValue
+      .map { (location, today) -> today.currentPeriod(location.zoneId) }
+      .dataOrElse(DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,
@@ -453,14 +456,14 @@ private fun ClockAndDayLengthCard(
     modifier = modifier
   ) {
     if (changeValue is WithData) {
-      val (_, today, yesterday) = changeValue.data
+      val (location, today, yesterday) = changeValue.data
       if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
           modifier = Modifier.padding(8.dp)
         ) {
-          Clock(zoneId = today.sunrise.zone, dayPeriod = dayPeriod)
-          NowTimezoneDiffText(dateTime = today.sunrise, dayPeriod = dayPeriod)
+          Clock(zoneId = location.zoneId, dayPeriod = dayPeriod)
+          NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod)
           Spacer(modifier = Modifier.height(5.dp))
           DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
         }
@@ -470,8 +473,8 @@ private fun ClockAndDayLengthCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
           ) {
-            Clock(zoneId = today.sunrise.zone, dayPeriod = dayPeriod)
-            NowTimezoneDiffText(dateTime = today.sunrise, dayPeriod = dayPeriod)
+            Clock(zoneId = location.zoneId, dayPeriod = dayPeriod)
+            NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod)
           }
           Spacer(modifier = Modifier.width(5.dp))
           DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
@@ -513,10 +516,10 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
 }
 
 @Composable
-private fun NowTimezoneDiffText(dateTime: ZonedDateTime, dayPeriod: DayPeriod) {
+private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
   val context = LocalContext.current
   Text(
-    text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime),
+    text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
     textAlign = TextAlign.Center,
     fontSize = 12.sp,
     overflow = TextOverflow.Ellipsis,
@@ -680,17 +683,19 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
 private fun SunriseSunsetChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
-  now: ZonedDateTime,
+  now: LocalDateTime,
   modifier: Modifier = Modifier
 ) {
   val changeValue = change.value
 
   val orientation = LocalConfiguration.current.orientation
+  val zoneId = if (changeValue is WithData) changeValue.data.location.zoneId else null
   val today = if (changeValue is WithData) changeValue.data.today else null
   val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
 
   val chartSegments =
     dayChartSegments(
+      zoneId = zoneId,
       today = today,
       yesterday = yesterday,
       orientation = orientation,
@@ -968,10 +973,10 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val sunrisePeriodStart: ZonedDateTime?,
-  val sunrisePeriodEnd: ZonedDateTime?,
-  val sunsetPeriodStart: ZonedDateTime?,
-  val sunsetPeriodEnd: ZonedDateTime?,
+  val sunrisePeriodStart: LocalDateTime?,
+  val sunrisePeriodEnd: LocalDateTime?,
+  val sunsetPeriodStart: LocalDateTime?,
+  val sunsetPeriodEnd: LocalDateTime?,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
@@ -979,7 +984,7 @@ private data class DayChartSegment(
   val sunriseDiffLabel: (() -> String)? = null,
   val sunsetDiffLabel: (() -> String)? = null,
 ) {
-  fun isCurrent(now: ZonedDateTime, dayMode: DayMode): Boolean =
+  fun isCurrent(now: LocalDateTime, dayMode: DayMode): Boolean =
     hasAllTimestamps && (isInSunrisePeriod(now, dayMode) || isInSunsetPeriod(now, dayMode))
 
   private val hasAllTimestamps: Boolean
@@ -989,10 +994,10 @@ private data class DayChartSegment(
         sunsetPeriodStart != null &&
         sunsetPeriodEnd != null
 
-  private fun isInSunrisePeriod(now: ZonedDateTime, dayMode: DayMode): Boolean =
+  private fun isInSunrisePeriod(now: LocalDateTime, dayMode: DayMode): Boolean =
     dayMode == DayMode.SUNRISE && now.isAfter(sunrisePeriodStart) && now.isBefore(sunrisePeriodEnd)
 
-  private fun isInSunsetPeriod(now: ZonedDateTime, dayMode: DayMode): Boolean =
+  private fun isInSunsetPeriod(now: LocalDateTime, dayMode: DayMode): Boolean =
     dayMode == DayMode.SUNSET && now.isAfter(sunsetPeriodStart) && now.isBefore(sunsetPeriodEnd)
 }
 
@@ -1001,6 +1006,7 @@ private fun initialDayMode(zoneId: ZoneId): DayMode =
 
 @Composable
 private fun dayChartSegments(
+  zoneId: ZoneId?,
   today: SunriseSunset?,
   yesterday: SunriseSunset?,
   orientation: Int,
@@ -1153,12 +1159,19 @@ private fun dayChartSegments(
         color = nightColor,
         periodLabel = nightLabel,
         sunrisePeriodStart =
-          today?.let { ZonedDateTime.ofLocal(it.date.atStartOfDay(), it.sunrise.zone, null) },
+          if (zoneId != null && today != null) {
+            ZonedDateTime.ofLocal(today.date.atStartOfDay(), zoneId, null).toLocalDateTime()
+          } else {
+            null
+          },
         sunrisePeriodEnd = today?.astronomicalTwilightBegin,
         sunsetPeriodStart = today?.astronomicalTwilightEnd,
         sunsetPeriodEnd =
-          today?.let {
-            ZonedDateTime.ofLocal(it.date.plusDays(1L).atStartOfDay(), it.sunrise.zone, null)
+          if (zoneId != null && today != null) {
+            ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), zoneId, null)
+              .toLocalDateTime()
+          } else {
+            null
           },
       ),
     )

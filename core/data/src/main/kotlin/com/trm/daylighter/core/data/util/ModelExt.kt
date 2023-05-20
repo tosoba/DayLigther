@@ -5,13 +5,13 @@ import java.time.ZoneId
 
 fun SunriseSunsetResult.timezoneAdjusted(zoneId: ZoneId): SunriseSunsetResult =
   copy(
-    astronomicalTwilightBegin = astronomicalTwilightBegin.withZoneSameInstant(zoneId),
-    astronomicalTwilightEnd = astronomicalTwilightEnd.withZoneSameInstant(zoneId),
-    civilTwilightBegin = civilTwilightBegin.withZoneSameInstant(zoneId),
-    civilTwilightEnd = civilTwilightEnd.withZoneSameInstant(zoneId),
-    nauticalTwilightBegin = nauticalTwilightBegin.withZoneSameInstant(zoneId),
-    nauticalTwilightEnd = nauticalTwilightEnd.withZoneSameInstant(zoneId),
-    solarNoon = solarNoon.withZoneSameInstant(zoneId),
-    sunrise = sunrise.withZoneSameInstant(zoneId),
-    sunset = sunset.withZoneSameInstant(zoneId),
+    astronomicalTwilightBegin = astronomicalTwilightBegin.atZone(zoneId).toLocalDateTime(),
+    astronomicalTwilightEnd = astronomicalTwilightEnd.atZone(zoneId).toLocalDateTime(),
+    civilTwilightBegin = civilTwilightBegin.atZone(zoneId).toLocalDateTime(),
+    civilTwilightEnd = civilTwilightEnd.atZone(zoneId).toLocalDateTime(),
+    nauticalTwilightBegin = nauticalTwilightBegin.atZone(zoneId).toLocalDateTime(),
+    nauticalTwilightEnd = nauticalTwilightEnd.atZone(zoneId).toLocalDateTime(),
+    solarNoon = solarNoon.atZone(zoneId).toLocalDateTime(),
+    sunrise = sunrise.atZone(zoneId).toLocalDateTime(),
+    sunset = sunset.atZone(zoneId).toLocalDateTime(),
   )

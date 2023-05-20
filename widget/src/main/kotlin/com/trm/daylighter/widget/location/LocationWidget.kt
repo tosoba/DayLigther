@@ -127,8 +127,8 @@ class LocationWidget(
             modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
           ) {
             LocationName(location = change.location)
-            Clock(zoneId = change.today.sunrise.zone)
-            NowTimezoneDiffText(dateTime = change.today.sunrise)
+            Clock(zoneId = change.location.zoneId)
+            NowTimezoneDiffText(dateTime = change.today.sunrise.atZone(change.location.zoneId))
             DayLengthInfo(today = change.today, yesterday = change.yesterday)
           }
         }
@@ -148,22 +148,22 @@ private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
   val widthPx = size.width.value.toPx
   val heightPx = size.height.value.toPx
   val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
-  val (_, today, _) = change
+  val (location, today, _) = change
 
   Canvas(bitmap).apply {
-    drawDayPeriods(today = change.today)
-    drawTimeLine(dateTime = ZonedDateTime.now(today.sunrise.zone), paint = nowLinePaint(context))
+    drawDayPeriods(zoneId = location.zoneId, today = change.today)
+    drawTimeLine(dateTime = ZonedDateTime.now(location.zoneId), paint = nowLinePaint(context))
   }
 
   return bitmap
 }
 
-private fun Canvas.drawDayPeriods(today: SunriseSunset) {
+private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset) {
   val widthPx = width.toFloat()
   val heightPx = height.toFloat()
 
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
-  val durations = dayPeriodDurationsInSeconds(today)
+  val durations = dayPeriodDurationsInSeconds(zoneId = zoneId, sunriseSunset = today)
   val paints = dayPeriodPaints()
 
   var left = 0f
@@ -176,20 +176,20 @@ private fun Canvas.drawDayPeriods(today: SunriseSunset) {
   }
 }
 
-private fun dayPeriodDurationsInSeconds(sunriseSunset: SunriseSunset): List<Float> {
+private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSunset): List<Float> {
   val periodInstants =
     sunriseSunset.run {
       listOf(
-          date.atStartOfDay(sunrise.zone),
-          astronomicalTwilightBegin,
-          nauticalTwilightBegin,
-          civilTwilightBegin,
-          sunrise,
-          sunset,
-          civilTwilightEnd,
-          nauticalTwilightEnd,
-          astronomicalTwilightEnd,
-          date.atStartOfDay(sunrise.zone).plusDays(1L),
+          date.atStartOfDay(zoneId),
+          astronomicalTwilightBegin.atZone(zoneId),
+          nauticalTwilightBegin.atZone(zoneId),
+          civilTwilightBegin.atZone(zoneId),
+          sunrise.atZone(zoneId),
+          sunset.atZone(zoneId),
+          civilTwilightEnd.atZone(zoneId),
+          nauticalTwilightEnd.atZone(zoneId),
+          astronomicalTwilightEnd.atZone(zoneId),
+          date.atStartOfDay(zoneId).plusDays(1L),
         )
         .map(ZonedDateTime::toInstant)
     }

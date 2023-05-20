@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import java.time.LocalDate
-import java.time.ZonedDateTime
+import java.time.LocalDateTime
 
 @Entity(
   tableName = "sunrise_sunset",
@@ -20,16 +20,16 @@ import java.time.ZonedDateTime
     ]
 )
 data class SunriseSunsetEntity(
-  @ColumnInfo(name = "astronomical_twilight_begin") val astronomicalTwilightBegin: ZonedDateTime,
-  @ColumnInfo(name = "astronomical_twilight_end") val astronomicalTwilightEnd: ZonedDateTime,
-  @ColumnInfo(name = "civil_twilight_begin") val civilTwilightBegin: ZonedDateTime,
-  @ColumnInfo(name = "civil_twilight_end") val civilTwilightEnd: ZonedDateTime,
+  @ColumnInfo(name = "astronomical_twilight_begin") val astronomicalTwilightBegin: LocalDateTime,
+  @ColumnInfo(name = "astronomical_twilight_end") val astronomicalTwilightEnd: LocalDateTime,
+  @ColumnInfo(name = "civil_twilight_begin") val civilTwilightBegin: LocalDateTime,
+  @ColumnInfo(name = "civil_twilight_end") val civilTwilightEnd: LocalDateTime,
   @ColumnInfo(name = "day_length_seconds") val dayLengthSeconds: Int,
-  @ColumnInfo(name = "nautical_twilight_begin") val nauticalTwilightBegin: ZonedDateTime,
-  @ColumnInfo(name = "nautical_twilight_end") val nauticalTwilightEnd: ZonedDateTime,
-  @ColumnInfo(name = "solar_noon") val solarNoon: ZonedDateTime,
-  val sunrise: ZonedDateTime,
-  val sunset: ZonedDateTime,
+  @ColumnInfo(name = "nautical_twilight_begin") val nauticalTwilightBegin: LocalDateTime,
+  @ColumnInfo(name = "nautical_twilight_end") val nauticalTwilightEnd: LocalDateTime,
+  @ColumnInfo(name = "solar_noon") val solarNoon: LocalDateTime,
+  val sunrise: LocalDateTime,
+  val sunset: LocalDateTime,
   val date: LocalDate,
   @ColumnInfo(name = "location_id") val locationId: Long,
 )

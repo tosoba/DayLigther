@@ -2,20 +2,21 @@ package com.trm.daylighter.core.common.util.ext
 
 import android.content.Context
 import com.trm.daylighter.core.common.R
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
-fun ZonedDateTime.isEqualOrAfter(other: ZonedDateTime): Boolean = isEqual(other) || isAfter(other)
+fun LocalDateTime.isEqualOrAfter(other: LocalDateTime): Boolean = isEqual(other) || isAfter(other)
 
-val ZonedDateTime.isoLocalTimeLabel24H: String
+val LocalDateTime.isoLocalTimeLabel24H: String
   get() = format(DateTimeFormatter.ISO_TIME)
 
-val ZonedDateTime.isoLocalTimeLabel12H: String
+val LocalDateTime.isoLocalTimeLabel12H: String
   get() = format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 
-fun ZonedDateTime.timeLabel(using24HFormat: Boolean): () -> String =
+fun LocalDateTime.timeLabel(using24HFormat: Boolean): () -> String =
   if (using24HFormat) ::isoLocalTimeLabel24H else ::isoLocalTimeLabel12H
 
 fun timeDifferenceLabel(from: LocalTime, to: LocalTime): String {
