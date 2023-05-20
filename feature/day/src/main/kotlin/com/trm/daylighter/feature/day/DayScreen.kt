@@ -71,7 +71,6 @@ import com.trm.daylighter.feature.day.model.DayPeriod
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -123,11 +122,12 @@ private fun DayScreen(
   val changeValue = change.value
   var dayMode by rememberSaveable {
     mutableStateOf(
-      if (changeValue is WithData) initialDayMode(changeValue.data.today) else DayMode.SUNRISE
+      if (changeValue is WithData) initialDayMode(changeValue.data.today.sunrise.zone)
+      else DayMode.SUNRISE
     )
   }
   LaunchedEffect(change) {
-    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today)
+    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.today.sunrise.zone)
   }
 
   SunriseSunset(
@@ -996,16 +996,8 @@ private data class DayChartSegment(
     dayMode == DayMode.SUNSET && now.isAfter(sunsetPeriodStart) && now.isBefore(sunsetPeriodEnd)
 }
 
-private fun initialDayMode(today: SunriseSunset): DayMode {
-  val now = ZonedDateTime.now(today.sunrise.zone)
-  if (now.isBefore(today.sunrise)) return DayMode.SUNRISE
-  else if (now.isAfter(today.sunset)) return DayMode.SUNSET
-
-  val nowSeconds = now.toLocalTime().toSecondOfDay()
-  val diffSunrise = abs(nowSeconds - today.sunrise.toLocalTime().toSecondOfDay())
-  val diffSunset = abs(nowSeconds - today.sunset.toLocalTime().toSecondOfDay())
-  return if (diffSunset < diffSunrise) DayMode.SUNSET else DayMode.SUNRISE
-}
+private fun initialDayMode(zoneId: ZoneId): DayMode =
+  if (LocalTime.now(zoneId).isBefore(LocalTime.NOON)) DayMode.SUNRISE else DayMode.SUNSET
 
 @Composable
 private fun dayChartSegments(
