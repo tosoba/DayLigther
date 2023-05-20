@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.domain
+package com.trm.daylighter.core.domain.serializer
 
 import com.trm.daylighter.core.domain.model.*
 import java.io.IOException
