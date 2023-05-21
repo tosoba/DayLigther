@@ -9,26 +9,26 @@ import kotlinx.serialization.Serializable
 data class SunriseSunsetResult(
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("astronomical_twilight_begin")
-  val astronomicalTwilightBegin: LocalDateTime,
+  val astronomicalTwilightBegin: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("astronomical_twilight_end")
-  val astronomicalTwilightEnd: LocalDateTime,
+  val astronomicalTwilightEnd: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("civil_twilight_begin")
-  val civilTwilightBegin: LocalDateTime,
+  val civilTwilightBegin: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("civil_twilight_end")
-  val civilTwilightEnd: LocalDateTime,
+  val civilTwilightEnd: LocalDateTime?,
   @SerialName("day_length") val dayLengthSeconds: Int,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("nautical_twilight_begin")
-  val nauticalTwilightBegin: LocalDateTime,
+  val nauticalTwilightBegin: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("nautical_twilight_end")
-  val nauticalTwilightEnd: LocalDateTime,
+  val nauticalTwilightEnd: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("solar_noon")
-  val solarNoon: LocalDateTime,
-  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunrise") val sunrise: LocalDateTime,
-  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunset") val sunset: LocalDateTime,
+  val solarNoon: LocalDateTime?,
+  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunrise") val sunrise: LocalDateTime?,
+  @Serializable(LocalDateTimeSerializer::class) @SerialName("sunset") val sunset: LocalDateTime?,
 )

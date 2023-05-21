@@ -69,7 +69,6 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -165,7 +164,7 @@ private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset) {
 
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
   val durations = dayPeriodDurationsInSeconds(zoneId = zoneId, sunriseSunset = today)
-  val paints = dayPeriodPaints()
+  val paints = today.dayPeriodPaints()
 
   var left = 0f
   var right = left + durations.first() / secondsInDay * widthPx
@@ -199,22 +198,22 @@ private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSu
   }
 }
 
-private fun dayPeriodPaints(): List<Paint> {
+private fun SunriseSunset.dayPeriodPaints(): List<Paint> {
   val nightPaint = antiAliasPaint(color = nightColor.toArgb())
   val astronomicalTwilightPaint = antiAliasPaint(color = astronomicalTwilightColor.toArgb())
   val nauticalTwilightPaint = antiAliasPaint(color = nauticalTwilightColor.toArgb())
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
   val dayPaint = antiAliasPaint(color = dayColor.toArgb())
-  return listOf(
-    nightPaint,
-    astronomicalTwilightPaint,
-    nauticalTwilightPaint,
-    civilTwilightPaint,
-    dayPaint,
-    civilTwilightPaint,
-    nauticalTwilightPaint,
-    astronomicalTwilightPaint,
-    nightPaint
+  return listOfNotNull(
+    astronomicalTwilightBegin?.let { nightPaint },
+    nauticalTwilightBegin?.let { astronomicalTwilightPaint },
+    civilTwilightBegin?.let { nauticalTwilightPaint },
+    sunrise?.let { civilTwilightPaint },
+    if (sunrise != null && sunset != null) dayPaint else null,
+    sunset?.let { civilTwilightPaint },
+    civilTwilightEnd?.let { nauticalTwilightPaint },
+    nauticalTwilightEnd?.let { astronomicalTwilightPaint },
+    astronomicalTwilightEnd?.let { nightPaint }
   )
 }
 

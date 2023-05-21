@@ -20,16 +20,16 @@ import java.time.LocalDateTime
     ]
 )
 data class SunriseSunsetEntity(
-  @ColumnInfo(name = "astronomical_twilight_begin") val astronomicalTwilightBegin: LocalDateTime,
-  @ColumnInfo(name = "astronomical_twilight_end") val astronomicalTwilightEnd: LocalDateTime,
-  @ColumnInfo(name = "civil_twilight_begin") val civilTwilightBegin: LocalDateTime,
-  @ColumnInfo(name = "civil_twilight_end") val civilTwilightEnd: LocalDateTime,
+  @ColumnInfo(name = "astronomical_twilight_begin") val astronomicalTwilightBegin: LocalDateTime?,
+  @ColumnInfo(name = "astronomical_twilight_end") val astronomicalTwilightEnd: LocalDateTime?,
+  @ColumnInfo(name = "civil_twilight_begin") val civilTwilightBegin: LocalDateTime?,
+  @ColumnInfo(name = "civil_twilight_end") val civilTwilightEnd: LocalDateTime?,
   @ColumnInfo(name = "day_length_seconds") val dayLengthSeconds: Int,
-  @ColumnInfo(name = "nautical_twilight_begin") val nauticalTwilightBegin: LocalDateTime,
-  @ColumnInfo(name = "nautical_twilight_end") val nauticalTwilightEnd: LocalDateTime,
-  @ColumnInfo(name = "solar_noon") val solarNoon: LocalDateTime,
-  val sunrise: LocalDateTime,
-  val sunset: LocalDateTime,
+  @ColumnInfo(name = "nautical_twilight_begin") val nauticalTwilightBegin: LocalDateTime?,
+  @ColumnInfo(name = "nautical_twilight_end") val nauticalTwilightEnd: LocalDateTime?,
+  @ColumnInfo(name = "solar_noon") val solarNoon: LocalDateTime?,
+  val sunrise: LocalDateTime?,
+  val sunset: LocalDateTime?,
   val date: LocalDate,
   @ColumnInfo(name = "location_id") val locationId: Long,
 )
