@@ -732,7 +732,7 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    var startAngle = -180f
+    var startAngle = -90f
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
       val isCurrent = segment.isCurrent(now, dayMode)
@@ -1029,7 +1029,7 @@ private fun dayChartSegments(
   return remember(today, yesterday, using24HFormat) {
     listOf(
       DayChartSegment(
-        sweepAngleDegrees = 180f,
+        sweepAngleDegrees = 90f,
         color = dayColor,
         periodLabel = dayLabel,
         sunrisePeriodStart = today?.sunrise,

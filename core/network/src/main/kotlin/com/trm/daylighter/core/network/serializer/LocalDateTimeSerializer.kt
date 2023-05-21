@@ -17,7 +17,7 @@ object LocalDateTimeSerializer : KSerializer<LocalDateTime?> {
 
   @OptIn(ExperimentalSerializationApi::class)
   override fun serialize(encoder: Encoder, value: LocalDateTime?) {
-    value?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)?.let { encoder.encodeString(it) }
+    value?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)?.let(encoder::encodeString)
       ?: run { encoder.encodeNull() }
   }
 
