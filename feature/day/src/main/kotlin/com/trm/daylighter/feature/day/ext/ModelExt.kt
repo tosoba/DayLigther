@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.day.ext
 
 import androidx.compose.ui.graphics.Color
+import com.trm.daylighter.core.common.util.ext.isBeforeNotNull
 import com.trm.daylighter.core.common.util.ext.isEqualOrAfter
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
@@ -14,9 +15,9 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal fun SunriseSunset.getUpcomingTimestampsSorted(now: LocalDateTime): List<LocalDateTime> =
-  allTimestamps().filter { it.isAfter(now) }.sorted()
+  allTimestamps().filterNotNull().filter { it.isAfter(now) }.sorted()
 
-internal fun SunriseSunset.allTimestamps(): List<LocalDateTime> =
+internal fun SunriseSunset.allTimestamps(): List<LocalDateTime?> =
   listOf(
     astronomicalTwilightBegin,
     astronomicalTwilightEnd,
@@ -31,22 +32,23 @@ internal fun SunriseSunset.allTimestamps(): List<LocalDateTime> =
 internal fun SunriseSunset.currentPeriod(zoneId: ZoneId): DayPeriod {
   val now = now(zoneId)
   return when {
-    now.isBefore(astronomicalTwilightBegin) || now.isEqualOrAfter(astronomicalTwilightEnd) -> {
+    now.isBeforeNotNull(astronomicalTwilightBegin) ||
+      now.isEqualOrAfter(astronomicalTwilightEnd) -> {
       DayPeriod.NIGHT
     }
-    (now.isEqualOrAfter(astronomicalTwilightBegin) && now.isBefore(nauticalTwilightBegin)) ||
-      (now.isEqualOrAfter(nauticalTwilightEnd) && now.isBefore(astronomicalTwilightEnd)) -> {
+    (now.isEqualOrAfter(astronomicalTwilightBegin) && now.isBeforeNotNull(nauticalTwilightBegin)) ||
+      (now.isEqualOrAfter(nauticalTwilightEnd) && now.isBeforeNotNull(astronomicalTwilightEnd)) -> {
       DayPeriod.ASTRONOMICAL
     }
-    (now.isEqualOrAfter(nauticalTwilightBegin) && now.isBefore(civilTwilightBegin)) ||
-      (now.isEqualOrAfter(civilTwilightEnd) && now.isBefore(nauticalTwilightEnd)) -> {
+    (now.isEqualOrAfter(nauticalTwilightBegin) && now.isBeforeNotNull(civilTwilightBegin)) ||
+      (now.isEqualOrAfter(civilTwilightEnd) && now.isBeforeNotNull(nauticalTwilightEnd)) -> {
       DayPeriod.NAUTICAL
     }
-    (now.isEqualOrAfter(civilTwilightBegin) && now.isBefore(sunrise)) ||
-      (now.isEqualOrAfter(sunset) && now.isBefore(civilTwilightEnd)) -> {
+    (now.isEqualOrAfter(civilTwilightBegin) && now.isBeforeNotNull(sunrise)) ||
+      (now.isEqualOrAfter(sunset) && now.isBeforeNotNull(civilTwilightEnd)) -> {
       DayPeriod.CIVIL
     }
-    now.isEqualOrAfter(sunrise) && now.isBefore(sunset) -> {
+    now.isEqualOrAfter(sunrise) && now.isBeforeNotNull(sunset) -> {
       DayPeriod.DAY
     }
     else -> {
@@ -69,5 +71,4 @@ internal fun DayPeriod.textColor(): Color = if (this == DayPeriod.DAY) Color.Bla
 internal fun DayPeriod.textShadowColor(): Color =
   if (this == DayPeriod.DAY) Color.White else Color.Black
 
-internal fun SunriseSunset.now(zoneId: ZoneId): LocalDateTime =
-  ZonedDateTime.now(zoneId).toLocalDateTime()
+internal fun now(zoneId: ZoneId): LocalDateTime = ZonedDateTime.now(zoneId).toLocalDateTime()

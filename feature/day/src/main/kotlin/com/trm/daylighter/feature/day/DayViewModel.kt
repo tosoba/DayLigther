@@ -61,12 +61,12 @@ constructor(
       .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
       .map { it.data }
       .transformLatest { (location, today) ->
-        val initialNow = today.now(location.zoneId)
+        val initialNow = now(location.zoneId)
         emit(initialNow)
 
         val remainingTimestamps = LinkedList(today.getUpcomingTimestampsSorted(initialNow))
         while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          val now = today.now(location.zoneId)
+          val now = now(location.zoneId)
           if (remainingTimestamps.first().isBefore(now)) {
             remainingTimestamps.removeFirst()
             emit(now)

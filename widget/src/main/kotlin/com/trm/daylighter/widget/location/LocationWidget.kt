@@ -69,6 +69,7 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -128,7 +129,7 @@ class LocationWidget(
           ) {
             LocationName(location = change.location)
             Clock(zoneId = change.location.zoneId)
-            NowTimezoneDiffText(dateTime = change.today.sunrise.atZone(change.location.zoneId))
+            NowTimezoneDiffText(dateTime = ZonedDateTime.now(change.location.zoneId))
             DayLengthInfo(today = change.today, yesterday = change.yesterday)
           }
         }
@@ -179,16 +180,16 @@ private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset) {
 private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSunset): List<Float> {
   val periodInstants =
     sunriseSunset.run {
-      listOf(
+      listOfNotNull(
           date.atStartOfDay(zoneId),
-          astronomicalTwilightBegin.atZone(zoneId),
-          nauticalTwilightBegin.atZone(zoneId),
-          civilTwilightBegin.atZone(zoneId),
-          sunrise.atZone(zoneId),
-          sunset.atZone(zoneId),
-          civilTwilightEnd.atZone(zoneId),
-          nauticalTwilightEnd.atZone(zoneId),
-          astronomicalTwilightEnd.atZone(zoneId),
+          astronomicalTwilightBegin?.atZone(zoneId),
+          nauticalTwilightBegin?.atZone(zoneId),
+          civilTwilightBegin?.atZone(zoneId),
+          sunrise?.atZone(zoneId),
+          sunset?.atZone(zoneId),
+          civilTwilightEnd?.atZone(zoneId),
+          nauticalTwilightEnd?.atZone(zoneId),
+          astronomicalTwilightEnd?.atZone(zoneId),
           date.atStartOfDay(zoneId).plusDays(1L),
         )
         .map(ZonedDateTime::toInstant)

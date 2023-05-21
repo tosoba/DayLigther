@@ -1041,15 +1041,19 @@ private fun dayChartSegments(
         sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
         sunsetTimeLabel = today?.sunset?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          if (today != null && yesterday != null) {
-            timeDifferenceLabel(yesterday.sunrise.toLocalTime(), today.sunrise.toLocalTime())
+          val yesterdaySunrise = yesterday?.sunrise
+          val todaySunrise = today?.sunrise
+          if (todaySunrise != null && yesterdaySunrise != null) {
+            timeDifferenceLabel(yesterdaySunrise.toLocalTime(), todaySunrise.toLocalTime())
           } else {
             ""
           }
         },
         sunsetDiffLabel = {
-          if (today != null && yesterday != null) {
-            timeDifferenceLabel(yesterday.sunset.toLocalTime(), today.sunset.toLocalTime())
+          val yesterdaySunset = yesterday?.sunset
+          val todaySunset = today?.sunset
+          if (todaySunset != null && yesterdaySunset != null) {
+            timeDifferenceLabel(yesterdaySunset.toLocalTime(), todaySunset.toLocalTime())
           } else {
             ""
           }
@@ -1068,20 +1072,24 @@ private fun dayChartSegments(
         sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
         sunsetTimeLabel = today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          if (today != null && yesterday != null) {
+          val yesterdayCivilTwilightBegin = yesterday?.civilTwilightBegin
+          val todayCivilTwilightBegin = today?.civilTwilightBegin
+          if (yesterdayCivilTwilightBegin != null && todayCivilTwilightBegin != null) {
             timeDifferenceLabel(
-              yesterday.civilTwilightBegin.toLocalTime(),
-              today.civilTwilightBegin.toLocalTime()
+              yesterdayCivilTwilightBegin.toLocalTime(),
+              todayCivilTwilightBegin.toLocalTime()
             )
           } else {
             ""
           }
         },
         sunsetDiffLabel = {
-          if (today != null && yesterday != null) {
+          val yesterdayCivilTwilightEnd = yesterday?.civilTwilightEnd
+          val todayCivilTwilightEnd = today?.civilTwilightEnd
+          if (todayCivilTwilightEnd != null && yesterdayCivilTwilightEnd != null) {
             timeDifferenceLabel(
-              yesterday.civilTwilightEnd.toLocalTime(),
-              today.civilTwilightEnd.toLocalTime()
+              yesterdayCivilTwilightEnd.toLocalTime(),
+              todayCivilTwilightEnd.toLocalTime()
             )
           } else {
             ""
@@ -1101,20 +1109,24 @@ private fun dayChartSegments(
         sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
         sunsetTimeLabel = today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          if (today != null && yesterday != null) {
+          val todayNauticalTwilightBegin = today?.nauticalTwilightBegin
+          val yesterdayNauticalTwilightBegin = yesterday?.nauticalTwilightBegin
+          if (todayNauticalTwilightBegin != null && yesterdayNauticalTwilightBegin != null) {
             timeDifferenceLabel(
-              yesterday.nauticalTwilightBegin.toLocalTime(),
-              today.nauticalTwilightBegin.toLocalTime()
+              yesterdayNauticalTwilightBegin.toLocalTime(),
+              todayNauticalTwilightBegin.toLocalTime()
             )
           } else {
             ""
           }
         },
         sunsetDiffLabel = {
-          if (today != null && yesterday != null) {
+          val todayNauticalTwilightEnd = today?.nauticalTwilightEnd
+          val yesterdayNauticalTwilightEnd = yesterday?.nauticalTwilightEnd
+          if (todayNauticalTwilightEnd != null && yesterdayNauticalTwilightEnd != null) {
             timeDifferenceLabel(
-              yesterday.nauticalTwilightEnd.toLocalTime(),
-              today.nauticalTwilightEnd.toLocalTime()
+              yesterdayNauticalTwilightEnd.toLocalTime(),
+              todayNauticalTwilightEnd.toLocalTime()
             )
           } else {
             ""
@@ -1134,20 +1146,26 @@ private fun dayChartSegments(
         sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
         sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
         sunriseDiffLabel = {
-          if (today != null && yesterday != null) {
+          val yesterdayAstronomicalTwilightBegin = yesterday?.astronomicalTwilightBegin
+          val todayAstronomicalTwilightBegin = today?.astronomicalTwilightBegin
+          if (
+            todayAstronomicalTwilightBegin != null && yesterdayAstronomicalTwilightBegin != null
+          ) {
             timeDifferenceLabel(
-              yesterday.astronomicalTwilightBegin.toLocalTime(),
-              today.astronomicalTwilightBegin.toLocalTime()
+              yesterdayAstronomicalTwilightBegin.toLocalTime(),
+              todayAstronomicalTwilightBegin.toLocalTime()
             )
           } else {
             ""
           }
         },
         sunsetDiffLabel = {
-          if (today != null && yesterday != null) {
+          val yesterdayAstronomicalTwilightEnd = yesterday?.astronomicalTwilightEnd
+          val todayAstronomicalTwilightEnd = today?.astronomicalTwilightEnd
+          if (todayAstronomicalTwilightEnd != null && yesterdayAstronomicalTwilightEnd != null) {
             timeDifferenceLabel(
-              yesterday.astronomicalTwilightEnd.toLocalTime(),
-              today.astronomicalTwilightEnd.toLocalTime()
+              yesterdayAstronomicalTwilightEnd.toLocalTime(),
+              todayAstronomicalTwilightEnd.toLocalTime()
             )
           } else {
             ""

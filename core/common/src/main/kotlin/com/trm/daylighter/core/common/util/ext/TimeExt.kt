@@ -8,7 +8,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
-fun LocalDateTime.isEqualOrAfter(other: LocalDateTime): Boolean = isEqual(other) || isAfter(other)
+fun LocalDateTime.isEqualOrAfter(other: LocalDateTime?): Boolean =
+  other != null && (isEqual(other) || isAfter(other))
+
+fun LocalDateTime.isBeforeNotNull(other: LocalDateTime?): Boolean = other != null && isBefore(other)
 
 val LocalDateTime.isoLocalTimeLabel24H: String
   get() = format(DateTimeFormatter.ISO_TIME)
