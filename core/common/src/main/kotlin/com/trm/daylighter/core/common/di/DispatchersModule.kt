@@ -1,10 +1,11 @@
 package com.trm.daylighter.core.common.di
 
+import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.Dispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Qualifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -18,13 +19,4 @@ object DispatchersModule {
   @Provides
   @Dispatcher(DaylighterDispatchers.DEFAULT)
   fun defaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
-}
-
-@Qualifier
-@Retention(AnnotationRetention.RUNTIME)
-annotation class Dispatcher(val dispatcher: DaylighterDispatchers)
-
-enum class DaylighterDispatchers {
-  IO,
-  DEFAULT
 }

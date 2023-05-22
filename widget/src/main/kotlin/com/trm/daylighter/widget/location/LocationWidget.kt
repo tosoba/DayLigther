@@ -8,6 +8,8 @@ import android.os.Build
 import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.BitmapImageProvider
+import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
@@ -22,11 +25,10 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
-import androidx.glance.currentState
+import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -37,6 +39,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
@@ -44,10 +47,12 @@ import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
@@ -57,6 +62,7 @@ import com.trm.daylighter.core.ui.theme.nightColor
 import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.GlanceTheme
+import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.stringResource
@@ -67,18 +73,27 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import com.trm.daylighter.core.common.R as commonR
 
-class LocationWidget : GlanceAppWidget() {
+class LocationWidget(
+  private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
+    GetDefaultLocationSunriseSunsetChangeFlowUseCase
+) : GlanceAppWidget() {
   override val stateDefinition = LocationWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
+    provideContent {
+      val change by getDefaultLocationSunriseSunsetChangeFlowUseCase().collectAsState(LoadingFirst)
+      Content(change = change)
+    }
+  }
+
   @Composable
-  override fun Content() {
+  private fun Content(change: Loadable<LocationSunriseSunsetChange>) {
     GlanceTheme {
-      when (val change = currentState<Loadable<LocationSunriseSunsetChange>>()) {
+      when (change) {
         Empty -> AddLocationButton()
-        is Loading -> CircularProgressIndicator()
+        is Loading -> ProgressIndicator()
         is Ready -> DayChart(change = change.data)
         is Failed -> RetryButton(onClick = updateWidgetAction())
       }

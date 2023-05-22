@@ -1,8 +1,6 @@
 package com.trm.daylighter.widget.ui
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
@@ -96,11 +94,6 @@ internal val Float.toPx: Float
 
 internal val Float.toDp: Float
   get() = this / Resources.getSystem().displayMetrics.density
-
-internal val Context.isNightMode: Boolean
-  get() =
-    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
-      Configuration.UI_MODE_NIGHT_YES
 
 @Composable
 internal fun deepLinkAction(@StringRes uriRes: Int): Action =

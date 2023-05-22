@@ -7,7 +7,7 @@ plugins {
 android { namespace = "com.trm.daylighter.feature.location" }
 
 dependencies {
-  implementation(libs.material)
+  implementation(libs.androidx.compose.material)
   implementation(libs.modalsheet)
 
   implementation(libs.osmdroid)

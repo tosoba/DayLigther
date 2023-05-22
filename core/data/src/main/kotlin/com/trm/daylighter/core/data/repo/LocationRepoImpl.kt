@@ -1,8 +1,8 @@
 package com.trm.daylighter.core.data.repo
 
 import androidx.room.withTransaction
-import com.trm.daylighter.core.common.di.DaylighterDispatchers
-import com.trm.daylighter.core.common.di.Dispatcher
+import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.Dispatcher
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao

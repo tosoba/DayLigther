@@ -4,24 +4,32 @@ import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import com.trm.daylighter.widget.util.ext.anyWidgetExists
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
+import com.trm.daylighter.widget.util.ext.getGlanceIds
 import com.trm.daylighter.widget.util.ext.widgetReceiverIntent
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.MainScope
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
-  override val glanceAppWidget: GlanceAppWidget = LocationWidget()
+  @Inject
+  internal lateinit var getDefaultLocationSunriseSunsetChangeFlowUseCase:
+    GetDefaultLocationSunriseSunsetChangeFlowUseCase
+
+  override val glanceAppWidget: GlanceAppWidget by
+    lazy(LazyThreadSafetyMode.NONE) {
+      LocationWidget(getDefaultLocationSunriseSunsetChangeFlowUseCase)
+    }
 
   override fun onEnabled(context: Context) {
     super.onEnabled(context)
-    LocationWidgetWorker.enqueue(context)
-  }
-
-  override fun onDisabled(context: Context) {
-    super.onDisabled(context)
-    LocationWidgetWorker.cancel(context)
+    enqueueWidgetUpdateIfAnyExists(context)
   }
 
   override fun onReceive(context: Context, intent: Intent) {
@@ -32,10 +40,11 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
   }
 
   private fun enqueueWidgetUpdateIfAnyExists(context: Context) {
-    MainScope().launch {
-      if (context.anyWidgetExists<LocationWidget>()) {
-        LocationWidgetWorker.enqueue(context)
-      }
+    CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
+      context
+        .getGlanceIds<LocationWidget>()
+        .map { async { glanceAppWidget.update(context, it) } }
+        .awaitAll()
     }
   }
 

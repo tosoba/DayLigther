@@ -30,7 +30,7 @@ androidxWindowManager = "1.0.0"
 androidxWork = "2.7.1"
 coil = "2.2.2"
 commonsCodec = "1.15"
-glance = "1.0.0-alpha05"
+glance = "1.0.0-beta01"
 guavaConflict = "9999.0-empty-to-avoid-conflict-with-guava"
 hilt = "2.44.2"
 hiltExt = "1.0.0"
@@ -42,6 +42,7 @@ kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.4.1"
 ksp = "1.8.10-1.0.9"
 lint = "30.3.1"
+material = "1.9.0"
 modalSheet = "0.3.0"
 okhttp = "4.10.0"
 osmdroid = "6.1.14"
@@ -69,6 +70,7 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
@@ -110,7 +112,8 @@ coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commonsCodec" }
 dagger-dagger = { group = "com.google.dagger", name = "dagger", version.ref = "hilt" }
 dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "hilt" }
-glance = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 guava-listenablefuture-conflict = { group = "com.google.guava", name = "listenablefuture", version.ref = "guavaConflict" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
@@ -125,7 +128,7 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lint-api = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
-material = { group = "androidx.compose.material", name = "material" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 modalsheet = { group = "io.github.oleksandrbalan", name = "modalsheet", version.ref = "modalSheet" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
