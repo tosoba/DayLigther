@@ -732,52 +732,59 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    var startAngle = -90f
+    var startAngle = 90f
+    var accumulatedSweepAngle = 0f
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
-      val isCurrent = segment.isCurrent(now, dayMode)
-      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-        drawIntoCanvas {
-          it.drawArc(
-            left = topLeftOffset.x,
-            top = topLeftOffset.y,
-            bottom = topLeftOffset.y + segmentSize.height,
-            right = topLeftOffset.x + segmentSize.width,
-            startAngle = startAngle,
-            sweepAngle = segment.sweepAngleDegrees,
-            useCenter = false,
-            paint =
-              if (isCurrent) {
-                chartSegmentGlowPaint
-              } else {
-                val paint =
-                  Paint().apply {
-                    style = PaintingStyle.Stroke
-                    strokeWidth = 50f
+      if (segment.hasAllTimestamps || changeValue is WithoutData) {
+        clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+          drawIntoCanvas {
+            it.drawArc(
+              left = topLeftOffset.x,
+              top = topLeftOffset.y,
+              bottom = topLeftOffset.y + segmentSize.height,
+              right = topLeftOffset.x + segmentSize.width,
+              startAngle = startAngle,
+              sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
+              useCenter = false,
+              paint =
+                if (segment.isCurrent(now, dayMode)) {
+                  chartSegmentGlowPaint
+                } else {
+                  val paint =
+                    Paint().apply {
+                      style = PaintingStyle.Stroke
+                      strokeWidth = 50f
+                    }
+                  paint.asFrameworkPaint().apply {
+                    color = segment.color.copy(alpha = 0f).toArgb()
+                    setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
                   }
-                paint.asFrameworkPaint().apply {
-                  color = segment.color.copy(alpha = 0f).toArgb()
-                  setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
-                }
-                paint
-              },
+                  paint
+                },
+            )
+          }
+
+          drawArc(
+            color = segment.color,
+            startAngle = startAngle,
+            sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
+            useCenter = true,
+            topLeft = topLeftOffset,
+            size = segmentSize
           )
+
+          startAngle += segment.sweepAngleDegrees + accumulatedSweepAngle
+          accumulatedSweepAngle = 0f
         }
-        drawArc(
-          color = segment.color,
-          startAngle = startAngle,
-          sweepAngle = segment.sweepAngleDegrees,
-          useCenter = true,
-          topLeft = topLeftOffset,
-          size = segmentSize
-        )
+      } else {
+        accumulatedSweepAngle += segment.sweepAngleDegrees
       }
     }
 
-    chartSegments.forEach { segment ->
-      drawChartSegment(segment)
-      startAngle += segment.sweepAngleDegrees
-    }
+    chartSegments
+      .reversed()
+      .forEach(::drawChartSegment)
 
     if (changeValue !is Ready) return@Canvas
 
@@ -987,7 +994,7 @@ private data class DayChartSegment(
   fun isCurrent(now: LocalDateTime, dayMode: DayMode): Boolean =
     hasAllTimestamps && (isInSunrisePeriod(now, dayMode) || isInSunsetPeriod(now, dayMode))
 
-  private val hasAllTimestamps: Boolean
+  val hasAllTimestamps: Boolean
     get() =
       sunrisePeriodStart != null &&
         sunrisePeriodEnd != null &&
@@ -1027,15 +1034,28 @@ private fun dayChartSegments(
   val astronomicalDawnLabel = stringResource(id = R.string.astronomical_dawn, edgeLabelSeparator)
   val astronomicalDuskLabel = stringResource(id = R.string.astronomical_dusk, edgeLabelSeparator)
   return remember(today, yesterday, using24HFormat) {
+    val startOfToday =
+      if (zoneId != null && today != null) {
+        ZonedDateTime.ofLocal(today.date.atStartOfDay(), zoneId, null).toLocalDateTime()
+      } else {
+        null
+      }
+    val startOfNextDay =
+      if (zoneId != null && today != null) {
+        ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), zoneId, null)
+          .toLocalDateTime()
+      } else {
+        null
+      }
     listOf(
       DayChartSegment(
-        sweepAngleDegrees = 90f,
+        sweepAngleDegrees = -90f,
         color = dayColor,
         periodLabel = dayLabel,
-        sunrisePeriodStart = today?.sunrise,
+        sunrisePeriodStart = today?.sunrise ?: startOfToday,
         sunrisePeriodEnd = today?.sunset,
         sunsetPeriodStart = today?.sunrise,
-        sunsetPeriodEnd = today?.sunset,
+        sunsetPeriodEnd = today?.sunset ?: startOfNextDay,
         sunriseEndingEdgeLabel = sunriseLabel,
         sunsetEndingEdgeLabel = sunsetLabel,
         sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
@@ -1060,13 +1080,13 @@ private fun dayChartSegments(
         }
       ),
       DayChartSegment(
-        sweepAngleDegrees = 6f,
+        sweepAngleDegrees = -6f,
         color = civilTwilightColor,
         periodLabel = civilTwilightLabel,
-        sunrisePeriodStart = today?.civilTwilightBegin,
+        sunrisePeriodStart = today?.civilTwilightBegin ?: startOfToday,
         sunrisePeriodEnd = today?.sunrise,
         sunsetPeriodStart = today?.sunset,
-        sunsetPeriodEnd = today?.civilTwilightEnd,
+        sunsetPeriodEnd = today?.civilTwilightEnd ?: startOfNextDay,
         sunriseEndingEdgeLabel = civilDawnLabel,
         sunsetEndingEdgeLabel = civilDuskLabel,
         sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1097,13 +1117,13 @@ private fun dayChartSegments(
         }
       ),
       DayChartSegment(
-        sweepAngleDegrees = 6f,
+        sweepAngleDegrees = -6f,
         color = nauticalTwilightColor,
         periodLabel = nauticalTwilightLabel,
-        sunrisePeriodStart = today?.nauticalTwilightBegin,
+        sunrisePeriodStart = today?.nauticalTwilightBegin ?: startOfToday,
         sunrisePeriodEnd = today?.civilTwilightBegin,
         sunsetPeriodStart = today?.civilTwilightEnd,
-        sunsetPeriodEnd = today?.nauticalTwilightEnd,
+        sunsetPeriodEnd = today?.nauticalTwilightEnd ?: startOfNextDay,
         sunriseEndingEdgeLabel = nauticalDawnLabel,
         sunsetEndingEdgeLabel = nauticalDuskLabel,
         sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1134,13 +1154,13 @@ private fun dayChartSegments(
         }
       ),
       DayChartSegment(
-        sweepAngleDegrees = 6f,
+        sweepAngleDegrees = -6f,
         color = astronomicalTwilightColor,
         periodLabel = astronomicalTwilightLabel,
-        sunrisePeriodStart = today?.astronomicalTwilightBegin,
+        sunrisePeriodStart = today?.astronomicalTwilightBegin ?: startOfToday,
         sunrisePeriodEnd = today?.nauticalTwilightBegin,
         sunsetPeriodStart = today?.nauticalTwilightEnd,
-        sunsetPeriodEnd = today?.astronomicalTwilightEnd,
+        sunsetPeriodEnd = today?.astronomicalTwilightEnd ?: startOfNextDay,
         sunriseEndingEdgeLabel = astronomicalDawnLabel,
         sunsetEndingEdgeLabel = astronomicalDuskLabel,
         sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1173,24 +1193,13 @@ private fun dayChartSegments(
         }
       ),
       DayChartSegment(
-        sweepAngleDegrees = 72f,
+        sweepAngleDegrees = -72f,
         color = nightColor,
         periodLabel = nightLabel,
-        sunrisePeriodStart =
-          if (zoneId != null && today != null) {
-            ZonedDateTime.ofLocal(today.date.atStartOfDay(), zoneId, null).toLocalDateTime()
-          } else {
-            null
-          },
+        sunrisePeriodStart = startOfToday,
         sunrisePeriodEnd = today?.astronomicalTwilightBegin,
         sunsetPeriodStart = today?.astronomicalTwilightEnd,
-        sunsetPeriodEnd =
-          if (zoneId != null && today != null) {
-            ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), zoneId, null)
-              .toLocalDateTime()
-          } else {
-            null
-          },
+        sunsetPeriodEnd = startOfNextDay,
       ),
     )
   }
