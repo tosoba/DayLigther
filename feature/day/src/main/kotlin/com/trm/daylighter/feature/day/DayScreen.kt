@@ -782,9 +782,7 @@ private fun SunriseSunsetChart(
       }
     }
 
-    chartSegments
-      .reversed()
-      .forEach(::drawChartSegment)
+    chartSegments.reversed().forEach(::drawChartSegment)
 
     if (changeValue !is Ready) return@Canvas
 
@@ -795,21 +793,30 @@ private fun SunriseSunsetChart(
     val textPadding = 3.dp.toPx()
     val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
-    val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString(horizonLabel))
-    drawText(
-      textMeasurer = textMeasurer,
-      text = horizonLabel,
-      topLeft =
-        Offset(
-          x = size.width - horizonLayoutResult.size.width - textPadding,
-          y = chartCenter.y - horizonLayoutResult.size.height - textPadding
-        ),
-      style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-    )
+    if (today?.sunrise != null && today.sunset != null) {
+      val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString(horizonLabel))
+      drawText(
+        textMeasurer = textMeasurer,
+        text = horizonLabel,
+        topLeft =
+          Offset(
+            x = size.width - horizonLayoutResult.size.width - textPadding,
+            y = chartCenter.y - horizonLayoutResult.size.height - textPadding
+          ),
+        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
 
     repeat(chartSegments.size - 1) { segmentIndex ->
+      if (
+        !chartSegments[segmentIndex].hasAllTimestamps ||
+          !chartSegments[segmentIndex + 1].hasAllTimestamps
+      ) {
+        return@repeat
+      }
+
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
         val lineRadiusMultiplier =
           when {
@@ -901,7 +908,7 @@ private fun SunriseSunsetChart(
     }
 
     currentAngleDegrees = 0f
-    chartSegments.forEachIndexed { index, segment ->
+    chartSegments.filter(DayChartSegment::hasAllTimestamps).forEachIndexed { index, segment ->
       rotate(
         degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
         pivot = chartCenter
@@ -926,6 +933,8 @@ private fun SunriseSunsetChart(
         currentAngleDegrees += angleIncrementDegrees
       }
     }
+
+    if (today?.sunrise == null || today.sunset == null) return@Canvas
 
     val sunArcTopLeft =
       Offset(
