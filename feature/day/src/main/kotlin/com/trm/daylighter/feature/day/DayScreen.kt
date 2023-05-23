@@ -734,55 +734,70 @@ private fun SunriseSunsetChart(
     val segmentSize = Size(size.height, size.height) * 2f
     var startAngle = 90f
     var accumulatedSweepAngle = 0f
+    var lastDrawnSegment: DayChartSegment? = null
 
-    fun DrawScope.drawChartSegment(segment: DayChartSegment) {
+    fun DrawScope.drawChartSegment(segment: DayChartSegment, skip: Boolean) {
       if (segment.hasAllTimestamps || changeValue is WithoutData) {
         clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-          drawIntoCanvas {
-            it.drawArc(
-              left = topLeftOffset.x,
-              top = topLeftOffset.y,
-              bottom = topLeftOffset.y + segmentSize.height,
-              right = topLeftOffset.x + segmentSize.width,
+          if (!skip) {
+            drawIntoCanvas {
+              it.drawArc(
+                left = topLeftOffset.x,
+                top = topLeftOffset.y,
+                bottom = topLeftOffset.y + segmentSize.height,
+                right = topLeftOffset.x + segmentSize.width,
+                startAngle = startAngle,
+                sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
+                useCenter = false,
+                paint =
+                  if (segment.isCurrent(now, dayMode)) {
+                    chartSegmentGlowPaint
+                  } else {
+                    val paint =
+                      Paint().apply {
+                        style = PaintingStyle.Stroke
+                        strokeWidth = 50f
+                      }
+                    paint.asFrameworkPaint().apply {
+                      color = segment.color.copy(alpha = 0f).toArgb()
+                      setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
+                    }
+                    paint
+                  },
+              )
+            }
+
+            drawArc(
+              color = segment.color,
               startAngle = startAngle,
               sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
-              useCenter = false,
-              paint =
-                if (segment.isCurrent(now, dayMode)) {
-                  chartSegmentGlowPaint
-                } else {
-                  val paint =
-                    Paint().apply {
-                      style = PaintingStyle.Stroke
-                      strokeWidth = 50f
-                    }
-                  paint.asFrameworkPaint().apply {
-                    color = segment.color.copy(alpha = 0f).toArgb()
-                    setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
-                  }
-                  paint
-                },
+              useCenter = true,
+              topLeft = topLeftOffset,
+              size = segmentSize
             )
           }
 
-          drawArc(
-            color = segment.color,
-            startAngle = startAngle,
-            sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
-            useCenter = true,
-            topLeft = topLeftOffset,
-            size = segmentSize
-          )
-
           startAngle += segment.sweepAngleDegrees + accumulatedSweepAngle
           accumulatedSweepAngle = 0f
+          lastDrawnSegment = segment
         }
       } else {
         accumulatedSweepAngle += segment.sweepAngleDegrees
       }
     }
 
-    chartSegments.reversed().forEach(::drawChartSegment)
+    chartSegments.reversed().forEachIndexed { index, segment ->
+      drawChartSegment(
+        segment,
+        index == chartSegments.lastIndex ||
+          (changeValue is WithData && !chartSegments[index + 1].hasAllTimestamps)
+      )
+    }
+
+    lastDrawnSegment?.let {
+      startAngle -= it.sweepAngleDegrees
+      drawChartSegment(it, false)
+    }
 
     if (changeValue !is Ready) return@Canvas
 
