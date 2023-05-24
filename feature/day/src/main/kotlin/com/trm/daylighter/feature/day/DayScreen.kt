@@ -732,7 +732,8 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    var startAngle = 90f
+    val multiplier = if (today == null || chartSegments.first().hasAllTimestamps) 1f else -1f
+    var startAngle = 90f * multiplier
     var accumulatedSweepAngle = 0f
 
     fun DrawScope.drawChartSegment(segment: DayChartSegment) {
@@ -745,7 +746,7 @@ private fun SunriseSunsetChart(
               bottom = topLeftOffset.y + segmentSize.height,
               right = topLeftOffset.x + segmentSize.width,
               startAngle = startAngle,
-              sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
+              sweepAngle = segment.sweepAngleDegrees * multiplier + accumulatedSweepAngle,
               useCenter = false,
               paint =
                 if (segment.isCurrent(now, dayMode)) {
@@ -768,21 +769,21 @@ private fun SunriseSunsetChart(
           drawArc(
             color = segment.color,
             startAngle = startAngle,
-            sweepAngle = segment.sweepAngleDegrees + accumulatedSweepAngle,
+            sweepAngle = segment.sweepAngleDegrees * multiplier + accumulatedSweepAngle,
             useCenter = true,
             topLeft = topLeftOffset,
             size = segmentSize
           )
 
-          startAngle += segment.sweepAngleDegrees + accumulatedSweepAngle
+          startAngle += (segment.sweepAngleDegrees + accumulatedSweepAngle) * multiplier
           accumulatedSweepAngle = 0f
         }
       } else {
-        accumulatedSweepAngle += segment.sweepAngleDegrees
+        accumulatedSweepAngle += segment.sweepAngleDegrees * multiplier
       }
     }
 
-    chartSegments.reversed().forEach(::drawChartSegment)
+    chartSegments.run { if (multiplier > 0f) reversed() else this }.forEach(::drawChartSegment)
 
     if (changeValue !is Ready) return@Canvas
 
