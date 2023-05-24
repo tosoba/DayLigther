@@ -724,6 +724,7 @@ private fun SunriseSunsetChart(
   }
 
   val horizonLabel = stringResource(R.string.horizon)
+  val dayLabel = stringResource(R.string.day)
 
   Canvas(modifier = modifier) {
     val topLeftOffset =
@@ -909,7 +910,7 @@ private fun SunriseSunsetChart(
     }
 
     currentAngleDegrees = 0f
-    chartSegments.filter(DayChartSegment::hasAllTimestamps).forEachIndexed { index, segment ->
+    chartSegments.filter(DayChartSegment::hasAllTimestamps).forEach { segment ->
       rotate(
         degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
         pivot = chartCenter
@@ -922,12 +923,15 @@ private fun SunriseSunsetChart(
             Offset(
               x = chartCenter.x + chartRadius - textLayoutResult.size.width - textPadding,
               y =
-                if (index == 0) chartCenter.y - textLayoutResult.size.height - textPadding
-                else chartCenter.y - textLayoutResult.size.height / 2f
+                if (segment.periodLabel == dayLabel) {
+                  chartCenter.y - textLayoutResult.size.height - textPadding
+                } else {
+                  chartCenter.y - textLayoutResult.size.height / 2f
+                }
             ),
           style =
             labelSmallTextStyle.copy(
-              color = if (index == 0) Color.Black else Color.White,
+              color = if (segment.periodLabel == dayLabel) Color.Black else Color.White,
               textAlign = TextAlign.Right
             ),
         )
