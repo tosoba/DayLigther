@@ -489,6 +489,12 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
   val textStyle = MaterialTheme.typography.labelLarge
   val resolver = LocalFontFamilyResolver.current
 
+  fun TextClock.onZoneIdOrDayPeriodUpdate() {
+    timeZone = zoneId.id
+    setTextColor(dayPeriod.textColor().toArgb())
+    setShadowLayer(1f, 1f, 1f, dayPeriod.textShadowColor().toArgb())
+  }
+
   AndroidView(
     factory = { context ->
       TextClock(context).apply {
@@ -504,13 +510,12 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
           .value
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextColor(dayPeriod.textColor().toArgb())
-        setShadowLayer(1f, 1f, 1f, dayPeriod.textShadowColor().toArgb())
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        onZoneIdOrDayPeriodUpdate()
       }
     },
-    update = { clockView -> clockView.timeZone = zoneId.id },
+    update = TextClock::onZoneIdOrDayPeriodUpdate,
     modifier = modifier
   )
 }
