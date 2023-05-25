@@ -8,6 +8,4 @@ interface SunriseSunsetRepo {
   suspend fun getLocationSunriseSunsetChangeAtIndex(index: Int): LocationSunriseSunsetChange?
 
   suspend fun getDefaultLocationSunriseSunsetChange(): LocationSunriseSunsetChange?
-
-  suspend fun deleteForEachLocationExceptMostRecent(limit: Int)
 }

@@ -105,10 +105,6 @@ constructor(
     return mapToSunriseSunsetChange(location, existingSunriseSunsets)
   }
 
-  override suspend fun deleteForEachLocationExceptMostRecent(limit: Int) {
-    sunriseSunsetDao.deleteForEachLocationExceptMostRecent(limit)
-  }
-
   override suspend fun getDefaultLocationSunriseSunsetChange(): LocationSunriseSunsetChange? {
     val (location, existingSunriseSunsets) =
       sunriseSunsetDao
