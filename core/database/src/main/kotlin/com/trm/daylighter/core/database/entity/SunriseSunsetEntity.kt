@@ -27,7 +27,6 @@ data class SunriseSunsetEntity(
   @ColumnInfo(name = "day_length_seconds") val dayLengthSeconds: Int,
   @ColumnInfo(name = "nautical_twilight_begin") val nauticalTwilightBegin: LocalDateTime?,
   @ColumnInfo(name = "nautical_twilight_end") val nauticalTwilightEnd: LocalDateTime?,
-  @ColumnInfo(name = "solar_noon") val solarNoon: LocalDateTime?,
   val sunrise: LocalDateTime?,
   val sunset: LocalDateTime?,
   val date: LocalDate,

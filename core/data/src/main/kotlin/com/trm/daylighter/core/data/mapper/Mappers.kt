@@ -16,7 +16,6 @@ fun SunriseSunsetResult.asEntity(locationId: Long, date: LocalDate): SunriseSuns
     dayLengthSeconds = dayLengthSeconds,
     nauticalTwilightBegin = nauticalTwilightBegin,
     nauticalTwilightEnd = nauticalTwilightEnd,
-    solarNoon = solarNoon,
     sunrise = sunrise,
     sunset = sunset,
     date = date,
@@ -32,7 +31,6 @@ fun SunriseSunsetEntity.asDomainModel(): SunriseSunset =
     dayLengthSeconds = dayLengthSeconds,
     nauticalTwilightBegin = nauticalTwilightBegin,
     nauticalTwilightEnd = nauticalTwilightEnd,
-    solarNoon = solarNoon,
     sunrise = sunrise,
     sunset = sunset,
     date = date

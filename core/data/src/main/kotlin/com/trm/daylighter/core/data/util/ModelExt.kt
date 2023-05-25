@@ -11,7 +11,6 @@ fun SunriseSunsetResult.timezoneAdjusted(zoneId: ZoneId): SunriseSunsetResult =
     civilTwilightEnd = civilTwilightEnd?.atZone(zoneId)?.toLocalDateTime(),
     nauticalTwilightBegin = nauticalTwilightBegin?.atZone(zoneId)?.toLocalDateTime(),
     nauticalTwilightEnd = nauticalTwilightEnd?.atZone(zoneId)?.toLocalDateTime(),
-    solarNoon = solarNoon?.atZone(zoneId)?.toLocalDateTime(),
     sunrise = sunrise?.atZone(zoneId)?.toLocalDateTime(),
     sunset = sunset?.atZone(zoneId)?.toLocalDateTime(),
   )

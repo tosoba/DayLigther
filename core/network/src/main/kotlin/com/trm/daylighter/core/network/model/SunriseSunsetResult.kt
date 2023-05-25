@@ -26,9 +26,6 @@ data class SunriseSunsetResult(
   @Serializable(LocalDateTimeSerializer::class)
   @SerialName("nautical_twilight_end")
   val nauticalTwilightEnd: LocalDateTime?,
-  @Serializable(LocalDateTimeSerializer::class)
-  @SerialName("solar_noon")
-  val solarNoon: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class) @SerialName("sunrise") val sunrise: LocalDateTime?,
   @Serializable(LocalDateTimeSerializer::class) @SerialName("sunset") val sunset: LocalDateTime?,
 )

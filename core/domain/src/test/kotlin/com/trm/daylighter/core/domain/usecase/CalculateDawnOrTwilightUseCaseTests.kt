@@ -12,7 +12,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
-class CalculateSunriseSunsetUseCaseTests {
+class CalculateDawnOrTwilightUseCaseTests {
   @Test
   fun london() {
     val lat = 52.13113642931021
@@ -52,7 +52,7 @@ class CalculateSunriseSunsetUseCaseTests {
     val lat = 52.13113642931021
     val lng = 0.13225649369147163
     val zoneId = ZoneId.of("Europe/London")
-    val useCase = CalculateSunriseSunsetUseCase()
+    val useCase = CalculateDawnOrTwilightUseCase()
     val date = LocalDateTime.now(zoneId)
 
     val start = System.currentTimeMillis()
@@ -63,11 +63,11 @@ class CalculateSunriseSunsetUseCaseTests {
           DawnOrTwilight.values().map { dot ->
             async(Dispatchers.Default) {
               useCase(
-                halfDay = hd,
-                date = date,
                 latitude = lat,
                 longitude = lng,
+                date = date,
                 dawnOrTwilight = dot,
+                halfDay = hd,
                 timeZone = TimeZone.getTimeZone(zoneId)
               )
             }
@@ -86,16 +86,16 @@ class CalculateSunriseSunsetUseCaseTests {
     lng: Double,
     zoneId: ZoneId?
   ) {
-    val useCase = CalculateSunriseSunsetUseCase()
+    val useCase = CalculateDawnOrTwilightUseCase()
     HalfDay.values().forEach { hd ->
       DawnOrTwilight.values().forEach { dot ->
         val result =
           useCase(
-            halfDay = hd,
-            date = date,
             latitude = lat,
             longitude = lng,
+            date = date,
             dawnOrTwilight = dot,
+            halfDay = hd,
             timeZone = TimeZone.getTimeZone(zoneId)
           )
         println("${hd.name} - ${dot.name} ${result?.format(DateTimeFormatter.ISO_DATE_TIME)}")
