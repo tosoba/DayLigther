@@ -41,6 +41,15 @@ class CalculateDawnOrTwilightUseCaseTests {
   }
 
   @Test
+  fun greenland() {
+    val lat = 83.57659495458118
+    val lng = -26.71875
+    val zoneId = ZoneId.of("America/Nuuk")
+    val date = LocalDateTime.now(zoneId)
+    calculateAllTimestamps(date = date, lat = lat, lng = lng, zoneId = zoneId)
+  }
+
+  @Test
   fun benchmarkSequential() {
     val start = System.currentTimeMillis()
     london()

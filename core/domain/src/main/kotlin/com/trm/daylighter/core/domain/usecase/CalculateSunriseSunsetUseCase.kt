@@ -42,7 +42,7 @@ constructor(private val calculateDawnOrTwilightUseCase: CalculateDawnOrTwilightU
       sunrise = sunrise,
       sunset = sunset,
       dayLengthSeconds =
-        if (sunrise != null && sunset != null) Duration.between(sunset, sunrise).seconds.toInt()
+        if (sunrise != null && sunset != null) Duration.between(sunrise, sunset).seconds.toInt()
         else 0,
       date = date.toLocalDate()
     )

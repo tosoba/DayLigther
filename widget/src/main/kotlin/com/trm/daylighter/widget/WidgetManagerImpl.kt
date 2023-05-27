@@ -14,6 +14,4 @@ constructor(
   override fun enqueueDefaultLocationWidgetsUpdate() {
     context.sendBroadcast(LocationWidgetReceiver.updateIntent(context))
   }
-
-  override fun enqueueLocationsListWidgetsUpdate() {}
 }

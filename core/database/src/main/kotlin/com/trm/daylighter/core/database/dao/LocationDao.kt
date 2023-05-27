@@ -2,17 +2,21 @@ package com.trm.daylighter.core.database.dao
 
 import androidx.room.*
 import com.trm.daylighter.core.database.entity.LocationEntity
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import java.time.ZoneId
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LocationDao {
   @Insert suspend fun insert(entity: LocationEntity)
 
   @Transaction
-  suspend fun insert(latitude: Double, longitude: Double, name: String, zoneId: ZoneId): LocationEntity {
+  suspend fun insert(
+    latitude: Double,
+    longitude: Double,
+    name: String,
+    zoneId: ZoneId
+  ): LocationEntity {
     val anyExists = selectAnyExists()
     val entity =
       LocationEntity(
@@ -29,23 +33,20 @@ interface LocationDao {
 
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
-  @Query("SELECT COUNT(*) FROM location") suspend fun selectCountAll(): Int
-
   @Query("SELECT COUNT(*) FROM location") fun selectCountAllFlow(): Flow<Int>
 
   @Transaction
-  suspend fun deleteByIdAndSelectCountAll(id: Long, isDefault: Boolean): Int {
+  suspend fun deleteById(id: Long, isDefault: Boolean) {
     deleteById(id)
     if (isDefault) setDefaultToMostRecentlyAddedLocation()
-    return selectCountAll()
   }
 
   @Query("SELECT * FROM location WHERE is_default = TRUE")
   fun selectDefaultFlow(): Flow<LocationEntity?>
 
-  @Query("SELECT EXISTS(SELECT * FROM location)") suspend fun selectAnyExists(): Boolean
+  @Query("SELECT * FROM location WHERE is_default = TRUE") fun selectDefault(): LocationEntity?
 
-  @Query("SELECT * FROM location") suspend fun selectAll(): List<LocationEntity>
+  @Query("SELECT EXISTS(SELECT * FROM location)") suspend fun selectAnyExists(): Boolean
 
   @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
 

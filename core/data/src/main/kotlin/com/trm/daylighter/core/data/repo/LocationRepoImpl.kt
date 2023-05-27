@@ -1,13 +1,12 @@
 package com.trm.daylighter.core.data.repo
 
 import androidx.room.withTransaction
-import com.trm.daylighter.core.domain.di.DaylighterDispatchers
-import com.trm.daylighter.core.domain.di.Dispatcher
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
-import com.trm.daylighter.core.database.dao.SunriseSunsetDao
 import com.trm.daylighter.core.database.entity.LocationEntity
+import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.Dispatcher
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.repo.LocationRepo
 import java.time.ZoneId
@@ -23,7 +22,6 @@ class LocationRepoImpl
 constructor(
   private val db: DaylighterDatabase,
   private val locationDao: LocationDao,
-  private val sunriseSunsetDao: SunriseSunsetDao,
   @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double, name: String): Location {
@@ -41,8 +39,15 @@ constructor(
   override fun getDefaultLocationFlow(): Flow<Location?> =
     locationDao.selectDefaultFlow().map { it?.asDomainModel() }
 
-  override suspend fun deleteLocationByIdAndCountAll(id: Long, isDefault: Boolean): Int =
-    locationDao.deleteByIdAndSelectCountAll(id, isDefault)
+  override suspend fun getDefaultLocation(): Location? =
+    locationDao.selectDefault()?.asDomainModel()
+
+  override suspend fun getLocationAtOffset(offset: Int): Location? =
+    locationDao.selectLocationAtOffset(offset)?.asDomainModel()
+
+  override suspend fun deleteLocationById(id: Long, isDefault: Boolean) {
+    locationDao.deleteById(id, isDefault)
+  }
 
   override suspend fun setDefaultLocationById(id: Long) {
     locationDao.updateDefaultLocationById(id)
@@ -66,7 +71,6 @@ constructor(
         name = name,
         zoneId = zoneId
       )
-      sunriseSunsetDao.deleteByLocationId(locationId = id)
       locationDao.selectById(id).asDomainModel()
     }
   }
