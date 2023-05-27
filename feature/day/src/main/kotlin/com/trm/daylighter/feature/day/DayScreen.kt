@@ -26,14 +26,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.drawText
@@ -712,9 +709,6 @@ private fun SunriseSunsetChart(
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
-  val sunPainter =
-    rememberVectorPainter(image = ImageVector.vectorResource(id = commonR.drawable.sun))
-
   val horizonLabel = stringResource(R.string.horizon)
   val dayLabel = stringResource(R.string.day)
 
@@ -885,10 +879,7 @@ private fun SunriseSunsetChart(
 
     val angleDeltaDegrees = 6f
     chartSegments.forEach { segment ->
-      rotate(
-        degrees = (segment.periodLabelAngle - angleDeltaDegrees / 2f).coerceAtLeast(0f),
-        pivot = chartCenter
-      ) {
+      rotate(degrees = (segment.periodLabelAngle - angleDeltaDegrees / 2f), pivot = chartCenter) {
         val textLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.periodLabel))
         drawText(
           textMeasurer = textMeasurer,
@@ -905,59 +896,10 @@ private fun SunriseSunsetChart(
             ),
           style =
             labelSmallTextStyle.copy(
-              color = if (segment.periodLabel == dayLabel) Color.Black else Color.White,
+              color = if (segment.periodLabel.startsWith(dayLabel)) Color.Black else Color.White,
               textAlign = TextAlign.Right
             ),
         )
-      }
-    }
-
-    if (today?.sunrise == null || today.sunset == null) return@Canvas
-
-    val sunArcTopLeft =
-      Offset(
-        topLeftOffset.x -
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) chartRadius / 8f
-          else chartRadius / 2f,
-        topLeftOffset.y
-      )
-    val sunArcCenter = Offset(sunArcTopLeft.x + chartRadius, size.height / 2f)
-    val sunArcSweepAngle = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10f else 15f
-    drawArc(
-      color = Color.Yellow,
-      startAngle = 360f - sunArcSweepAngle / 2f,
-      sweepAngle = sunArcSweepAngle,
-      useCenter = false,
-      topLeft = sunArcTopLeft,
-      size = segmentSize,
-      style = Stroke(width = 2f, pathEffect = dashPathEffect),
-    )
-
-    val arrowHeadCenterX = (sunArcTopLeft.x + segmentSize.maxDimension)
-    val arrowHeadPath =
-      buildSunArcArrowHeadPath(
-        dayMode = dayMode,
-        arrowHeadCenterX = arrowHeadCenterX,
-        arrowHeadDimension = 10.dp.toPx()
-      )
-    rotate(
-      degrees = if (dayMode == DayMode.SUNRISE) -sunArcSweepAngle / 2f else sunArcSweepAngle / 2f,
-      pivot = sunArcCenter
-    ) {
-      drawPath(path = arrowHeadPath, color = Color.Yellow)
-    }
-
-    clipRect(
-      left = arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
-      top = size.height / 2f - sunPainter.intrinsicSize.height / 2f,
-      right = arrowHeadCenterX + sunPainter.intrinsicSize.width / 2f,
-      bottom = size.height / 2f,
-    ) {
-      translate(
-        arrowHeadCenterX - sunPainter.intrinsicSize.width / 2f,
-        size.height / 2f - sunPainter.intrinsicSize.height / 2f
-      ) {
-        with(sunPainter) { draw(intrinsicSize) }
       }
     }
   }
@@ -990,11 +932,24 @@ private fun dayChartSegments(
 ): List<DayChartSegment> {
   val sunriseLabel = stringResource(id = R.string.sunrise)
   val sunsetLabel = stringResource(id = R.string.sunset)
+
   val dayLabel = stringResource(R.string.day)
   val civilTwilightLabel = stringResource(R.string.civil_twilight)
   val nauticalTwilightLabel = stringResource(R.string.nautical_twilight)
   val astronomicalTwilightLabel = stringResource(R.string.astronomical_twilight)
   val nightLabel = stringResource(R.string.night)
+  val longestTwilightLabelLength =
+    listOf(
+        dayLabel,
+        civilTwilightLabel,
+        nauticalTwilightLabel,
+        astronomicalTwilightLabel,
+        nightLabel
+      )
+      .maxOf(String::length)
+
+  fun String.padToLongestLabel(): String = padEnd(longestTwilightLabelLength)
+
   val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
   val civilDawnLabel = stringResource(id = R.string.civil_dawn, edgeLabelSeparator)
   val civilDuskLabel = stringResource(id = R.string.civil_dusk, edgeLabelSeparator)
@@ -1002,6 +957,7 @@ private fun dayChartSegments(
   val nauticalDuskLabel = stringResource(id = R.string.nautical_dusk, edgeLabelSeparator)
   val astronomicalDawnLabel = stringResource(id = R.string.astronomical_dawn, edgeLabelSeparator)
   val astronomicalDuskLabel = stringResource(id = R.string.astronomical_dusk, edgeLabelSeparator)
+
   return remember(today, yesterday, using24HFormat) {
     var accumulatedSweepAngle = 0f
     buildList {
@@ -1016,7 +972,7 @@ private fun dayChartSegments(
             endingEdgeAngle = 0f,
             periodLabelAngle = 0f,
             color = dayColor,
-            periodLabel = dayLabel,
+            periodLabel = dayLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = sunriseLabel,
             sunsetEndingEdgeLabel = sunsetLabel,
             sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
@@ -1057,7 +1013,7 @@ private fun dayChartSegments(
             endingEdgeAngle = 0f,
             periodLabelAngle = 6f,
             color = civilTwilightColor,
-            periodLabel = civilTwilightLabel,
+            periodLabel = civilTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = civilDawnLabel,
             sunsetEndingEdgeLabel = civilDuskLabel,
             sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1104,7 +1060,7 @@ private fun dayChartSegments(
             endingEdgeAngle = 6f,
             periodLabelAngle = 12f,
             color = nauticalTwilightColor,
-            periodLabel = nauticalTwilightLabel,
+            periodLabel = nauticalTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = nauticalDawnLabel,
             sunsetEndingEdgeLabel = nauticalDuskLabel,
             sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1151,7 +1107,7 @@ private fun dayChartSegments(
             endingEdgeAngle = 12f,
             periodLabelAngle = 18f,
             color = astronomicalTwilightColor,
-            periodLabel = astronomicalTwilightLabel,
+            periodLabel = astronomicalTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
             sunsetEndingEdgeLabel = astronomicalDuskLabel,
             sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
@@ -1203,7 +1159,7 @@ private fun dayChartSegments(
             endingEdgeAngle = 18f,
             periodLabelAngle = 24f,
             color = nightColor,
-            periodLabel = nightLabel
+            periodLabel = nightLabel.padToLongestLabel()
           )
         )
         accumulatedSweepAngle = 0f
@@ -1221,20 +1177,3 @@ private fun dayChartSegments(
     }
   }
 }
-
-private fun DrawScope.buildSunArcArrowHeadPath(
-  dayMode: DayMode,
-  arrowHeadCenterX: Float,
-  arrowHeadDimension: Float
-): Path =
-  Path().apply {
-    moveTo(arrowHeadCenterX - arrowHeadDimension / 2f, size.height / 2f)
-    lineTo(
-      x = arrowHeadCenterX,
-      y =
-        if (dayMode == DayMode.SUNRISE) size.height / 2f - arrowHeadDimension
-        else size.height / 2f + arrowHeadDimension
-    )
-    lineTo(arrowHeadCenterX + arrowHeadDimension / 2f, size.height / 2f)
-    close()
-  }
