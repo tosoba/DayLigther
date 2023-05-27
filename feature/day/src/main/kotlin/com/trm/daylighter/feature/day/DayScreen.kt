@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -715,20 +714,6 @@ private fun SunriseSunsetChart(
   val sunPainter =
     rememberVectorPainter(image = ImageVector.vectorResource(id = commonR.drawable.sun))
 
-  val chartSegmentGlowPaint = remember {
-    Paint().apply {
-      style = PaintingStyle.Stroke
-      strokeWidth = 75f
-    }
-  }
-  val glowColor = colorResource(id = commonR.color.sun_outline)
-  remember {
-    chartSegmentGlowPaint.asFrameworkPaint().apply {
-      color = glowColor.copy(alpha = 0f).toArgb()
-      setShadowLayer(60f, 0f, 0f, glowColor.copy(alpha = .5f).toArgb())
-    }
-  }
-
   val horizonLabel = stringResource(R.string.horizon)
   val dayLabel = stringResource(R.string.day)
 
@@ -749,6 +734,15 @@ private fun SunriseSunsetChart(
       if (segment.hasAllTimestamps || changeValue is WithoutData || drawAccumulated) {
         clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
           drawIntoCanvas {
+            val paint =
+              Paint().apply {
+                style = PaintingStyle.Stroke
+                strokeWidth = 50f
+              }
+            paint.asFrameworkPaint().apply {
+              color = segment.color.copy(alpha = 0f).toArgb()
+              setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
+            }
             it.drawArc(
               left = topLeftOffset.x,
               top = topLeftOffset.y,
@@ -757,21 +751,7 @@ private fun SunriseSunsetChart(
               startAngle = startAngle,
               sweepAngle = segment.sweepAngleDegrees * multiplier + accumulatedSweepAngle,
               useCenter = false,
-              paint =
-                if (segment.isCurrent(now, dayMode)) {
-                  chartSegmentGlowPaint
-                } else {
-                  val paint =
-                    Paint().apply {
-                      style = PaintingStyle.Stroke
-                      strokeWidth = 50f
-                    }
-                  paint.asFrameworkPaint().apply {
-                    color = segment.color.copy(alpha = 0f).toArgb()
-                    setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
-                  }
-                  paint
-                },
+              paint = paint,
             )
           }
 
@@ -1017,21 +997,12 @@ private data class DayChartSegment(
   val sunriseDiffLabel: (() -> String)? = null,
   val sunsetDiffLabel: (() -> String)? = null,
 ) {
-  fun isCurrent(now: LocalDateTime, dayMode: DayMode): Boolean =
-    hasAllTimestamps && (isInSunrisePeriod(now, dayMode) || isInSunsetPeriod(now, dayMode))
-
   val hasAllTimestamps: Boolean
     get() =
       sunrisePeriodStart != null &&
         sunrisePeriodEnd != null &&
         sunsetPeriodStart != null &&
         sunsetPeriodEnd != null
-
-  private fun isInSunrisePeriod(now: LocalDateTime, dayMode: DayMode): Boolean =
-    dayMode == DayMode.SUNRISE && now.isAfter(sunrisePeriodStart) && now.isBefore(sunrisePeriodEnd)
-
-  private fun isInSunsetPeriod(now: LocalDateTime, dayMode: DayMode): Boolean =
-    dayMode == DayMode.SUNSET && now.isAfter(sunsetPeriodStart) && now.isBefore(sunsetPeriodEnd)
 }
 
 private fun initialDayMode(zoneId: ZoneId): DayMode =
