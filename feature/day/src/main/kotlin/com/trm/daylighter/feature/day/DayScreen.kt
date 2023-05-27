@@ -793,13 +793,6 @@ private fun SunriseSunsetChart(
     val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      if (
-        !chartSegments[segmentIndex].hasAllTimestamps ||
-          !chartSegments[segmentIndex + 1].hasAllTimestamps
-      ) {
-        return@repeat
-      }
-
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
         val lineRadiusMultiplier =
           when {
@@ -891,7 +884,7 @@ private fun SunriseSunsetChart(
     }
 
     currentAngleDegrees = 0f
-    chartSegments.filter(DayChartSegment::hasAllTimestamps).forEach { segment ->
+    chartSegments.forEach { segment ->
       rotate(
         degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
         pivot = chartCenter
@@ -975,24 +968,13 @@ private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
-  val sunrisePeriodStart: LocalDateTime?,
-  val sunrisePeriodEnd: LocalDateTime?,
-  val sunsetPeriodStart: LocalDateTime?,
-  val sunsetPeriodEnd: LocalDateTime?,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
   val sunsetTimeLabel: (() -> String)? = null,
   val sunriseDiffLabel: (() -> String)? = null,
   val sunsetDiffLabel: (() -> String)? = null,
-) {
-  val hasAllTimestamps: Boolean
-    get() =
-      sunrisePeriodStart != null &&
-        sunrisePeriodEnd != null &&
-        sunsetPeriodStart != null &&
-        sunsetPeriodEnd != null
-}
+)
 
 private fun initialDayMode(zoneId: ZoneId): DayMode =
   if (LocalTime.now(zoneId).isBefore(LocalTime.NOON)) DayMode.SUNRISE else DayMode.SUNSET
@@ -1005,7 +987,6 @@ private fun dayChartSegments(
   orientation: Int,
   using24HFormat: Boolean
 ): List<DayChartSegment> {
-  val zoneId = location?.zoneId
   val sunriseLabel = stringResource(id = R.string.sunrise)
   val sunsetLabel = stringResource(id = R.string.sunset)
   val dayLabel = stringResource(R.string.day)
@@ -1021,20 +1002,6 @@ private fun dayChartSegments(
   val astronomicalDawnLabel = stringResource(id = R.string.astronomical_dawn, edgeLabelSeparator)
   val astronomicalDuskLabel = stringResource(id = R.string.astronomical_dusk, edgeLabelSeparator)
   return remember(today, yesterday, using24HFormat) {
-    val startOfToday =
-      if (zoneId != null && today != null) {
-        ZonedDateTime.ofLocal(today.date.atStartOfDay(), zoneId, null).toLocalDateTime()
-      } else {
-        null
-      }
-    val startOfNextDay =
-      if (zoneId != null && today != null) {
-        ZonedDateTime.ofLocal(today.date.plusDays(1L).atStartOfDay(), zoneId, null)
-          .toLocalDateTime()
-      } else {
-        null
-      }
-
     var accumulatedSweepAngle = 0f
     buildList {
       if (
@@ -1047,10 +1014,6 @@ private fun dayChartSegments(
             sweepAngleDegrees = 90f + accumulatedSweepAngle,
             color = dayColor,
             periodLabel = dayLabel,
-            sunrisePeriodStart = today?.sunrise ?: startOfToday,
-            sunrisePeriodEnd = today?.sunset,
-            sunsetPeriodStart = today?.sunrise,
-            sunsetPeriodEnd = today?.sunset ?: startOfNextDay,
             sunriseEndingEdgeLabel = sunriseLabel,
             sunsetEndingEdgeLabel = sunsetLabel,
             sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
@@ -1086,10 +1049,6 @@ private fun dayChartSegments(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             color = civilTwilightColor,
             periodLabel = civilTwilightLabel,
-            sunrisePeriodStart = today?.civilTwilightBegin,
-            sunrisePeriodEnd = today?.sunrise,
-            sunsetPeriodStart = today?.sunset,
-            sunsetPeriodEnd = today?.civilTwilightEnd,
             sunriseEndingEdgeLabel = civilDawnLabel,
             sunsetEndingEdgeLabel = civilDuskLabel,
             sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1131,10 +1090,6 @@ private fun dayChartSegments(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             color = nauticalTwilightColor,
             periodLabel = nauticalTwilightLabel,
-            sunrisePeriodStart = today?.nauticalTwilightBegin,
-            sunrisePeriodEnd = today?.civilTwilightBegin,
-            sunsetPeriodStart = today?.civilTwilightEnd,
-            sunsetPeriodEnd = today?.nauticalTwilightEnd,
             sunriseEndingEdgeLabel = nauticalDawnLabel,
             sunsetEndingEdgeLabel = nauticalDuskLabel,
             sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
@@ -1178,10 +1133,6 @@ private fun dayChartSegments(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             color = astronomicalTwilightColor,
             periodLabel = astronomicalTwilightLabel,
-            sunrisePeriodStart = today?.astronomicalTwilightBegin,
-            sunrisePeriodEnd = today?.nauticalTwilightBegin,
-            sunsetPeriodStart = today?.nauticalTwilightEnd,
-            sunsetPeriodEnd = today?.astronomicalTwilightEnd,
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
             sunsetEndingEdgeLabel = astronomicalDuskLabel,
             sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
@@ -1231,11 +1182,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 72f + accumulatedSweepAngle,
             color = nightColor,
-            periodLabel = nightLabel,
-            sunrisePeriodStart = startOfToday,
-            sunrisePeriodEnd = today?.astronomicalTwilightBegin,
-            sunsetPeriodStart = today?.astronomicalTwilightEnd,
-            sunsetPeriodEnd = startOfNextDay,
+            periodLabel = nightLabel
           )
         )
         accumulatedSweepAngle = 0f
