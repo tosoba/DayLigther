@@ -788,11 +788,11 @@ private fun SunriseSunsetChart(
       )
     }
 
-    var currentAngleDegrees = 0f
-    val angleIncrementDegrees = 6f
     val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
     repeat(chartSegments.size - 1) { segmentIndex ->
+      val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians
+
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
         val lineRadiusMultiplier =
           when {
@@ -801,15 +801,17 @@ private fun SunriseSunsetChart(
             else -> 1.1f
           }
         val strokeWidth = 2f
+
         drawLine(
           color = chartSegments[segmentIndex + 1].color,
           start = chartCenter,
           end =
             Offset(
-              chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentAngleDegrees.radians),
-              chartCenter.y +
-                chartRadius * lineRadiusMultiplier * sin(currentAngleDegrees.radians) +
-                strokeWidth
+              x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(endingEdgeAngleRadians),
+              y =
+                chartCenter.y +
+                  chartRadius * lineRadiusMultiplier * sin(endingEdgeAngleRadians) +
+                  strokeWidth
             ),
           strokeWidth = strokeWidth,
           pathEffect = if (segmentIndex == 0) null else dashPathEffect
@@ -829,10 +831,10 @@ private fun SunriseSunsetChart(
         Offset(
           x =
             chartCenter.x +
-              chartRadius * textRadiusMultiplier * cos(currentAngleDegrees.radians) +
+              chartRadius * textRadiusMultiplier * cos(endingEdgeAngleRadians) +
               textPadding,
           y =
-            chartCenter.y + chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
+            chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
               if (segmentIndex == 0) 0f else endingEdgeLabelLayoutResult.size.height / 2f
         )
       drawText(
@@ -868,7 +870,7 @@ private fun SunriseSunsetChart(
               size.width - timeLayoutResult.size.width - textPadding
             ),
           y =
-            chartCenter.y + chartRadius * textRadiusMultiplier * sin(currentAngleDegrees.radians) -
+            chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
               if (segmentIndex == 0) 0f else timeLayoutResult.size.height / 2f
         )
       drawText(
@@ -879,11 +881,10 @@ private fun SunriseSunsetChart(
         maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
         overflow = TextOverflow.Ellipsis,
       )
-
-      currentAngleDegrees += angleIncrementDegrees
     }
 
-    currentAngleDegrees = 0f
+    var currentAngleDegrees = 0f
+    val angleIncrementDegrees = 6f
     chartSegments.forEach { segment ->
       rotate(
         degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
@@ -966,6 +967,7 @@ private fun SunriseSunsetChart(
 
 private data class DayChartSegment(
   val sweepAngleDegrees: Float,
+  val endingEdgeAngle: Float,
   val color: Color,
   val periodLabel: String,
   val sunriseEndingEdgeLabel: String = "",
@@ -1012,6 +1014,7 @@ private fun dayChartSegments(
         add(
           DayChartSegment(
             sweepAngleDegrees = 90f + accumulatedSweepAngle,
+            endingEdgeAngle = 0f,
             color = dayColor,
             periodLabel = dayLabel,
             sunriseEndingEdgeLabel = sunriseLabel,
@@ -1051,6 +1054,7 @@ private fun dayChartSegments(
         add(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            endingEdgeAngle = 0f,
             color = civilTwilightColor,
             periodLabel = civilTwilightLabel,
             sunriseEndingEdgeLabel = civilDawnLabel,
@@ -1096,6 +1100,7 @@ private fun dayChartSegments(
         add(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            endingEdgeAngle = 6f,
             color = nauticalTwilightColor,
             periodLabel = nauticalTwilightLabel,
             sunriseEndingEdgeLabel = nauticalDawnLabel,
@@ -1141,6 +1146,7 @@ private fun dayChartSegments(
         add(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            endingEdgeAngle = 12f,
             color = astronomicalTwilightColor,
             periodLabel = astronomicalTwilightLabel,
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
@@ -1191,6 +1197,7 @@ private fun dayChartSegments(
         add(
           DayChartSegment(
             sweepAngleDegrees = 72f + accumulatedSweepAngle,
+            endingEdgeAngle = 18f,
             color = nightColor,
             periodLabel = nightLabel
           )
