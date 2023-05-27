@@ -445,9 +445,7 @@ private fun ClockAndDayLengthCard(
 ) {
   val changeValue = change.value
   val dayPeriod =
-    changeValue
-      .map { (location, today) -> today.currentPeriod(location.zoneId) }
-      .dataOrElse(DayPeriod.DAY)
+    changeValue.map { (location, today) -> today.currentPeriod(location) }.dataOrElse(DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,

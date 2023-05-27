@@ -13,7 +13,6 @@ import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
 import com.trm.daylighter.feature.day.ext.getUpcomingTimestampsSorted
-import com.trm.daylighter.feature.day.ext.now
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -61,12 +60,12 @@ constructor(
       .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
       .map { it.data }
       .transformLatest { (location, today) ->
-        val initialNow = now(location.zoneId)
+        val initialNow = LocalDateTime.now(location.zoneId)
         emit(initialNow)
 
         val remainingTimestamps = LinkedList(today.getUpcomingTimestampsSorted(initialNow))
         while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          val now = now(location.zoneId)
+          val now = LocalDateTime.now(location.zoneId)
           if (remainingTimestamps.first().isBefore(now)) {
             remainingTimestamps.removeFirst()
             emit(now)
