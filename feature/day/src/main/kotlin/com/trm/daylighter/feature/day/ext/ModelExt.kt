@@ -41,7 +41,7 @@ private fun LocalDateTime.isInPeriod(
     (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherNotNull(endEvening)) ||
     (beginEvening == null && isBeforeOtherNotNull(endEvening))
 
-internal fun SunriseSunset.currentPeriod(location: Location): DayPeriod {
+internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
 
   return when {

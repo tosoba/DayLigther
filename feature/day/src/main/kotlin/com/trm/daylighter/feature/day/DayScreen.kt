@@ -63,7 +63,7 @@ import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.ext.color
-import com.trm.daylighter.feature.day.ext.currentPeriod
+import com.trm.daylighter.feature.day.ext.currentPeriodIn
 import com.trm.daylighter.feature.day.ext.textColor
 import com.trm.daylighter.feature.day.ext.textShadowColor
 import com.trm.daylighter.feature.day.model.DayMode
@@ -445,7 +445,9 @@ private fun ClockAndDayLengthCard(
 ) {
   val changeValue = change.value
   val dayPeriod =
-    changeValue.map { (location, today) -> today.currentPeriod(location) }.dataOrElse(DayPeriod.DAY)
+    changeValue
+      .map { (location, today) -> today.currentPeriodIn(location) }
+      .dataOrElse(DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,
@@ -692,6 +694,7 @@ private fun SunriseSunsetChart(
   val changeValue = change.value
 
   val orientation = LocalConfiguration.current.orientation
+  val location = if (changeValue is WithData) changeValue.data.location else null
   val zoneId = if (changeValue is WithData) changeValue.data.location.zoneId else null
   val today = if (changeValue is WithData) changeValue.data.today else null
   val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
@@ -736,12 +739,14 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    val multiplier = if (today == null || chartSegments.first().hasAllTimestamps) 1f else -1f
+    val multiplier =
+      if (today == null || today.currentPeriodIn(requireNotNull(location)) == DayPeriod.DAY) 1f
+      else -1f
     var startAngle = 90f * multiplier
     var accumulatedSweepAngle = 0f
 
-    fun DrawScope.drawChartSegment(segment: DayChartSegment) {
-      if (segment.hasAllTimestamps || changeValue is WithoutData) {
+    fun DrawScope.drawChartSegment(segment: DayChartSegment, drawAccumulated: Boolean) {
+      if (segment.hasAllTimestamps || changeValue is WithoutData || drawAccumulated) {
         clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
           drawIntoCanvas {
             it.drawArc(
@@ -787,7 +792,11 @@ private fun SunriseSunsetChart(
       }
     }
 
-    chartSegments.run { if (multiplier > 0f) reversed() else this }.forEach(::drawChartSegment)
+    chartSegments
+      .run { if (multiplier > 0f) reversed() else this }
+      .forEachIndexed { index, segment ->
+        drawChartSegment(segment = segment, drawAccumulated = index == chartSegments.lastIndex)
+      }
 
     if (changeValue !is Ready) return@Canvas
 
