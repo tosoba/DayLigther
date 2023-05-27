@@ -11,7 +11,9 @@ import com.trm.daylighter.core.ui.theme.dayColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
 import com.trm.daylighter.feature.day.model.DayPeriod
+import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.abs
 
 internal fun SunriseSunset.getUpcomingTimestampsSorted(now: LocalDateTime): List<LocalDateTime> =
   allTimestamps().filterNotNull().filter { it.isAfter(now) }.sorted()
@@ -75,7 +77,16 @@ internal fun SunriseSunset.currentPeriod(location: Location): DayPeriod {
       DayPeriod.DAY
     }
     else -> {
-      DayPeriod.DAY
+      val decemberSolstice = LocalDateTime.of(now.year, 12, 22, 0, 0)
+      val juneSolstice = LocalDateTime.of(now.year, 6, 22, 0, 0)
+      if (
+        abs(Duration.between(decemberSolstice, now).seconds) <
+          abs(Duration.between(juneSolstice, now).seconds)
+      ) {
+        if (location.latitude > 0) DayPeriod.NIGHT else DayPeriod.DAY
+      } else {
+        if (location.latitude > 0) DayPeriod.DAY else DayPeriod.NIGHT
+      }
     }
   }
 }

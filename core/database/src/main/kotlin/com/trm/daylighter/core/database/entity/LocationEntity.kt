@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 
 @Entity(tableName = "location")
 data class LocationEntity(
