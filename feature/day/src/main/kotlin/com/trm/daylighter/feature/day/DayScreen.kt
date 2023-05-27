@@ -764,16 +764,13 @@ private fun SunriseSunsetChart(
       }
     }
 
-    chartSegments.forEach { segment -> drawChartSegment(segment = segment) }
+    chartSegments.forEach(::drawChartSegment)
 
     if (changeValue !is Ready) return@Canvas
 
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
-    var currentAngleDegrees = 0f
-    val angleIncrementDegrees = 6f
     val textPadding = 3.dp.toPx()
-    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
     if (today?.sunrise != null && today.sunset != null) {
       val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString(horizonLabel))
@@ -790,6 +787,10 @@ private fun SunriseSunsetChart(
         overflow = TextOverflow.Ellipsis,
       )
     }
+
+    var currentAngleDegrees = 0f
+    val angleIncrementDegrees = 6f
+    val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
     repeat(chartSegments.size - 1) { segmentIndex ->
       if (
