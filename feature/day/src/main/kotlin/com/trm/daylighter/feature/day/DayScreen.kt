@@ -883,11 +883,10 @@ private fun SunriseSunsetChart(
       )
     }
 
-    var currentAngleDegrees = 0f
-    val angleIncrementDegrees = 6f
+    val angleDeltaDegrees = 6f
     chartSegments.forEach { segment ->
       rotate(
-        degrees = (currentAngleDegrees - angleIncrementDegrees / 2f).coerceAtLeast(0f),
+        degrees = (segment.periodLabelAngle - angleDeltaDegrees / 2f).coerceAtLeast(0f),
         pivot = chartCenter
       ) {
         val textLayoutResult = textMeasurer.measure(text = AnnotatedString(segment.periodLabel))
@@ -910,7 +909,6 @@ private fun SunriseSunsetChart(
               textAlign = TextAlign.Right
             ),
         )
-        currentAngleDegrees += angleIncrementDegrees
       }
     }
 
@@ -968,6 +966,7 @@ private fun SunriseSunsetChart(
 private data class DayChartSegment(
   val sweepAngleDegrees: Float,
   val endingEdgeAngle: Float,
+  val periodLabelAngle: Float,
   val color: Color,
   val periodLabel: String,
   val sunriseEndingEdgeLabel: String = "",
@@ -1015,6 +1014,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 90f + accumulatedSweepAngle,
             endingEdgeAngle = 0f,
+            periodLabelAngle = 0f,
             color = dayColor,
             periodLabel = dayLabel,
             sunriseEndingEdgeLabel = sunriseLabel,
@@ -1055,6 +1055,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             endingEdgeAngle = 0f,
+            periodLabelAngle = 6f,
             color = civilTwilightColor,
             periodLabel = civilTwilightLabel,
             sunriseEndingEdgeLabel = civilDawnLabel,
@@ -1101,6 +1102,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             endingEdgeAngle = 6f,
+            periodLabelAngle = 12f,
             color = nauticalTwilightColor,
             periodLabel = nauticalTwilightLabel,
             sunriseEndingEdgeLabel = nauticalDawnLabel,
@@ -1147,6 +1149,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             endingEdgeAngle = 12f,
+            periodLabelAngle = 18f,
             color = astronomicalTwilightColor,
             periodLabel = astronomicalTwilightLabel,
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
@@ -1198,6 +1201,7 @@ private fun dayChartSegments(
           DayChartSegment(
             sweepAngleDegrees = 72f + accumulatedSweepAngle,
             endingEdgeAngle = 18f,
+            periodLabelAngle = 24f,
             color = nightColor,
             periodLabel = nightLabel
           )
