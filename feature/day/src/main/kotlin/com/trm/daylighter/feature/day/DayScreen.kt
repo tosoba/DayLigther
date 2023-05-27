@@ -63,6 +63,8 @@ import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.ext.color
 import com.trm.daylighter.feature.day.ext.currentPeriodIn
+import com.trm.daylighter.feature.day.ext.isPolarDayAtLocation
+import com.trm.daylighter.feature.day.ext.isPolarNightAtLocation
 import com.trm.daylighter.feature.day.ext.textColor
 import com.trm.daylighter.feature.day.ext.textShadowColor
 import com.trm.daylighter.feature.day.model.DayMode
@@ -694,13 +696,12 @@ private fun SunriseSunsetChart(
 
   val orientation = LocalConfiguration.current.orientation
   val location = if (changeValue is WithData) changeValue.data.location else null
-  val zoneId = if (changeValue is WithData) changeValue.data.location.zoneId else null
   val today = if (changeValue is WithData) changeValue.data.today else null
   val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
 
   val chartSegments =
     dayChartSegments(
-      zoneId = zoneId,
+      location = location,
       today = today,
       yesterday = yesterday,
       orientation = orientation,
@@ -724,59 +725,46 @@ private fun SunriseSunsetChart(
         -size.height * .5f
       )
     val segmentSize = Size(size.height, size.height) * 2f
-    val multiplier =
-      if (today == null || today.currentPeriodIn(requireNotNull(location)) == DayPeriod.DAY) 1f
-      else -1f
-    var startAngle = 90f * multiplier
-    var accumulatedSweepAngle = 0f
+    var startAngle = -90f
 
-    fun DrawScope.drawChartSegment(segment: DayChartSegment, drawAccumulated: Boolean) {
-      if (segment.hasAllTimestamps || changeValue is WithoutData || drawAccumulated) {
-        clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-          drawIntoCanvas {
-            val paint =
-              Paint().apply {
-                style = PaintingStyle.Stroke
-                strokeWidth = 50f
-              }
-            paint.asFrameworkPaint().apply {
-              color = segment.color.copy(alpha = 0f).toArgb()
-              setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
+    fun DrawScope.drawChartSegment(segment: DayChartSegment) {
+      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+        drawIntoCanvas {
+          val paint =
+            Paint().apply {
+              style = PaintingStyle.Stroke
+              strokeWidth = 50f
             }
-            it.drawArc(
-              left = topLeftOffset.x,
-              top = topLeftOffset.y,
-              bottom = topLeftOffset.y + segmentSize.height,
-              right = topLeftOffset.x + segmentSize.width,
-              startAngle = startAngle,
-              sweepAngle = segment.sweepAngleDegrees * multiplier + accumulatedSweepAngle,
-              useCenter = false,
-              paint = paint,
-            )
+          paint.asFrameworkPaint().apply {
+            color = segment.color.copy(alpha = 0f).toArgb()
+            setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
           }
-
-          drawArc(
-            color = segment.color,
+          it.drawArc(
+            left = topLeftOffset.x,
+            top = topLeftOffset.y,
+            bottom = topLeftOffset.y + segmentSize.height,
+            right = topLeftOffset.x + segmentSize.width,
             startAngle = startAngle,
-            sweepAngle = segment.sweepAngleDegrees * multiplier + accumulatedSweepAngle,
-            useCenter = true,
-            topLeft = topLeftOffset,
-            size = segmentSize
+            sweepAngle = segment.sweepAngleDegrees,
+            useCenter = false,
+            paint = paint,
           )
-
-          startAngle += (segment.sweepAngleDegrees + accumulatedSweepAngle) * multiplier
-          accumulatedSweepAngle = 0f
         }
-      } else {
-        accumulatedSweepAngle += segment.sweepAngleDegrees * multiplier
+
+        drawArc(
+          color = segment.color,
+          startAngle = startAngle,
+          sweepAngle = segment.sweepAngleDegrees,
+          useCenter = true,
+          topLeft = topLeftOffset,
+          size = segmentSize
+        )
+
+        startAngle += segment.sweepAngleDegrees
       }
     }
 
-    chartSegments
-      .run { if (multiplier > 0f) reversed() else this }
-      .forEachIndexed { index, segment ->
-        drawChartSegment(segment = segment, drawAccumulated = index == chartSegments.lastIndex)
-      }
+    chartSegments.forEach { segment -> drawChartSegment(segment = segment) }
 
     if (changeValue !is Ready) return@Canvas
 
@@ -1010,12 +998,13 @@ private fun initialDayMode(zoneId: ZoneId): DayMode =
 
 @Composable
 private fun dayChartSegments(
-  zoneId: ZoneId?,
+  location: Location?,
   today: SunriseSunset?,
   yesterday: SunriseSunset?,
   orientation: Int,
   using24HFormat: Boolean
 ): List<DayChartSegment> {
+  val zoneId = location?.zoneId
   val sunriseLabel = stringResource(id = R.string.sunrise)
   val sunsetLabel = stringResource(id = R.string.sunset)
   val dayLabel = stringResource(R.string.day)
@@ -1044,161 +1033,223 @@ private fun dayChartSegments(
       } else {
         null
       }
-    listOf(
-      DayChartSegment(
-        sweepAngleDegrees = -90f,
-        color = dayColor,
-        periodLabel = dayLabel,
-        sunrisePeriodStart = today?.sunrise ?: startOfToday,
-        sunrisePeriodEnd = today?.sunset,
-        sunsetPeriodStart = today?.sunrise,
-        sunsetPeriodEnd = today?.sunset ?: startOfNextDay,
-        sunriseEndingEdgeLabel = sunriseLabel,
-        sunsetEndingEdgeLabel = sunsetLabel,
-        sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
-        sunsetTimeLabel = today?.sunset?.timeLabel(using24HFormat) ?: { "" },
-        sunriseDiffLabel = {
-          val yesterdaySunrise = yesterday?.sunrise
-          val todaySunrise = today?.sunrise
-          if (todaySunrise != null && yesterdaySunrise != null) {
-            timeDifferenceLabel(yesterdaySunrise.toLocalTime(), todaySunrise.toLocalTime())
-          } else {
-            ""
+
+    var accumulatedSweepAngle = 0f
+    buildList {
+      if (
+        today == null ||
+          (today.sunrise != null && today.sunset != null) ||
+          today.isPolarDayAtLocation(requireNotNull(location))
+      ) {
+        add(
+          DayChartSegment(
+            sweepAngleDegrees = 90f + accumulatedSweepAngle,
+            color = dayColor,
+            periodLabel = dayLabel,
+            sunrisePeriodStart = today?.sunrise ?: startOfToday,
+            sunrisePeriodEnd = today?.sunset,
+            sunsetPeriodStart = today?.sunrise,
+            sunsetPeriodEnd = today?.sunset ?: startOfNextDay,
+            sunriseEndingEdgeLabel = sunriseLabel,
+            sunsetEndingEdgeLabel = sunsetLabel,
+            sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
+            sunsetTimeLabel = today?.sunset?.timeLabel(using24HFormat) ?: { "" },
+            sunriseDiffLabel = {
+              val yesterdaySunrise = yesterday?.sunrise
+              val todaySunrise = today?.sunrise
+              if (todaySunrise != null && yesterdaySunrise != null) {
+                timeDifferenceLabel(yesterdaySunrise.toLocalTime(), todaySunrise.toLocalTime())
+              } else {
+                ""
+              }
+            },
+            sunsetDiffLabel = {
+              val yesterdaySunset = yesterday?.sunset
+              val todaySunset = today?.sunset
+              if (todaySunset != null && yesterdaySunset != null) {
+                timeDifferenceLabel(yesterdaySunset.toLocalTime(), todaySunset.toLocalTime())
+              } else {
+                ""
+              }
+            }
+          )
+        )
+        accumulatedSweepAngle = 0f
+      } else {
+        accumulatedSweepAngle += 90f
+      }
+
+      if (today == null || (today.sunrise != null && today.sunset != null)) {
+        add(
+          DayChartSegment(
+            sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            color = civilTwilightColor,
+            periodLabel = civilTwilightLabel,
+            sunrisePeriodStart = today?.civilTwilightBegin,
+            sunrisePeriodEnd = today?.sunrise,
+            sunsetPeriodStart = today?.sunset,
+            sunsetPeriodEnd = today?.civilTwilightEnd,
+            sunriseEndingEdgeLabel = civilDawnLabel,
+            sunsetEndingEdgeLabel = civilDuskLabel,
+            sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
+            sunsetTimeLabel = today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseDiffLabel = {
+              val yesterdayCivilTwilightBegin = yesterday?.civilTwilightBegin
+              val todayCivilTwilightBegin = today?.civilTwilightBegin
+              if (yesterdayCivilTwilightBegin != null && todayCivilTwilightBegin != null) {
+                timeDifferenceLabel(
+                  yesterdayCivilTwilightBegin.toLocalTime(),
+                  todayCivilTwilightBegin.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            },
+            sunsetDiffLabel = {
+              val yesterdayCivilTwilightEnd = yesterday?.civilTwilightEnd
+              val todayCivilTwilightEnd = today?.civilTwilightEnd
+              if (todayCivilTwilightEnd != null && yesterdayCivilTwilightEnd != null) {
+                timeDifferenceLabel(
+                  yesterdayCivilTwilightEnd.toLocalTime(),
+                  todayCivilTwilightEnd.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            }
+          )
+        )
+        accumulatedSweepAngle = 0f
+      } else {
+        accumulatedSweepAngle += 6f
+      }
+
+      if (today == null || (today.civilTwilightBegin != null && today.civilTwilightEnd != null)) {
+        add(
+          DayChartSegment(
+            sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            color = nauticalTwilightColor,
+            periodLabel = nauticalTwilightLabel,
+            sunrisePeriodStart = today?.nauticalTwilightBegin,
+            sunrisePeriodEnd = today?.civilTwilightBegin,
+            sunsetPeriodStart = today?.civilTwilightEnd,
+            sunsetPeriodEnd = today?.nauticalTwilightEnd,
+            sunriseEndingEdgeLabel = nauticalDawnLabel,
+            sunsetEndingEdgeLabel = nauticalDuskLabel,
+            sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
+            sunsetTimeLabel = today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseDiffLabel = {
+              val todayNauticalTwilightBegin = today?.nauticalTwilightBegin
+              val yesterdayNauticalTwilightBegin = yesterday?.nauticalTwilightBegin
+              if (todayNauticalTwilightBegin != null && yesterdayNauticalTwilightBegin != null) {
+                timeDifferenceLabel(
+                  yesterdayNauticalTwilightBegin.toLocalTime(),
+                  todayNauticalTwilightBegin.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            },
+            sunsetDiffLabel = {
+              val todayNauticalTwilightEnd = today?.nauticalTwilightEnd
+              val yesterdayNauticalTwilightEnd = yesterday?.nauticalTwilightEnd
+              if (todayNauticalTwilightEnd != null && yesterdayNauticalTwilightEnd != null) {
+                timeDifferenceLabel(
+                  yesterdayNauticalTwilightEnd.toLocalTime(),
+                  todayNauticalTwilightEnd.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            }
+          )
+        )
+        accumulatedSweepAngle = 0f
+      } else {
+        accumulatedSweepAngle += 6f
+      }
+
+      if (
+        today == null || (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null)
+      ) {
+        add(
+          DayChartSegment(
+            sweepAngleDegrees = 6f + accumulatedSweepAngle,
+            color = astronomicalTwilightColor,
+            periodLabel = astronomicalTwilightLabel,
+            sunrisePeriodStart = today?.astronomicalTwilightBegin,
+            sunrisePeriodEnd = today?.nauticalTwilightBegin,
+            sunsetPeriodStart = today?.nauticalTwilightEnd,
+            sunsetPeriodEnd = today?.astronomicalTwilightEnd,
+            sunriseEndingEdgeLabel = astronomicalDawnLabel,
+            sunsetEndingEdgeLabel = astronomicalDuskLabel,
+            sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
+                ?: { "" },
+            sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseDiffLabel = {
+              val yesterdayAstronomicalTwilightBegin = yesterday?.astronomicalTwilightBegin
+              val todayAstronomicalTwilightBegin = today?.astronomicalTwilightBegin
+              if (
+                todayAstronomicalTwilightBegin != null && yesterdayAstronomicalTwilightBegin != null
+              ) {
+                timeDifferenceLabel(
+                  yesterdayAstronomicalTwilightBegin.toLocalTime(),
+                  todayAstronomicalTwilightBegin.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            },
+            sunsetDiffLabel = {
+              val yesterdayAstronomicalTwilightEnd = yesterday?.astronomicalTwilightEnd
+              val todayAstronomicalTwilightEnd = today?.astronomicalTwilightEnd
+              if (
+                todayAstronomicalTwilightEnd != null && yesterdayAstronomicalTwilightEnd != null
+              ) {
+                timeDifferenceLabel(
+                  yesterdayAstronomicalTwilightEnd.toLocalTime(),
+                  todayAstronomicalTwilightEnd.toLocalTime()
+                )
+              } else {
+                ""
+              }
+            }
+          )
+        )
+        accumulatedSweepAngle = 0f
+      } else {
+        accumulatedSweepAngle += 6f
+      }
+
+      if (
+        today == null ||
+          (today.astronomicalTwilightBegin != null && today.astronomicalTwilightEnd != null) ||
+          today.isPolarNightAtLocation(requireNotNull(location))
+      ) {
+        add(
+          DayChartSegment(
+            sweepAngleDegrees = 72f + accumulatedSweepAngle,
+            color = nightColor,
+            periodLabel = nightLabel,
+            sunrisePeriodStart = startOfToday,
+            sunrisePeriodEnd = today?.astronomicalTwilightBegin,
+            sunsetPeriodStart = today?.astronomicalTwilightEnd,
+            sunsetPeriodEnd = startOfNextDay,
+          )
+        )
+        accumulatedSweepAngle = 0f
+      } else {
+        accumulatedSweepAngle += 72f
+      }
+
+      if (accumulatedSweepAngle > 0f) {
+        add(
+          removeLast().let {
+            it.copy(sweepAngleDegrees = it.sweepAngleDegrees + accumulatedSweepAngle)
           }
-        },
-        sunsetDiffLabel = {
-          val yesterdaySunset = yesterday?.sunset
-          val todaySunset = today?.sunset
-          if (todaySunset != null && yesterdaySunset != null) {
-            timeDifferenceLabel(yesterdaySunset.toLocalTime(), todaySunset.toLocalTime())
-          } else {
-            ""
-          }
-        }
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = -6f,
-        color = civilTwilightColor,
-        periodLabel = civilTwilightLabel,
-        sunrisePeriodStart = today?.civilTwilightBegin ?: startOfToday,
-        sunrisePeriodEnd = today?.sunrise,
-        sunsetPeriodStart = today?.sunset,
-        sunsetPeriodEnd = today?.civilTwilightEnd ?: startOfNextDay,
-        sunriseEndingEdgeLabel = civilDawnLabel,
-        sunsetEndingEdgeLabel = civilDuskLabel,
-        sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
-        sunsetTimeLabel = today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
-        sunriseDiffLabel = {
-          val yesterdayCivilTwilightBegin = yesterday?.civilTwilightBegin
-          val todayCivilTwilightBegin = today?.civilTwilightBegin
-          if (yesterdayCivilTwilightBegin != null && todayCivilTwilightBegin != null) {
-            timeDifferenceLabel(
-              yesterdayCivilTwilightBegin.toLocalTime(),
-              todayCivilTwilightBegin.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        },
-        sunsetDiffLabel = {
-          val yesterdayCivilTwilightEnd = yesterday?.civilTwilightEnd
-          val todayCivilTwilightEnd = today?.civilTwilightEnd
-          if (todayCivilTwilightEnd != null && yesterdayCivilTwilightEnd != null) {
-            timeDifferenceLabel(
-              yesterdayCivilTwilightEnd.toLocalTime(),
-              todayCivilTwilightEnd.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        }
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = -6f,
-        color = nauticalTwilightColor,
-        periodLabel = nauticalTwilightLabel,
-        sunrisePeriodStart = today?.nauticalTwilightBegin ?: startOfToday,
-        sunrisePeriodEnd = today?.civilTwilightBegin,
-        sunsetPeriodStart = today?.civilTwilightEnd,
-        sunsetPeriodEnd = today?.nauticalTwilightEnd ?: startOfNextDay,
-        sunriseEndingEdgeLabel = nauticalDawnLabel,
-        sunsetEndingEdgeLabel = nauticalDuskLabel,
-        sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
-        sunsetTimeLabel = today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
-        sunriseDiffLabel = {
-          val todayNauticalTwilightBegin = today?.nauticalTwilightBegin
-          val yesterdayNauticalTwilightBegin = yesterday?.nauticalTwilightBegin
-          if (todayNauticalTwilightBegin != null && yesterdayNauticalTwilightBegin != null) {
-            timeDifferenceLabel(
-              yesterdayNauticalTwilightBegin.toLocalTime(),
-              todayNauticalTwilightBegin.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        },
-        sunsetDiffLabel = {
-          val todayNauticalTwilightEnd = today?.nauticalTwilightEnd
-          val yesterdayNauticalTwilightEnd = yesterday?.nauticalTwilightEnd
-          if (todayNauticalTwilightEnd != null && yesterdayNauticalTwilightEnd != null) {
-            timeDifferenceLabel(
-              yesterdayNauticalTwilightEnd.toLocalTime(),
-              todayNauticalTwilightEnd.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        }
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = -6f,
-        color = astronomicalTwilightColor,
-        periodLabel = astronomicalTwilightLabel,
-        sunrisePeriodStart = today?.astronomicalTwilightBegin ?: startOfToday,
-        sunrisePeriodEnd = today?.nauticalTwilightBegin,
-        sunsetPeriodStart = today?.nauticalTwilightEnd,
-        sunsetPeriodEnd = today?.astronomicalTwilightEnd ?: startOfNextDay,
-        sunriseEndingEdgeLabel = astronomicalDawnLabel,
-        sunsetEndingEdgeLabel = astronomicalDuskLabel,
-        sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
-        sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
-        sunriseDiffLabel = {
-          val yesterdayAstronomicalTwilightBegin = yesterday?.astronomicalTwilightBegin
-          val todayAstronomicalTwilightBegin = today?.astronomicalTwilightBegin
-          if (
-            todayAstronomicalTwilightBegin != null && yesterdayAstronomicalTwilightBegin != null
-          ) {
-            timeDifferenceLabel(
-              yesterdayAstronomicalTwilightBegin.toLocalTime(),
-              todayAstronomicalTwilightBegin.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        },
-        sunsetDiffLabel = {
-          val yesterdayAstronomicalTwilightEnd = yesterday?.astronomicalTwilightEnd
-          val todayAstronomicalTwilightEnd = today?.astronomicalTwilightEnd
-          if (todayAstronomicalTwilightEnd != null && yesterdayAstronomicalTwilightEnd != null) {
-            timeDifferenceLabel(
-              yesterdayAstronomicalTwilightEnd.toLocalTime(),
-              todayAstronomicalTwilightEnd.toLocalTime()
-            )
-          } else {
-            ""
-          }
-        }
-      ),
-      DayChartSegment(
-        sweepAngleDegrees = -72f,
-        color = nightColor,
-        periodLabel = nightLabel,
-        sunrisePeriodStart = startOfToday,
-        sunrisePeriodEnd = today?.astronomicalTwilightBegin,
-        sunsetPeriodStart = today?.astronomicalTwilightEnd,
-        sunsetPeriodEnd = startOfNextDay,
-      ),
-    )
+        )
+      }
+    }
   }
 }
 
