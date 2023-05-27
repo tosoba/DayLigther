@@ -1043,7 +1043,11 @@ private fun dayChartSegments(
         accumulatedSweepAngle += 90f
       }
 
-      if (today == null || (today.sunrise != null && today.sunset != null)) {
+      if (
+        today == null ||
+          (today.sunrise != null && today.sunset != null) ||
+          (today.civilTwilightBegin != null && today.civilTwilightEnd != null)
+      ) {
         add(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
@@ -1084,7 +1088,11 @@ private fun dayChartSegments(
         accumulatedSweepAngle += 6f
       }
 
-      if (today == null || (today.civilTwilightBegin != null && today.civilTwilightEnd != null)) {
+      if (
+        today == null ||
+          (today.civilTwilightBegin != null && today.civilTwilightEnd != null) ||
+          (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null)
+      ) {
         add(
           DayChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
@@ -1126,7 +1134,9 @@ private fun dayChartSegments(
       }
 
       if (
-        today == null || (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null)
+        today == null ||
+          (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null) ||
+          (today.astronomicalTwilightBegin != null && today.astronomicalTwilightEnd != null)
       ) {
         add(
           DayChartSegment(
