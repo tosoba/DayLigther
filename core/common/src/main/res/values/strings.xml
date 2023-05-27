@@ -8,7 +8,7 @@
     <string name="retry">Retry</string>
     <string name="clear">Clear</string>
     <string name="refresh">Refresh</string>
-    <string name="time_format_12_h">hh:mm:ss</string>
+    <string name="time_format_12_h">hh:mm:ss aa</string>
     <string name="time_format_24_h">HH:mm:ss</string>
 
     <string name="same_timezone_as_you">Same timezone as you</string>
