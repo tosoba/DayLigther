@@ -974,9 +974,10 @@ private fun currentTimeLineAngleRadians(
     sunriseSunset.dayPeriodStartTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
   val endTimeSecond =
     sunriseSunset.dayPeriodEndTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
+  val nowSecond = now.toSecondOfDay()
 
-  return ((endAngle - startAngle) * abs(now.toSecondOfDay() - startTimeSecond) + startAngle) /
-    abs(endTimeSecond - startTimeSecond)
+  return ((endAngle - startAngle) * abs(nowSecond - startTimeSecond)) /
+    abs(endTimeSecond - startTimeSecond) + startAngle
 }
 
 private fun SunriseSunset.dayPeriodStartAngleRadians(
