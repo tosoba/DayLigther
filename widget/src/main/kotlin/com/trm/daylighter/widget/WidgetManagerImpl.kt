@@ -11,7 +11,7 @@ class WidgetManagerImpl
 constructor(
   @ApplicationContext private val context: Context,
 ) : WidgetManager {
-  override fun enqueueDefaultLocationWidgetsUpdate() {
+  override fun updateDefaultLocationWidgets() {
     context.sendBroadcast(LocationWidgetReceiver.updateIntent(context))
   }
 }

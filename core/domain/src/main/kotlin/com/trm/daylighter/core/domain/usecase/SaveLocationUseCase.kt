@@ -14,7 +14,7 @@ constructor(
   suspend operator fun invoke(latitude: Double, longitude: Double, name: String) {
     val location =
       locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
-    if (location.isDefault) widgetManager.enqueueDefaultLocationWidgetsUpdate()
+    if (location.isDefault) widgetManager.updateDefaultLocationWidgets()
   }
 
   suspend operator fun invoke(id: Long, latitude: Double, longitude: Double, name: String) {
@@ -25,7 +25,7 @@ constructor(
         longitude = longitude,
         name = name
       )
-    if (location.isDefault) widgetManager.enqueueDefaultLocationWidgetsUpdate()
+    if (location.isDefault) widgetManager.updateDefaultLocationWidgets()
     sendLocationSavedEventUseCase(id)
   }
 }

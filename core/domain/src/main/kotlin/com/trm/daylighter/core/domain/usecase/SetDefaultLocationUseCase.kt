@@ -9,6 +9,6 @@ class SetDefaultLocationUseCase
 constructor(private val repo: LocationRepo, private val widgetManager: WidgetManager) {
   suspend operator fun invoke(id: Long) {
     repo.setDefaultLocationById(id)
-    widgetManager.enqueueDefaultLocationWidgetsUpdate()
+    widgetManager.updateDefaultLocationWidgets()
   }
 }

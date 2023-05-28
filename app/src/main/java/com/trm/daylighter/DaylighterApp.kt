@@ -1,6 +1,7 @@
 package com.trm.daylighter
 
 import android.app.Application
+import com.trm.daylighter.work.initializer.WidgetUpdateInitializer
 import dagger.hilt.android.HiltAndroidApp
 import org.osmdroid.config.Configuration
 import timber.log.Timber
@@ -11,6 +12,7 @@ class DaylighterApp : Application() {
     super.onCreate()
     initializeTimber()
     initializeOsm()
+    initializeWidgetUpdate()
   }
 
   private fun initializeTimber() {
@@ -19,5 +21,9 @@ class DaylighterApp : Application() {
 
   private fun initializeOsm() {
     Configuration.getInstance().userAgentValue = packageName
+  }
+
+  private fun initializeWidgetUpdate() {
+    WidgetUpdateInitializer(this)
   }
 }
