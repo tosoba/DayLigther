@@ -10,10 +10,12 @@ import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
+import com.trm.daylighter.feature.day.model.DayMode
 import com.trm.daylighter.feature.day.model.DayPeriod
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.Month
 import java.time.Year
 import java.time.ZoneId
@@ -144,3 +146,77 @@ internal fun DayPeriod.textColor(): Color = if (this == DayPeriod.DAY) Color.Bla
 
 internal fun DayPeriod.textShadowColor(): Color =
   if (this == DayPeriod.DAY) Color.White else Color.Black
+
+internal fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+  val nightStart = LocalTime.ofSecondOfDay(1L)
+  val noon = LocalTime.NOON
+  return when (dayPeriod) {
+    DayPeriod.NIGHT -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nightStart
+        DayMode.SUNSET -> astronomicalTwilightEnd?.toLocalTime() ?: noon
+      }
+    }
+    DayPeriod.ASTRONOMICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> astronomicalTwilightBegin?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> nauticalTwilightEnd?.toLocalTime() ?: noon
+      }
+    }
+    DayPeriod.NAUTICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nauticalTwilightBegin?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> civilTwilightEnd?.toLocalTime() ?: noon
+      }
+    }
+    DayPeriod.CIVIL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> civilTwilightBegin?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> sunset?.toLocalTime() ?: noon
+      }
+    }
+    DayPeriod.DAY -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> sunrise?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> noon
+      }
+    }
+  }
+}
+
+internal fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+  val nightEnd = LocalTime.MAX
+  val noon = LocalTime.NOON
+  return when (dayPeriod) {
+    DayPeriod.NIGHT -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> astronomicalTwilightBegin?.toLocalTime() ?: noon
+        DayMode.SUNSET -> nightEnd
+      }
+    }
+    DayPeriod.ASTRONOMICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nauticalTwilightBegin?.toLocalTime() ?: noon
+        DayMode.SUNSET -> astronomicalTwilightEnd?.toLocalTime() ?: nightEnd
+      }
+    }
+    DayPeriod.NAUTICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> civilTwilightBegin?.toLocalTime() ?: noon
+        DayMode.SUNSET -> nauticalTwilightEnd?.toLocalTime() ?: nightEnd
+      }
+    }
+    DayPeriod.CIVIL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> sunrise?.toLocalTime() ?: noon
+        DayMode.SUNSET -> civilTwilightEnd?.toLocalTime() ?: nightEnd
+      }
+    }
+    DayPeriod.DAY -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> noon
+        DayMode.SUNSET -> sunset?.toLocalTime() ?: nightEnd
+      }
+    }
+  }
+}

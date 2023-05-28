@@ -60,6 +60,8 @@ import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.ext.color
 import com.trm.daylighter.feature.day.ext.currentPeriodIn
+import com.trm.daylighter.feature.day.ext.dayPeriodEndTime
+import com.trm.daylighter.feature.day.ext.dayPeriodStartTime
 import com.trm.daylighter.feature.day.ext.isPolarDayAtLocation
 import com.trm.daylighter.feature.day.ext.isPolarNightAtLocation
 import com.trm.daylighter.feature.day.ext.textColor
@@ -69,6 +71,8 @@ import com.trm.daylighter.feature.day.model.DayPeriod
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
+import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -783,6 +787,8 @@ private fun SunriseSunsetChart(
     }
 
     val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+    val portraitLineRadiusMultiplier = 1.025f
+    val landscapeLineRadiusMultiplier = 1.1f
 
     repeat(chartSegments.size - 1) { segmentIndex ->
       val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians
@@ -791,8 +797,8 @@ private fun SunriseSunsetChart(
         val lineRadiusMultiplier =
           when {
             segmentIndex == 0 -> 10f
-            orientation == Configuration.ORIENTATION_PORTRAIT -> 1.025f
-            else -> 1.1f
+            orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
+            else -> landscapeLineRadiusMultiplier
           }
         val strokeWidth = 2f
 
@@ -900,6 +906,158 @@ private fun SunriseSunsetChart(
               textAlign = TextAlign.Right
             ),
         )
+      }
+    }
+
+    val nowTime = now.toLocalTime()
+    if (
+      (nowTime.hour < 12 && dayMode == DayMode.SUNSET) ||
+        (nowTime.hour >= 12 && dayMode == DayMode.SUNRISE)
+    ) {
+      return@Canvas
+    }
+
+    clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+      val lineRadiusMultiplier =
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+        else landscapeLineRadiusMultiplier
+      val currentTimeAngleRadians =
+        currentTimeLineAngleRadians(
+          sunriseSunset = requireNotNull(today),
+          location = requireNotNull(location),
+          now = nowTime,
+          dayMode = dayMode,
+          canvasHeight = size.height,
+          chartRadius = chartRadius
+        )
+
+      drawLine(
+        color = Color.Yellow,
+        start = chartCenter,
+        end =
+          Offset(
+            x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
+            y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
+          ),
+        strokeWidth = 4f,
+      )
+    }
+  }
+}
+
+private fun currentTimeLineAngleRadians(
+  sunriseSunset: SunriseSunset,
+  location: Location,
+  now: LocalTime,
+  dayMode: DayMode,
+  canvasHeight: Float,
+  chartRadius: Float,
+): Float {
+  val dayPeriod = sunriseSunset.currentPeriodIn(location)
+
+  val startAngle =
+    sunriseSunset.dayPeriodStartAngleRadians(
+      dayPeriod = dayPeriod,
+      dayMode = dayMode,
+      canvasHeight = canvasHeight,
+      chartRadius = chartRadius
+    )
+  val endAngle =
+    sunriseSunset.dayPeriodEndAngleRadians(
+      dayPeriod = dayPeriod,
+      dayMode = dayMode,
+      canvasHeight = canvasHeight,
+      chartRadius = chartRadius
+    )
+
+  val startTimeSecond =
+    sunriseSunset.dayPeriodStartTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
+  val endTimeSecond =
+    sunriseSunset.dayPeriodEndTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
+
+  return ((endAngle - startAngle) * abs(now.toSecondOfDay() - startTimeSecond) + startAngle) /
+    abs(endTimeSecond - startTimeSecond)
+}
+
+private fun SunriseSunset.dayPeriodStartAngleRadians(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  canvasHeight: Float,
+  chartRadius: Float,
+): Float {
+  val nightStart = asin(canvasHeight / (2f * chartRadius))
+  val dayStart = -nightStart
+  return when (dayPeriod) {
+    DayPeriod.NIGHT -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nightStart
+        DayMode.SUNSET -> astronomicalTwilightEnd?.let { 18f.radians } ?: dayStart
+      }
+    }
+    DayPeriod.ASTRONOMICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> astronomicalTwilightBegin?.let { 18f.radians } ?: nightStart
+        DayMode.SUNSET -> nauticalTwilightEnd?.let { 12f.radians } ?: dayStart
+      }
+    }
+    DayPeriod.NAUTICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nauticalTwilightBegin?.let { 12f.radians } ?: nightStart
+        DayMode.SUNSET -> civilTwilightEnd?.let { 6f.radians } ?: dayStart
+      }
+    }
+    DayPeriod.CIVIL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> civilTwilightBegin?.let { 6f.radians } ?: nightStart
+        DayMode.SUNSET -> sunset?.let { 0f.radians } ?: dayStart
+      }
+    }
+    DayPeriod.DAY -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> sunset?.let { 0f.radians } ?: nightStart
+        DayMode.SUNSET -> dayStart
+      }
+    }
+  }
+}
+
+private fun SunriseSunset.dayPeriodEndAngleRadians(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  canvasHeight: Float,
+  chartRadius: Float,
+): Float {
+  val nightEnd = asin(canvasHeight / (2f * chartRadius))
+  val dayEnd = -nightEnd
+  return when (dayPeriod) {
+    DayPeriod.NIGHT -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> astronomicalTwilightBegin?.let { 18f.radians } ?: dayEnd
+        DayMode.SUNSET -> nightEnd
+      }
+    }
+    DayPeriod.ASTRONOMICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> nauticalTwilightBegin?.let { 12f.radians } ?: dayEnd
+        DayMode.SUNSET -> astronomicalTwilightEnd?.let { 18f.radians } ?: nightEnd
+      }
+    }
+    DayPeriod.NAUTICAL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> civilTwilightBegin?.let { 6f.radians } ?: dayEnd
+        DayMode.SUNSET -> nauticalTwilightEnd?.let { 12f.radians } ?: nightEnd
+      }
+    }
+    DayPeriod.CIVIL -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> sunrise?.let { 0f.radians } ?: dayEnd
+        DayMode.SUNSET -> civilTwilightEnd?.let { 6f.radians } ?: nightEnd
+      }
+    }
+    DayPeriod.DAY -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> dayEnd
+        DayMode.SUNSET -> sunset?.let { 0f.radians } ?: nightEnd
       }
     }
   }
