@@ -595,7 +595,8 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset, dayPer
           },
         style =
           MaterialTheme.typography.bodyMedium.copy(
-            shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
+            shadow =
+              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
     }
