@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -205,6 +206,8 @@ private fun SunriseSunset(
       snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
     }
 
+    var appBarHeightPx by remember { mutableStateOf(0f) }
+
     Box(
       modifier =
         Modifier.constrainAs(mainContent) {
@@ -232,6 +235,7 @@ private fun SunriseSunset(
                 change = change,
                 dayMode = dayMode,
                 now = now,
+                appBarHeightPx = appBarHeightPx,
                 modifier = Modifier.fillMaxSize()
               )
 
@@ -261,6 +265,7 @@ private fun SunriseSunset(
               change = change,
               dayMode = dayMode,
               now = now,
+              appBarHeightPx = appBarHeightPx,
               modifier = Modifier.fillMaxSize()
             )
 
@@ -291,6 +296,9 @@ private fun SunriseSunset(
               top.linkTo(parent.top)
             }
             .background(topBarGradient)
+            .onGloballyPositioned { coordinates ->
+              appBarHeightPx = coordinates.size.height.toFloat()
+            }
             .padding(10.dp),
         navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
       )
@@ -346,6 +354,9 @@ private fun SunriseSunset(
               width = Dimension.fillToConstraints
             }
             .background(topBarGradient)
+            .onGloballyPositioned { coordinates ->
+              appBarHeightPx = coordinates.size.height.toFloat()
+            }
             .padding(10.dp)
       )
 
@@ -693,11 +704,12 @@ private fun SunriseSunsetChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
   now: LocalTime,
+  appBarHeightPx: Float,
   modifier: Modifier = Modifier
 ) {
-  val changeValue = change.value
-
   val orientation = LocalConfiguration.current.orientation
+
+  val changeValue = change.value
   val location = if (changeValue is WithData) changeValue.data.location else null
   val today = if (changeValue is WithData) changeValue.data.today else null
   val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
@@ -928,6 +940,7 @@ private fun SunriseSunsetChart(
           now = now,
           dayMode = dayMode,
           canvasHeight = size.height,
+          appBarHeight = appBarHeightPx,
           chartRadius = chartRadius
         )
 
@@ -951,6 +964,7 @@ private fun currentTimeLineAngleRadians(
   now: LocalTime,
   dayMode: DayMode,
   canvasHeight: Float,
+  appBarHeight: Float,
   chartRadius: Float,
 ): Float {
   val dayPeriod = sunriseSunset.currentPeriodIn(location)
@@ -960,6 +974,7 @@ private fun currentTimeLineAngleRadians(
       dayPeriod = dayPeriod,
       dayMode = dayMode,
       canvasHeight = canvasHeight,
+      appBarHeight = appBarHeight,
       chartRadius = chartRadius
     )
   val endAngle =
@@ -967,6 +982,7 @@ private fun currentTimeLineAngleRadians(
       dayPeriod = dayPeriod,
       dayMode = dayMode,
       canvasHeight = canvasHeight,
+      appBarHeight = appBarHeight,
       chartRadius = chartRadius
     )
 
@@ -984,10 +1000,11 @@ private fun SunriseSunset.dayPeriodStartAngleRadians(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
   canvasHeight: Float,
+  appBarHeight: Float,
   chartRadius: Float,
 ): Float {
   val nightStart = asin(canvasHeight / (2f * chartRadius))
-  val dayStart = -nightStart
+  val dayStart = -asin((canvasHeight - appBarHeight) / (2f * chartRadius))
   return when (dayPeriod) {
     DayPeriod.NIGHT -> {
       when (dayMode) {
@@ -1026,10 +1043,11 @@ private fun SunriseSunset.dayPeriodEndAngleRadians(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
   canvasHeight: Float,
+  appBarHeight: Float,
   chartRadius: Float,
 ): Float {
   val nightEnd = asin(canvasHeight / (2f * chartRadius))
-  val dayEnd = -nightEnd
+  val dayEnd = -asin((canvasHeight - appBarHeight) / (2f * chartRadius))
   return when (dayPeriod) {
     DayPeriod.NIGHT -> {
       when (dayMode) {
