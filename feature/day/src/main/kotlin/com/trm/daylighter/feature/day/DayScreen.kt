@@ -91,7 +91,9 @@ fun DayRoute(
       initialValue = StableValue(LoadingFirst)
     )
   val now =
-    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = LocalDateTime.now())
+    viewModel.currentTimeAtCurrentLocation.collectAsStateWithLifecycle(
+      initialValue = LocalTime.now()
+    )
   val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
 
   DayScreen(
@@ -111,7 +113,7 @@ fun DayRoute(
 @Composable
 private fun DayScreen(
   change: StableLoadable<LocationSunriseSunsetChange>,
-  now: LocalDateTime,
+  now: LocalTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onDrawerMenuClick: () -> Unit,
@@ -181,7 +183,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 private fun SunriseSunset(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
-  now: LocalDateTime,
+  now: LocalTime,
   locationsCount: Int,
   currentLocationIndex: Int,
   onChangeLocationIndex: (Int) -> Unit,
@@ -690,7 +692,7 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
 private fun SunriseSunsetChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
   dayMode: DayMode,
-  now: LocalDateTime,
+  now: LocalTime,
   modifier: Modifier = Modifier
 ) {
   val changeValue = change.value
@@ -909,10 +911,8 @@ private fun SunriseSunsetChart(
       }
     }
 
-    val nowTime = now.toLocalTime()
     if (
-      (nowTime.hour < 12 && dayMode == DayMode.SUNSET) ||
-        (nowTime.hour >= 12 && dayMode == DayMode.SUNRISE)
+      (now.hour < 12 && dayMode == DayMode.SUNSET) || (now.hour >= 12 && dayMode == DayMode.SUNRISE)
     ) {
       return@Canvas
     }
@@ -925,7 +925,7 @@ private fun SunriseSunsetChart(
         currentTimeLineAngleRadians(
           sunriseSunset = requireNotNull(today),
           location = requireNotNull(location),
-          now = nowTime,
+          now = now,
           dayMode = dayMode,
           canvasHeight = size.height,
           chartRadius = chartRadius

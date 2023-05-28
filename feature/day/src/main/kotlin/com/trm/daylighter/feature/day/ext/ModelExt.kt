@@ -21,9 +21,6 @@ import java.time.Year
 import java.time.ZoneId
 import kotlin.math.abs
 
-internal fun SunriseSunset.getUpcomingTimestampsSorted(now: LocalDateTime): List<LocalDateTime> =
-  allTimestamps().filterNotNull().filter { it.isAfter(now) }.sorted()
-
 internal fun SunriseSunset.allTimestamps(): List<LocalDateTime?> =
   listOf(
     astronomicalTwilightBegin,

@@ -12,9 +12,8 @@ import com.trm.daylighter.core.domain.usecase.ReceiveLocationSavedEventUseCase
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.feature.day.exception.LocationIndexOutOfBoundsException
-import com.trm.daylighter.feature.day.ext.getUpcomingTimestampsSorted
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.*
 import javax.inject.Inject
@@ -54,23 +53,15 @@ constructor(
     SharedFlow<StableLoadable<LocationSunriseSunsetChange>> =
     buildCurrentLocationSunriseSunsetChangeFlow()
 
-  val nowAtCurrentLocation: SharedFlow<LocalDateTime> =
+  val currentTimeAtCurrentLocation: SharedFlow<LocalTime> =
     currentLocationSunriseSunsetChangeFlow
       .map { it.value }
       .filterIsInstance<Ready<LocationSunriseSunsetChange>>()
-      .map { it.data }
-      .transformLatest { (location, today) ->
-        val initialNow = LocalDateTime.now(location.zoneId)
-        emit(initialNow)
-
-        val remainingTimestamps = LinkedList(today.getUpcomingTimestampsSorted(initialNow))
-        while (currentCoroutineContext().isActive && remainingTimestamps.isNotEmpty()) {
-          val now = LocalDateTime.now(location.zoneId)
-          if (remainingTimestamps.first().isBefore(now)) {
-            remainingTimestamps.removeFirst()
-            emit(now)
-          }
-          delay(1000L)
+      .map { it.data.location }
+      .transformLatest { location ->
+        while (currentCoroutineContext().isActive) {
+          emit(LocalTime.now(location.zoneId))
+          delay(60_000L)
         }
       }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
