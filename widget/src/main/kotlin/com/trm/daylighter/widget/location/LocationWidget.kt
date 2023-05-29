@@ -20,10 +20,8 @@ import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -35,7 +33,6 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -67,7 +64,6 @@ import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
-import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
@@ -113,12 +109,6 @@ class LocationWidget(
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
         modifier = GlanceModifier.fillMaxSize()
-      )
-
-      Image(
-        provider = ImageProvider(commonR.drawable.refresh),
-        contentDescription = stringResource(id = commonR.string.refresh),
-        modifier = GlanceModifier.padding(5.dp).clickable(updateWidgetAction())
       )
 
       when (LocalSize.current) {
