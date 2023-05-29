@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -731,6 +732,8 @@ private fun SunriseSunsetChart(
   val horizonLabel = stringResource(R.string.horizon)
   val dayLabel = stringResource(R.string.day)
 
+  val nowLineColor = colorResource(id = commonR.color.now_line)
+
   Canvas(modifier = modifier) {
     val topLeftOffset =
       Offset(
@@ -946,14 +949,14 @@ private fun SunriseSunsetChart(
         )
 
       drawLine(
-        color = Color.Yellow,
+        color = nowLineColor,
         start = chartCenter,
         end =
           Offset(
             x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
             y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
           ),
-        strokeWidth = 4f,
+        strokeWidth = 8f,
       )
     }
   }

@@ -241,9 +241,9 @@ private fun nowLinePaint(context: Context): Paint =
     Color(
         with(context.resources) {
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getColor(commonR.color.sun_inside, context.theme)
+            getColor(commonR.color.now_line, context.theme)
           } else {
-            getColor(commonR.color.sun_inside)
+            getColor(commonR.color.now_line)
           }
         }
       )
