@@ -596,8 +596,7 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset, dayPer
           },
         style =
           MaterialTheme.typography.bodyMedium.copy(
-            shadow =
-              Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
+            shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
     }
@@ -814,7 +813,7 @@ private fun SunriseSunsetChart(
       clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
         val lineRadiusMultiplier =
           when {
-            segmentIndex == 0 -> 10f
+            chartSegments[segmentIndex].periodLabel.startsWith(dayLabel) -> 10f
             orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
             else -> landscapeLineRadiusMultiplier
           }
@@ -832,7 +831,9 @@ private fun SunriseSunsetChart(
                   strokeWidth
             ),
           strokeWidth = strokeWidth,
-          pathEffect = if (segmentIndex == 0) null else dashPathEffect
+          pathEffect =
+            if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) null
+            else dashPathEffect
         )
       }
 
@@ -853,7 +854,8 @@ private fun SunriseSunsetChart(
               textPadding,
           y =
             chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-              if (segmentIndex == 0) 0f else endingEdgeLabelLayoutResult.size.height / 2f
+              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) 0f
+              else endingEdgeLabelLayoutResult.size.height / 2f
         )
       drawText(
         textMeasurer = textMeasurer,
@@ -889,7 +891,8 @@ private fun SunriseSunsetChart(
             ),
           y =
             chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-              if (segmentIndex == 0) 0f else timeLayoutResult.size.height / 2f
+              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) 0f
+              else timeLayoutResult.size.height / 2f
         )
       drawText(
         textMeasurer = textMeasurer,
