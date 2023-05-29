@@ -53,6 +53,8 @@ import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
+import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
+import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
@@ -151,20 +153,20 @@ private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
   val (location, today, _) = change
 
   Canvas(bitmap).apply {
-    drawDayPeriods(zoneId = location.zoneId, today = change.today)
+    drawDayPeriods(zoneId = location.zoneId, today = today, location = location)
     drawTimeLine(dateTime = ZonedDateTime.now(location.zoneId), paint = nowLinePaint(context))
   }
 
   return bitmap
 }
 
-private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset) {
+private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset, location: Location) {
   val widthPx = width.toFloat()
   val heightPx = height.toFloat()
 
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
   val durations = dayPeriodDurationsInSeconds(zoneId = zoneId, sunriseSunset = today)
-  val paints = today.dayPeriodPaints()
+  val paints = today.dayPeriodPaintsFor(location)
 
   var left = 0f
   var right = left + durations.first() / secondsInDay * widthPx
@@ -198,23 +200,30 @@ private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSu
   }
 }
 
-private fun SunriseSunset.dayPeriodPaints(): List<Paint> {
+private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
   val nightPaint = antiAliasPaint(color = nightColor.toArgb())
+  if (isPolarNightAtLocation(location)) return listOf(nightPaint)
+
+  val dayPaint = antiAliasPaint(color = dayColor.toArgb())
+  if (isPolarDayAtLocation(location)) return listOf(dayPaint)
+
   val astronomicalTwilightPaint = antiAliasPaint(color = astronomicalTwilightColor.toArgb())
   val nauticalTwilightPaint = antiAliasPaint(color = nauticalTwilightColor.toArgb())
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
-  val dayPaint = antiAliasPaint(color = dayColor.toArgb())
-  return listOfNotNull(
-    astronomicalTwilightBegin?.let { nightPaint },
-    nauticalTwilightBegin?.let { astronomicalTwilightPaint },
-    civilTwilightBegin?.let { nauticalTwilightPaint },
-    sunrise?.let { civilTwilightPaint },
-    if (sunrise != null && sunset != null) dayPaint else null,
-    sunset?.let { civilTwilightPaint },
-    civilTwilightEnd?.let { nauticalTwilightPaint },
-    nauticalTwilightEnd?.let { astronomicalTwilightPaint },
-    astronomicalTwilightEnd?.let { nightPaint }
-  )
+
+  val paints =
+    listOfNotNull(
+      astronomicalTwilightBegin?.let { nightPaint },
+      astronomicalTwilightBegin?.let { astronomicalTwilightPaint },
+      nauticalTwilightBegin?.let { nauticalTwilightPaint },
+      civilTwilightBegin?.let { civilTwilightPaint },
+      if (sunrise != null && sunset != null) dayPaint else null,
+      civilTwilightEnd?.let { civilTwilightPaint },
+      nauticalTwilightEnd?.let { nauticalTwilightPaint },
+      astronomicalTwilightEnd?.let { astronomicalTwilightPaint },
+      astronomicalTwilightEnd?.let { nightPaint }
+    )
+  return paints.zipWithNext().filter { it.first != it.second }.map { it.first } + paints.last()
 }
 
 private fun Canvas.drawTimeLine(

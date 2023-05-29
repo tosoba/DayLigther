@@ -56,6 +56,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
+import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.StableValue
@@ -64,8 +66,6 @@ import com.trm.daylighter.feature.day.ext.color
 import com.trm.daylighter.feature.day.ext.currentPeriodIn
 import com.trm.daylighter.feature.day.ext.dayPeriodEndTime
 import com.trm.daylighter.feature.day.ext.dayPeriodStartTime
-import com.trm.daylighter.feature.day.ext.isPolarDayAtLocation
-import com.trm.daylighter.feature.day.ext.isPolarNightAtLocation
 import com.trm.daylighter.feature.day.ext.textColor
 import com.trm.daylighter.feature.day.ext.textShadowColor
 import com.trm.daylighter.feature.day.model.DayMode
