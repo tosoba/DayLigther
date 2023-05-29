@@ -459,11 +459,12 @@ private fun ClockAndDayLengthCard(
   change: StableLoadable<LocationSunriseSunsetChange>,
   modifier: Modifier = Modifier,
 ) {
-  val changeValue = change.value
   val dayPeriod =
-    changeValue
-      .map { (location, today) -> today.currentPeriodIn(location) }
-      .dataOrElse(DayPeriod.DAY)
+    remember(change) {
+      change.value
+        .map { (location, today) -> today.currentPeriodIn(location) }
+        .dataOrElse(DayPeriod.DAY)
+    }
 
   Surface(
     shape = CardDefaults.shape,
@@ -471,8 +472,8 @@ private fun ClockAndDayLengthCard(
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
-    if (changeValue is WithData) {
-      val (location, today, yesterday) = changeValue.data
+    change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
+      val (location, today, yesterday) = it.data
       if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -531,7 +532,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
         onZoneIdOrDayPeriodUpdate()
       }
     },
-    update = TextClock::onZoneIdOrDayPeriodUpdate,
+    update = { it.onZoneIdOrDayPeriodUpdate() },
     modifier = modifier
   )
 }
