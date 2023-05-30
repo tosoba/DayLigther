@@ -22,6 +22,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -64,6 +65,7 @@ import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
+import com.trm.daylighter.widget.ui.deepLinkAction
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
@@ -81,7 +83,8 @@ class LocationWidget(
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent {
-      val change by getDefaultLocationSunriseSunsetChangeFlowUseCase().collectAsState(LoadingFirst)
+      val change by
+        getDefaultLocationSunriseSunsetChangeFlowUseCase().collectAsState(initial = LoadingFirst)
       Content(change = change)
     }
   }
@@ -102,7 +105,10 @@ class LocationWidget(
   private fun DayChart(change: LocationSunriseSunsetChange) {
     Box(
       contentAlignment = Alignment.TopEnd,
-      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+      modifier =
+        GlanceModifier.fillMaxSize()
+          .appWidgetBackgroundCornerRadius()
+          .clickable(deepLinkAction(uriRes = commonR.string.day_deep_link_uri))
     ) {
       Image(
         provider = BitmapImageProvider(dayChartBitmap(change = change)),
