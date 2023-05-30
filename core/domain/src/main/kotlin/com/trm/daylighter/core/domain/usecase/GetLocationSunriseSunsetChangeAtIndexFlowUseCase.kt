@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-class GetLocationSunriseSunsetChangeAtIndexUseCase
+class GetLocationSunriseSunsetChangeAtIndexFlowUseCase
 @Inject
 constructor(
   private val calculateSunriseSunsetChangeUseCase: CalculateSunriseSunsetChangeUseCase,

@@ -28,4 +28,6 @@ interface LocationRepo {
     longitude: Double,
     name: String
   ): Location
+
+  suspend fun getNonDefaultLocationOffsetById(id: Long): Int?
 }

@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.common.util.ext.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeAtIndexFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationsCountFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetNonDefaultLocationOffsetByIdUseCase
 import com.trm.daylighter.core.domain.usecase.ReceiveLocationSavedEventUseCase
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
@@ -30,8 +31,9 @@ class DayViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getLocationsCountFlowUseCase: GetLocationsCountFlowUseCase,
-  private val getLocationSunriseSunsetChangeAtIndexUseCase:
-    GetLocationSunriseSunsetChangeAtIndexUseCase,
+  private val getLocationSunriseSunsetChangeAtIndexFlowUseCase:
+    GetLocationSunriseSunsetChangeAtIndexFlowUseCase,
+  private val getNonDefaultLocationOffsetByIdUseCase: GetNonDefaultLocationOffsetByIdUseCase,
   receiveLocationSavedEventUseCase: ReceiveLocationSavedEventUseCase,
 ) : ViewModel() {
   val locationCountFlow: SharedFlow<Int> =
@@ -46,6 +48,21 @@ constructor(
     private set(value) {
       savedStateHandle[SavedState.CURRENT_LOCATION_INDEX.name] = value
     }
+
+  init {
+    val argsCount =
+      savedStateHandle.keys().count { it == LOCATION_ID_ARG_NAME || it == DEFAULT_ARG_NAME }
+    require(argsCount == 0 || argsCount == 2)
+
+    if (argsCount == 2 && !savedStateHandle.get<String>(DEFAULT_ARG_NAME).toBoolean()) {
+      viewModelScope.launch {
+        getNonDefaultLocationOffsetByIdUseCase(
+            id = savedStateHandle.get<Long>(LOCATION_ID_ARG_NAME)!!
+          )
+          ?.let(::currentLocationIndex::set)
+      }
+    }
+  }
 
   private val reloadLocationFlow = MutableSharedFlow<Unit>()
 
@@ -139,7 +156,9 @@ constructor(
           while (currentCoroutineContext().isActive) {
             val now = ZonedDateTime.now(location.zoneId)
             if (now.dayOfMonth != today.date.dayOfMonth) {
-              emitAll(getLocationSunriseSunsetChangeAtIndexUseCase(index = currentLocationIndex))
+              emitAll(
+                getLocationSunriseSunsetChangeAtIndexFlowUseCase(index = currentLocationIndex)
+              )
             }
             delay(1000L)
           }
@@ -166,7 +185,7 @@ constructor(
       else -> {
         emit(LoadingFirst)
         emitAll(
-          getLocationSunriseSunsetChangeAtIndexUseCase(index).map {
+          getLocationSunriseSunsetChangeAtIndexFlowUseCase(index).map {
             if (it is Empty) FailedFirst(LocationIndexOutOfBoundsException(size)) else it
           }
         )
@@ -176,5 +195,10 @@ constructor(
 
   private enum class SavedState {
     CURRENT_LOCATION_INDEX
+  }
+
+  companion object {
+    private const val LOCATION_ID_ARG_NAME = "locationId"
+    private const val DEFAULT_ARG_NAME = "default"
   }
 }

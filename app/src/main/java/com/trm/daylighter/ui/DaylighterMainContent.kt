@@ -186,7 +186,10 @@ private fun DaylighterNavHost(
     }
   }
 
-  val dayDeepLinkUri = stringResource(id = commonR.string.day_deep_link_uri)
+  val dayDeepLinkUri =
+    stringResource(id = commonR.string.day_deep_link_uri).run {
+      "${substring(0, indexOf("?"))}?locationId={locationId}&default={default}"
+    }
   val addLocationDeepLinkUri = stringResource(id = commonR.string.add_location_deep_link_uri)
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {

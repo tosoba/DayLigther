@@ -86,8 +86,8 @@ internal fun GlanceModifier.appWidgetInnerCornerRadius(): GlanceModifier {
 }
 
 @Composable
-internal fun stringResource(@StringRes id: Int, vararg args: Any): String =
-  LocalContext.current.getString(id, args)
+internal fun stringResource(@StringRes id: Int, args: List<Any> = emptyList()): String =
+  LocalContext.current.getString(id, *args.toTypedArray())
 
 internal val Float.toPx: Float
   get() = this * Resources.getSystem().displayMetrics.density
@@ -96,5 +96,5 @@ internal val Float.toDp: Float
   get() = this / Resources.getSystem().displayMetrics.density
 
 @Composable
-internal fun deepLinkAction(@StringRes uriRes: Int): Action =
-  actionStartActivity(Intent(Intent.ACTION_VIEW, stringResource(uriRes).toUri()))
+internal fun deepLinkAction(@StringRes uriRes: Int, args: List<Any> = emptyList()): Action =
+  actionStartActivity(Intent(Intent.ACTION_VIEW, stringResource(uriRes, args).toUri()))

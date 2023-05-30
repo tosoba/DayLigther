@@ -88,4 +88,7 @@ constructor(
         ?.let(ZoneId::of)
         ?: ZoneId.systemDefault()
     }
+
+  override suspend fun getNonDefaultLocationOffsetById(id: Long): Int? =
+    locationDao.selectNonDefaultLocationIndexById(id)
 }

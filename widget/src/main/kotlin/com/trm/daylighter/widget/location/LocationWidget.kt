@@ -108,7 +108,12 @@ class LocationWidget(
       modifier =
         GlanceModifier.fillMaxSize()
           .appWidgetBackgroundCornerRadius()
-          .clickable(deepLinkAction(uriRes = commonR.string.day_deep_link_uri))
+          .clickable(
+            deepLinkAction(
+              uriRes = commonR.string.day_deep_link_uri,
+              listOf(change.location.id.toString(), change.location.isDefault.toString())
+            )
+          )
     ) {
       Image(
         provider = BitmapImageProvider(dayChartBitmap(change = change)),
