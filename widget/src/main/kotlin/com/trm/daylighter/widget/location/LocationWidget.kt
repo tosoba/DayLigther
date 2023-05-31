@@ -217,6 +217,9 @@ private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
 
   val paints = buildList {
+    if (astronomicalTwilightBegin != null) {
+      add(nightPaint)
+    }
     if (astronomicalTwilightBegin != null || nauticalTwilightBegin != null) {
       add(astronomicalTwilightPaint)
     }

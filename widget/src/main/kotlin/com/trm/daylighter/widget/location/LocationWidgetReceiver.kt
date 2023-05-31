@@ -12,8 +12,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -41,10 +39,9 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
 
   private fun updateExistingWidgets(context: Context) {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
-      context
-        .getGlanceIds<LocationWidget>()
-        .map { async { glanceAppWidget.update(context, it) } }
-        .awaitAll()
+      for (id in context.getGlanceIds<LocationWidget>()) {
+        glanceAppWidget.update(context, id)
+      }
     }
   }
 
