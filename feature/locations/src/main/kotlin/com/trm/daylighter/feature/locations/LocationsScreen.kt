@@ -88,7 +88,7 @@ private fun LocationsScreen(
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
 
     val gridState = rememberLazyGridState()
-    val bottomButtonsVisible = rememberGridBottomButtonsVisible(locations, gridState)
+    val bottomButtonsVisible = rememberLoadableGridCanScroll(key = locations, gridState = gridState)
 
     when (locations) {
       is WithData -> {
@@ -162,18 +162,18 @@ private fun LocationsScreen(
 }
 
 @Composable
-private fun BoxWithConstraintsScope.rememberGridBottomButtonsVisible(
-  locations: Loadable<List<StableValue<Location>>>,
+private fun BoxWithConstraintsScope.rememberLoadableGridCanScroll(
+  key: Loadable<Any>,
   gridState: LazyGridState
 ): State<Boolean> {
   val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
   val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-  return remember(locations) {
+  return remember(key) {
     derivedStateOf {
       val layoutInfo = gridState.layoutInfo
       val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
       val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-      if (locations !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
+      if (key !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
         return@derivedStateOf false
       }
 
