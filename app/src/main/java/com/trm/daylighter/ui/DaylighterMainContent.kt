@@ -33,8 +33,8 @@ import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.locationsGraph
 import com.trm.daylighter.feature.locations.locationsGraphRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.widgets.WidgetsScreen
-import com.trm.daylighter.feature.widgets.widgetsRoute
+import com.trm.daylighter.feature.widget.location.WidgetLocationScreen
+import com.trm.daylighter.feature.widget.location.newWidgetRoute
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,7 +81,7 @@ fun DaylighterMainContent() {
                     when (currentRoute) {
                       aboutRoute -> R.string.about_item
                       locationsRoute -> R.string.locations_item
-                      widgetsRoute -> R.string.widgets_item
+                      newWidgetRoute -> R.string.new_widget_item
                       else -> R.string.empty
                     }
                 )
@@ -105,12 +105,12 @@ fun DaylighterMainContent() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
-  val widgetsLabel = stringResource(R.string.widgets_item)
+  val newWidgetLabel = stringResource(R.string.new_widget_item)
   val locationsLabel = stringResource(R.string.locations_item)
   val aboutLabel = stringResource(R.string.about_item)
   val drawerDestinations = remember {
     sequenceOf(
-      DrawerDestination(route = widgetsRoute, icon = Icons.Filled.Widgets, label = widgetsLabel),
+      DrawerDestination(route = newWidgetRoute, icon = Icons.Filled.Widgets, label = newWidgetLabel),
       DrawerDestination(
         route = locationsGraphRoute,
         icon = Icons.Filled.LocationOn,
@@ -220,7 +220,7 @@ private fun DaylighterNavHost(
       editLocationRoute()
     }
 
-    composable(widgetsRoute) { WidgetsScreen(modifier = Modifier.fillMaxSize()) }
+    composable(newWidgetRoute) { WidgetLocationScreen(modifier = Modifier.fillMaxSize()) }
   }
 }
 

@@ -57,7 +57,7 @@ dependencies {
   implementation(project(":feature:intro"))
   implementation(project(":feature:location"))
   implementation(project(":feature:locations"))
-  implementation(project(":feature:widgets"))
+  implementation(project(":feature:widget-location"))
   implementation(project(":widget"))
   implementation(project(":work"))
 
