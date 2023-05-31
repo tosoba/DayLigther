@@ -29,17 +29,17 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
 
   override fun onEnabled(context: Context) {
     super.onEnabled(context)
-    enqueueWidgetUpdateIfAnyExists(context)
+    updateExistingWidgets(context)
   }
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
     when (intent.action) {
-      ACTION_UPDATE -> enqueueWidgetUpdateIfAnyExists(context)
+      ACTION_UPDATE -> updateExistingWidgets(context)
     }
   }
 
-  private fun enqueueWidgetUpdateIfAnyExists(context: Context) {
+  private fun updateExistingWidgets(context: Context) {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
       context
         .getGlanceIds<LocationWidget>()

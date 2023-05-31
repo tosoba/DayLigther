@@ -42,8 +42,8 @@ constructor(
   override suspend fun getDefaultLocation(): Location? =
     locationDao.selectDefault()?.asDomainModel()
 
-  override suspend fun getLocationAtOffset(offset: Int): Location? =
-    locationDao.selectLocationAtOffset(offset)?.asDomainModel()
+  override suspend fun getLocationAtOffsetFlow(offset: Int): Flow<Location?> =
+    locationDao.selectLocationAtOffsetFlow(offset).map { it?.asDomainModel() }
 
   override suspend fun deleteLocationById(id: Long, isDefault: Boolean) {
     locationDao.deleteById(id, isDefault)

@@ -11,9 +11,10 @@ import java.io.File
 
 object LocationWidgetStateDefinition :
   GlanceStateDefinition<Loadable<LocationSunriseSunsetChange>> {
-  private const val DATA_STORE_FILENAME = "DefaultLocationChartWidget"
+  private const val DATA_STORE_FILENAME = "LocationChartWidget"
 
-  private val Context.datastore by dataStore(DATA_STORE_FILENAME, LoadableLocationSunriseSunsetChangeSerializer)
+  private val Context.datastore: DataStore<Loadable<LocationSunriseSunsetChange>> by
+    dataStore(DATA_STORE_FILENAME, LoadableLocationSunriseSunsetChangeSerializer)
 
   override suspend fun getDataStore(
     context: Context,

@@ -8,8 +8,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 class GetLocationSunriseSunsetChangeAtIndexFlowUseCase
 @Inject
@@ -21,10 +23,13 @@ constructor(
   operator fun invoke(index: Int): Flow<Loadable<LocationSunriseSunsetChange>> = flow {
     emit(LoadingFirst)
     try {
-      emit(
-        withContext(ioDispatcher) { repo.getLocationAtOffset(offset = index) }
-          ?.let(calculateSunriseSunsetChangeUseCase::invoke)
-          .asLoadable()
+      emitAll(
+        repo
+          .getLocationAtOffsetFlow(offset = index)
+          .map { location ->
+            location.asLoadable().map(calculateSunriseSunsetChangeUseCase::invoke)
+          }
+          .flowOn(ioDispatcher)
       )
     } catch (ex: CancellationException) {
       throw ex
