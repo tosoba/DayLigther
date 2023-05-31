@@ -151,13 +151,17 @@ class LocationWidget(
 @Composable
 private fun dayChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
   val context = LocalContext.current
-  val size = LocalSize.current
-  val widthPx = size.width.value.toPx
-  val heightPx = size.height.value.toPx
-  val bitmap = Bitmap.createBitmap(widthPx.toInt(), heightPx.toInt(), Bitmap.Config.ARGB_8888)
-  val (location, today, _) = change
+  val bitmap =
+    with(LocalSize.current) {
+      Bitmap.createBitmap(
+        width.value.toPx.toInt(),
+        height.value.toPx.toInt(),
+        Bitmap.Config.ARGB_8888
+      )
+    }
 
   Canvas(bitmap).apply {
+    val (location, today, _) = change
     drawDayPeriods(zoneId = location.zoneId, today = today, location = location)
     drawTimeLine(dateTime = ZonedDateTime.now(location.zoneId), paint = nowLinePaint(context))
   }
