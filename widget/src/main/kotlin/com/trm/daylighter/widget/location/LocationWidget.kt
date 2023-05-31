@@ -38,6 +38,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
@@ -103,6 +104,7 @@ class LocationWidget(
 
   @Composable
   private fun DayChart(change: LocationSunriseSunsetChange) {
+    val context = LocalContext.current
     Box(
       contentAlignment = Alignment.TopEnd,
       modifier =
@@ -110,8 +112,10 @@ class LocationWidget(
           .appWidgetBackgroundCornerRadius()
           .clickable(
             deepLinkAction(
-              uriRes = commonR.string.day_deep_link_uri,
-              listOf(change.location.id.toString(), change.location.isDefault.toString())
+              context.dayDeepLinkUri(
+                locationId = change.location.id,
+                isDefault = change.location.isDefault
+              )
             )
           )
     ) {
@@ -212,18 +216,32 @@ private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
   val nauticalTwilightPaint = antiAliasPaint(color = nauticalTwilightColor.toArgb())
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
 
-  val paints =
-    listOfNotNull(
-      astronomicalTwilightBegin?.let { nightPaint },
-      astronomicalTwilightBegin?.let { astronomicalTwilightPaint },
-      nauticalTwilightBegin?.let { nauticalTwilightPaint },
-      civilTwilightBegin?.let { civilTwilightPaint },
-      if (sunrise != null && sunset != null) dayPaint else null,
-      civilTwilightEnd?.let { civilTwilightPaint },
-      nauticalTwilightEnd?.let { nauticalTwilightPaint },
-      astronomicalTwilightEnd?.let { astronomicalTwilightPaint },
-      astronomicalTwilightEnd?.let { nightPaint }
-    )
+  val paints = buildList {
+    if (astronomicalTwilightBegin != null || nauticalTwilightBegin != null) {
+      add(astronomicalTwilightPaint)
+    }
+    if (nauticalTwilightBegin != null || civilTwilightBegin != null) {
+      add(nauticalTwilightPaint)
+    }
+    if (civilTwilightBegin != null || sunrise != null) {
+      add(civilTwilightPaint)
+    }
+    if (sunrise != null && sunset != null) {
+      add(dayPaint)
+    }
+    if (sunset != null || civilTwilightEnd != null) {
+      add(civilTwilightPaint)
+    }
+    if (civilTwilightEnd != null || nauticalTwilightEnd != null) {
+      add(nauticalTwilightPaint)
+    }
+    if (nauticalTwilightEnd != null || astronomicalTwilightEnd != null) {
+      add(astronomicalTwilightPaint)
+    }
+    if (astronomicalTwilightEnd != null) {
+      add(nightPaint)
+    }
+  }
   return paints.zipWithNext().filter { it.first != it.second }.map { it.first } + paints.last()
 }
 

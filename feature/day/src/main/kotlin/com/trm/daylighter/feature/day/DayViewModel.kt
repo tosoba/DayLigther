@@ -3,6 +3,7 @@ package com.trm.daylighter.feature.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trm.daylighter.core.common.navigation.DayDeepLinkParams
 import com.trm.daylighter.core.common.util.ext.takeIfInstance
 import com.trm.daylighter.core.common.util.ext.withLatestFrom
 import com.trm.daylighter.core.domain.model.*
@@ -51,13 +52,15 @@ constructor(
 
   init {
     val argsCount =
-      savedStateHandle.keys().count { it == LOCATION_ID_ARG_NAME || it == DEFAULT_ARG_NAME }
+      savedStateHandle.keys().count {
+        it == DayDeepLinkParams.LOCATION_ID || it == DayDeepLinkParams.DEFAULT
+      }
     require(argsCount == 0 || argsCount == 2)
 
-    if (argsCount == 2 && !savedStateHandle.get<String>(DEFAULT_ARG_NAME).toBoolean()) {
+    if (argsCount == 2 && !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()) {
       viewModelScope.launch {
         getNonDefaultLocationOffsetByIdUseCase(
-            id = savedStateHandle.get<Long>(LOCATION_ID_ARG_NAME)!!
+            id = savedStateHandle.get<Long>(DayDeepLinkParams.LOCATION_ID)!!
           )
           ?.let(::currentLocationIndex::set)
       }
@@ -195,10 +198,5 @@ constructor(
 
   private enum class SavedState {
     CURRENT_LOCATION_INDEX
-  }
-
-  companion object {
-    private const val LOCATION_ID_ARG_NAME = "locationId"
-    private const val DEFAULT_ARG_NAME = "default"
   }
 }

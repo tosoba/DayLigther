@@ -2,6 +2,7 @@ package com.trm.daylighter.widget.ui
 
 import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -96,5 +97,5 @@ internal val Float.toDp: Float
   get() = this / Resources.getSystem().displayMetrics.density
 
 @Composable
-internal fun deepLinkAction(@StringRes uriRes: Int, args: List<Any> = emptyList()): Action =
-  actionStartActivity(Intent(Intent.ACTION_VIEW, stringResource(uriRes, args).toUri()))
+internal fun deepLinkAction(uri: Uri): Action =
+  actionStartActivity(Intent(Intent.ACTION_VIEW, uri))

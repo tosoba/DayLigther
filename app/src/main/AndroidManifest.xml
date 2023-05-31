@@ -33,7 +33,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:host="@string/deep_link_host"
-                    android:scheme="@string/nav_scheme" />
+                    android:scheme="@string/deep_link_scheme" />
             </intent-filter>
 
         </activity>

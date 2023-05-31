@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -22,6 +23,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.R
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.addLocationDeepPattern
+import com.trm.daylighter.core.common.navigation.dayDeepLinkPattern
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
@@ -186,11 +189,8 @@ private fun DaylighterNavHost(
     }
   }
 
-  val dayDeepLinkUri =
-    stringResource(id = commonR.string.day_deep_link_uri).run {
-      "${substring(0, indexOf("?"))}?locationId={locationId}&default={default}"
-    }
-  val addLocationDeepLinkUri = stringResource(id = commonR.string.add_location_deep_link_uri)
+  val dayDeepLinkUri = LocalContext.current.dayDeepLinkPattern()
+  val addLocationDeepLinkUri = LocalContext.current.addLocationDeepPattern()
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
     composable(route = dayRoute, deepLinks = listOf(navDeepLink { uriPattern = dayDeepLinkUri })) {

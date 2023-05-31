@@ -15,8 +15,6 @@
     <string name="timezone_ahead_of_you">You\'re %1$02d:%2$02d ahead</string>
     <string name="timezone_behind_of_you">You\'re %1$02d:%2$02d behind</string>
 
-    <string name="nav_scheme">deeplink</string>
+    <string name="deep_link_scheme">deeplink</string>
     <string name="deep_link_host">daylighter</string>
-    <string name="add_location_deep_link_uri">deeplink://daylighter/location</string>
-    <string name="day_deep_link_uri">deeplink://daylighter/day?locationId=%1$s&amp;default=%2$s</string>
 </resources>
