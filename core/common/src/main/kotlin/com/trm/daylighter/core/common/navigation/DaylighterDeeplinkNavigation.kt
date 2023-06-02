@@ -17,6 +17,16 @@ fun Context.dayDeepLinkUri(locationId: Long, isDefault: Boolean): Uri =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/day/${locationId}?default=${isDefault}".toUri()
 
 object DayDeepLinkParams {
-  const val LOCATION_ID = "locationId"
-  const val DEFAULT = "default"
+  const val LOCATION_ID = "day_locationId"
+  const val DEFAULT = "day_default"
+}
+
+fun Context.widgetLocationDeepLinkPattern(): String =
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget_location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
+
+fun Context.widgetLocationDeepLinkUri(locationId: Long): Uri =
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget_location/${locationId}".toUri()
+
+object WidgetLocationDeepLinkParams {
+  const val LOCATION_ID = "widgetLocation_locationId"
 }

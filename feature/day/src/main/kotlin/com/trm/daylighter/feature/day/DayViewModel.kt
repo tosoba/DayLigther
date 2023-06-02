@@ -55,9 +55,9 @@ constructor(
       savedStateHandle.keys().count {
         it == DayDeepLinkParams.LOCATION_ID || it == DayDeepLinkParams.DEFAULT
       }
-    require(argsCount == 0 || argsCount == 2)
-
-    if (argsCount == 2 && !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()) {
+    if (
+      argsCount == 2 && !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()
+    ) {
       viewModelScope.launch {
         getNonDefaultLocationOffsetByIdUseCase(
             id = savedStateHandle.get<Long>(DayDeepLinkParams.LOCATION_ID)!!

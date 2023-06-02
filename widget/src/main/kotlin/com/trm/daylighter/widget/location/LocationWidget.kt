@@ -41,6 +41,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
+import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
@@ -147,7 +148,11 @@ class LocationWidget(
       Image(
         provider = AndroidResourceImageProvider(R.drawable.settings),
         contentDescription = stringResource(id = commonR.string.settings),
-        modifier = GlanceModifier.padding(5.dp)
+        modifier =
+          GlanceModifier.padding(5.dp)
+            .clickable(
+              deepLinkAction(context.widgetLocationDeepLinkUri(locationId = change.location.id))
+            )
       )
     }
   }

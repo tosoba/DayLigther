@@ -25,6 +25,7 @@ import com.trm.daylighter.R
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.addLocationDeepPattern
 import com.trm.daylighter.core.common.navigation.dayDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
@@ -81,7 +82,7 @@ fun DaylighterMainContent() {
                     when (currentRoute) {
                       aboutRoute -> R.string.about_item
                       locationsRoute -> R.string.locations_item
-                      newWidgetRoute -> R.string.new_widget_item
+                      newWidgetRoute -> R.string.choose_location
                       else -> R.string.empty
                     }
                 )
@@ -110,7 +111,11 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   val aboutLabel = stringResource(R.string.about_item)
   val drawerDestinations = remember {
     sequenceOf(
-      DrawerDestination(route = newWidgetRoute, icon = Icons.Filled.Widgets, label = newWidgetLabel),
+      DrawerDestination(
+        route = newWidgetRoute,
+        icon = Icons.Filled.Widgets,
+        label = newWidgetLabel
+      ),
       DrawerDestination(
         route = locationsGraphRoute,
         icon = Icons.Filled.LocationOn,
@@ -189,8 +194,10 @@ private fun DaylighterNavHost(
     }
   }
 
-  val dayDeepLinkUri = LocalContext.current.dayDeepLinkPattern()
-  val addLocationDeepLinkUri = LocalContext.current.addLocationDeepPattern()
+  val context = LocalContext.current
+  val dayDeepLinkUri = context.dayDeepLinkPattern()
+  val addLocationDeepLinkUri = context.addLocationDeepPattern()
+  val widgetLocationDeepLinkUri = context.widgetLocationDeepLinkPattern()
 
   NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
     composable(route = dayRoute, deepLinks = listOf(navDeepLink { uriPattern = dayDeepLinkUri })) {
@@ -220,7 +227,12 @@ private fun DaylighterNavHost(
       editLocationRoute()
     }
 
-    composable(newWidgetRoute) { WidgetLocationScreen(modifier = Modifier.fillMaxSize()) }
+    composable(
+      route = newWidgetRoute,
+      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUri })
+    ) {
+      WidgetLocationScreen(modifier = Modifier.fillMaxSize())
+    }
   }
 }
 

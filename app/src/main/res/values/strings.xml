@@ -5,4 +5,5 @@
     <string name="new_widget_item">New widget</string>
     <string name="locations_item">Locations</string>
     <string name="about_item">About</string>
+    <string name="choose_location">Choose location</string>
 </resources>
