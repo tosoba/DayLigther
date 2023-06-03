@@ -86,7 +86,8 @@ private fun WidgetLocationScreen(
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
-    var bottomButtonsHeightPx by remember { mutableStateOf(0) }
+    var addWidgetButtonHeightPx by remember { mutableStateOf(0) }
+    var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
 
     when (locations) {
       is WithData -> {
@@ -107,13 +108,14 @@ private fun WidgetLocationScreen(
               )
             }
 
-            if (bottomButtonsHeightPx > 0) {
+            val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
+            if (spacerHeightPx > 0) {
               item(span = { GridItemSpan(columnsCount) }) {
                 Spacer(
                   modifier =
                     Modifier.height(
                       bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                        with(LocalDensity.current) { spacerHeightPx.toDp() }
                     )
                 )
               }
@@ -124,8 +126,26 @@ private fun WidgetLocationScreen(
             zoom = zoom,
             incrementZoom = { ++zoom },
             decrementZoom = { --zoom },
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+            modifier =
+              Modifier.align(Alignment.BottomStart)
+                .padding(bottomButtonsPaddingDp)
+                .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
           )
+
+          AnimatedVisibility(
+            visible = selectedLocationId != null,
+            modifier =
+              Modifier.align(Alignment.BottomEnd)
+                .padding(bottomButtonsPaddingDp)
+                .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
+          ) {
+            FloatingActionButton(onClick = onAddWidgetClick) {
+              Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(id = R.string.add_a_widget)
+              )
+            }
+          }
         } else {
           InfoButtonCard(
             infoText = stringResource(commonR.string.no_saved_locations_add_one),
@@ -137,21 +157,6 @@ private fun WidgetLocationScreen(
             text = stringResource(commonR.string.no_locations),
             modifier = Modifier.align(Alignment.Center)
           )
-        }
-
-        AnimatedVisibility(
-          visible = locations.data.isNotEmpty() && selectedLocationId != null,
-          modifier =
-            Modifier.align(Alignment.BottomEnd)
-              .padding(bottomButtonsPaddingDp)
-              .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
-        ) {
-          FloatingActionButton(onClick = onAddWidgetClick) {
-            Icon(
-              imageVector = Icons.Filled.Add,
-              contentDescription = stringResource(id = R.string.add_a_widget)
-            )
-          }
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
