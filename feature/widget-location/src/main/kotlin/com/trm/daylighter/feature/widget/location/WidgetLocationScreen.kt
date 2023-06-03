@@ -124,7 +124,7 @@ private fun WidgetLocationScreen(
             zoom = zoom,
             incrementZoom = { ++zoom },
             decrementZoom = { --zoom },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottomButtonsPaddingDp)
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
           )
         } else {
           InfoButtonCard(
