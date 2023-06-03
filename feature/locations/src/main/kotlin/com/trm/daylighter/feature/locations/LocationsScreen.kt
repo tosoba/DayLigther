@@ -2,8 +2,6 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -16,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -87,20 +86,18 @@ private fun LocationsScreen(
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
 
-    val gridState = rememberLazyGridState()
-    val bottomButtonsVisible = rememberLoadableGridCanScroll(key = locations, gridState = gridState)
+    val bottomButtonsPaddingDp = 20.dp
+    var bottomButtonsHeightPx by remember { mutableStateOf(0) }
 
     when (locations) {
       is WithData -> {
         if (locations.data.isNotEmpty()) {
+          val columnsCount =
+            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
+            else 4
           LazyVerticalGrid(
-            state = gridState,
             contentPadding = PaddingValues(10.dp),
-            columns =
-              GridCells.Fixed(
-                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
-                else 4
-              )
+            columns = GridCells.Fixed(columnsCount)
           ) {
             items(locations.data, key = { it.value.id }) { location ->
               MapCard(
@@ -111,19 +108,24 @@ private fun LocationsScreen(
                 onDeleteLocationClick = { locationBeingDeleted = it },
               )
             }
+
+            if (bottomButtonsHeightPx > 0) {
+              item(span = { GridItemSpan(columnsCount) }) {
+                Spacer(
+                  modifier =
+                    Modifier.height(
+                      bottomButtonsPaddingDp * 2 +
+                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                    )
+                )
+              }
+            }
           }
 
-          AnimatedVisibility(
-            visible = !bottomButtonsVisible.value,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)
-          ) {
-            Row {
-              ZoomInButton(mapZoom = zoom, onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom })
-              Spacer(modifier = Modifier.width(5.dp))
-              ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
-            }
+          Row(modifier = Modifier.align(Alignment.BottomCenter).padding(bottomButtonsPaddingDp)) {
+            ZoomInButton(mapZoom = zoom, onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom })
+            Spacer(modifier = Modifier.width(5.dp))
+            ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
           }
         } else {
           Text(
@@ -132,18 +134,17 @@ private fun LocationsScreen(
           )
         }
 
-        AnimatedVisibility(
-          visible = !bottomButtonsVisible.value,
-          enter = fadeIn(),
-          exit = fadeOut(),
-          modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
+        FloatingActionButton(
+          onClick = onAddLocationClick,
+          modifier =
+            Modifier.align(Alignment.BottomEnd)
+              .padding(bottomButtonsPaddingDp)
+              .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
         ) {
-          FloatingActionButton(onClick = onAddLocationClick) {
-            Icon(
-              imageVector = Icons.Filled.Add,
-              contentDescription = stringResource(id = R.string.add_a_location)
-            )
-          }
+          Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = stringResource(id = R.string.add_a_location)
+          )
         }
       }
       is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -158,38 +159,6 @@ private fun LocationsScreen(
       onDismissRequest = { locationBeingDeleted = null },
       modifier = Modifier.align(Alignment.Center).wrapContentHeight()
     )
-  }
-}
-
-@Composable
-private fun BoxWithConstraintsScope.rememberLoadableGridCanScroll(
-  key: Loadable<Any>,
-  gridState: LazyGridState
-): State<Boolean> {
-  val itemPaddingVerticalPx = with(LocalDensity.current) { 10.dp.toPx() }
-  val boxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-  return remember(key) {
-    derivedStateOf {
-      val layoutInfo = gridState.layoutInfo
-      val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()
-      val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-      if (key !is WithData || firstVisibleItem == null || lastVisibleItem == null) {
-        return@derivedStateOf false
-      }
-
-      val lastItemFullyVisible =
-        lastVisibleItem.index == layoutInfo.totalItemsCount - 1 &&
-          lastVisibleItem.size.height + lastVisibleItem.offset.y <= layoutInfo.viewportEndOffset
-      if (!lastItemFullyVisible) return@derivedStateOf false
-
-      val visibleRows = lastVisibleItem.row - firstVisibleItem.row + 1
-      val canScrollAtAll =
-        visibleRows * lastVisibleItem.size.height +
-          visibleRows * itemPaddingVerticalPx +
-          layoutInfo.beforeContentPadding +
-          layoutInfo.afterContentPadding > boxHeightPx
-      canScrollAtAll
-    }
   }
 }
 
