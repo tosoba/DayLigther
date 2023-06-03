@@ -9,6 +9,7 @@
     <string name="clear">Clear</string>
     <string name="refresh">Refresh</string>
     <string name="settings">Settings</string>
+    <string name="new_location">New location</string>
     <string name="no_locations">No locations</string>
     <string name="no_saved_locations_add_one">No saved locations - add one to track its day periods.</string>
     <string name="time_format_12_h">hh:mm:ss aa</string>

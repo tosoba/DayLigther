@@ -140,7 +140,7 @@ private fun WidgetLocationScreen(
         }
 
         AnimatedVisibility(
-          visible = locations.data.isNotEmpty(),
+          visible = locations.data.isNotEmpty() && selectedLocationId != null,
           modifier =
             Modifier.align(Alignment.BottomEnd)
               .padding(bottomButtonsPaddingDp)

@@ -162,7 +162,7 @@ private fun LocationScreen(
     stringResource(
       id =
         when (screenMode) {
-          LocationScreenMode.ADD -> R.string.add_location
+          LocationScreenMode.ADD -> commonR.string.add_location
           LocationScreenMode.EDIT -> R.string.edit_location
         }
     )
@@ -343,7 +343,8 @@ private fun LocationAppBar(
     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
     title = {
       Text(
-        text = locationMap.state.savedMapPosition.label,
+        text = locationMap.state.savedMapPosition.label.takeIf(String::isNotEmpty)
+            ?: stringResource(id = commonR.string.new_location),
         style = MaterialTheme.typography.titleMedium,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
