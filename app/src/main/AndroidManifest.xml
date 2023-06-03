@@ -39,6 +39,10 @@
         </activity>
 
         <receiver
+            android:name=".widget.WidgetPinnedReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".widget.location.LocationWidgetReceiver"
             android:exported="false"
             android:label="@string/location_chart">
