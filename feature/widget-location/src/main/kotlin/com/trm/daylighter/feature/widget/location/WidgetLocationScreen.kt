@@ -69,7 +69,7 @@ fun WidgetLocationRoute(
     selectedLocationId = selectedLocationId.value,
     onLocationSelected = { viewModel.selectedLocationId = it },
     mode = viewModel.mode,
-    onConfirmLocationSelectionClick = {},
+    onConfirmLocationSelectionClick = viewModel::confirmLocationSelection,
     onAddLocationClick = {},
     modifier = modifier
   )

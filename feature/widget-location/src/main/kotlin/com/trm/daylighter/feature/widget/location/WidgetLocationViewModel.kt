@@ -7,6 +7,7 @@ import com.trm.daylighter.core.common.navigation.WidgetLocationDeepLinkParams
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
+import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ class WidgetLocationViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
+  private val widgetManager: WidgetManager
 ) : ViewModel() {
   val locations: Flow<Loadable<List<StableValue<Location>>>> =
     getAllLocationsFlowUseCase()
@@ -48,6 +50,15 @@ constructor(
       } else {
         WidgetLocationMode.ADD
       }
+
+  fun confirmLocationSelection() {
+    selectedLocationId?.let {
+      when (mode) {
+        WidgetLocationMode.ADD -> widgetManager.addLocationWidget(it)
+        WidgetLocationMode.EDIT -> {}
+      }
+    }
+  }
 
   private enum class SavedState {
     SELECTED_LOCATION_ID

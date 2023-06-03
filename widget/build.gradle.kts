@@ -25,4 +25,6 @@ dependencies {
 
   implementation(libs.hilt.ext.work)
   kapt(libs.hilt.ext.compiler)
+
+  implementation(libs.timber)
 }
