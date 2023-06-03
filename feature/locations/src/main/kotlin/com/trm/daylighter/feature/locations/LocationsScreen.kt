@@ -82,9 +82,9 @@ private fun LocationsScreen(
   onDeleteLocationClick: (Location) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  BoxWithConstraints(modifier = modifier) {
-    var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
+  Box(modifier = modifier) {
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
+    var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
     var bottomButtonsHeightPx by remember { mutableStateOf(0) }
