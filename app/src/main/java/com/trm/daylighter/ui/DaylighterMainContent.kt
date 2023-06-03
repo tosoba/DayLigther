@@ -34,7 +34,7 @@ import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.locationsGraph
 import com.trm.daylighter.feature.locations.locationsGraphRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.widget.location.WidgetLocationScreen
+import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.newWidgetRoute
 import kotlinx.coroutines.launch
 
@@ -231,7 +231,7 @@ private fun DaylighterNavHost(
       route = newWidgetRoute,
       deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUri })
     ) {
-      WidgetLocationScreen(modifier = Modifier.fillMaxSize())
+      WidgetLocationRoute(modifier = Modifier.fillMaxSize())
     }
   }
 }
