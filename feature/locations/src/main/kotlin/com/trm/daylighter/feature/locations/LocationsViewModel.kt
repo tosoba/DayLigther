@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.domain.usecase.DeleteLocationUseCase
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.usecase.SetDefaultLocationUseCase
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
-import com.trm.daylighter.core.domain.usecase.DeleteLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
@@ -18,9 +18,9 @@ import kotlinx.coroutines.launch
 class LocationsViewModel
 @Inject
 constructor(
-    getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
-    private val setDefaultLocationUseCase: SetDefaultLocationUseCase,
-    private val deleteLocationUseCase: DeleteLocationUseCase,
+  getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
+  private val setDefaultLocationUseCase: SetDefaultLocationUseCase,
+  private val deleteLocationUseCase: DeleteLocationUseCase,
 ) : ViewModel() {
   val locations: Flow<Loadable<List<StableValue<Location>>>> =
     getAllLocationsFlowUseCase()

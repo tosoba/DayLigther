@@ -5,4 +5,6 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.widget.location" }
 
-dependencies {}
+dependencies {
+  implementation(project(":core:common"))
+}
