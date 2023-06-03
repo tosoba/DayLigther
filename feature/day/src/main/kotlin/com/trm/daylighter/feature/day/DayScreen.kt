@@ -271,7 +271,7 @@ private fun SunriseSunset(
             )
 
             InfoButtonCard(
-              infoText = stringResource(R.string.no_saved_locations_add_one),
+              infoText = stringResource(commonR.string.no_saved_locations_add_one),
               actionText = stringResource(commonR.string.add_location),
               onButtonClick = onAddLocationClick,
               modifier = Modifier.align(Alignment.Center).padding(20.dp)
@@ -399,26 +399,6 @@ private fun SunriseSunset(
       ) {
         ClockAndDayLengthCard(change = change)
       }
-    }
-  }
-}
-
-@Composable
-private fun InfoButtonCard(
-  infoText: String,
-  actionText: String,
-  onButtonClick: () -> Unit,
-  modifier: Modifier = Modifier
-) {
-  Surface(shape = CardDefaults.shape, shadowElevation = 6.dp, modifier = modifier) {
-    Column(
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.padding(10.dp)
-    ) {
-      Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
-      Spacer(modifier = Modifier.height(10.dp))
-      Button(onClick = onButtonClick) { Text(text = actionText) }
     }
   }
 }

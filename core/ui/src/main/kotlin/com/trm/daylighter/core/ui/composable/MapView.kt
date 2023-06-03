@@ -1,13 +1,17 @@
 package com.trm.daylighter.core.ui.composable
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
+import com.trm.daylighter.core.common.util.setPosition
 import org.osmdroid.views.MapView
 
 @Composable
@@ -48,4 +52,17 @@ fun rememberMapLifecycleObserver(
       }
     }
   }
+}
+
+@Composable
+fun DisabledMapView(latitude: Double, longitude: Double, zoom: Double) {
+  val mapView = rememberMapViewWithLifecycle()
+  val darkMode = isSystemInDarkTheme()
+  AndroidView(
+    factory = { mapView },
+    update = {
+      it.setDefaultDisabledConfig(darkMode = darkMode)
+      it.setPosition(latitude = latitude, longitude = longitude, zoom = zoom)
+    }
+  )
 }

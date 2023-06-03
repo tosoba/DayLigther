@@ -2,7 +2,6 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -21,7 +20,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -29,8 +27,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.MapDefaults
-import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
-import com.trm.daylighter.core.common.util.setPosition
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
@@ -130,7 +126,7 @@ private fun LocationsScreen(
           )
         } else {
           Text(
-            text = stringResource(R.string.no_locations),
+            text = stringResource(commonR.string.no_locations),
             modifier = Modifier.align(Alignment.Center)
           )
         }
@@ -204,7 +200,11 @@ private fun MapCard(
     modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
-      MapView(latitude = location.value.latitude, longitude = location.value.longitude, zoom = zoom)
+      DisabledMapView(
+        latitude = location.value.latitude,
+        longitude = location.value.longitude,
+        zoom = zoom
+      )
 
       LocationNameGradientOverlay()
 
@@ -232,19 +232,6 @@ private fun MapCard(
       }
     }
   }
-}
-
-@Composable
-private fun MapView(latitude: Double, longitude: Double, zoom: Double) {
-  val mapView = rememberMapViewWithLifecycle()
-  val darkMode = isSystemInDarkTheme()
-  AndroidView(
-    factory = { mapView },
-    update = {
-      it.setDefaultDisabledConfig(darkMode = darkMode)
-      it.setPosition(latitude = latitude, longitude = longitude, zoom = zoom)
-    }
-  )
 }
 
 @Composable

@@ -82,7 +82,7 @@ fun DaylighterMainContent() {
                     when (currentRoute) {
                       aboutRoute -> R.string.about_item
                       locationsRoute -> R.string.locations_item
-                      newWidgetRoute -> R.string.choose_location
+                      newWidgetRoute -> R.string.choose_widget_location
                       else -> R.string.empty
                     }
                 )
