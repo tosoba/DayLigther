@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.widget.util.ext.getGlanceIds
 import com.trm.daylighter.widget.util.ext.widgetReceiverIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,9 +21,16 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
   internal lateinit var getDefaultLocationSunriseSunsetChangeFlowUseCase:
     GetDefaultLocationSunriseSunsetChangeFlowUseCase
 
+  @Inject
+  internal lateinit var getLocationSunriseSunsetChangeFlowByIdUseCase:
+    GetLocationSunriseSunsetChangeFlowByIdUseCase
+
   override val glanceAppWidget: GlanceAppWidget by
     lazy(LazyThreadSafetyMode.NONE) {
-      LocationWidget(getDefaultLocationSunriseSunsetChangeFlowUseCase)
+      LocationWidget(
+        getDefaultLocationSunriseSunsetChangeFlowUseCase,
+        getLocationSunriseSunsetChangeFlowByIdUseCase
+      )
     }
 
   override fun onEnabled(context: Context) {

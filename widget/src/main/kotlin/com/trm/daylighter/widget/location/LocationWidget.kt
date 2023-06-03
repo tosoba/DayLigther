@@ -31,6 +31,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.provideContent
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -57,6 +58,7 @@ import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
@@ -83,15 +85,28 @@ import java.time.format.DateTimeFormatter
 
 class LocationWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
-    GetDefaultLocationSunriseSunsetChangeFlowUseCase
+    GetDefaultLocationSunriseSunsetChangeFlowUseCase,
+  private val getLocationSunriseSunsetChangeFlowByIdUseCase:
+    GetLocationSunriseSunsetChangeFlowByIdUseCase
 ) : GlanceAppWidget() {
   override val stateDefinition = LocationWidgetStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent {
-      val change by
-        getDefaultLocationSunriseSunsetChangeFlowUseCase().collectAsState(initial = LoadingFirst)
+      val state = currentState<LocationWidgetState>()
+      val changeFlow =
+        remember(state) {
+          when (state) {
+            is LocationWidgetState.ChosenLocation -> {
+              getLocationSunriseSunsetChangeFlowByIdUseCase(state.locationId)
+            }
+            LocationWidgetState.DefaultLocation -> {
+              getDefaultLocationSunriseSunsetChangeFlowUseCase()
+            }
+          }
+        }
+      val change by changeFlow.collectAsState(initial = LoadingFirst)
       Content(change = change, id = id)
     }
   }

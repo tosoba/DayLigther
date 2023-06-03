@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
   private const val DEFAULT_LOCATION_ID = -1L
 
-  override val defaultValue = LocationWidgetState.Default
+  override val defaultValue = LocationWidgetState.DefaultLocation
 
   override suspend fun readFrom(input: InputStream): LocationWidgetState =
     try {
@@ -20,8 +20,8 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
           deserializer = Long.serializer(),
           string = input.readBytes().decodeToString()
         )
-      if (locationId != DEFAULT_LOCATION_ID) LocationWidgetState.NonDefault(locationId)
-      else LocationWidgetState.Default
+      if (locationId != DEFAULT_LOCATION_ID) LocationWidgetState.ChosenLocation(locationId)
+      else LocationWidgetState.DefaultLocation
     } catch (exception: SerializationException) {
       throw CorruptionException("Could not read location widget state : ${exception.message}")
     }
@@ -33,8 +33,8 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
             serializer = Long.serializer(),
             value =
               when (t) {
-                LocationWidgetState.Default -> DEFAULT_LOCATION_ID
-                is LocationWidgetState.NonDefault -> t.locationId
+                LocationWidgetState.DefaultLocation -> DEFAULT_LOCATION_ID
+                is LocationWidgetState.ChosenLocation -> t.locationId
               }
           )
           .encodeToByteArray()
