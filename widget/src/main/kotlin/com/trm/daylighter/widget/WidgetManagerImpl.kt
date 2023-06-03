@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.widget.location.LocationWidgetReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +22,8 @@ constructor(
     context.sendBroadcast(LocationWidgetReceiver.updateIntent(context))
   }
 
-  override fun addLocationWidget(locationId: Long) {
+  @RequiresApi(Build.VERSION_CODES.O)
+  override fun addLocationWidget(locationId: Long): Boolean {
     val widgetManager = AppWidgetManager.getInstance(context)
 
     val componentName =
@@ -32,21 +34,19 @@ constructor(
           Timber.e(
             "Widget id not found for package: ${componentName.packageName}; class: ${componentName.className}"
           )
-          return
+          return false
         }
 
-    val successCallback =
+    widgetManager.requestPinAppWidget(
+      widgetInfo.provider,
+      null,
       PendingIntent.getBroadcast(
         context,
         0,
         Intent(context, WidgetPinnedReceiver::class.java),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
       )
-
-    // TODO:
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      AppWidgetManager.getInstance(context)
-        .requestPinAppWidget(widgetInfo.provider, null, successCallback)
-    }
+    )
+    return true
   }
 }
