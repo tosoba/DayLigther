@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,6 +50,7 @@ import com.trm.daylighter.core.ui.composable.DisabledMapView
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
+import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
 import com.trm.daylighter.core.ui.model.StableValue
 
@@ -179,11 +179,7 @@ private fun MapCard(
 
       LocationNameGradientOverlay()
 
-      Icon(
-        painter = painterResource(id = commonR.drawable.marker),
-        contentDescription = stringResource(id = commonR.string.location_marker),
-        modifier = Modifier.align(Alignment.Center).size(36.dp)
-      )
+      MarkerIcon(modifier = Modifier.align(Alignment.Center).size(36.dp))
 
       LocationNameLabel(
         name = location.value.name,

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -208,11 +207,7 @@ private fun MapCard(
 
       LocationNameGradientOverlay()
 
-      Icon(
-        painter = painterResource(id = commonR.drawable.marker),
-        contentDescription = stringResource(id = commonR.string.location_marker),
-        modifier = Modifier.align(Alignment.Center).size(36.dp)
-      )
+      MarkerIcon(modifier = Modifier.align(Alignment.Center).size(36.dp))
 
       Row(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(5.dp),
