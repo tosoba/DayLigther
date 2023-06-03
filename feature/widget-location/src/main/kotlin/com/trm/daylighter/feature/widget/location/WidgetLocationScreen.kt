@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -67,7 +68,8 @@ fun WidgetLocationRoute(
     locations = locations.value,
     selectedLocationId = selectedLocationId.value,
     onLocationSelected = { viewModel.selectedLocationId = it },
-    onAddWidgetClick = {},
+    mode = viewModel.mode,
+    onConfirmLocationSelectionClick = {},
     onAddLocationClick = {},
     modifier = modifier
   )
@@ -78,7 +80,8 @@ private fun WidgetLocationScreen(
   locations: Loadable<List<StableValue<Location>>>,
   selectedLocationId: Long?,
   onLocationSelected: (Long) -> Unit,
-  onAddWidgetClick: () -> Unit,
+  mode: WidgetLocationMode,
+  onConfirmLocationSelectionClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -139,10 +142,21 @@ private fun WidgetLocationScreen(
                 .padding(bottomButtonsPaddingDp)
                 .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
           ) {
-            FloatingActionButton(onClick = onAddWidgetClick) {
+            FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
               Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(id = R.string.add_a_widget)
+                imageVector =
+                  when (mode) {
+                    WidgetLocationMode.ADD -> Icons.Filled.Add
+                    WidgetLocationMode.EDIT -> Icons.Filled.Done
+                  },
+                contentDescription =
+                  stringResource(
+                    id =
+                      when (mode) {
+                        WidgetLocationMode.ADD -> R.string.add_a_widget
+                        WidgetLocationMode.EDIT -> R.string.update_a_widget
+                      }
+                  )
               )
             }
           }

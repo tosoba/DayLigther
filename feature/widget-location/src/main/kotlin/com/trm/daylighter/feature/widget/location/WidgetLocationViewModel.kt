@@ -32,13 +32,22 @@ constructor(
   val selectedLocationIdFlow: StateFlow<Long?> =
     savedStateHandle.getStateFlow(
       SavedState.SELECTED_LOCATION_ID.name,
-      savedStateHandle.get<Long>(WidgetLocationDeepLinkParams.LOCATION_ID)
+      savedStateHandle.get<String>(WidgetLocationDeepLinkParams.LOCATION_ID)?.toLong()
     )
+
   var selectedLocationId: Long?
     get() = selectedLocationIdFlow.value
     set(value) {
       savedStateHandle[SavedState.SELECTED_LOCATION_ID.name] = value
     }
+
+  val mode: WidgetLocationMode
+    get() =
+      if (savedStateHandle.contains(WidgetLocationDeepLinkParams.LOCATION_ID)) {
+        WidgetLocationMode.EDIT
+      } else {
+        WidgetLocationMode.ADD
+      }
 
   private enum class SavedState {
     SELECTED_LOCATION_ID
