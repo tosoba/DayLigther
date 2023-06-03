@@ -22,11 +22,12 @@ object DayDeepLinkParams {
 }
 
 fun Context.widgetLocationDeepLinkPattern(): String =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget_location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/{${WidgetLocationDeepLinkParams.GLANCE_ID}}/location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
 
-fun Context.widgetLocationDeepLinkUri(locationId: Long): Uri =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget_location/${locationId}".toUri()
+fun Context.widgetLocationDeepLinkUri(glanceId: Int, locationId: Long): Uri =
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/${glanceId}/location/${locationId}".toUri()
 
 object WidgetLocationDeepLinkParams {
+  const val GLANCE_ID = "widgetLocation_glanceId"
   const val LOCATION_ID = "widgetLocation_locationId"
 }

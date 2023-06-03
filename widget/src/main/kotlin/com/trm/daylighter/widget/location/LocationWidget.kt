@@ -10,6 +10,7 @@ import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
@@ -26,6 +27,7 @@ import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.provideContent
@@ -90,25 +92,27 @@ class LocationWidget(
     provideContent {
       val change by
         getDefaultLocationSunriseSunsetChangeFlowUseCase().collectAsState(initial = LoadingFirst)
-      Content(change = change)
+      Content(change = change, id = id)
     }
   }
 
   @Composable
-  private fun Content(change: Loadable<LocationSunriseSunsetChange>) {
+  private fun Content(change: Loadable<LocationSunriseSunsetChange>, id: GlanceId) {
     GlanceTheme {
       when (change) {
         Empty -> AddLocationButton()
         is Loading -> ProgressIndicator()
-        is Ready -> DayChart(change = change.data)
+        is Ready -> DayChart(change = change.data, id = id)
         is Failed -> RetryButton(onClick = updateWidgetAction())
       }
     }
   }
 
   @Composable
-  private fun DayChart(change: LocationSunriseSunsetChange) {
+  private fun DayChart(change: LocationSunriseSunsetChange, id: GlanceId) {
     val context = LocalContext.current
+    val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
+
     Box(
       contentAlignment = Alignment.TopEnd,
       modifier =
@@ -151,7 +155,12 @@ class LocationWidget(
         modifier =
           GlanceModifier.padding(5.dp)
             .clickable(
-              deepLinkAction(context.widgetLocationDeepLinkUri(locationId = change.location.id))
+              deepLinkAction(
+                context.widgetLocationDeepLinkUri(
+                  glanceId = widgetManager.getAppWidgetId(id),
+                  locationId = change.location.id
+                )
+              )
             )
       )
     }
