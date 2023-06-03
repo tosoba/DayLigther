@@ -417,11 +417,11 @@ private fun DayTopAppBar(
       if (changeReady) {
         Text(
           text = changeValue.map { (location) -> location.name }.dataOrElse(""),
-          style = MaterialTheme.typography.titleMedium,
-          maxLines = 2,
+          style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+          maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           textAlign = TextAlign.Center,
-          modifier = Modifier.fillMaxWidth()
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
         )
       } else {
         Spacer(modifier = Modifier.weight(1f))

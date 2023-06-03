@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -345,8 +346,8 @@ private fun LocationAppBar(
       Text(
         text = locationMap.state.savedMapPosition.label.takeIf(String::isNotEmpty)
             ?: stringResource(id = commonR.string.new_location),
-        style = MaterialTheme.typography.titleMedium,
-        maxLines = 2,
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+        maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
       )
