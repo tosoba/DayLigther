@@ -122,11 +122,12 @@ private fun LocationsScreen(
             }
           }
 
-          Row(modifier = Modifier.align(Alignment.BottomCenter).padding(bottomButtonsPaddingDp)) {
-            ZoomInButton(mapZoom = zoom, onClick = { if (zoom < MapDefaults.MAX_ZOOM) ++zoom })
-            Spacer(modifier = Modifier.width(5.dp))
-            ZoomOutButton(mapZoom = zoom, onClick = { if (zoom > MapDefaults.MIN_ZOOM) --zoom })
-          }
+          ZoomControlsRow(
+            zoom = zoom,
+            incrementZoom = { ++zoom },
+            decrementZoom = { --zoom },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottomButtonsPaddingDp)
+          )
         } else {
           Text(
             text = stringResource(R.string.no_locations),
