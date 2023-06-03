@@ -11,7 +11,9 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -403,6 +405,7 @@ private fun SunriseSunset(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -421,7 +424,7 @@ private fun DayTopAppBar(
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           textAlign = TextAlign.Center,
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
+          modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
         )
       } else {
         Spacer(modifier = Modifier.weight(1f))
