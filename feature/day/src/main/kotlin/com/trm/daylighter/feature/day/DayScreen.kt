@@ -282,11 +282,7 @@ private fun SunriseSunset(
     }
 
     val topBarGradient =
-      Brush.verticalGradient(
-        0f to MaterialTheme.colorScheme.surface,
-        .25f to MaterialTheme.colorScheme.surface,
-        1f to Color.Transparent
-      )
+      Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
 
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       DayTopAppBar(
