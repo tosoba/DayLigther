@@ -47,9 +47,6 @@ fun MapView.setDefaultDisabledConfig(darkMode: Boolean) {
   isTilesScaledToDpi = true
   setMultiTouchControls(false)
   zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-  val tileSystem = MapView.getTileSystem()
-  setScrollableAreaLimitLatitude(tileSystem.maxLatitude, tileSystem.minLatitude, 0)
-  setScrollableAreaLimitLongitude(tileSystem.minLongitude, tileSystem.maxLongitude, 0)
   isFlingEnabled = false
   setOnTouchListener { _, _ -> true }
   if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
