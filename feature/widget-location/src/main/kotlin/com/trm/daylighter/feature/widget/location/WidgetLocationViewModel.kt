@@ -55,13 +55,13 @@ constructor(
         WidgetLocationMode.ADD
       }
 
-  private val _addWidgetFailure = MutableSharedFlow<Unit>()
-  val addWidgetFailure: SharedFlow<Unit> = _addWidgetFailure.asSharedFlow()
+  private val _toastMessageResId = MutableSharedFlow<Int>()
+  val toastMessageResId: SharedFlow<Int> = _toastMessageResId.asSharedFlow()
 
   fun confirmLocationSelection() {
     when (mode) {
       WidgetLocationMode.ADD -> addSelectedLocationWidget()
-      WidgetLocationMode.EDIT -> {}
+      WidgetLocationMode.EDIT -> editSelectedLocationWidget()
     }
   }
 
@@ -69,8 +69,21 @@ constructor(
     val locationId = selectedLocationId ?: return
     viewModelScope.launch {
       if (!widgetManager.addLocationWidget(locationId = locationId)) {
-        _addWidgetFailure.emit(Unit)
+        _toastMessageResId.emit(R.string.failed_to_add_widget)
       }
+    }
+  }
+
+  private fun editSelectedLocationWidget() {
+    val locationId = selectedLocationId ?: return
+    viewModelScope.launch {
+      widgetManager.editLocationWidget(
+        widgetId =
+          requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.GLANCE_ID))
+            .toInt(),
+        locationId = locationId
+      )
+      _toastMessageResId.emit(R.string.widget_location_updated)
     }
   }
 

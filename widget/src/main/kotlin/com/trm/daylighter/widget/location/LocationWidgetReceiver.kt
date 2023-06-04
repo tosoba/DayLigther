@@ -9,8 +9,8 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.widget.util.ext.actionIntent
 import com.trm.daylighter.widget.util.ext.getGlanceIds
-import com.trm.daylighter.widget.util.ext.widgetReceiverIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -78,11 +78,11 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
       ComponentName(context.applicationContext.packageName, LocationWidgetReceiver::class.java.name)
 
     fun updateAllWidgetsIntent(context: Context): Intent =
-      context.widgetReceiverIntent<LocationWidgetReceiver>(ACTION_UPDATE_ALL_WIDGETS)
+      context.actionIntent<LocationWidgetReceiver>(ACTION_UPDATE_ALL_WIDGETS)
 
     fun updateWidgetIntent(context: Context, widgetId: Int, locationId: Long): Intent =
       context
-        .widgetReceiverIntent<LocationWidgetReceiver>(ACTION_UPDATE_WIDGET)
+        .actionIntent<LocationWidgetReceiver>(ACTION_UPDATE_WIDGET)
         .putExtra(LocationWidgetExtras.WIDGET_ID, widgetId)
         .putExtra(LocationWidgetExtras.LOCATION_ID, locationId)
   }

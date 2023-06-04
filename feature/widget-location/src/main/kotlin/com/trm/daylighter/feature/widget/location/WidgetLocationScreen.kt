@@ -80,13 +80,13 @@ fun WidgetLocationRoute(
   )
 
   val context = LocalContext.current
-  var addWidgetFailureToast: Toast? by remember { mutableStateOf(null) }
+  var currentToast: Toast? by remember { mutableStateOf(null) }
   LaunchedEffect(Unit) {
-    viewModel.addWidgetFailure.collectLatest {
-      Toast.makeText(context, R.string.failed_to_add_widget, Toast.LENGTH_LONG).also {
+    viewModel.toastMessageResId.collectLatest { messageResId ->
+      Toast.makeText(context, messageResId, Toast.LENGTH_LONG).also {
         it.show()
-        addWidgetFailureToast?.cancel()
-        addWidgetFailureToast = it
+        currentToast?.cancel()
+        currentToast = it
       }
     }
   }

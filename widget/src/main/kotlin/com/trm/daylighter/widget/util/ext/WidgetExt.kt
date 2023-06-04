@@ -9,5 +9,5 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 suspend inline fun <reified T : GlanceAppWidget> Context.getGlanceIds(): List<GlanceId> =
   GlanceAppWidgetManager(this).getGlanceIds(T::class.java)
 
-inline fun <reified T> Context.widgetReceiverIntent(action: String): Intent =
+inline fun <reified T> Context.actionIntent(action: String): Intent =
   Intent(this, T::class.java).apply { this.action = action }
