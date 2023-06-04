@@ -1,5 +1,6 @@
 package com.trm.daylighter.ui
 
+import android.appwidget.AppWidgetManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -105,36 +106,57 @@ fun DaylighterMainContent() {
 
 @Composable
 private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
-  val newWidgetLabel = stringResource(R.string.new_widget_item)
-  val locationsLabel = stringResource(R.string.locations_item)
-  val aboutLabel = stringResource(R.string.about_item)
-  val drawerDestinations = remember {
-    sequenceOf(
-      DrawerDestination(
-        route = newWidgetRoute,
-        icon = Icons.Filled.Widgets,
-        label = newWidgetLabel
-      ),
-      DrawerDestination(
-        route = locationsGraphRoute,
-        icon = Icons.Filled.LocationOn,
-        label = locationsLabel
-      ),
-      DrawerDestination(route = aboutRoute, icon = Icons.Filled.Info, label = aboutLabel)
-    )
-  }
+  val context = LocalContext.current
+  val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
 
   ModalDrawerSheet {
     Spacer(Modifier.height(12.dp))
-    drawerDestinations.forEach { destination ->
-      NavigationDrawerItem(
-        icon = { Icon(imageVector = destination.icon, contentDescription = destination.label) },
-        label = { Text(text = destination.label) },
-        selected = false,
-        onClick = { onItemClick(destination) }
+
+    if (appWidgetManager.isRequestPinAppWidgetSupported) {
+      DaylighterDrawerItem(
+        destination =
+          DrawerDestination(
+            route = newWidgetRoute,
+            icon = Icons.Filled.Widgets,
+            label = stringResource(R.string.new_widget_item)
+          ),
+        onItemClick = onItemClick
       )
     }
+
+    DaylighterDrawerItem(
+      destination =
+        DrawerDestination(
+          route = locationsGraphRoute,
+          icon = Icons.Filled.LocationOn,
+          label = stringResource(R.string.locations_item)
+        ),
+      onItemClick = onItemClick
+    )
+
+    DaylighterDrawerItem(
+      destination =
+        DrawerDestination(
+          route = aboutRoute,
+          icon = Icons.Filled.Info,
+          label = stringResource(R.string.about_item)
+        ),
+      onItemClick = onItemClick
+    )
   }
+}
+
+@Composable
+private fun DaylighterDrawerItem(
+  destination: DrawerDestination,
+  onItemClick: (DrawerDestination) -> Unit
+) {
+  NavigationDrawerItem(
+    icon = { Icon(imageVector = destination.icon, contentDescription = destination.label) },
+    label = { Text(text = destination.label) },
+    selected = false,
+    onClick = { onItemClick(destination) }
+  )
 }
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
@@ -226,9 +248,7 @@ private fun DaylighterNavHost(
       route = newWidgetRoute,
       deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUri })
     ) {
-      WidgetLocationRoute(
-        modifier = Modifier.fillMaxSize()
-      )
+      WidgetLocationRoute(modifier = Modifier.fillMaxSize())
     }
   }
 }
