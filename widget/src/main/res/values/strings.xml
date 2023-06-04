@@ -4,5 +4,5 @@
     <string name="location_chart">Location chart</string>
     <string name="day_length">Day length: %1$s</string>
     <string name="diff">%1$s%2$02d:%3$02d</string>
-    <string name="widget_pinned_go_to_homescreen">Widget pinned. Go to homescreen.</string>
+    <string name="widget_pinned_to_home_screen">Widget pinned to home screen.</string>
 </resources>

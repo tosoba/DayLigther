@@ -13,10 +13,14 @@ import com.trm.daylighter.core.ui.model.asStable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WidgetLocationViewModel
@@ -51,11 +55,21 @@ constructor(
         WidgetLocationMode.ADD
       }
 
+  private val _addWidgetFailure = MutableSharedFlow<Unit>()
+  val addWidgetFailure: SharedFlow<Unit> = _addWidgetFailure.asSharedFlow()
+
   fun confirmLocationSelection() {
-    selectedLocationId?.let {
-      when (mode) {
-        WidgetLocationMode.ADD -> widgetManager.addLocationWidget(it)
-        WidgetLocationMode.EDIT -> {}
+    when (mode) {
+      WidgetLocationMode.ADD -> addSelectedLocationWidget()
+      WidgetLocationMode.EDIT -> {}
+    }
+  }
+
+  private fun addSelectedLocationWidget() {
+    val locationId = selectedLocationId ?: return
+    viewModelScope.launch {
+      if (!widgetManager.addLocationWidget(locationId = locationId)) {
+        _addWidgetFailure.emit(Unit)
       }
     }
   }

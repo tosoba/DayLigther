@@ -104,7 +104,6 @@ fun DaylighterMainContent() {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   val newWidgetLabel = stringResource(R.string.new_widget_item)
   val locationsLabel = stringResource(R.string.locations_item)
@@ -138,11 +137,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   }
 }
 
-@OptIn(
-  ExperimentalMaterial3Api::class,
-  ExperimentalComposeUiApi::class,
-  ExperimentalLayoutApi::class
-)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun DayLighterScaffold(
   navController: NavHostController,
@@ -160,7 +155,7 @@ private fun DayLighterScaffold(
       navController = navController,
       onDrawerMenuClick = onDrawerMenuClick,
       modifier =
-        Modifier.padding(it).consumedWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
+        Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
     )
   }
 }
@@ -231,7 +226,9 @@ private fun DaylighterNavHost(
       route = newWidgetRoute,
       deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUri })
     ) {
-      WidgetLocationRoute(modifier = Modifier.fillMaxSize())
+      WidgetLocationRoute(
+        modifier = Modifier.fillMaxSize()
+      )
     }
   }
 }

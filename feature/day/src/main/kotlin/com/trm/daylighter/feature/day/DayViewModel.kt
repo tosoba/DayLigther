@@ -51,16 +51,14 @@ constructor(
     }
 
   init {
-    val argsCount =
-      savedStateHandle.keys().count {
-        it == DayDeepLinkParams.LOCATION_ID || it == DayDeepLinkParams.DEFAULT
-      }
     if (
-      argsCount == 2 && !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()
+      savedStateHandle.contains(DayDeepLinkParams.LOCATION_ID) &&
+        !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()
     ) {
       viewModelScope.launch {
         getNonDefaultLocationOffsetByIdUseCase(
-            id = savedStateHandle.get<Long>(DayDeepLinkParams.LOCATION_ID)!!
+            id =
+              requireNotNull(savedStateHandle.get<String>(DayDeepLinkParams.LOCATION_ID)).toLong()
           )
           ?.let(::currentLocationIndex::set)
       }

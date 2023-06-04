@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.widget.location
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +27,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
 import com.trm.daylighter.core.ui.model.StableValue
+import kotlinx.coroutines.flow.collectLatest
 
 const val newWidgetRoute = "widget_location_route"
 
@@ -64,6 +68,7 @@ fun WidgetLocationRoute(
 ) {
   val locations = viewModel.locations.collectAsState(initial = Empty)
   val selectedLocationId = viewModel.selectedLocationIdFlow.collectAsState()
+
   WidgetLocationScreen(
     locations = locations.value,
     selectedLocationId = selectedLocationId.value,
@@ -73,6 +78,18 @@ fun WidgetLocationRoute(
     onAddLocationClick = {},
     modifier = modifier
   )
+
+  val context = LocalContext.current
+  var addWidgetFailureToast: Toast? by remember { mutableStateOf(null) }
+  LaunchedEffect(Unit) {
+    viewModel.addWidgetFailure.collectLatest {
+      Toast.makeText(context, R.string.failed_to_add_widget, Toast.LENGTH_LONG).also {
+        it.show()
+        addWidgetFailureToast?.cancel()
+        addWidgetFailureToast = it
+      }
+    }
+  }
 }
 
 @Composable

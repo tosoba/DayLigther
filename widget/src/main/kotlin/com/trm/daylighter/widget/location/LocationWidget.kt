@@ -325,7 +325,7 @@ private fun nowLinePaint(context: Context): Paint =
 
 @Composable
 private fun updateWidgetAction() =
-  actionSendBroadcast(LocationWidgetReceiver.updateIntent(LocalContext.current))
+  actionSendBroadcast(LocationWidgetReceiver.updateAllWidgetsIntent(LocalContext.current))
 
 @Composable
 private fun LocationName(location: Location) {

@@ -2,4 +2,5 @@
 <resources>
     <string name="add_a_widget">Add a widget</string>
     <string name="update_a_widget">Update a widget</string>
+    <string name="failed_to_add_widget">Failed to add location widget. Try to add it directly from the home screen.</string>
 </resources>

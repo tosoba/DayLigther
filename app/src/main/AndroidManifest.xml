@@ -39,7 +39,7 @@
         </activity>
 
         <receiver
-            android:name=".widget.WidgetPinnedReceiver"
+            android:name=".widget.LocationWidgetPinnedReceiver"
             android:exported="false" />
 
         <receiver

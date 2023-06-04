@@ -54,7 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.PagerState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
@@ -204,7 +204,10 @@ private fun SunriseSunset(
     val orientation = LocalConfiguration.current.orientation
     val changeValue = change.value
 
-    val pagerState = rememberPagerState(initialPage = currentLocationIndex)
+    val pagerState =
+      rememberSaveable(currentLocationIndex, saver = PagerState.Saver) {
+        PagerState(currentPage = currentLocationIndex)
+      }
     LaunchedEffect(pagerState) {
       snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
     }

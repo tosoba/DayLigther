@@ -98,7 +98,7 @@ fun LocationRoute(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSheetApi::class)
+@OptIn(ExperimentalSheetApi::class)
 @Composable
 private fun LocationScreen(
   screenMode: LocationScreenMode,
@@ -270,7 +270,6 @@ private fun LocationScreen(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationScaffold(
   locationMap: LocationMap,
@@ -424,7 +423,6 @@ private fun MarkerIcon(modifier: Modifier = Modifier) {
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModalSheetContent(
   headerLabel: String,
