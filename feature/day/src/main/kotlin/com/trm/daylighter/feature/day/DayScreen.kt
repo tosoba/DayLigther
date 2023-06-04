@@ -15,11 +15,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,10 +55,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.PagerState
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
@@ -182,7 +183,34 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
   }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
+private class DaylighterPagerStateImpl(
+  initialPage: Int = 0,
+  initialPageOffsetFraction: Float = 0f,
+  val updatedPageCount: () -> Int
+) : PagerState(initialPage, initialPageOffsetFraction) {
+
+  var pageCountState = mutableStateOf(updatedPageCount)
+  override val pageCount: Int
+    get() = pageCountState.value.invoke()
+
+  companion object {
+    /** To keep current page and current page offset saved */
+    val Saver: Saver<DaylighterPagerStateImpl, *> =
+      listSaver(
+        save = { listOf(it.currentPage, it.currentPageOffsetFraction, it.pageCount) },
+        restore = {
+          DaylighterPagerStateImpl(
+            initialPage = it[0] as Int,
+            initialPageOffsetFraction = it[1] as Float,
+            updatedPageCount = { it[2] as Int }
+          )
+        }
+      )
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SunriseSunset(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -204,15 +232,20 @@ private fun SunriseSunset(
     val orientation = LocalConfiguration.current.orientation
     val changeValue = change.value
 
-    val pagerState =
-      rememberSaveable(currentLocationIndex, saver = PagerState.Saver) {
-        PagerState(currentPage = currentLocationIndex)
-      }
+    val pagerState: PagerState =
+      rememberSaveable(
+          currentLocationIndex,
+          locationsCount,
+          saver = DaylighterPagerStateImpl.Saver
+        ) {
+          DaylighterPagerStateImpl(currentLocationIndex) { locationsCount }
+        }
+        .apply { pageCountState.value = updatedPageCount }
     LaunchedEffect(pagerState) {
       snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
     }
 
-    var appBarHeightPx by remember { mutableStateOf(0f) }
+    var appBarHeightPx by remember { mutableFloatStateOf(0f) }
 
     Box(
       modifier =
@@ -232,8 +265,8 @@ private fun SunriseSunset(
         pagerVisible ->
         if (pagerVisible) {
           HorizontalPager(
-            count = locationsCount,
             state = pagerState,
+            beyondBoundsPageCount = 1,
             modifier = Modifier.fillMaxSize()
           ) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -262,6 +295,7 @@ private fun SunriseSunset(
 
           HorizontalPagerIndicator(
             pagerState = pagerState,
+            pageCount = locationsCount,
             modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
             activeColor = MaterialTheme.colorScheme.onBackground,
           )
