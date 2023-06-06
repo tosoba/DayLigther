@@ -96,16 +96,14 @@ fun DayRoute(
       initialValue = StableValue(LoadingFirst)
     )
   val now =
-    viewModel.currentTimeAtCurrentLocation.collectAsStateWithLifecycle(
-      initialValue = LocalTime.now()
-    )
+    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = LocalTime.now())
   val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
 
   DayScreen(
     change = change.value,
     now = now.value,
     locationsCount = locationsCount.value,
-    currentLocationIndex = viewModel.currentLocationIndex,
+    currentLocationIndex = viewModel.initialLocationIndex,
     onDrawerMenuClick = onDrawerMenuClick,
     onChangeLocationIndex = viewModel::changeLocation,
     onAddLocationClick = onAddLocation,
@@ -268,7 +266,7 @@ private fun SunriseSunset(
             state = pagerState,
             beyondBoundsPageCount = 1,
             modifier = Modifier.fillMaxSize()
-          ) {
+          ) { locationIndex ->
             Box(modifier = Modifier.fillMaxSize()) {
               SunriseSunsetChart(
                 change = change,

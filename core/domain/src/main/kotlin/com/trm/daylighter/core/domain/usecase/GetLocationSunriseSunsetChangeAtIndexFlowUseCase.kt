@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.map
 class GetLocationSunriseSunsetChangeAtIndexFlowUseCase
 @Inject
 constructor(
-  private val calculateSunriseSunsetChangeUseCase: CalculateSunriseSunsetChangeUseCase,
+  private val calculateLocationSunriseSunsetChangeUseCase: CalculateLocationSunriseSunsetChangeUseCase,
   private val repo: LocationRepo,
   @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) {
@@ -27,7 +27,7 @@ constructor(
         repo
           .getLocationAtOffsetFlow(offset = index)
           .map { location ->
-            location.asLoadable().map(calculateSunriseSunsetChangeUseCase::invoke)
+            location.asLoadable().map(calculateLocationSunriseSunsetChangeUseCase::invoke)
           }
           .flowOn(ioDispatcher)
       )

@@ -48,7 +48,8 @@ interface LocationDao {
 
   @Query("SELECT EXISTS(SELECT * FROM location)") suspend fun selectAnyExists(): Boolean
 
-  @Query("SELECT * FROM location") fun selectAllFlow(): Flow<List<LocationEntity>>
+  @Query("SELECT * FROM location ORDER BY is_default DESC, updated_at DESC")
+  fun selectAllFlow(): Flow<List<LocationEntity>>
 
   @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity
 
