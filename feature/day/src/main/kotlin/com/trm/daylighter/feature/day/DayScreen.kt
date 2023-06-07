@@ -129,6 +129,7 @@ private fun DayScreen(
           is WithoutData -> 0
         }
       }
+    LaunchedEffect(initialLocationIndex) { pagerState.animateScrollToPage(initialLocationIndex) }
 
     var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
     LaunchedEffect(pagerState.currentPage) {
