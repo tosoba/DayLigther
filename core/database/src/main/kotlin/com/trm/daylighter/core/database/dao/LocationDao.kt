@@ -33,8 +33,6 @@ interface LocationDao {
 
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
-  @Query("SELECT COUNT(*) FROM location") fun selectCountAllFlow(): Flow<Int>
-
   @Transaction
   suspend fun deleteById(id: Long, isDefault: Boolean) {
     deleteById(id)
@@ -79,9 +77,6 @@ interface LocationDao {
     name: String,
     zoneId: ZoneId
   )
-
-  @Query("SELECT * FROM location ORDER BY is_default DESC, updated_at DESC LIMIT 1 OFFSET :offset")
-  fun selectLocationAtOffsetFlow(offset: Int): Flow<LocationEntity?>
 
   @Query(
     "SELECT position " +

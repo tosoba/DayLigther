@@ -34,16 +34,11 @@ constructor(
   override fun getAllLocationsFlow(): Flow<List<Location>> =
     locationDao.selectAllFlow().map { it.map(LocationEntity::asDomainModel) }
 
-  override fun getLocationsCountFlow(): Flow<Int> = locationDao.selectCountAllFlow()
-
   override fun getDefaultLocationFlow(): Flow<Location?> =
     locationDao.selectDefaultFlow().map { it?.asDomainModel() }
 
   override suspend fun getDefaultLocation(): Location? =
     locationDao.selectDefault()?.asDomainModel()
-
-  override suspend fun getLocationAtOffsetFlow(offset: Int): Flow<Location?> =
-    locationDao.selectLocationAtOffsetFlow(offset).map { it?.asDomainModel() }
 
   override suspend fun deleteLocationById(id: Long, isDefault: Boolean) {
     locationDao.deleteById(id, isDefault)

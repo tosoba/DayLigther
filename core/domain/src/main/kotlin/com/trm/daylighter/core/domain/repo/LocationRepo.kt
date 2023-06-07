@@ -8,13 +8,9 @@ interface LocationRepo {
 
   fun getAllLocationsFlow(): Flow<List<Location>>
 
-  fun getLocationsCountFlow(): Flow<Int>
-
   fun getDefaultLocationFlow(): Flow<Location?>
 
   suspend fun getDefaultLocation(): Location?
-
-  suspend fun getLocationAtOffsetFlow(offset: Int): Flow<Location?>
 
   suspend fun deleteLocationById(id: Long, isDefault: Boolean)
 
