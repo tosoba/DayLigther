@@ -16,14 +16,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +52,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
@@ -63,7 +60,7 @@ import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableLoadable
-import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.feature.day.ext.color
 import com.trm.daylighter.feature.day.ext.currentPeriodIn
@@ -80,6 +77,8 @@ import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 
 const val dayRoute = "day_route"
 
@@ -91,66 +90,267 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val change: State<StableLoadable<LocationSunriseSunsetChange>> =
-    viewModel.currentLocationSunriseSunsetChangeFlow.collectAsStateWithLifecycle(
-      initialValue = StableValue(LoadingFirst)
-    )
-  val now =
-    viewModel.nowAtCurrentLocation.collectAsStateWithLifecycle(initialValue = LocalTime.now())
-  val locationsCount = viewModel.locationCountFlow.collectAsStateWithLifecycle(initialValue = 0)
+  val locations = viewModel.locationsFlow.collectAsState(initial = LoadingFirst)
+  val initialLocationIndex = viewModel.initialLocationIndexFlow.collectAsState(initial = 0)
 
   DayScreen(
-    change = change.value,
-    now = now.value,
-    locationsCount = locationsCount.value,
-    currentLocationIndex = viewModel.initialLocationIndex,
+    locations = locations.value,
+    initialLocationIndex = initialLocationIndex.value,
+    sunriseSunsetChangeInLocationAt = viewModel::sunriseSunsetChangeInLocationAt,
+    currentTimeInLocationAt = viewModel::currentTimeInLocationAt,
     onDrawerMenuClick = onDrawerMenuClick,
-    onChangeLocationIndex = viewModel::changeLocation,
     onAddLocationClick = onAddLocation,
     onEditLocationClick = onEditLocation,
-    onRetryClick = viewModel::reloadLocation,
     modifier = modifier
   )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DayScreen(
-  change: StableLoadable<LocationSunriseSunsetChange>,
-  now: LocalTime,
-  locationsCount: Int,
-  currentLocationIndex: Int,
+  locations: Loadable<List<Location>>,
+  initialLocationIndex: Int,
+  sunriseSunsetChangeInLocationAt: (Int) -> Flow<StableLoadable<LocationSunriseSunsetChange>>,
+  currentTimeInLocationAt: (Int) -> Flow<LocalTime>,
   onDrawerMenuClick: () -> Unit,
-  onChangeLocationIndex: (Int) -> Unit,
   onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
-  onRetryClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val changeValue = change.value
-  var dayMode by rememberSaveable {
-    mutableStateOf(
-      if (changeValue is WithData) initialDayMode(changeValue.data.location.zoneId)
-      else DayMode.SUNRISE
-    )
-  }
-  LaunchedEffect(change) {
-    if (changeValue is WithData) dayMode = initialDayMode(changeValue.data.location.zoneId)
-  }
+  ConstraintLayout(modifier = modifier) {
+    val orientation = LocalConfiguration.current.orientation
+    val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
+    var appBarHeightPx by remember { mutableFloatStateOf(0f) }
 
-  SunriseSunset(
-    change = change,
-    dayMode = dayMode,
-    now = now,
-    locationsCount = locationsCount,
-    currentLocationIndex = currentLocationIndex,
-    onChangeLocationIndex = onChangeLocationIndex,
-    onDayModeNavClick = { dayMode = it },
-    onDrawerMenuClick = onDrawerMenuClick,
-    onAddLocationClick = onAddLocationClick,
-    onEditLocationClick = onEditLocationClick,
-    onRetryClick = onRetryClick,
-    modifier = modifier,
-  )
+    val pagerState =
+      rememberPagerState(initialPage = initialLocationIndex) {
+        when (locations) {
+          is WithData -> locations.data.size
+          is WithoutData -> 0
+        }
+      }
+
+    var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
+    LaunchedEffect(pagerState.currentPage) {
+      dayMode =
+        when (locations) {
+          is WithData -> initialDayMode(locations.data[pagerState.currentPage].zoneId)
+          is WithoutData -> DayMode.SUNRISE
+        }
+    }
+
+    var currentChange by remember {
+      mutableStateOf(StableLoadable<LocationSunriseSunsetChange>(Empty))
+    }
+    LaunchedEffect(pagerState.currentPage) {
+      sunriseSunsetChangeInLocationAt(pagerState.currentPage).collectLatest { currentChange = it }
+    }
+
+    Box(
+      modifier =
+        Modifier.constrainAs(mainContent) {
+          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            linkTo(parent.start, parent.end)
+            linkTo(parent.top, navigation.top)
+          } else {
+            linkTo(navigation.end, parent.end)
+            linkTo(parent.top, parent.bottom)
+          }
+          height = Dimension.fillToConstraints
+          width = Dimension.fillToConstraints
+        }
+    ) {
+      Crossfade(targetState = locations is WithData, modifier = Modifier.fillMaxSize()) {
+        pagerVisible ->
+        if (pagerVisible) {
+          HorizontalPager(
+            state = pagerState,
+            beyondBoundsPageCount = 1,
+            modifier = Modifier.fillMaxSize()
+          ) { locationIndex ->
+            val pageChange =
+              sunriseSunsetChangeInLocationAt(locationIndex)
+                .collectAsState(initial = StableLoadable<LocationSunriseSunsetChange>(Empty))
+            val now =
+              currentTimeInLocationAt(locationIndex)
+                .collectAsState(
+                  initial =
+                    LocalTime.now(
+                      if (locations is WithData) locations.data[locationIndex].zoneId
+                      else ZoneId.systemDefault()
+                    )
+                )
+
+            SunriseSunsetChart(
+              change = pageChange.value,
+              dayMode = dayMode,
+              now = now.value,
+              appBarHeightPx = appBarHeightPx,
+              modifier = Modifier.fillMaxSize()
+            )
+          }
+
+          HorizontalPagerIndicator(
+            pagerState = pagerState,
+            pageCount =
+              when (locations) {
+                is WithData -> locations.data.size
+                is WithoutData -> 0
+              },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+            activeColor = MaterialTheme.colorScheme.onBackground,
+          )
+        } else {
+          Box(modifier = Modifier.fillMaxSize()) {
+            SunriseSunsetChart(
+              change = Empty.asStable(),
+              dayMode = dayMode,
+              now = LocalTime.now(),
+              appBarHeightPx = appBarHeightPx,
+              modifier = Modifier.fillMaxSize()
+            )
+
+            AnimatedVisibility(
+              visible = locations is Loading,
+              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+            ) {
+              LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            AnimatedVisibility(
+              visible = locations is Empty,
+              modifier = Modifier.align(Alignment.Center).padding(20.dp)
+            ) {
+              InfoButtonCard(
+                infoText = stringResource(commonR.string.no_saved_locations_add_one),
+                actionText = stringResource(commonR.string.add_location),
+                onButtonClick = onAddLocationClick,
+              )
+            }
+          }
+        }
+      }
+    }
+
+    val topBarGradient =
+      Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
+
+    fun onEditLocationClick() {
+      currentChange.value.takeIfInstance<Ready<LocationSunriseSunsetChange>>()?.let { (data) ->
+        onEditLocationClick(data.location.id)
+      }
+    }
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      DayTopAppBar(
+        change = currentChange,
+        modifier =
+          Modifier.constrainAs(topAppBar) {
+              linkTo(mainContent.start, mainContent.end)
+              top.linkTo(parent.top)
+            }
+            .background(topBarGradient)
+            .onGloballyPositioned { coordinates ->
+              appBarHeightPx = coordinates.size.height.toFloat()
+            }
+            .padding(10.dp),
+        navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
+      )
+
+      AnimatedVisibility(
+        visible = locations is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(topAppBar.bottom, 10.dp)
+            end.linkTo(parent.end, 16.dp)
+          },
+      ) {
+        ClockAndDayLengthCard(change = currentChange)
+      }
+
+      NavigationBar(
+        content = {
+          SunriseSunsetNavigationBarContent(
+            dayMode = dayMode,
+            itemsEnabled = currentChange.value is Ready,
+            onDayModeChange = { dayMode = it }
+          )
+        },
+        modifier =
+          Modifier.constrainAs(navigation) {
+            linkTo(mainContent.bottom, parent.bottom)
+            linkTo(parent.start, parent.end)
+          }
+      )
+
+      AnimatedVisibility(
+        visible = currentChange.value is Ready,
+        modifier =
+          Modifier.constrainAs(editLocationButton) {
+            bottom.linkTo(navigation.top, 16.dp)
+            end.linkTo(parent.end, 16.dp)
+          }
+      ) {
+        EditLocationButton(onClick = ::onEditLocationClick)
+      }
+    } else {
+      DayTopAppBar(
+        change = currentChange,
+        modifier =
+          Modifier.constrainAs(topAppBar) {
+              linkTo(navigation.end, mainContent.end)
+              top.linkTo(parent.top)
+              height = Dimension.wrapContent
+              width = Dimension.fillToConstraints
+            }
+            .background(topBarGradient)
+            .onGloballyPositioned { coordinates ->
+              appBarHeightPx = coordinates.size.height.toFloat()
+            }
+            .padding(10.dp)
+      )
+
+      NavigationRail(
+        header = {
+          DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+        },
+        content = {
+          SunriseSunsetNavigationRailContent(
+            dayMode = dayMode,
+            itemsEnabled = currentChange.value is Ready,
+            onDayModeChange = { dayMode = it },
+            footer = {
+              AnimatedVisibility(
+                visible = currentChange.value is Ready,
+                modifier = Modifier.padding(bottom = 8.dp)
+              ) {
+                EditLocationButton(onClick = ::onEditLocationClick)
+              }
+            }
+          )
+        },
+        modifier =
+          Modifier.constrainAs(navigation) {
+            start.linkTo(parent.start)
+            linkTo(parent.top, parent.bottom)
+          },
+      )
+
+      AnimatedVisibility(
+        visible = currentChange.value is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier =
+          Modifier.constrainAs(dayTimeCard) {
+            top.linkTo(topAppBar.bottom)
+            end.linkTo(parent.end, 16.dp)
+          },
+      ) {
+        ClockAndDayLengthCard(change = currentChange)
+      }
+    }
+  }
 }
 
 @Composable
@@ -178,265 +378,6 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
     FloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
   } else {
     SmallFloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
-  }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-private class DaylighterPagerStateImpl(
-  initialPage: Int = 0,
-  initialPageOffsetFraction: Float = 0f,
-  val updatedPageCount: () -> Int
-) : PagerState(initialPage, initialPageOffsetFraction) {
-
-  var pageCountState = mutableStateOf(updatedPageCount)
-  override val pageCount: Int
-    get() = pageCountState.value.invoke()
-
-  companion object {
-    /** To keep current page and current page offset saved */
-    val Saver: Saver<DaylighterPagerStateImpl, *> =
-      listSaver(
-        save = { listOf(it.currentPage, it.currentPageOffsetFraction, it.pageCount) },
-        restore = {
-          DaylighterPagerStateImpl(
-            initialPage = it[0] as Int,
-            initialPageOffsetFraction = it[1] as Float,
-            updatedPageCount = { it[2] as Int }
-          )
-        }
-      )
-  }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun SunriseSunset(
-  change: StableLoadable<LocationSunriseSunsetChange>,
-  dayMode: DayMode,
-  now: LocalTime,
-  locationsCount: Int,
-  currentLocationIndex: Int,
-  onChangeLocationIndex: (Int) -> Unit,
-  onDayModeNavClick: (DayMode) -> Unit,
-  onDrawerMenuClick: () -> Unit,
-  onAddLocationClick: () -> Unit,
-  onEditLocationClick: (Long) -> Unit,
-  onRetryClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  ConstraintLayout(modifier = modifier) {
-    val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
-
-    val orientation = LocalConfiguration.current.orientation
-    val changeValue = change.value
-
-    val pagerState: PagerState =
-      rememberSaveable(
-          currentLocationIndex,
-          locationsCount,
-          saver = DaylighterPagerStateImpl.Saver
-        ) {
-          DaylighterPagerStateImpl(currentLocationIndex) { locationsCount }
-        }
-        .apply { pageCountState.value = updatedPageCount }
-    LaunchedEffect(pagerState) {
-      snapshotFlow(pagerState::currentPage).collect(onChangeLocationIndex)
-    }
-
-    var appBarHeightPx by remember { mutableFloatStateOf(0f) }
-
-    Box(
-      modifier =
-        Modifier.constrainAs(mainContent) {
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            linkTo(parent.start, parent.end)
-            linkTo(parent.top, navigation.top)
-          } else {
-            linkTo(navigation.end, parent.end)
-            linkTo(parent.top, parent.bottom)
-          }
-          height = Dimension.fillToConstraints
-          width = Dimension.fillToConstraints
-        }
-    ) {
-      Crossfade(targetState = changeValue !is Empty, modifier = Modifier.fillMaxSize()) {
-        pagerVisible ->
-        if (pagerVisible) {
-          HorizontalPager(
-            state = pagerState,
-            beyondBoundsPageCount = 1,
-            modifier = Modifier.fillMaxSize()
-          ) { locationIndex ->
-            Box(modifier = Modifier.fillMaxSize()) {
-              SunriseSunsetChart(
-                change = change,
-                dayMode = dayMode,
-                now = now,
-                appBarHeightPx = appBarHeightPx,
-                modifier = Modifier.fillMaxSize()
-              )
-
-              if (changeValue is Failed) {
-                InfoButtonCard(
-                  infoText = stringResource(R.string.error_occurred),
-                  actionText = stringResource(commonR.string.retry),
-                  onButtonClick = onRetryClick,
-                  modifier = Modifier.align(Alignment.Center)
-                )
-              } else if (changeValue is Loading) {
-                LinearProgressIndicator(
-                  modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                )
-              }
-            }
-          }
-
-          HorizontalPagerIndicator(
-            pagerState = pagerState,
-            pageCount = locationsCount,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-            activeColor = MaterialTheme.colorScheme.onBackground,
-          )
-        } else {
-          Box(modifier = Modifier.fillMaxSize()) {
-            SunriseSunsetChart(
-              change = change,
-              dayMode = dayMode,
-              now = now,
-              appBarHeightPx = appBarHeightPx,
-              modifier = Modifier.fillMaxSize()
-            )
-
-            InfoButtonCard(
-              infoText = stringResource(commonR.string.no_saved_locations_add_one),
-              actionText = stringResource(commonR.string.add_location),
-              onButtonClick = onAddLocationClick,
-              modifier = Modifier.align(Alignment.Center).padding(20.dp)
-            )
-          }
-        }
-      }
-    }
-
-    val topBarGradient =
-      Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
-
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-      DayTopAppBar(
-        change = change,
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(mainContent.start, mainContent.end)
-              top.linkTo(parent.top)
-            }
-            .background(topBarGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .padding(10.dp),
-        navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
-      )
-
-      AnimatedVisibility(
-        visible = changeValue is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom, 10.dp)
-            end.linkTo(parent.end, 16.dp)
-          },
-      ) {
-        ClockAndDayLengthCard(change = change)
-      }
-
-      NavigationBar(
-        content = {
-          SunriseSunsetNavigationBarContent(
-            dayMode = dayMode,
-            itemsEnabled = changeValue is Ready,
-            onDayModeChange = onDayModeNavClick
-          )
-        },
-        modifier =
-          Modifier.constrainAs(navigation) {
-            linkTo(mainContent.bottom, parent.bottom)
-            linkTo(parent.start, parent.end)
-          }
-      )
-
-      AnimatedVisibility(
-        visible = changeValue is Ready,
-        modifier =
-          Modifier.constrainAs(editLocationButton) {
-            bottom.linkTo(navigation.top, 16.dp)
-            end.linkTo(parent.end, 16.dp)
-          }
-      ) {
-        EditLocationButton(
-          onClick = { if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id) },
-        )
-      }
-    } else {
-      DayTopAppBar(
-        change = change,
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(navigation.end, mainContent.end)
-              top.linkTo(parent.top)
-              height = Dimension.wrapContent
-              width = Dimension.fillToConstraints
-            }
-            .background(topBarGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .padding(10.dp)
-      )
-
-      NavigationRail(
-        header = {
-          DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
-        },
-        content = {
-          SunriseSunsetNavigationRailContent(
-            dayMode = dayMode,
-            itemsEnabled = changeValue is Ready,
-            onDayModeChange = onDayModeNavClick,
-            footer = {
-              AnimatedVisibility(
-                visible = changeValue is Ready,
-                modifier = Modifier.padding(bottom = 8.dp)
-              ) {
-                EditLocationButton(
-                  onClick = {
-                    if (changeValue is Ready) onEditLocationClick(changeValue.data.location.id)
-                  }
-                )
-              }
-            }
-          )
-        },
-        modifier =
-          Modifier.constrainAs(navigation) {
-            start.linkTo(parent.start)
-            linkTo(parent.top, parent.bottom)
-          },
-      )
-
-      AnimatedVisibility(
-        visible = changeValue is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom)
-            end.linkTo(parent.end, 16.dp)
-          },
-      ) {
-        ClockAndDayLengthCard(change = change)
-      }
-    }
   }
 }
 

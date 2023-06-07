@@ -8,7 +8,7 @@ import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
-import com.trm.daylighter.core.domain.model.SunriseSunsetChange
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.WithData
 import com.trm.daylighter.core.domain.model.WithoutData
 import com.trm.daylighter.core.domain.model.asLoadable
@@ -54,7 +54,9 @@ constructor(
     getAllLocationsFlowUseCase()
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
 
-  fun sunriseSunsetChangeInLocationAt(index: Int): Flow<StableLoadable<SunriseSunsetChange>> =
+  fun sunriseSunsetChangeInLocationAt(
+    index: Int
+  ): Flow<StableLoadable<LocationSunriseSunsetChange>> =
     locationsFlow
       .transformLatest { locations ->
         when (locations) {
@@ -63,13 +65,27 @@ constructor(
 
             val location = locations.data[index]
             var change = calculateSunriseSunsetChangeUseCase(location)
-            emit(change.asLoadable())
+            emit(
+              LocationSunriseSunsetChange(
+                  location = location,
+                  today = change.today,
+                  yesterday = change.yesterday
+                )
+                .asLoadable()
+            )
 
             while (currentCoroutineContext().isActive) {
               val now = ZonedDateTime.now(location.zoneId)
               if (now.dayOfMonth != change.today.date.dayOfMonth) {
                 change = calculateSunriseSunsetChangeUseCase(location)
-                emit(change.asLoadable())
+                emit(
+                  LocationSunriseSunsetChange(
+                      location = location,
+                      today = change.today,
+                      yesterday = change.yesterday
+                    )
+                    .asLoadable()
+                )
               }
               delay(1_000L)
             }
@@ -79,7 +95,7 @@ constructor(
           }
         }
       }
-      .map(Loadable<SunriseSunsetChange>::asStable)
+      .map(Loadable<LocationSunriseSunsetChange>::asStable)
 
   fun currentTimeInLocationAt(index: Int): Flow<LocalTime> =
     locationsFlow.transformLatest { locations ->
