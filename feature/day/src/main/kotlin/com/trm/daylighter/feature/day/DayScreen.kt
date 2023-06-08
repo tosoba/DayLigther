@@ -686,7 +686,6 @@ private fun SunriseSunsetChart(
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
-  val horizonLabel = stringResource(R.string.horizon)
   val dayLabel = stringResource(R.string.day)
 
   val nowLineColor = colorResource(id = commonR.color.now_line)
@@ -744,23 +743,6 @@ private fun SunriseSunsetChart(
     val chartRadius = segmentSize.maxDimension / 2f
     val chartCenter = Offset(topLeftOffset.x + chartRadius, size.height / 2f)
     val textPadding = 3.dp.toPx()
-
-    if (today?.sunrise != null && today.sunset != null) {
-      val horizonLayoutResult = textMeasurer.measure(text = AnnotatedString(horizonLabel))
-      drawText(
-        textMeasurer = textMeasurer,
-        text = horizonLabel,
-        topLeft =
-          Offset(
-            x = size.width - horizonLayoutResult.size.width - textPadding,
-            y = chartCenter.y - horizonLayoutResult.size.height - textPadding
-          ),
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-
     val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     val portraitLineRadiusMultiplier = 1.025f
     val landscapeLineRadiusMultiplier = 1.1f
