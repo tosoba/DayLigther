@@ -891,6 +891,27 @@ private fun SunriseSunsetChart(
           chartRadius = chartRadius
         )
 
+      drawIntoCanvas {
+        val paint =
+          Paint().apply {
+            style = PaintingStyle.Stroke
+            strokeWidth = 10f
+          }
+        paint.asFrameworkPaint().apply {
+          color = nowLineColor.copy(alpha = 0f).toArgb()
+          setShadowLayer(15f, 0f, 0f, nowLineColor.copy(alpha = .75f).toArgb())
+        }
+        it.drawLine(
+          p1 = chartCenter,
+          p2 =
+            Offset(
+              x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
+              y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
+            ),
+          paint
+        )
+      }
+
       drawLine(
         color = nowLineColor,
         start = chartCenter,
