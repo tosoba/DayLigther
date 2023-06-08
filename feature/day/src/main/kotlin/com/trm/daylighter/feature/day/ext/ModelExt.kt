@@ -21,7 +21,6 @@ import kotlin.math.abs
 
 internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
-
   return when {
     now.isBeforeOtherNotNull(astronomicalTwilightBegin) ||
       now.isEqualOrAfterOtherNotNull(astronomicalTwilightEnd) -> {

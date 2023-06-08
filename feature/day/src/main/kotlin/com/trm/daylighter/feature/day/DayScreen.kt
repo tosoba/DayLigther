@@ -56,6 +56,7 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.util.ext.allTimestamps
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.composable.*
@@ -73,6 +74,7 @@ import com.trm.daylighter.feature.day.model.DayPeriod
 import java.lang.Float.max
 import java.time.*
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
@@ -144,7 +146,7 @@ private fun DayScreen(
     LaunchedEffect(pagerState.currentPage) {
       dayMode =
         when (locations) {
-          is WithData -> initialDayMode(locations.data[pagerState.currentPage].zoneId)
+          is WithData -> currentDayMode(locations.data[pagerState.currentPage].zoneId)
           is WithoutData -> DayMode.SUNRISE
         }
     }
@@ -445,6 +447,12 @@ private fun ClockAndDayLengthCard(
           NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           Spacer(modifier = Modifier.height(5.dp))
           DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
+          NextDayPeriodTimer(
+            dayPeriod = dayPeriod.value,
+            dayMode = currentDayMode(location.zoneId),
+            today = today,
+            zoneId = location.zoneId
+          )
         }
       } else {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
@@ -462,6 +470,87 @@ private fun ClockAndDayLengthCard(
     }
   }
 }
+
+@Composable
+private fun NextDayPeriodTimer(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  today: SunriseSunset,
+  zoneId: ZoneId
+) {
+  val nextTimestamp =
+    remember(dayPeriod, today) {
+      val timestamps = today.allTimestamps().filterNotNull()
+      when (dayPeriod) {
+        DayPeriod.NIGHT -> {
+          when (dayMode) {
+            DayMode.SUNRISE -> timestamps.firstOrNull()
+            DayMode.SUNSET -> null
+          }
+        }
+        DayPeriod.ASTRONOMICAL -> {
+          when (dayMode) {
+            DayMode.SUNRISE -> timestamps.getOrNull(1)
+            DayMode.SUNSET -> timestamps.lastOrNull()
+          }
+        }
+        DayPeriod.NAUTICAL -> {
+          when (dayMode) {
+            DayMode.SUNRISE -> timestamps.getOrNull(2)
+            DayMode.SUNSET -> timestamps.getOrNull(timestamps.lastIndex - 1)
+          }
+        }
+        DayPeriod.CIVIL -> {
+          when (dayMode) {
+            DayMode.SUNRISE -> timestamps.getOrNull(3)
+            DayMode.SUNSET -> timestamps.getOrNull(timestamps.lastIndex - 2)
+          }
+        }
+        DayPeriod.DAY -> today.sunset
+      }?.toLocalTime()
+    }
+
+  AnimatedVisibility(visible = nextTimestamp != null, enter = fadeIn(), exit = fadeOut()) {
+    var timerText by rememberSaveable {
+      mutableStateOf(nextTimestamp?.formatTimeUntilNow(zoneId) ?: "")
+    }
+
+    nextTimestamp?.let {
+      LaunchedEffect(dayPeriod, today) {
+        flow {
+            delay(System.currentTimeMillis() % 1_000L)
+            while (currentCoroutineContext().isActive) {
+              emit(it.formatTimeUntilNow(zoneId))
+              delay(1_000L)
+            }
+          }
+          .collect { timerText = it }
+      }
+    }
+
+    Text(
+      text = timerText,
+      style =
+        MaterialTheme.typography.bodyLarge.copy(
+          color = dayPeriod.textColor(),
+          shadow =
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+        ),
+      textAlign = TextAlign.Center
+    )
+  }
+}
+
+private fun LocalTime.formatTimeUntilNow(zoneId: ZoneId) =
+  formatTime(millis = (toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()) * 1_000L)
+
+private fun formatTime(millis: Long): String =
+  String.format(
+    "%02d:%02d:%02d",
+    TimeUnit.MILLISECONDS.toHours(millis),
+    TimeUnit.MILLISECONDS.toMinutes(millis) % 60,
+    TimeUnit.MILLISECONDS.toSeconds(millis) % 60
+  )
 
 private fun dayPeriodFlow(change: Loadable<LocationSunriseSunsetChange>): Flow<DayPeriod> = flow {
   while (currentCoroutineContext().isActive) {
@@ -1086,7 +1175,7 @@ private data class DayChartSegment(
   val sunsetDiffLabel: (() -> String)? = null,
 )
 
-private fun initialDayMode(zoneId: ZoneId): DayMode =
+private fun currentDayMode(zoneId: ZoneId): DayMode =
   if (LocalTime.now(zoneId).isBefore(LocalTime.NOON)) DayMode.SUNRISE else DayMode.SUNSET
 
 @Composable

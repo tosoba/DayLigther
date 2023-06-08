@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.Build
 import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
@@ -310,18 +309,7 @@ private fun Canvas.timeXFor(dateTime: ZonedDateTime): Float {
 }
 
 private fun nowLinePaint(context: Context): Paint =
-  antiAliasPaint(
-    Color(
-        with(context.resources) {
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getColor(commonR.color.now_line, context.theme)
-          } else {
-            getColor(commonR.color.now_line)
-          }
-        }
-      )
-      .toArgb()
-  )
+  antiAliasPaint(Color(context.resources.getColor(commonR.color.now_line, context.theme)).toArgb())
 
 @Composable
 private fun updateWidgetAction() =
