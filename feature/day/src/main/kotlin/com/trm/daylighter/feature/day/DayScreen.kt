@@ -166,7 +166,7 @@ private fun DayScreen(
         if (pagerVisible) {
           HorizontalPager(
             state = pagerState,
-            beyondBoundsPageCount = 1,
+            beyondBoundsPageCount = 2,
             modifier = Modifier.fillMaxSize()
           ) { locationIndex ->
             val pageChange =
