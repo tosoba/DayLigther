@@ -77,8 +77,12 @@ import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 
 const val dayRoute = "day_route"
 
@@ -422,15 +426,11 @@ private fun ClockAndDayLengthCard(
   modifier: Modifier = Modifier,
 ) {
   val dayPeriod =
-    remember(change) {
-      change.value
-        .map { (location, today) -> today.currentPeriodIn(location) }
-        .dataOrElse(DayPeriod.DAY)
-    }
+    remember(change) { dayPeriodFlow(change.value) }.collectAsState(initial = DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,
-    color = dayPeriod.color(),
+    color = dayPeriod.value.color(),
     shadowElevation = 6.dp,
     modifier = modifier
   ) {
@@ -441,10 +441,10 @@ private fun ClockAndDayLengthCard(
           horizontalAlignment = Alignment.CenterHorizontally,
           modifier = Modifier.padding(8.dp)
         ) {
-          Clock(zoneId = location.zoneId, dayPeriod = dayPeriod)
-          NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod)
+          Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+          NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           Spacer(modifier = Modifier.height(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
+          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
         }
       } else {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
@@ -452,14 +452,23 @@ private fun ClockAndDayLengthCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
           ) {
-            Clock(zoneId = location.zoneId, dayPeriod = dayPeriod)
-            NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod)
+            Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+            NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           }
           Spacer(modifier = Modifier.width(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod)
+          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
         }
       }
     }
+  }
+}
+
+private fun dayPeriodFlow(change: Loadable<LocationSunriseSunsetChange>): Flow<DayPeriod> = flow {
+  while (currentCoroutineContext().isActive) {
+    emit(
+      change.map { (location, today) -> today.currentPeriodIn(location) }.dataOrElse(DayPeriod.DAY)
+    )
+    delay(1_000L)
   }
 }
 
