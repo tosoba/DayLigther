@@ -47,7 +47,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -56,7 +55,6 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
-import com.trm.daylighter.core.domain.util.ext.allTimestamps
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.composable.*
@@ -455,21 +453,35 @@ private fun ClockAndDayLengthCard(
           )
         }
       } else {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-          Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-          ) {
-            Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-            NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier.padding(8.dp)
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center
+            ) {
+              Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+              NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
           }
-          Spacer(modifier = Modifier.width(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
+          NextDayPeriodTimer(
+            dayPeriod = dayPeriod.value,
+            dayMode = currentDayMode(location.zoneId),
+            today = today,
+            zoneId = location.zoneId
+          )
         }
       }
     }
   }
 }
+
+private data class NextDayPeriod(val timestamp: LocalTime, val label: String)
 
 @Composable
 private fun NextDayPeriodTimer(
@@ -478,49 +490,24 @@ private fun NextDayPeriodTimer(
   today: SunriseSunset,
   zoneId: ZoneId
 ) {
-  val nextTimestamp =
-    remember(dayPeriod, today) {
-      val timestamps = today.allTimestamps().filterNotNull()
-      when (dayPeriod) {
-        DayPeriod.NIGHT -> {
-          when (dayMode) {
-            DayMode.SUNRISE -> timestamps.firstOrNull()
-            DayMode.SUNSET -> null
-          }
-        }
-        DayPeriod.ASTRONOMICAL -> {
-          when (dayMode) {
-            DayMode.SUNRISE -> timestamps.getOrNull(1)
-            DayMode.SUNSET -> timestamps.lastOrNull()
-          }
-        }
-        DayPeriod.NAUTICAL -> {
-          when (dayMode) {
-            DayMode.SUNRISE -> timestamps.getOrNull(2)
-            DayMode.SUNSET -> timestamps.getOrNull(timestamps.lastIndex - 1)
-          }
-        }
-        DayPeriod.CIVIL -> {
-          when (dayMode) {
-            DayMode.SUNRISE -> timestamps.getOrNull(3)
-            DayMode.SUNSET -> timestamps.getOrNull(timestamps.lastIndex - 2)
-          }
-        }
-        DayPeriod.DAY -> today.sunset
-      }?.toLocalTime()
-    }
+  val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
+  val until = stringResource(id = R.string.until)
+  val separator =
+    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " "
 
-  AnimatedVisibility(visible = nextTimestamp != null, enter = fadeIn(), exit = fadeOut()) {
+  AnimatedVisibility(visible = nextPeriod != null, enter = fadeIn(), exit = fadeOut()) {
     var timerText by rememberSaveable {
-      mutableStateOf(nextTimestamp?.formatTimeUntilNow(zoneId) ?: "")
+      mutableStateOf(
+        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $until$separator${nextPeriod?.label ?: ""}"
+      )
     }
 
-    nextTimestamp?.let {
+    nextPeriod?.let {
       LaunchedEffect(dayPeriod, today) {
         flow {
             delay(System.currentTimeMillis() % 1_000L)
             while (currentCoroutineContext().isActive) {
-              emit(it.formatTimeUntilNow(zoneId))
+              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $until$separator${nextPeriod.label}")
               delay(1_000L)
             }
           }
@@ -536,8 +523,78 @@ private fun NextDayPeriodTimer(
           shadow =
             Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
         ),
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
+      maxLines = 2,
+      overflow = TextOverflow.Ellipsis
     )
+  }
+}
+
+@Composable
+private fun rememberNextDayPeriod(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  today: SunriseSunset,
+): NextDayPeriod? {
+  val astronomicalDawn = stringResource(id = R.string.astronomical_dawn).lowercase()
+  val nauticalDawn = stringResource(id = R.string.nautical_dawn).lowercase()
+  val civilDawn = stringResource(id = R.string.civil_dawn).lowercase()
+  val sunrise = stringResource(id = R.string.sunrise).lowercase()
+  val sunset = stringResource(id = R.string.sunset).lowercase()
+  val civilDusk = stringResource(id = R.string.civil_dusk).lowercase()
+  val nauticalDusk = stringResource(id = R.string.nautical_dusk).lowercase()
+  val astronomicalDusk = stringResource(id = R.string.astronomical_dusk).lowercase()
+  return remember(dayPeriod, today) {
+    when (dayPeriod) {
+      DayPeriod.NIGHT -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.astronomicalTwilightBegin?.let {
+              NextDayPeriod(it.toLocalTime(), astronomicalDawn)
+            }
+          }
+          DayMode.SUNSET -> {
+            null
+          }
+        }
+      }
+      DayPeriod.ASTRONOMICAL -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.nauticalTwilightBegin?.let { NextDayPeriod(it.toLocalTime(), nauticalDawn) }
+              ?: today.astronomicalTwilightEnd?.let {
+                NextDayPeriod(it.toLocalTime(), astronomicalDusk)
+              }
+          }
+          DayMode.SUNSET -> {
+            today.astronomicalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
+          }
+        }
+      }
+      DayPeriod.NAUTICAL -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.civilTwilightBegin?.let { NextDayPeriod(it.toLocalTime(), civilDawn) }
+              ?: today.nauticalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+          }
+          DayMode.SUNSET -> {
+            today.nauticalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+          }
+        }
+      }
+      DayPeriod.CIVIL -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.sunrise?.let { NextDayPeriod(it.toLocalTime(), sunrise) }
+              ?: today.civilTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+          }
+          DayMode.SUNSET -> {
+            today.civilTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+          }
+        }
+      }
+      DayPeriod.DAY -> today.sunset?.let { NextDayPeriod(it.toLocalTime(), sunset) }
+    }
   }
 }
 
@@ -603,7 +660,6 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
     textAlign = TextAlign.Center,
-    fontSize = 12.sp,
     overflow = TextOverflow.Ellipsis,
     color = dayPeriod.textColor(),
     style =
@@ -1207,12 +1263,16 @@ private fun dayChartSegments(
   fun String.padToLongestLabel(): String = padEnd(longestTwilightLabelLength)
 
   val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
-  val civilDawnLabel = stringResource(id = R.string.civil_dawn, edgeLabelSeparator)
-  val civilDuskLabel = stringResource(id = R.string.civil_dusk, edgeLabelSeparator)
-  val nauticalDawnLabel = stringResource(id = R.string.nautical_dawn, edgeLabelSeparator)
-  val nauticalDuskLabel = stringResource(id = R.string.nautical_dusk, edgeLabelSeparator)
-  val astronomicalDawnLabel = stringResource(id = R.string.astronomical_dawn, edgeLabelSeparator)
-  val astronomicalDuskLabel = stringResource(id = R.string.astronomical_dusk, edgeLabelSeparator)
+  val civilDawnLabel = stringResource(id = R.string.civil_dawn_degrees_below, edgeLabelSeparator)
+  val civilDuskLabel = stringResource(id = R.string.civil_dusk_degrees_below, edgeLabelSeparator)
+  val nauticalDawnLabel =
+    stringResource(id = R.string.nautical_dawn_degrees_below, edgeLabelSeparator)
+  val nauticalDuskLabel =
+    stringResource(id = R.string.nautical_dusk_degrees_below, edgeLabelSeparator)
+  val astronomicalDawnLabel =
+    stringResource(id = R.string.astronomical_dawn_degrees_below, edgeLabelSeparator)
+  val astronomicalDuskLabel =
+    stringResource(id = R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
 
   return remember(today, yesterday, using24HFormat) {
     var accumulatedSweepAngle = 0f
