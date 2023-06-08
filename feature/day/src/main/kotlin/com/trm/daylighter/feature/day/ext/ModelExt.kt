@@ -19,17 +19,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
 
-private fun LocalDateTime.isInPeriod(
-  beginMorning: LocalDateTime?,
-  endMorning: LocalDateTime?,
-  beginEvening: LocalDateTime?,
-  endEvening: LocalDateTime?
-): Boolean =
-  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherNotNull(endMorning)) ||
-    (beginMorning == null && isBeforeOtherNotNull(endMorning)) ||
-    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherNotNull(endEvening)) ||
-    (beginEvening == null && isBeforeOtherNotNull(endEvening))
-
 internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
 
@@ -79,6 +68,17 @@ internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
     }
   }
 }
+
+private fun LocalDateTime.isInPeriod(
+  beginMorning: LocalDateTime?,
+  endMorning: LocalDateTime?,
+  beginEvening: LocalDateTime?,
+  endEvening: LocalDateTime?
+): Boolean =
+  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherNotNull(endMorning)) ||
+    (beginMorning == null && isBeforeOtherNotNull(endMorning)) ||
+    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherNotNull(endEvening)) ||
+    (beginEvening == null && isBeforeOtherNotNull(endEvening))
 
 internal fun DayPeriod.color(): Color =
   when (this) {

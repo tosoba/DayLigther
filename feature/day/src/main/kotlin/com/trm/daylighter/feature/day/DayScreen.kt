@@ -241,6 +241,7 @@ private fun DayScreen(
         onEditLocationClick(data.location.id)
       }
     }
+
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       DayTopAppBar(
         change = currentChange,
