@@ -269,7 +269,7 @@ private fun DayScreen(
         exit = fadeOut(),
         modifier =
           Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom, 10.dp)
+            top.linkTo(topAppBar.bottom, 5.dp)
             end.linkTo(parent.end, 16.dp)
           },
       ) {
