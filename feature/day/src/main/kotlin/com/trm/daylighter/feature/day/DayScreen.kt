@@ -301,7 +301,7 @@ private fun DayScreen(
         change = currentChange,
         modifier =
           Modifier.constrainAs(topAppBar) {
-              linkTo(navigation.end, mainContent.end)
+              linkTo(navigation.end, dayTimeCard.start)
               top.linkTo(parent.top)
               height = Dimension.wrapContent
               width = Dimension.fillToConstraints
@@ -345,7 +345,7 @@ private fun DayScreen(
         exit = fadeOut(),
         modifier =
           Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom)
+            top.linkTo(parent.top, 16.dp)
             end.linkTo(parent.end, 16.dp)
           },
       ) {
