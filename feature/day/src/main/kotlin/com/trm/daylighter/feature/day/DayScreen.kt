@@ -757,7 +757,7 @@ private fun SunriseSunsetChart(
             orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
             else -> landscapeLineRadiusMultiplier
           }
-        val strokeWidth = 2f
+        val strokeWidth = 4f
 
         drawLine(
           color = chartSegments[segmentIndex + 1].color,
@@ -794,8 +794,16 @@ private fun SunriseSunsetChart(
               textPadding,
           y =
             chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) 0f
-              else endingEdgeLabelLayoutResult.size.height / 2f
+              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) {
+                0f
+              } else {
+                endingEdgeLabelLayoutResult.size.height /
+                  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    2f
+                  } else {
+                    4f
+                  }
+              }
         )
       drawText(
         textMeasurer = textMeasurer,
