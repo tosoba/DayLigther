@@ -243,7 +243,7 @@ private fun DayScreen(
     }
 
     val topBarGradient =
-      Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
+      Brush.verticalGradient(0f to MaterialTheme.colorScheme.background, 1f to Color.Transparent)
 
     fun onEditLocationClick() {
       currentChange.value.takeIfInstance<Ready<LocationSunriseSunsetChange>>()?.let { (data) ->
