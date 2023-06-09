@@ -140,7 +140,22 @@ private fun DayScreen(
       if (!pageChanged) pagerState.animateScrollToPage(initialLocationIndex)
     }
 
-    var dayMode by rememberSaveable { mutableStateOf(DayMode.SUNRISE) }
+    var dayMode by
+      rememberSaveable(locations, initialLocationIndex) {
+        mutableStateOf(
+          when (locations) {
+            is WithData -> {
+              currentDayMode(
+                locations.data[if (pageChanged) pagerState.currentPage else initialLocationIndex]
+                  .zoneId
+              )
+            }
+            is WithoutData -> {
+              DayMode.SUNRISE
+            }
+          }
+        )
+      }
     LaunchedEffect(pagerState.currentPage) {
       dayMode =
         when (locations) {
