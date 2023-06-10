@@ -5,4 +5,11 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.settings" }
 
-dependencies {}
+dependencies {
+  implementation(project(":core:datastore"))
+
+  implementation(libs.androidx.dataStore.core)
+  implementation(libs.androidx.dataStore.preferences)
+
+  implementation("com.github.JamalMulla:ComposePrefs3:1.0.3")
+}
