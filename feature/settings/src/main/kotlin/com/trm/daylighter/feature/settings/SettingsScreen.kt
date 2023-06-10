@@ -73,12 +73,6 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     }) {
       prefsItem {
         TextPref(
-          title = stringResource(R.string.remove_all_widgets_pref_title),
-          summary = stringResource(R.string.remove_all_widgets_pref_summary)
-        )
-      }
-      prefsItem {
-        TextPref(
           title = stringResource(R.string.clear_application_data_pref_title),
           summary = stringResource(R.string.clear_application_data_summary)
         )

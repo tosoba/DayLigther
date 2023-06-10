@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="application_data_pref_group_title">Application data</string>
-    <string name="remove_all_widgets_pref_title">Remove all widgets</string>
-    <string name="remove_all_widgets_pref_summary">Removes all location widgets from the home screen.</string>
     <string name="clear_application_data_pref_title">Clear application data</string>
-    <string name="clear_application_data_summary">Removes all application data (saved locations, home screen widgets, settings).</string>
+    <string name="clear_application_data_summary">Removes all saved locations and settings. Added home screen widgets must be removed manually.</string>
     <string name="geocoding_pref_group_title">Geocoding</string>
     <string name="geocoding_email_pref_title">Email</string>
     <string name="geocoding_email_pref_summary">Email used for authorizing geocoding (retrieving location address) API requests.</string>
