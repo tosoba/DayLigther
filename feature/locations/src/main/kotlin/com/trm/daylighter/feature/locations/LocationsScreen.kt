@@ -2,6 +2,8 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -186,6 +188,7 @@ private fun DeleteLocationConfirmationDialog(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MapCard(
   location: StableValue<Location>,
@@ -212,11 +215,11 @@ private fun MapCard(
       Row(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(5.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Bottom
       ) {
         LocationNameLabel(
           name = location.value.name,
-          modifier = Modifier.weight(1f).padding(horizontal = 5.dp)
+          modifier = Modifier.weight(1f).basicMarquee().padding(5.dp)
         )
         LocationDropDrownMenu(
           location = location,

@@ -3,6 +3,8 @@ package com.trm.daylighter.feature.widget.location
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -195,6 +197,7 @@ private fun WidgetLocationScreen(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MapCard(
   location: StableValue<Location>,
@@ -219,7 +222,8 @@ private fun MapCard(
 
       LocationNameLabel(
         name = location.value.name,
-        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(5.dp)
+        modifier =
+          Modifier.fillMaxWidth().align(Alignment.BottomCenter).basicMarquee().padding(5.dp)
       )
 
       Checkbox(
