@@ -46,6 +46,7 @@ import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
+import com.trm.daylighter.core.common.util.ext.formatTimeMillis
 import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
@@ -58,6 +59,7 @@ import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
@@ -77,10 +79,8 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.ui.toPx
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
-import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 class LocationWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -158,7 +158,7 @@ class LocationWidget(
             LocationName(location = change.location)
             Clock(zoneId = change.location.zoneId)
             NowTimezoneDiffText(dateTime = ZonedDateTime.now(change.location.zoneId))
-            DayLengthInfo(today = change.today, yesterday = change.yesterday)
+            DayLengthInfo(change = change)
           }
         }
       }
@@ -365,14 +365,17 @@ private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
 }
 
 @Composable
-private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
+private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
   val context = LocalContext.current
-  val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
-  val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
+  val (location, today, yesterday) = change
+
+  val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
+  val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
+  val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
   val diffPrefix =
     dayLengthDiffPrefix(
-      todayLengthSeconds = today.dayLengthSeconds,
-      yesterdayLengthSeconds = yesterday.dayLengthSeconds
+      todayLengthSeconds = todayLengthSeconds,
+      yesterdayLengthSeconds = yesterdayLengthSeconds
     )
 
   Row {
@@ -381,10 +384,7 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset) {
         RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
           setTextViewText(
             R.id.shadow_text_view,
-            context.getString(
-              R.string.day_length,
-              todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME)
-            ),
+            context.getString(R.string.day_length, formatTimeMillis(todayLengthSeconds * 1_000L)),
           )
           setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
           setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)

@@ -55,6 +55,7 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.composable.*
@@ -71,8 +72,6 @@ import com.trm.daylighter.feature.day.model.DayMode
 import com.trm.daylighter.feature.day.model.DayPeriod
 import java.lang.Float.max
 import java.time.*
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.cos
@@ -450,7 +449,7 @@ private fun ClockAndDayLengthCard(
     modifier = modifier
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
-      val (location, today, yesterday) = it.data
+      val (location, today, _) = it.data
       if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -459,7 +458,7 @@ private fun ClockAndDayLengthCard(
           Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           Spacer(modifier = Modifier.height(5.dp))
-          DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
+          DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
             dayMode = currentDayMode(location.zoneId),
@@ -482,7 +481,7 @@ private fun ClockAndDayLengthCard(
               NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
             }
             Spacer(modifier = Modifier.width(5.dp))
-            DayLengthInfo(today = today, yesterday = yesterday, dayPeriod = dayPeriod.value)
+            DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
           }
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
@@ -614,15 +613,7 @@ private fun rememberNextDayPeriod(
 }
 
 private fun LocalTime.formatTimeUntilNow(zoneId: ZoneId) =
-  formatTime(millis = (toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()) * 1_000L)
-
-private fun formatTime(millis: Long): String =
-  String.format(
-    "%02d:%02d:%02d",
-    TimeUnit.MILLISECONDS.toHours(millis),
-    TimeUnit.MILLISECONDS.toMinutes(millis) % 60,
-    TimeUnit.MILLISECONDS.toSeconds(millis) % 60
-  )
+  formatTimeMillis(millis = (toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()) * 1_000L)
 
 private fun dayPeriodFlow(change: Loadable<LocationSunriseSunsetChange>): Flow<DayPeriod> = flow {
   while (currentCoroutineContext().isActive) {
@@ -686,17 +677,20 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
 }
 
 @Composable
-private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset, dayPeriod: DayPeriod) {
+private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
-    val todayLength = LocalTime.ofSecondOfDay(today.dayLengthSeconds.toLong())
-    val dayLengthDiffTime = dayLengthDiffTime(today.dayLengthSeconds, yesterday.dayLengthSeconds)
+    val (location, today, yesterday) = change
+
+    val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
+    val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
+    val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
     val diffPrefix =
       dayLengthDiffPrefix(
-        todayLengthSeconds = today.dayLengthSeconds,
-        yesterdayLengthSeconds = yesterday.dayLengthSeconds
+        todayLengthSeconds = todayLengthSeconds,
+        yesterdayLengthSeconds = yesterdayLengthSeconds
       )
     Text(
       text = stringResource(id = R.string.day_length_label),
@@ -709,7 +703,7 @@ private fun DayLengthInfo(today: SunriseSunset, yesterday: SunriseSunset, dayPer
     )
     Row {
       Text(
-        text = todayLength.format(DateTimeFormatter.ISO_LOCAL_TIME),
+        text = formatTimeMillis(todayLengthSeconds * 1_000L),
         color = dayPeriod.textColor(),
         style =
           MaterialTheme.typography.bodyMedium.copy(

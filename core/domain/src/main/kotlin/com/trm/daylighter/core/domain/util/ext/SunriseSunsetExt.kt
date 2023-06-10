@@ -57,3 +57,10 @@ fun SunriseSunset.isPolarNightAtLocation(location: Location): Boolean {
       abs(Duration.between(juneSolstice, now).seconds)
   }
 }
+
+fun SunriseSunset.dayLengthSecondsAtLocation(location: Location): Long =
+  when {
+    sunrise != null && sunset != null -> Duration.between(sunrise, sunset).seconds
+    isPolarDayAtLocation(location) -> 60L * 60L * 24L
+    else -> 0L
+  }

@@ -3,7 +3,6 @@ package com.trm.daylighter.core.domain.usecase
 import com.trm.daylighter.core.domain.model.DawnOrTwilight
 import com.trm.daylighter.core.domain.model.HalfDay
 import com.trm.daylighter.core.domain.model.SunriseSunset
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
@@ -41,9 +40,6 @@ constructor(private val calculateDawnOrTwilightUseCase: CalculateDawnOrTwilightU
       nauticalTwilightEnd = calculateDawnOrTwilight(DawnOrTwilight.NAUTICAL, HalfDay.EVENING),
       sunrise = sunrise,
       sunset = sunset,
-      dayLengthSeconds =
-        if (sunrise != null && sunset != null) Duration.between(sunrise, sunset).seconds.toInt()
-        else 0,
       date = date.toLocalDate()
     )
   }
