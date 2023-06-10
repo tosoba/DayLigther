@@ -35,6 +35,8 @@ import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.locationsGraph
 import com.trm.daylighter.feature.locations.locationsGraphRoute
 import com.trm.daylighter.feature.locations.locationsRoute
+import com.trm.daylighter.feature.settings.SettingsScreen
+import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.newWidgetRoute
 import kotlinx.coroutines.launch
@@ -84,6 +86,7 @@ fun DaylighterMainContent() {
                       aboutRoute -> R.string.about_item
                       locationsRoute -> R.string.locations_item
                       newWidgetRoute -> R.string.choose_widget_location
+                      settingsRoute -> R.string.settings_item
                       else -> R.string.empty
                     }
                 )
@@ -130,6 +133,16 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
           route = locationsGraphRoute,
           icon = Icons.Filled.LocationOn,
           label = stringResource(R.string.locations_item)
+        ),
+      onItemClick = onItemClick
+    )
+
+    DaylighterDrawerItem(
+      destination =
+        DrawerDestination(
+          route = settingsRoute,
+          icon = Icons.Filled.Settings,
+          label = stringResource(R.string.settings_item)
         ),
       onItemClick = onItemClick
     )
@@ -227,6 +240,8 @@ private fun DaylighterNavHost(
     }
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
+
+    composable(settingsRoute) { SettingsScreen(modifier = Modifier.fillMaxSize()) }
 
     composable(
       route = locationRoute,
