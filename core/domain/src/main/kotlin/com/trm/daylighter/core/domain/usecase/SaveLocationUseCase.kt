@@ -12,20 +12,17 @@ constructor(
   private val sendLocationSavedEventUseCase: SendLocationSavedEventUseCase
 ) {
   suspend operator fun invoke(latitude: Double, longitude: Double, name: String) {
-    val location =
-      locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
-    if (location.isDefault) widgetManager.updateDefaultLocationWidgets()
+    locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
   }
 
   suspend operator fun invoke(id: Long, latitude: Double, longitude: Double, name: String) {
-    val location =
-      locationRepo.updateLocationLatLngById(
-        id = id,
-        latitude = latitude,
-        longitude = longitude,
-        name = name
-      )
-    if (location.isDefault) widgetManager.updateDefaultLocationWidgets()
+    locationRepo.updateLocationLatLngById(
+      id = id,
+      latitude = latitude,
+      longitude = longitude,
+      name = name
+    )
+    widgetManager.updateAllLocationWidgets()
     sendLocationSavedEventUseCase(id)
   }
 }

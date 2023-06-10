@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.domain.widget
 
 interface WidgetManager {
-  fun updateDefaultLocationWidgets()
+  fun updateAllLocationWidgets()
 
   suspend fun addLocationWidget(locationId: Long): Boolean
 

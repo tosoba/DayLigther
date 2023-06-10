@@ -18,7 +18,8 @@ import kotlinx.coroutines.withContext
 class GetLocationSunriseSunsetChangeFlowByIdUseCase
 @Inject
 constructor(
-  private val calculateLocationSunriseSunsetChangeUseCase: CalculateLocationSunriseSunsetChangeUseCase,
+  private val calculateLocationSunriseSunsetChangeUseCase:
+    CalculateLocationSunriseSunsetChangeUseCase,
   private val repo: LocationRepo,
   @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) {
@@ -26,9 +27,8 @@ constructor(
     emit(LoadingFirst)
     try {
       emit(
-        withContext(ioDispatcher) {
-            calculateLocationSunriseSunsetChangeUseCase(location = repo.getLocationById(id))
-          }
+        withContext(ioDispatcher) { repo.getLocationById(id) ?: repo.getDefaultLocation() }
+          ?.let(calculateLocationSunriseSunsetChangeUseCase::invoke)
           .asLoadable()
       )
     } catch (ex: CancellationException) {

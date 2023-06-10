@@ -1,8 +1,6 @@
 package com.trm.daylighter.core.data.repo
 
-import androidx.room.withTransaction
 import com.trm.daylighter.core.data.mapper.asDomainModel
-import com.trm.daylighter.core.database.DaylighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.entity.LocationEntity
 import com.trm.daylighter.core.domain.di.DaylighterDispatchers
@@ -20,15 +18,16 @@ import us.dustinj.timezonemap.TimeZoneMap
 class LocationRepoImpl
 @Inject
 constructor(
-  private val db: DaylighterDatabase,
   private val locationDao: LocationDao,
   @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
-  override suspend fun saveLocation(latitude: Double, longitude: Double, name: String): Location {
-    val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
-    return locationDao
-      .insert(latitude = latitude, longitude = longitude, name = name, zoneId = zoneId)
-      .asDomainModel()
+  override suspend fun saveLocation(latitude: Double, longitude: Double, name: String) {
+    locationDao.insert(
+      latitude = latitude,
+      longitude = longitude,
+      name = name,
+      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
+    )
   }
 
   override fun getAllLocationsFlow(): Flow<List<Location>> =
@@ -48,26 +47,22 @@ constructor(
     locationDao.updateDefaultLocationById(id)
   }
 
-  override suspend fun getLocationById(id: Long): Location =
-    locationDao.selectById(id).asDomainModel()
+  override suspend fun getLocationById(id: Long): Location? =
+    locationDao.selectById(id)?.asDomainModel()
 
   override suspend fun updateLocationLatLngById(
     id: Long,
     latitude: Double,
     longitude: Double,
     name: String
-  ): Location {
-    val zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
-    return db.withTransaction {
-      locationDao.updateLocationLatLngById(
-        id = id,
-        latitude = latitude,
-        longitude = longitude,
-        name = name,
-        zoneId = zoneId
-      )
-      locationDao.selectById(id).asDomainModel()
-    }
+  ) {
+    locationDao.updateLocationLatLngById(
+      id = id,
+      latitude = latitude,
+      longitude = longitude,
+      name = name,
+      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
+    )
   }
 
   private suspend fun getTimeZoneId(latitude: Double, longitude: Double): ZoneId =

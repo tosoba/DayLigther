@@ -18,7 +18,8 @@ import kotlinx.coroutines.withContext
 class GetDefaultLocationSunriseSunsetChangeFlowUseCase
 @Inject
 constructor(
-  private val calculateLocationSunriseSunsetChangeUseCase: CalculateLocationSunriseSunsetChangeUseCase,
+  private val calculateLocationSunriseSunsetChangeUseCase:
+    CalculateLocationSunriseSunsetChangeUseCase,
   private val repo: LocationRepo,
   @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) {

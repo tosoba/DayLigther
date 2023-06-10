@@ -17,7 +17,7 @@ constructor(
   private val widgetManager: WidgetManager,
 ) : CoroutineWorker(appContext, workerParams) {
   override suspend fun doWork(): Result {
-    widgetManager.updateDefaultLocationWidgets()
+    widgetManager.updateAllLocationWidgets()
     return Result.success()
   }
 

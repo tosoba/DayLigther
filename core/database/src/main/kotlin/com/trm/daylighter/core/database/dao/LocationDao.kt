@@ -11,24 +11,17 @@ interface LocationDao {
   @Insert suspend fun insert(entity: LocationEntity)
 
   @Transaction
-  suspend fun insert(
-    latitude: Double,
-    longitude: Double,
-    name: String,
-    zoneId: ZoneId
-  ): LocationEntity {
-    val anyExists = selectAnyExists()
-    val entity =
+  suspend fun insert(latitude: Double, longitude: Double, name: String, zoneId: ZoneId) {
+    insert(
       LocationEntity(
         latitude = latitude,
         longitude = longitude,
         name = name,
-        isDefault = !anyExists,
+        isDefault = !selectAnyExists(),
         updatedAt = LocalDateTime.now(),
         zoneId = zoneId,
       )
-    insert(entity)
-    return entity
+    )
   }
 
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
@@ -49,7 +42,7 @@ interface LocationDao {
   @Query("SELECT * FROM location ORDER BY is_default DESC, updated_at DESC")
   fun selectAllFlow(): Flow<List<LocationEntity>>
 
-  @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity
+  @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity?
 
   @Query("UPDATE location SET is_default = FALSE") suspend fun setIsDefaultToFalse()
 

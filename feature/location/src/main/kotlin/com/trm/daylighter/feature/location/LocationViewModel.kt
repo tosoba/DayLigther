@@ -69,17 +69,18 @@ constructor(
 
   val initialMapPositionFlow: StateFlow<MapPosition> =
     flow {
-        initialLocationId?.let { id ->
-          val location = getLocationById(id)
-          emit(
-            MapPosition(
-              latitude = location.latitude,
-              longitude = location.longitude,
-              zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
-              label = location.name
+        initialLocationId
+          ?.let { getLocationById(it) }
+          ?.let { location ->
+            emit(
+              MapPosition(
+                latitude = location.latitude,
+                longitude = location.longitude,
+                zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
+                label = location.name
+              )
             )
-          )
-        }
+          }
       }
       .stateIn(
         scope = viewModelScope,
