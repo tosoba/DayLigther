@@ -31,6 +31,7 @@ import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
+import kotlinx.coroutines.launch
 
 const val locationsGraphRoute = "locations_graph"
 const val locationsRoute = "locations_route"
@@ -80,11 +81,20 @@ private fun LocationsScreen(
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
+    val scope = rememberCoroutineScope()
+
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
     var bottomButtonsHeightPx by remember { mutableStateOf(0) }
+
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(locations) {
+      if (locations is Ready) {
+        scope.launch { gridState.animateScrollToItem(0) }
+      }
+    }
 
     when (locations) {
       is WithData -> {
@@ -93,6 +103,7 @@ private fun LocationsScreen(
             if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
             else 4
           LazyVerticalGrid(
+            state = gridState,
             contentPadding = PaddingValues(10.dp),
             columns = GridCells.Fixed(columnsCount)
           ) {
