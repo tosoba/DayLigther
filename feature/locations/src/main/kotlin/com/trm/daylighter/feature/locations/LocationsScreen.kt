@@ -278,7 +278,12 @@ private fun LocationDropDrownMenu(
             }
           }
         },
-        onClick = { if (!location.value.isDefault) onSetDefaultLocationClick(location.value.id) }
+        onClick = {
+          if (!location.value.isDefault) {
+            onSetDefaultLocationClick(location.value.id)
+            hideDropdown()
+          }
+        }
       )
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.edit)) },
