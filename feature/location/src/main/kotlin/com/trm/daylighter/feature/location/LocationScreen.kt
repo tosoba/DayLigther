@@ -49,8 +49,6 @@ import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
-import eu.wewox.modalsheet.ExperimentalSheetApi
-import eu.wewox.modalsheet.ModalSheet
 import timber.log.Timber
 
 const val locationRoute = "location_route"
@@ -98,7 +96,7 @@ fun LocationRoute(
   )
 }
 
-@OptIn(ExperimentalSheetApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationScreen(
   screenMode: LocationScreenMode,
@@ -218,14 +216,9 @@ private fun LocationScreen(
       cancelCurrentSaveLocation = cancelCurrentSaveLocation,
       onBackClick = onBackClick,
       modalSheet = {
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-          ModalSheet(
-            visible = sheetVisible,
-            onVisibleChange = { sheetVisible = it },
-            backgroundColor = MaterialTheme.colorScheme.background,
-            shape = MaterialTheme.shapes.medium,
-          ) {
-            ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxWidth())
+        if (sheetVisible && orientation == Configuration.ORIENTATION_PORTRAIT) {
+          ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
+            ModalSheetContent(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth())
           }
         }
       },

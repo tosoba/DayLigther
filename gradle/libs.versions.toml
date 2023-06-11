@@ -43,7 +43,6 @@ kotlinxSerializationJson = "1.4.1"
 ksp = "1.8.10-1.0.9"
 lint = "30.3.1"
 material = "1.9.0"
-modalSheet = "0.5.0"
 okhttp = "4.10.0"
 osmdroid = "6.1.14"
 playServicesLocation = "21.0.1"
@@ -129,7 +128,6 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lint-api = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-modalsheet = { group = "io.github.oleksandrbalan", name = "modalsheet", version.ref = "modalSheet" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

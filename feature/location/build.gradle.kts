@@ -8,7 +8,6 @@ android { namespace = "com.trm.daylighter.feature.location" }
 
 dependencies {
   implementation(libs.androidx.compose.material)
-  implementation(libs.modalsheet)
 
   implementation(libs.osmdroid)
   implementation(libs.timber)
