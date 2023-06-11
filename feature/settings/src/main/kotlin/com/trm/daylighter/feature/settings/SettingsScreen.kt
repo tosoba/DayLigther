@@ -1,5 +1,9 @@
 package com.trm.daylighter.feature.settings
 
+import android.util.Patterns
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,12 +59,21 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
       )
     }) {
       prefsItem {
+        val emailEmptyError = stringResource(id = R.string.email_empty_error)
+        val invalidEmailAddress = stringResource(id = R.string.invalid_email_error)
         EditTextPref(
           key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
           title = stringResource(R.string.geocoding_email_pref_title),
           summary = stringResource(R.string.geocoding_email_pref_summary),
           dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
-          dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message)
+          dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
+          validateValue = {
+            when {
+              it.isBlank() -> emailEmptyError
+              !Patterns.EMAIL_ADDRESS.matcher(it).matches() -> invalidEmailAddress
+              else -> null
+            }
+          },
         )
       }
     }
@@ -91,8 +104,9 @@ private fun EditTextPref(
   dialogTitle: String? = null,
   dialogMessage: String? = null,
   defaultValue: String = "",
-  onValueSaved: ((String) -> Unit) = {},
-  onValueChange: ((String) -> Unit) = {},
+  validateValue: (String) -> String? = { null },
+  onValueSaved: (String) -> Unit = {},
+  onValueChange: (String) -> Unit = {},
   dialogBackgroundColor: Color = MaterialTheme.colorScheme.background,
   textColor: Color = MaterialTheme.colorScheme.onBackground,
   enabled: Boolean = true,
@@ -103,8 +117,11 @@ private fun EditTextPref(
   val datastore = LocalPrefsDataStore.current
   val prefKey = stringPreferencesKey(key)
   val prefs by remember(datastore::data).collectAsState(initial = null)
+
   var prefValue by remember { mutableStateOf(defaultValue) }
-  var textValue by remember { mutableStateOf(prefValue) }
+  var textValue by rememberSaveable { mutableStateOf(prefValue) }
+  var textValueChanged by rememberSaveable { mutableStateOf(false) }
+  var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
 
   LaunchedEffect(Unit) { prefs?.get(prefKey)?.also { prefValue = it } }
 
@@ -135,19 +152,36 @@ private fun EditTextPref(
   var dialogSize by remember { mutableStateOf(Size.Zero) }
 
   if (showDialog) {
-    LaunchedEffect(Unit) { textValue = prefValue }
+    LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
 
     AlertDialog(
       modifier = Modifier.fillMaxWidth(0.9f).onGloballyPositioned { dialogSize = it.size.toSize() },
-      onDismissRequest = { showDialog = false },
+      onDismissRequest = {
+        textValueChanged = false
+        textValue = prefValue
+        showDialog = false
+      },
       title = { DialogHeader(dialogTitle, dialogMessage) },
       text = {
         OutlinedTextField(
           value = textValue,
           modifier = Modifier.fillMaxWidth().padding(16.dp),
           placeholder = { Text(text = stringResource(R.string.geocoding_email_value_placeholder)) },
+          singleLine = true,
+          isError = validationMsg != null,
+          supportingText = {
+            AnimatedVisibility(
+              visible = validationMsg != null,
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              Text(text = validationMsg ?: "")
+            }
+          },
           onValueChange = {
             textValue = it
+            validationMsg = null
+            textValueChanged = true
             onValueChange(it)
           }
         )
@@ -156,15 +190,26 @@ private fun EditTextPref(
         TextButton(
           modifier = Modifier.padding(end = 16.dp),
           onClick = {
-            edit()
-            showDialog = false
+            validationMsg = validateValue(textValue)
+            if (validationMsg == null) {
+              edit()
+              textValueChanged = false
+              showDialog = false
+            }
           }
         ) {
           Text(stringResource(id = android.R.string.ok), style = MaterialTheme.typography.bodyLarge)
         }
       },
       dismissButton = {
-        TextButton(modifier = Modifier.padding(end = 16.dp), onClick = { showDialog = false }) {
+        TextButton(
+          modifier = Modifier.padding(end = 16.dp),
+          onClick = {
+            textValueChanged = false
+            validationMsg = null
+            showDialog = false
+          }
+        ) {
           Text(
             stringResource(id = android.R.string.cancel),
             style = MaterialTheme.typography.bodyLarge

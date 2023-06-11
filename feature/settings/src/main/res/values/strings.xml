@@ -9,4 +9,6 @@
     <string name="geocoding_email_pref_dialog_title">Enter an email address</string>
     <string name="geocoding_email_pref_dialog_message">Provided email address will be used to authorize geocoding API requests. There will be no need to login to it. Any valid email address will work.</string>
     <string name="geocoding_email_value_placeholder">Email</string>
+    <string name="email_empty_error">Email address cannot be empty.</string>
+    <string name="invalid_email_error">Invalid email address.</string>
 </resources>
