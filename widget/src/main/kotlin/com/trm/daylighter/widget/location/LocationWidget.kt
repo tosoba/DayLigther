@@ -100,7 +100,7 @@ class LocationWidget(
             is LocationWidgetState.ChosenLocation -> {
               getLocationSunriseSunsetChangeFlowByIdUseCase(state.locationId)
             }
-            LocationWidgetState.DefaultLocation -> {
+            is LocationWidgetState.DefaultLocation -> {
               getDefaultLocationSunriseSunsetChangeFlowUseCase()
             }
           }

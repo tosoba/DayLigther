@@ -4,14 +4,15 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.widget.util.ext.actionIntent
+import com.trm.daylighter.widget.util.ext.getGlanceIdByWidgetId
 import com.trm.daylighter.widget.util.ext.getGlanceIds
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,17 +55,30 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
 
   private fun Context.updateAllWidgets() {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
-      for (id in getGlanceIds<LocationWidget>()) {
-        glanceAppWidget.update(this@updateAllWidgets, id)
+      for (glanceId in getGlanceIds<LocationWidget>()) {
+        updateAppWidgetState(
+          context = this@updateAllWidgets,
+          definition = LocationWidgetStateDefinition,
+          glanceId = glanceId,
+          updateState = LocationWidgetState::copyWithNewUuid
+        )
+        glanceAppWidget.update(this@updateAllWidgets, glanceId)
       }
     }
   }
 
   private fun Context.updateWidget(widgetId: Int, locationId: Long) {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
-      val glanceId = GlanceAppWidgetManager(this@updateWidget).getGlanceIdBy(widgetId)
-      updateAppWidgetState(this@updateWidget, LocationWidgetStateDefinition, glanceId) {
-        LocationWidgetState.ChosenLocation(locationId)
+      val glanceId = getGlanceIdByWidgetId(widgetId)
+      updateAppWidgetState(
+        context = this@updateWidget,
+        definition = LocationWidgetStateDefinition,
+        glanceId = glanceId
+      ) {
+        LocationWidgetState.ChosenLocation(
+          locationId = locationId,
+          uuid = UUID.randomUUID().toString()
+        )
       }
       glanceAppWidget.update(this@updateWidget, glanceId)
     }

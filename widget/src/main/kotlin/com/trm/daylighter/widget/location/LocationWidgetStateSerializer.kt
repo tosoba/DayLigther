@@ -4,6 +4,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.UUID
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -11,7 +12,7 @@ import kotlinx.serialization.json.Json
 object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
   private const val DEFAULT_LOCATION_ID = -1L
 
-  override val defaultValue = LocationWidgetState.DefaultLocation
+  override val defaultValue = LocationWidgetState.DefaultLocation(UUID.randomUUID().toString())
 
   override suspend fun readFrom(input: InputStream): LocationWidgetState =
     try {
@@ -20,8 +21,13 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
           deserializer = Long.serializer(),
           string = input.readBytes().decodeToString()
         )
-      if (locationId != DEFAULT_LOCATION_ID) LocationWidgetState.ChosenLocation(locationId)
-      else LocationWidgetState.DefaultLocation
+      val uuid =
+        Json.decodeFromString(
+          deserializer = String.serializer(),
+          string = input.readBytes().decodeToString()
+        )
+      if (locationId != DEFAULT_LOCATION_ID) LocationWidgetState.ChosenLocation(locationId, uuid)
+      else LocationWidgetState.DefaultLocation(uuid)
     } catch (exception: SerializationException) {
       throw CorruptionException("Could not read location widget state : ${exception.message}")
     }
@@ -33,11 +39,14 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
             serializer = Long.serializer(),
             value =
               when (t) {
-                LocationWidgetState.DefaultLocation -> DEFAULT_LOCATION_ID
+                is LocationWidgetState.DefaultLocation -> DEFAULT_LOCATION_ID
                 is LocationWidgetState.ChosenLocation -> t.locationId
               }
           )
           .encodeToByteArray()
+      )
+      it.write(
+        Json.encodeToString(serializer = String.serializer(), value = t.uuid).encodeToByteArray()
       )
     }
   }
