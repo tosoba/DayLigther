@@ -88,8 +88,8 @@ const val dayRoute = "day_route"
 @Composable
 fun DayRoute(
   onDrawerMenuClick: () -> Unit,
-  onAddLocation: () -> Unit,
-  onEditLocation: (Long) -> Unit,
+  onAddLocationClick: () -> Unit,
+  onEditLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
@@ -102,8 +102,8 @@ fun DayRoute(
     sunriseSunsetChangeInLocationAt = viewModel::sunriseSunsetChangeInLocationAt,
     currentTimeInLocationAt = viewModel::currentTimeInLocationAt,
     onDrawerMenuClick = onDrawerMenuClick,
-    onAddLocationClick = onAddLocation,
-    onEditLocationClick = onEditLocation,
+    onAddLocationClick = onAddLocationClick,
+    onEditLocationClick = onEditLocationClick,
     modifier = modifier
   )
 }

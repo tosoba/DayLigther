@@ -32,8 +32,7 @@ import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
 import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.*
-import com.trm.daylighter.feature.locations.locationsGraph
-import com.trm.daylighter.feature.locations.locationsGraphRoute
+import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
 import com.trm.daylighter.feature.settings.SettingsScreen
 import com.trm.daylighter.feature.settings.settingsRoute
@@ -130,7 +129,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
     DaylighterDrawerItem(
       destination =
         DrawerDestination(
-          route = locationsGraphRoute,
+          route = locationsRoute,
           icon = Icons.Filled.LocationOn,
           label = stringResource(R.string.locations_item)
         ),
@@ -215,15 +214,6 @@ private fun DaylighterNavHost(
     )
   }
 
-  fun NavGraphBuilder.editLocationRoute() {
-    composable(
-      route = editLocationRoute,
-      arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
-    ) {
-      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
-    }
-  }
-
   val context = LocalContext.current
   val dayDeepLinkUri = context.dayDeepLinkPattern()
   val addLocationDeepLinkUri = context.addLocationDeepPattern()
@@ -234,8 +224,8 @@ private fun DaylighterNavHost(
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
-        onAddLocation = ::navigateToAddLocation,
-        onEditLocation = ::navigateToEditLocation,
+        onAddLocationClick = ::navigateToAddLocation,
+        onEditLocationClick = ::navigateToEditLocation,
       )
     }
 
@@ -250,13 +240,19 @@ private fun DaylighterNavHost(
       LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
     }
 
-    editLocationRoute()
-
-    locationsGraph(
-      onAddLocationClick = ::navigateToAddLocation,
-      onEditLocationClick = ::navigateToEditLocation
+    composable(
+      route = editLocationRoute,
+      arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
     ) {
-      editLocationRoute()
+      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
+    }
+
+    composable(locationsRoute) {
+      LocationsRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocationClick = ::navigateToAddLocation,
+        onEditLocationClick = ::navigateToEditLocation,
+      )
     }
 
     composable(

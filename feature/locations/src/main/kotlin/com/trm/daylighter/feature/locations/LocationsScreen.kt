@@ -23,9 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.domain.model.*
@@ -33,28 +30,10 @@ import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
 import kotlinx.coroutines.launch
 
-const val locationsGraphRoute = "locations_graph"
 const val locationsRoute = "locations_route"
 
-fun NavGraphBuilder.locationsGraph(
-  onAddLocationClick: () -> Unit,
-  onEditLocationClick: (Long) -> Unit,
-  nestedRoutes: NavGraphBuilder.() -> Unit
-) {
-  navigation(startDestination = locationsRoute, route = locationsGraphRoute) {
-    composable(locationsRoute) {
-      LocationsRoute(
-        modifier = Modifier.fillMaxSize(),
-        onEditLocationClick = onEditLocationClick,
-        onAddLocationClick = onAddLocationClick,
-      )
-    }
-    nestedRoutes()
-  }
-}
-
 @Composable
-private fun LocationsRoute(
+fun LocationsRoute(
   modifier: Modifier = Modifier,
   onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
