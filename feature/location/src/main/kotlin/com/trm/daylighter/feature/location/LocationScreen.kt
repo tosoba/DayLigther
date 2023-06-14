@@ -58,6 +58,7 @@ const val editLocationRoute = "$locationRoute/{$locationIdParam}"
 @Composable
 fun LocationRoute(
   onBackClick: () -> Unit,
+  onEnableGeocodingClick: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()
 ) {
@@ -74,6 +75,8 @@ fun LocationRoute(
     viewModel.locationNameLoadingFlow.collectAsStateWithLifecycle(initialValue = false)
   val locationNameFailureMessage =
     viewModel.locationNameFailureMessageFlow.collectAsStateWithLifecycle(initialValue = null)
+  val isGeocodeEmailPreferenceSet =
+    viewModel.isGeocodeEmailPreferenceSetFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
     screenMode = viewModel.screenMode,
@@ -90,7 +93,13 @@ fun LocationRoute(
     locationNameFailureMessage = locationNameFailureMessage.value,
     onLocationNameChange = viewModel::inputLocationName,
     clearLocationName = viewModel::clearLocationName,
-    onGeocodeClick = viewModel::getLocationDisplayName,
+    geocodeButtonText =
+      stringResource(
+        id = if (isGeocodeEmailPreferenceSet.value) R.string.geocode else R.string.enable_geocoding
+      ),
+    onGeocodeClick =
+      if (isGeocodeEmailPreferenceSet.value) viewModel::getLocationDisplayName
+      else { _, _ -> onEnableGeocodingClick() },
     onBackClick = onBackClick,
     modifier = modifier
   )
@@ -113,6 +122,7 @@ private fun LocationScreen(
   @StringRes locationNameFailureMessage: Int?,
   onLocationNameChange: (String) -> Unit,
   clearLocationName: () -> Unit,
+  geocodeButtonText: String,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -189,6 +199,7 @@ private fun LocationScreen(
         onLocationNameChange(it)
       },
       nameError = locationNameError,
+      geocodeButtonText = geocodeButtonText,
       onGeocodeClick = { onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude) },
       onSaveClick = {
         if (locationName.isBlank()) {
@@ -424,6 +435,7 @@ private fun ModalSheetContent(
   @StringRes nameFailureMessage: Int?,
   onNameValueChange: (String) -> Unit,
   nameError: LocationNameError,
+  geocodeButtonText: String,
   onSaveClick: () -> Unit,
   onGeocodeClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -480,7 +492,7 @@ private fun ModalSheetContent(
 
     Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
       OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
-        Text(text = stringResource(R.string.geocode))
+        Text(text = geocodeButtonText)
       }
       Spacer(modifier = Modifier.width(10.dp))
       OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {

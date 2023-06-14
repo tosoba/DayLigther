@@ -9,6 +9,7 @@ import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
 import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
+import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.*
@@ -27,6 +28,7 @@ constructor(
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
   private val getLocationDisplayName: GetLocationDisplayName,
+  isGeocodingEmailPreferenceSetFlowUseCase: IsGeocodingEmailPreferenceSetFlowUseCase
 ) : ViewModel() {
   private val saveLocationRequestFlow = MutableSharedFlow<SaveLocationRequest>()
   private val prepareSaveLocationFlow: SharedFlow<Loadable<LocationPreparedToSave>> =
@@ -130,6 +132,10 @@ constructor(
 
   val screenMode: LocationScreenMode =
     if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
+
+  val isGeocodeEmailPreferenceSetFlow: SharedFlow<Boolean> =
+    isGeocodingEmailPreferenceSetFlowUseCase()
+      .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
 
   fun requestSaveSpecifiedLocation(latitude: Double, longitude: Double) {
     viewModelScope.launch {

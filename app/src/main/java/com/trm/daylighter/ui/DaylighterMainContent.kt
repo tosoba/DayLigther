@@ -214,6 +214,13 @@ private fun DaylighterNavHost(
     )
   }
 
+  fun navigateToSettings() {
+    navController.navigate(
+      route = settingsRoute,
+      navOptions = navOptions { launchSingleTop = true }
+    )
+  }
+
   val context = LocalContext.current
   val dayDeepLinkUri = context.dayDeepLinkPattern()
   val addLocationDeepLinkUri = context.addLocationDeepPattern()
@@ -237,14 +244,22 @@ private fun DaylighterNavHost(
       route = locationRoute,
       deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUri })
     ) {
-      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
+      LocationRoute(
+        modifier = Modifier.fillMaxSize(),
+        onBackClick = navController::popBackStack,
+        onEnableGeocodingClick = ::navigateToSettings
+      )
     }
 
     composable(
       route = editLocationRoute,
       arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
     ) {
-      LocationRoute(onBackClick = navController::popBackStack, modifier = Modifier.fillMaxSize())
+      LocationRoute(
+        modifier = Modifier.fillMaxSize(),
+        onBackClick = navController::popBackStack,
+        onEnableGeocodingClick = ::navigateToSettings
+      )
     }
 
     composable(locationsRoute) {
