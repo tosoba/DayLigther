@@ -92,4 +92,7 @@ data class Ready<T : Any>(override val data: T) : WithData<T> {
 
 inline fun <reified T : Any> T?.asLoadable(): Loadable<T> = if (this == null) Empty else Ready(this)
 
+inline fun <reified T : Collection<*>> T?.asLoadable(): Loadable<T> =
+  if (isNullOrEmpty()) Empty else Ready(this)
+
 fun <T : Any> Loadable<T>.dataOrElse(fallback: T): T = if (this is WithData) data else fallback

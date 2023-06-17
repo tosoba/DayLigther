@@ -62,6 +62,10 @@ constructor(
         when (locations) {
           is WithData -> {
             emit(LoadingFirst)
+            if (locations.data.isEmpty()) {
+              emit(Empty)
+              return@transformLatest
+            }
 
             val location = locations.data[index]
             var change = calculateSunriseSunsetChangeUseCase(location)
