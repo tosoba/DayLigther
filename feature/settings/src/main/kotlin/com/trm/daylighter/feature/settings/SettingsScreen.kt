@@ -149,22 +149,20 @@ private fun EditTextPref(
   textColor: Color = MaterialTheme.colorScheme.onBackground,
   enabled: Boolean = true,
 ) {
-  var showDialog by rememberSaveable { mutableStateOf(false) }
   val scope = rememberCoroutineScope()
+  var showDialog by rememberSaveable { mutableStateOf(false) }
 
   val datastore = LocalPrefsDataStore.current
   val prefKey = stringPreferencesKey(key)
-  val prefs by remember { datastore.data }.collectAsState(initial = null)
-
   var prefValue by remember { mutableStateOf(defaultValue) }
-  var textValue by rememberSaveable { mutableStateOf(prefValue) }
+  var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
   var textValueChanged by rememberSaveable { mutableStateOf(false) }
   var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
 
-  LaunchedEffect(Unit) { prefs?.get(prefKey)?.also { prefValue = it } }
-
-  LaunchedEffect(datastore.data) {
-    datastore.data.collectLatest { pref -> pref[prefKey]?.also { prefValue = it } }
+  LaunchedEffect(Unit) {
+    datastore.data.collectLatest { pref ->
+      pref[prefKey]?.also { prefValue = it } ?: run { prefValue = "" }
+    }
   }
 
   fun edit() {
@@ -237,7 +235,10 @@ private fun EditTextPref(
             }
           }
         ) {
-          Text(stringResource(id = android.R.string.ok), style = MaterialTheme.typography.bodyLarge)
+          Text(
+            text = stringResource(id = android.R.string.ok),
+            style = MaterialTheme.typography.bodyLarge
+          )
         }
       },
       dismissButton = {
@@ -250,7 +251,7 @@ private fun EditTextPref(
           }
         ) {
           Text(
-            stringResource(id = android.R.string.cancel),
+            text = stringResource(id = android.R.string.cancel),
             style = MaterialTheme.typography.bodyLarge
           )
         }
