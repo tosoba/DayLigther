@@ -45,7 +45,7 @@ import com.jamal.composeprefs3.ui.PrefsScreen
 import com.jamal.composeprefs3.ui.prefs.*
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -150,20 +150,16 @@ private fun EditTextPref(
   enabled: Boolean = true,
 ) {
   val scope = rememberCoroutineScope()
-  var showDialog by rememberSaveable { mutableStateOf(false) }
 
   val datastore = LocalPrefsDataStore.current
   val prefKey = stringPreferencesKey(key)
-  var prefValue by remember { mutableStateOf(defaultValue) }
+  val prefValue by
+    remember { datastore.data.map { preferences -> preferences[prefKey] ?: defaultValue } }
+      .collectAsState(initial = defaultValue)
+
   var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
   var textValueChanged by rememberSaveable { mutableStateOf(false) }
   var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
-
-  LaunchedEffect(Unit) {
-    datastore.data.collectLatest { pref ->
-      pref[prefKey]?.also { prefValue = it } ?: run { prefValue = "" }
-    }
-  }
 
   fun edit() {
     scope.launch {
@@ -176,6 +172,9 @@ private fun EditTextPref(
     }
   }
 
+  var showDialog by rememberSaveable { mutableStateOf(false) }
+  var dialogSize by remember { mutableStateOf(Size.Zero) }
+
   TextPref(
     title = title,
     modifier = modifier,
@@ -184,8 +183,6 @@ private fun EditTextPref(
     enabled = enabled,
     onClick = { if (enabled) showDialog = !showDialog },
   )
-
-  var dialogSize by remember { mutableStateOf(Size.Zero) }
 
   if (showDialog) {
     LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
