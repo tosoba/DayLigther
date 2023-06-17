@@ -179,10 +179,11 @@ private fun EditTextPref(
             }
           },
           onValueChange = {
-            textValue = it
+            val trimmed = it.trim()
+            textValue = trimmed
             validationMsg = null
             textValueChanged = true
-            onValueChange(it)
+            onValueChange(trimmed)
           }
         )
       },
