@@ -80,14 +80,14 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 
     prefsGroup({
       GroupHeader(
-        title = stringResource(R.string.application_data_pref_group_title),
+        title = stringResource(R.string.locations_pref_group_title),
         color = MaterialTheme.colorScheme.secondary
       )
     }) {
       prefsItem {
         TextPref(
-          title = stringResource(R.string.clear_application_data_pref_title),
-          summary = stringResource(R.string.clear_application_data_summary)
+          title = stringResource(R.string.clear_locations_data_pref_title),
+          summary = stringResource(R.string.clear_locations_data_summary)
         )
       }
     }
