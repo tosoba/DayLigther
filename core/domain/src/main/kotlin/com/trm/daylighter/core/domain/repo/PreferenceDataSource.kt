@@ -4,4 +4,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface PreferenceDataSource {
   fun isGeocodingEmailPreferenceSetFlow(): Flow<Boolean>
+
+  suspend fun clearGeocodingEmailPreference()
 }

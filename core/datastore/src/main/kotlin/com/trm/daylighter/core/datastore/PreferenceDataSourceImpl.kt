@@ -1,6 +1,7 @@
 package com.trm.daylighter.core.datastore
 
 import android.content.Context
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.trm.daylighter.core.domain.repo.PreferenceDataSource
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,4 +18,10 @@ constructor(
     context.preferencesDataStore.data.map { preferences ->
       !preferences[stringPreferencesKey(PreferencesDataStoreKeys.GEOCODING_EMAIL)].isNullOrBlank()
     }
+
+  override suspend fun clearGeocodingEmailPreference() {
+    context.preferencesDataStore.edit { preferences ->
+      preferences.remove(stringPreferencesKey(PreferencesDataStoreKeys.GEOCODING_EMAIL))
+    }
+  }
 }

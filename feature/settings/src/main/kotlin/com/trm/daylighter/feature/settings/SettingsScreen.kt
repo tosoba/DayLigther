@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.settings
 
 import android.util.Patterns
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,6 +40,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
+import com.jamal.composeprefs3.ui.PrefsScope
 import com.jamal.composeprefs3.ui.PrefsScreen
 import com.jamal.composeprefs3.ui.prefs.*
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
@@ -51,17 +53,27 @@ const val settingsRoute = "settings_route"
 
 @Composable
 fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
+  val context = LocalContext.current
   val isGeocodeEmailPreferenceSet =
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
+
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
+    onDisableGeocodingClick = {
+      viewModel.clearGeocodingEmail()
+      Toast.makeText(context, "Geocoding is disabled.", Toast.LENGTH_SHORT).show()
+    },
     modifier = modifier
   )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun SettingsScreen(isGeocodeEmailPreferenceSet: Boolean, modifier: Modifier = Modifier) {
+private fun SettingsScreen(
+  isGeocodeEmailPreferenceSet: Boolean,
+  onDisableGeocodingClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
   PrefsScreen(dataStore = LocalContext.current.preferencesDataStore, modifier = modifier) {
     prefsGroup({
       GroupHeader(
@@ -89,12 +101,7 @@ private fun SettingsScreen(isGeocodeEmailPreferenceSet: Boolean, modifier: Modif
       }
 
       if (isGeocodeEmailPreferenceSet) {
-        prefsItem {
-          TextPref(
-            title = stringResource(R.string.disable_geocoding_email_pref_title),
-            summary = stringResource(R.string.disable_geocoding_email_pref_summary)
-          )
-        }
+        disableGeocodingPreferenceItem(onClick = onDisableGeocodingClick)
       }
     }
 
@@ -111,6 +118,17 @@ private fun SettingsScreen(isGeocodeEmailPreferenceSet: Boolean, modifier: Modif
         )
       }
     }
+  }
+}
+
+private fun PrefsScope.disableGeocodingPreferenceItem(onClick: () -> Unit) {
+  prefsItem {
+    TextPref(
+      title = stringResource(R.string.disable_geocoding_email_pref_title),
+      summary = stringResource(R.string.disable_geocoding_email_pref_summary),
+      enabled = true,
+      onClick = onClick
+    )
   }
 }
 
@@ -136,7 +154,7 @@ private fun EditTextPref(
 
   val datastore = LocalPrefsDataStore.current
   val prefKey = stringPreferencesKey(key)
-  val prefs by remember(datastore::data).collectAsState(initial = null)
+  val prefs by remember { datastore.data }.collectAsState(initial = null)
 
   var prefValue by remember { mutableStateOf(defaultValue) }
   var textValue by rememberSaveable { mutableStateOf(prefValue) }
