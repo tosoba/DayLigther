@@ -56,12 +56,13 @@ fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = 
   val context = LocalContext.current
   val isGeocodeEmailPreferenceSet =
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
+  val geocodingDisabledMessage = stringResource(R.string.geocoding_is_disabled)
 
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
     onDisableGeocodingClick = {
       viewModel.clearGeocodingEmail()
-      Toast.makeText(context, "Geocoding is disabled.", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, geocodingDisabledMessage, Toast.LENGTH_SHORT).show()
     },
     modifier = modifier
   )
