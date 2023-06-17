@@ -5,8 +5,9 @@ import androidx.datastore.core.Serializer
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
@@ -14,20 +15,21 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
 
   override val defaultValue = LocationWidgetState.DefaultLocation(UUID.randomUUID().toString())
 
+  @Serializable
+  private data class LocationWidgetStateSurrogate(val locationId: Long, val uuid: String)
+
   override suspend fun readFrom(input: InputStream): LocationWidgetState =
     try {
-      val locationId =
+      val surrogate =
         Json.decodeFromString(
-          deserializer = Long.serializer(),
+          deserializer = LocationWidgetStateSurrogate.serializer(),
           string = input.readBytes().decodeToString()
         )
-      val uuid =
-        Json.decodeFromString(
-          deserializer = String.serializer(),
-          string = input.readBytes().decodeToString()
-        )
-      if (locationId != DEFAULT_LOCATION_ID) LocationWidgetState.ChosenLocation(locationId, uuid)
-      else LocationWidgetState.DefaultLocation(uuid)
+      if (surrogate.locationId != DEFAULT_LOCATION_ID) {
+        LocationWidgetState.ChosenLocation(locationId = surrogate.locationId, uuid = surrogate.uuid)
+      } else {
+        LocationWidgetState.DefaultLocation(uuid = surrogate.uuid)
+      }
     } catch (exception: SerializationException) {
       throw CorruptionException("Could not read location widget state : ${exception.message}")
     }
@@ -36,17 +38,16 @@ object LocationWidgetStateSerializer : Serializer<LocationWidgetState> {
     output.use {
       it.write(
         Json.encodeToString(
-            serializer = Long.serializer(),
-            value =
-              when (t) {
-                is LocationWidgetState.DefaultLocation -> DEFAULT_LOCATION_ID
-                is LocationWidgetState.ChosenLocation -> t.locationId
-              }
+            LocationWidgetStateSurrogate(
+              locationId =
+                when (t) {
+                  is LocationWidgetState.DefaultLocation -> DEFAULT_LOCATION_ID
+                  is LocationWidgetState.ChosenLocation -> t.locationId
+                },
+              uuid = t.uuid
+            )
           )
           .encodeToByteArray()
-      )
-      it.write(
-        Json.encodeToString(serializer = String.serializer(), value = t.uuid).encodeToByteArray()
       )
     }
   }

@@ -1,10 +1,14 @@
 package com.trm.daylighter.widget.location
 
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
 sealed interface LocationWidgetState {
   val uuid: String
-  data class DefaultLocation(override val uuid: String) : LocationWidgetState
+
+  @Serializable data class DefaultLocation(override val uuid: String) : LocationWidgetState
+
+  @Serializable
   data class ChosenLocation(val locationId: Long, override val uuid: String) : LocationWidgetState
 
   fun copyWithNewUuid(): LocationWidgetState =
