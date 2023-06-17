@@ -34,7 +34,7 @@ import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.settings.SettingsScreen
+import com.trm.daylighter.feature.settings.SettingsRoute
 import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.newWidgetRoute
@@ -238,7 +238,7 @@ private fun DaylighterNavHost(
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
-    composable(settingsRoute) { SettingsScreen(modifier = Modifier.fillMaxSize()) }
+    composable(settingsRoute) { SettingsRoute(modifier = Modifier.fillMaxSize()) }
 
     composable(
       route = locationRoute,

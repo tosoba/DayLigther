@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScreen
@@ -48,9 +49,19 @@ import timber.log.Timber
 
 const val settingsRoute = "settings_route"
 
+@Composable
+fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
+  val isGeocodeEmailPreferenceSet =
+    viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
+  SettingsScreen(
+    isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
+    modifier = modifier
+  )
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+private fun SettingsScreen(isGeocodeEmailPreferenceSet: Boolean, modifier: Modifier = Modifier) {
   PrefsScreen(dataStore = LocalContext.current.preferencesDataStore, modifier = modifier) {
     prefsGroup({
       GroupHeader(
@@ -75,6 +86,15 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             }
           },
         )
+      }
+
+      if (isGeocodeEmailPreferenceSet) {
+        prefsItem {
+          TextPref(
+            title = stringResource(R.string.disable_geocoding_email_pref_title),
+            summary = stringResource(R.string.disable_geocoding_email_pref_summary)
+          )
+        }
       }
     }
 
