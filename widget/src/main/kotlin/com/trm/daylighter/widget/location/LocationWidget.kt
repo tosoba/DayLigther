@@ -41,13 +41,11 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.formatTimeMillis
-import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
@@ -81,6 +79,7 @@ import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import com.trm.daylighter.core.common.R as commonR
 
 class LocationWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -157,7 +156,6 @@ class LocationWidget(
           ) {
             LocationName(location = change.location)
             Clock(zoneId = change.location.zoneId)
-            NowTimezoneDiffText(dateTime = ZonedDateTime.now(change.location.zoneId))
             DayLengthInfo(change = change)
           }
         }
@@ -341,25 +339,6 @@ private fun Clock(zoneId: ZoneId) {
             setString(R.id.location_clock, "setTimeZone", zoneId.id)
             setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
           }
-    )
-  }
-}
-
-@Composable
-private fun NowTimezoneDiffText(dateTime: ZonedDateTime) {
-  val context = LocalContext.current
-  Box {
-    AndroidRemoteViews(
-      remoteViews =
-        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-          setCharSequence(
-            R.id.shadow_text_view,
-            "setText",
-            context.timeZoneDiffLabelBetween(ZonedDateTime.now(), dateTime)
-          )
-          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
-        }
     )
   }
 }
