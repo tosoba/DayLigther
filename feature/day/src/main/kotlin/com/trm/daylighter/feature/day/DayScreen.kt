@@ -47,6 +47,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -651,7 +652,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
         onZoneIdOrDayPeriodUpdate()
       }
     },
@@ -678,40 +679,35 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
 
 @Composable
 private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
-  ) {
-    val (location, today, yesterday) = change
-
-    val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
-    val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
-    val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
-    val diffPrefix =
-      dayLengthDiffPrefix(
-        todayLengthSeconds = todayLengthSeconds,
-        yesterdayLengthSeconds = yesterdayLengthSeconds
-      )
-    Text(
-      text = stringResource(id = R.string.day_length_label),
-      color = dayPeriod.textColor(),
-      style =
-        MaterialTheme.typography.bodyLarge.copy(
-          shadow =
-            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
-        )
+  Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+    Icon(
+      painter = painterResource(id = commonR.drawable.day_length),
+      contentDescription = stringResource(R.string.day_length)
     )
-    Row {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center
+    ) {
+      val (location, today, yesterday) = change
+      val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
+      val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
+      val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
+      val diffPrefix =
+        dayLengthDiffPrefix(
+          todayLengthSeconds = todayLengthSeconds,
+          yesterdayLengthSeconds = yesterdayLengthSeconds
+        )
+
       Text(
         text = formatTimeMillis(todayLengthSeconds * 1_000L),
         color = dayPeriod.textColor(),
         style =
-          MaterialTheme.typography.bodyMedium.copy(
+          MaterialTheme.typography.bodyLarge.copy(
+            fontSize = 20.sp,
             shadow =
               Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
-      Text(text = " ")
       Text(
         text = formatTimeDifference(diffPrefix, dayLengthDiffTime),
         color =
@@ -721,7 +717,8 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
             else -> light_onDayColor
           },
         style =
-          MaterialTheme.typography.bodyMedium.copy(
+          MaterialTheme.typography.bodyLarge.copy(
+            fontSize = 20.sp,
             shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )

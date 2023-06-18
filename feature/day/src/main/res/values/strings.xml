@@ -23,6 +23,6 @@
     <string name="horizon">Horizon</string>
     <string name="edit_location">Edit location</string>
     <string name="error_occurred">Error occurred.</string>
-    <string name="day_length_label">Day length:</string>
+    <string name="day_length">Day length</string>
     <string name="until">until</string>
 </resources>
