@@ -681,7 +681,13 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
 private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
     Icon(
-      painter = painterResource(id = commonR.drawable.day_length),
+      painter =
+        painterResource(
+          id =
+            if (dayPeriod == DayPeriod.DAY) commonR.drawable.day_length_black
+            else commonR.drawable.day_length_white
+        ),
+      tint = Color.Unspecified,
       contentDescription = stringResource(R.string.day_length)
     )
     Column(
