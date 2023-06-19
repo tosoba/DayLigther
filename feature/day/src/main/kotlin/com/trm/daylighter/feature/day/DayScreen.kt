@@ -652,7 +652,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
         onZoneIdOrDayPeriodUpdate()
       }
     },
@@ -690,10 +690,8 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
       tint = Color.Unspecified,
       contentDescription = stringResource(R.string.day_length)
     )
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center
-    ) {
+    Spacer(modifier = Modifier.width(5.dp))
+    Column {
       val (location, today, yesterday) = change
       val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
       val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
@@ -709,7 +707,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
         color = dayPeriod.textColor(),
         style =
           MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             shadow =
               Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
           )
@@ -724,7 +722,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
           },
         style =
           MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             shadow = Shadow(color = Color.Black, offset = Offset(1f, 1f), blurRadius = 1f)
           )
       )
