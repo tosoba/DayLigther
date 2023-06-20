@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.drawable.Icon
 import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
@@ -15,11 +16,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.AndroidResourceImageProvider
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.IconImageProvider
 import androidx.glance.Image
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
@@ -39,8 +40,7 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
@@ -79,7 +79,6 @@ import com.trm.daylighter.widget.util.ext.antiAliasPaint
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import com.trm.daylighter.core.common.R as commonR
 
 class LocationWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -357,44 +356,53 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
       yesterdayLengthSeconds = yesterdayLengthSeconds
     )
 
-  Row {
-    AndroidRemoteViews(
-      remoteViews =
-        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-          setTextViewText(
-            R.id.shadow_text_view,
-            context.getString(R.string.day_length, formatTimeMillis(todayLengthSeconds * 1_000L)),
-          )
-          setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
-        }
+  Row(
+    horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+    verticalAlignment = Alignment.Vertical.CenterVertically
+  ) {
+    Image(
+      provider =
+        IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
+      contentDescription = stringResource(id = R.string.day_length)
     )
 
-    Text(text = " ", style = TextStyle(fontSize = 14.sp))
+    Column(
+      verticalAlignment = Alignment.Vertical.CenterVertically,
+      horizontalAlignment = Alignment.Horizontal.Start
+    ) {
+      AndroidRemoteViews(
+        remoteViews =
+          RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+            setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
+            setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+          }
+      )
 
-    AndroidRemoteViews(
-      remoteViews =
-        RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-          setTextViewText(
-            R.id.shadow_text_view,
-            context.getString(
-              R.string.diff,
-              diffPrefix,
-              dayLengthDiffTime.minute,
-              dayLengthDiffTime.second
-            ),
-          )
-          setInt(
-            R.id.shadow_text_view,
-            "setTextColor",
-            when (diffPrefix) {
-              "+" -> Color.Green
-              "-" -> Color.Red
-              else -> light_onDayColor
-            }.toArgb()
-          )
-          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
-        }
-    )
+      AndroidRemoteViews(
+        remoteViews =
+          RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+            setTextViewText(
+              R.id.shadow_text_view,
+              context.getString(
+                R.string.diff,
+                diffPrefix,
+                dayLengthDiffTime.minute,
+                dayLengthDiffTime.second
+              ),
+            )
+            setInt(
+              R.id.shadow_text_view,
+              "setTextColor",
+              when (diffPrefix) {
+                "+" -> Color.Green
+                "-" -> Color.Red
+                else -> light_onDayColor
+              }.toArgb()
+            )
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+          }
+      )
+    }
   }
 }
