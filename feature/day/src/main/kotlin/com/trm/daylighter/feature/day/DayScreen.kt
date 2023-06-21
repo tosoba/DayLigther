@@ -652,7 +652,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
           .takeIfInstance<Typeface>()
           ?.let(this::setTypeface)
         textAlignment = View.TEXT_ALIGNMENT_CENTER
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
         onZoneIdOrDayPeriodUpdate()
       }
     },
