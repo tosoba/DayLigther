@@ -360,11 +360,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
     horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
     verticalAlignment = Alignment.Vertical.CenterVertically
   ) {
-    Image(
-      provider =
-        IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
-      contentDescription = stringResource(id = R.string.day_length)
-    )
+    DayLengthIcon()
 
     Column(
       verticalAlignment = Alignment.Vertical.CenterVertically,
@@ -404,5 +400,24 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
           }
       )
     }
+  }
+}
+
+@Composable
+private fun DayLengthIcon() {
+  val context = LocalContext.current
+  Box {
+    Image(
+      provider =
+        IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_shadow)),
+      contentDescription = stringResource(id = R.string.day_length),
+      modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp)
+    )
+
+    Image(
+      provider =
+        IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
+      contentDescription = stringResource(id = R.string.day_length)
+    )
   }
 }
