@@ -680,16 +680,7 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
 @Composable
 private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-    Icon(
-      painter =
-        painterResource(
-          id =
-            if (dayPeriod == DayPeriod.DAY) commonR.drawable.day_length_black
-            else commonR.drawable.day_length_white
-        ),
-      tint = Color.Unspecified,
-      contentDescription = stringResource(R.string.day_length)
-    )
+    DayLengthIcon(dayPeriod = dayPeriod)
     Spacer(modifier = Modifier.width(5.dp))
     Column {
       val (location, today, yesterday) = change
@@ -727,6 +718,29 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
           )
       )
     }
+  }
+}
+
+@Composable
+private fun DayLengthIcon(dayPeriod: DayPeriod) {
+  Box {
+    Icon(
+      painter = painterResource(id = commonR.drawable.day_length_shadow),
+      tint = Color.Unspecified,
+      contentDescription = null,
+      modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+    )
+
+    Icon(
+      painter =
+        painterResource(
+          id =
+            if (dayPeriod == DayPeriod.DAY) commonR.drawable.day_length_black
+            else commonR.drawable.day_length_white
+        ),
+      tint = Color.Unspecified,
+      contentDescription = stringResource(R.string.day_length)
+    )
   }
 }
 
