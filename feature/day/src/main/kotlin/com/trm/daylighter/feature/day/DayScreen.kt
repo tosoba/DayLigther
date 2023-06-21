@@ -292,7 +292,10 @@ private fun DayScreen(
             end.linkTo(parent.end, 16.dp)
           },
       ) {
-        ClockAndDayLengthCard(change = currentChange)
+        ClockAndDayLengthCard(
+          change = currentChange,
+          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
+        )
       }
 
       NavigationBar(
@@ -373,7 +376,10 @@ private fun DayScreen(
             end.linkTo(parent.end, 16.dp)
           },
       ) {
-        ClockAndDayLengthCard(change = currentChange)
+        ClockAndDayLengthCard(
+          change = currentChange,
+          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
+        )
       }
     }
   }
@@ -460,6 +466,7 @@ private fun ClockAndDayLengthCard(
           NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           Spacer(modifier = Modifier.height(5.dp))
           DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
+          Spacer(modifier = Modifier.height(5.dp))
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
             dayMode = currentDayMode(location.zoneId),
@@ -484,6 +491,7 @@ private fun ClockAndDayLengthCard(
             Spacer(modifier = Modifier.width(5.dp))
             DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
           }
+          Spacer(modifier = Modifier.height(5.dp))
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
             dayMode = currentDayMode(location.zoneId),
@@ -506,14 +514,12 @@ private fun NextDayPeriodTimer(
   zoneId: ZoneId
 ) {
   val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
-  val until = stringResource(id = R.string.until)
-  val separator =
-    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " "
+  val to = stringResource(id = R.string.to)
 
   AnimatedVisibility(visible = nextPeriod != null, enter = fadeIn(), exit = fadeOut()) {
     var timerText by rememberSaveable {
       mutableStateOf(
-        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $until$separator${nextPeriod?.label ?: ""}"
+        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $to ${nextPeriod?.label ?: ""}"
       )
     }
 
@@ -522,7 +528,7 @@ private fun NextDayPeriodTimer(
         flow {
             delay(System.currentTimeMillis() % 1_000L)
             while (currentCoroutineContext().isActive) {
-              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $until$separator${nextPeriod.label}")
+              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $to ${nextPeriod.label}")
               delay(1_000L)
             }
           }
@@ -533,13 +539,14 @@ private fun NextDayPeriodTimer(
     Text(
       text = timerText,
       style =
-        MaterialTheme.typography.bodyLarge.copy(
+        MaterialTheme.typography.bodySmall.copy(
           color = dayPeriod.textColor(),
           shadow =
-            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+          fontSize = 14.sp,
         ),
       textAlign = TextAlign.Center,
-      maxLines = 2,
+      maxLines = 3,
       overflow = TextOverflow.Ellipsis
     )
   }
