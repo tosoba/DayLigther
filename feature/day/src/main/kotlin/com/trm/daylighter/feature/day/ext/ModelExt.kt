@@ -2,6 +2,7 @@ package com.trm.daylighter.feature.day.ext
 
 import androidx.compose.ui.graphics.Color
 import com.trm.daylighter.core.common.util.ext.isBeforeOtherNotNull
+import com.trm.daylighter.core.common.util.ext.isBeforeOtherOrOtherIsNull
 import com.trm.daylighter.core.common.util.ext.isEqualOrAfterOtherNotNull
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.SunriseSunset
@@ -74,9 +75,9 @@ private fun LocalDateTime.isInPeriod(
   beginEvening: LocalDateTime?,
   endEvening: LocalDateTime?
 ): Boolean =
-  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherNotNull(endMorning)) ||
+  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherOrOtherIsNull(endMorning)) ||
     (beginMorning == null && isBeforeOtherNotNull(endMorning)) ||
-    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherNotNull(endEvening)) ||
+    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherOrOtherIsNull(endEvening)) ||
     (beginEvening == null && isBeforeOtherNotNull(endEvening))
 
 internal fun DayPeriod.color(): Color =

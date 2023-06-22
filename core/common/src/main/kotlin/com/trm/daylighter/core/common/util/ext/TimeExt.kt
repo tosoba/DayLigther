@@ -15,6 +15,9 @@ fun LocalDateTime.isEqualOrAfterOtherNotNull(other: LocalDateTime?): Boolean =
 fun LocalDateTime.isBeforeOtherNotNull(other: LocalDateTime?): Boolean =
   other != null && isBefore(other)
 
+fun LocalDateTime.isBeforeOtherOrOtherIsNull(other: LocalDateTime?): Boolean =
+  other == null || isBefore(other)
+
 val LocalDateTime.isoLocalTimeLabel24H: String
   get() = format(DateTimeFormatter.ISO_TIME)
 
