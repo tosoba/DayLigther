@@ -40,6 +40,7 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentSize
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
@@ -364,9 +365,10 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
 
     Column(
       verticalAlignment = Alignment.Vertical.CenterVertically,
-      horizontalAlignment = Alignment.Horizontal.Start
+      horizontalAlignment = Alignment.Horizontal.End
     ) {
       AndroidRemoteViews(
+        modifier = GlanceModifier.wrapContentSize(),
         remoteViews =
           RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
             setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
@@ -376,6 +378,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange) {
       )
 
       AndroidRemoteViews(
+        modifier = GlanceModifier.wrapContentSize(),
         remoteViews =
           RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
             setTextViewText(
