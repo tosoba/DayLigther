@@ -514,9 +514,15 @@ private fun NextDayPeriodTimer(
   zoneId: ZoneId
 ) {
   val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
+  val timerPositive =
+    remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
   val to = stringResource(id = R.string.to)
 
-  AnimatedVisibility(visible = nextPeriod != null, enter = fadeIn(), exit = fadeOut()) {
+  AnimatedVisibility(
+    visible = nextPeriod != null && timerPositive,
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
     var timerText by rememberSaveable {
       mutableStateOf(
         "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $to ${nextPeriod?.label ?: ""}"
@@ -621,7 +627,10 @@ private fun rememberNextDayPeriod(
 }
 
 private fun LocalTime.formatTimeUntilNow(zoneId: ZoneId) =
-  formatTimeMillis(millis = (toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()) * 1_000L)
+  formatTimeMillis(millis = secondsUntilNow(zoneId) * 1_000L)
+
+private fun LocalTime.secondsUntilNow(zoneId: ZoneId) =
+  toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()
 
 private fun dayPeriodFlow(change: Loadable<LocationSunriseSunsetChange>): Flow<DayPeriod> = flow {
   while (currentCoroutineContext().isActive) {
