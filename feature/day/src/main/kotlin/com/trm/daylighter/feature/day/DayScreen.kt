@@ -689,7 +689,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
     DayLengthIcon(dayPeriod = dayPeriod)
     Spacer(modifier = Modifier.width(5.dp))
-    Column {
+    Column(horizontalAlignment = Alignment.End) {
       val (location, today, yesterday) = change
       val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
       val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
