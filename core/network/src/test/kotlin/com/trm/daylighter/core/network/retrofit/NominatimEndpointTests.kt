@@ -12,7 +12,7 @@ class NominatimEndpointTests {
   @Test
   fun getAddress() = runTest {
     println(
-      endpoint.getAddress(lat = WARSAW_LAT, lon = WARSAW_LNG, email = "therealmerengue@gmail.com")
+      endpoint.getAddress(lat = WARSAW_LAT, lon = WARSAW_LNG, email = "trmhorizon@gmail.com")
     )
   }
 

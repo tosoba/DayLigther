@@ -6,4 +6,6 @@ interface PreferenceDataSource {
   fun isGeocodingEmailPreferenceSetFlow(): Flow<Boolean>
 
   suspend fun clearGeocodingEmailPreference()
+
+  suspend fun getGeocodingEmail(): String?
 }
