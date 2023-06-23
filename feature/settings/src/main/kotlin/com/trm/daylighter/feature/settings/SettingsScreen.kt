@@ -140,6 +140,7 @@ private fun EditTextPref(
   title: String,
   modifier: Modifier = Modifier,
   summary: String? = null,
+  autoShowDialog: Boolean = false,
   dialogTitle: String? = null,
   dialogMessage: String? = null,
   defaultValue: String = "",
@@ -173,7 +174,7 @@ private fun EditTextPref(
     }
   }
 
-  var showDialog by rememberSaveable { mutableStateOf(false) }
+  var showDialog by rememberSaveable { mutableStateOf(autoShowDialog) }
   var dialogSize by remember { mutableStateOf(Size.Zero) }
 
   TextPref(
