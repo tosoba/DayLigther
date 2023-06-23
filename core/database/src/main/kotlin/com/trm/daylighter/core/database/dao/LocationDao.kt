@@ -73,7 +73,7 @@ interface LocationDao {
 
   @Query(
     "SELECT position " +
-      "FROM (SELECT id, (SELECT COUNT(*) FROM location WHERE updated_at > l.updated_at) + 1 AS position " +
+      "FROM (SELECT id, (SELECT COUNT(*) FROM location WHERE updated_at > l.updated_at AND is_default = FALSE) + 1 AS position " +
       "FROM location l WHERE is_default = FALSE ORDER BY updated_at DESC) WHERE id = :id"
   )
   fun selectNonDefaultLocationIndexById(id: Long): Int?
