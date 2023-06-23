@@ -12,5 +12,5 @@ dependencies {
   implementation(libs.androidx.dataStore.preferences)
   implementation(libs.timber)
 
-  implementation("com.github.JamalMulla:ComposePrefs3:1.0.3")
+  implementation(libs.compose.prefs)
 }

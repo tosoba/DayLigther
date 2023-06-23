@@ -30,6 +30,7 @@ androidxWindowManager = "1.0.0"
 androidxWork = "2.7.1"
 coil = "2.2.2"
 commonsCodec = "1.15"
+composePrefs = "1.0.3"
 glance = "1.0.0-beta01"
 guavaConflict = "9999.0-empty-to-avoid-conflict-with-guava"
 hilt = "2.44.2"
@@ -109,6 +110,7 @@ coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 commons-codec = { group = "commons-codec", name = "commons-codec", version.ref = "commonsCodec" }
+compose-prefs = { group = "com.github.JamalMulla", name = "ComposePrefs3", version.ref = "composePrefs" }
 dagger-dagger = { group = "com.google.dagger", name = "dagger", version.ref = "hilt" }
 dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "hilt" }
 glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
