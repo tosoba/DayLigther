@@ -490,15 +490,11 @@ private fun ModalSheetContent(
       )
     }
 
-    Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-      OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
-        Text(text = geocodeButtonText)
-      }
-      Spacer(modifier = Modifier.width(10.dp))
-      OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
-        Text(text = stringResource(R.string.save))
-      }
-    }
+    ModalSheetButtons(
+      geocodeButtonText = geocodeButtonText,
+      onGeocodeClick = onGeocodeClick,
+      onSaveClick = onSaveClick
+    )
 
     Spacer(
       modifier =
@@ -509,6 +505,24 @@ private fun ModalSheetContent(
   }
 
   ToastMessageEffect(message = nameFailureMessage)
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ModalSheetButtons(
+  geocodeButtonText: String,
+  onGeocodeClick: () -> Unit,
+  onSaveClick: () -> Unit
+) {
+  Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+    OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
+      Text(text = geocodeButtonText, maxLines = 1, modifier = Modifier.basicMarquee())
+    }
+    Spacer(modifier = Modifier.width(5.dp))
+    OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
+      Text(text = stringResource(R.string.save), maxLines = 1, modifier = Modifier.basicMarquee())
+    }
+  }
 }
 
 @Composable
