@@ -38,6 +38,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScope
@@ -49,10 +55,43 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+private const val settingsAutoShowEmailDialogParam = "auto_show_email_dialog"
 const val settingsRoute = "settings_route"
+const val settingsAutoShowEmailDialogRoute =
+  "$settingsRoute?$settingsAutoShowEmailDialogParam={$settingsAutoShowEmailDialogParam}"
+
+fun NavController.navigateToSettings(autoShowEmailDialog: Boolean) {
+  navigate(
+    route = "$settingsRoute?$settingsAutoShowEmailDialogParam=$autoShowEmailDialog",
+    navOptions = navOptions { launchSingleTop = true }
+  )
+}
+
+fun NavGraphBuilder.settingsComposable(modifier: Modifier = Modifier) {
+  composable(
+    route = settingsAutoShowEmailDialogRoute,
+    arguments =
+      listOf(
+        navArgument(settingsAutoShowEmailDialogParam) {
+          type = NavType.StringType
+          nullable = true
+        }
+      )
+  ) {
+    SettingsRoute(
+      autoShowEmailDialog = it.arguments?.getString(settingsAutoShowEmailDialogParam)?.toBoolean()
+          ?: false,
+      modifier = modifier
+    )
+  }
+}
 
 @Composable
-fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
+private fun SettingsRoute(
+  modifier: Modifier = Modifier,
+  autoShowEmailDialog: Boolean = false,
+  viewModel: SettingsViewModel = hiltViewModel()
+) {
   val context = LocalContext.current
   val isGeocodeEmailPreferenceSet =
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
@@ -60,6 +99,7 @@ fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = 
 
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
+    autoShowEmailDialog = autoShowEmailDialog,
     onDisableGeocodingClick = {
       viewModel.clearGeocodingEmail()
       Toast.makeText(context, geocodingDisabledMessage, Toast.LENGTH_SHORT).show()
@@ -72,6 +112,7 @@ fun SettingsRoute(modifier: Modifier = Modifier, viewModel: SettingsViewModel = 
 @Composable
 private fun SettingsScreen(
   isGeocodeEmailPreferenceSet: Boolean,
+  autoShowEmailDialog: Boolean,
   onDisableGeocodingClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -89,6 +130,7 @@ private fun SettingsScreen(
           key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
           title = stringResource(R.string.geocoding_email_pref_title),
           summary = stringResource(R.string.geocoding_email_pref_summary),
+          autoShowDialog = autoShowEmailDialog,
           dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
           dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
           validateValue = {

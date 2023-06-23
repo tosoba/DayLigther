@@ -34,7 +34,9 @@ import com.trm.daylighter.feature.day.dayRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.settings.SettingsRoute
+import com.trm.daylighter.feature.settings.navigateToSettings
+import com.trm.daylighter.feature.settings.settingsAutoShowEmailDialogRoute
+import com.trm.daylighter.feature.settings.settingsComposable
 import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.newWidgetRoute
@@ -85,7 +87,8 @@ fun DaylighterMainContent() {
                       aboutRoute -> R.string.about_item
                       locationsRoute -> R.string.locations_item
                       newWidgetRoute -> R.string.choose_widget_location
-                      settingsRoute -> R.string.settings_item
+                      settingsRoute,
+                      settingsAutoShowEmailDialogRoute -> R.string.settings_item
                       else -> R.string.empty
                     }
                 )
@@ -214,11 +217,8 @@ private fun DaylighterNavHost(
     )
   }
 
-  fun navigateToSettings() {
-    navController.navigate(
-      route = settingsRoute,
-      navOptions = navOptions { launchSingleTop = true }
-    )
+  fun navigateToSettingsAndShowEmailDialog() {
+    navController.navigateToSettings(autoShowEmailDialog = true)
   }
 
   val context = LocalContext.current
@@ -238,7 +238,7 @@ private fun DaylighterNavHost(
 
     composable(aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
 
-    composable(settingsRoute) { SettingsRoute(modifier = Modifier.fillMaxSize()) }
+    settingsComposable(modifier = Modifier.fillMaxSize())
 
     composable(
       route = locationRoute,
@@ -247,7 +247,7 @@ private fun DaylighterNavHost(
       LocationRoute(
         modifier = Modifier.fillMaxSize(),
         onBackClick = navController::popBackStack,
-        onEnableGeocodingClick = ::navigateToSettings
+        onEnableGeocodingClick = ::navigateToSettingsAndShowEmailDialog
       )
     }
 
@@ -258,7 +258,7 @@ private fun DaylighterNavHost(
       LocationRoute(
         modifier = Modifier.fillMaxSize(),
         onBackClick = navController::popBackStack,
-        onEnableGeocodingClick = ::navigateToSettings
+        onEnableGeocodingClick = ::navigateToSettingsAndShowEmailDialog
       )
     }
 
