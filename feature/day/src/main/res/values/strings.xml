@@ -1,24 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sunrise">Sunrise</string>
-    <string name="sunset">Sunset</string>
-    <string name="day">Day</string>
-    <string name="civil_twilight">Civil twilight</string>
-    <string name="nautical_twilight">Nautical twilight</string>
-    <string name="astronomical_twilight">Astronomical twilight</string>
-    <string name="night">Night</string>
-    <string name="civil_dawn">Civil dawn</string>
-    <string name="civil_dusk">Civil dusk</string>
-    <string name="nautical_dawn">Nautical dawn</string>
-    <string name="nautical_dusk">Nautical dusk</string>
-    <string name="astronomical_dawn">Astronomical dawn</string>
-    <string name="astronomical_dusk">Astronomical dusk</string>
-    <string name="civil_dawn_degrees_below">Civil dawn %1$s 6º below</string>
-    <string name="civil_dusk_degrees_below">Civil dusk %1$s 6º below</string>
-    <string name="nautical_dawn_degrees_below">Nautical dawn %1$s 12º below</string>
-    <string name="nautical_dusk_degrees_below">Nautical dusk %1$s 12º below</string>
-    <string name="astronomical_dawn_degrees_below">Astronomical dawn %1$s 18º below</string>
-    <string name="astronomical_dusk_degrees_below">Astronomical dusk %1$s 18º below</string>
     <string name="application_menu">Application menu</string>
     <string name="horizon">Horizon</string>
     <string name="edit_location">Edit location</string>

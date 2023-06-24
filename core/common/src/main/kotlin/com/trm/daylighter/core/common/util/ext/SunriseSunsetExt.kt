@@ -1,26 +1,17 @@
-package com.trm.daylighter.feature.day.ext
+package com.trm.daylighter.core.common.util.ext
 
-import androidx.compose.ui.graphics.Color
-import com.trm.daylighter.core.common.util.ext.isBeforeOtherNotNull
-import com.trm.daylighter.core.common.util.ext.isBeforeOtherOrOtherIsNull
-import com.trm.daylighter.core.common.util.ext.isEqualOrAfterOtherNotNull
+import com.trm.daylighter.core.common.model.DayMode
+import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.util.ext.decemberSolstice
 import com.trm.daylighter.core.domain.util.ext.juneSolstice
-import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
-import com.trm.daylighter.core.ui.theme.civilTwilightColor
-import com.trm.daylighter.core.ui.theme.dayColor
-import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
-import com.trm.daylighter.core.ui.theme.nightColor
-import com.trm.daylighter.feature.day.model.DayMode
-import com.trm.daylighter.feature.day.model.DayPeriod
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
 
-internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
+fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
   return when {
     now.isBeforeOtherNotNull(astronomicalTwilightBegin) ||
@@ -69,32 +60,7 @@ internal fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   }
 }
 
-private fun LocalDateTime.isInPeriod(
-  beginMorning: LocalDateTime?,
-  endMorning: LocalDateTime?,
-  beginEvening: LocalDateTime?,
-  endEvening: LocalDateTime?
-): Boolean =
-  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherOrOtherIsNull(endMorning)) ||
-    (beginMorning == null && isBeforeOtherNotNull(endMorning)) ||
-    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherOrOtherIsNull(endEvening)) ||
-    (beginEvening == null && isBeforeOtherNotNull(endEvening))
-
-internal fun DayPeriod.color(): Color =
-  when (this) {
-    DayPeriod.NIGHT -> nightColor
-    DayPeriod.ASTRONOMICAL -> astronomicalTwilightColor
-    DayPeriod.NAUTICAL -> nauticalTwilightColor
-    DayPeriod.CIVIL -> civilTwilightColor
-    DayPeriod.DAY -> dayColor
-  }
-
-internal fun DayPeriod.textColor(): Color = if (this == DayPeriod.DAY) Color.Black else Color.White
-
-internal fun DayPeriod.textShadowColor(): Color =
-  if (this == DayPeriod.DAY) Color.White else Color.Black
-
-internal fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
   val nightStart = LocalTime.ofSecondOfDay(1L)
   val noon = LocalTime.NOON
   return when (dayPeriod) {
@@ -131,7 +97,7 @@ internal fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: Day
   }
 }
 
-internal fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
   val nightEnd = LocalTime.MAX
   val noon = LocalTime.NOON
   return when (dayPeriod) {
@@ -167,3 +133,14 @@ internal fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMo
     }
   }
 }
+
+private fun LocalDateTime.isInPeriod(
+  beginMorning: LocalDateTime?,
+  endMorning: LocalDateTime?,
+  beginEvening: LocalDateTime?,
+  endEvening: LocalDateTime?
+): Boolean =
+  (isEqualOrAfterOtherNotNull(beginMorning) && isBeforeOtherOrOtherIsNull(endMorning)) ||
+    (beginMorning == null && isBeforeOtherNotNull(endMorning)) ||
+    (isEqualOrAfterOtherNotNull(beginEvening) && isBeforeOtherOrOtherIsNull(endEvening)) ||
+    (beginEvening == null && isBeforeOtherNotNull(endEvening))

@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.common.model.MapDefaults
 
 @Composable
 internal fun rememberSaveLocationState(

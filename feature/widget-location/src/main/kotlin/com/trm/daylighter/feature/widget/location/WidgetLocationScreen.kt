@@ -45,7 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading

@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.trm.daylighter.core.common.util.setDefaultDisabledConfig
-import com.trm.daylighter.core.common.util.setPosition
+import com.trm.daylighter.core.common.util.ext.setDefaultDisabledConfig
+import com.trm.daylighter.core.common.util.ext.setPosition
 import org.osmdroid.views.MapView
 
 @Composable

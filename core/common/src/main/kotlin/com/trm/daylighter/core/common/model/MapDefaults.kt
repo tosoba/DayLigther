@@ -1,12 +1,7 @@
-package com.trm.daylighter.core.common.util
+package com.trm.daylighter.core.common.model
 
-import android.annotation.SuppressLint
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.tileprovider.tilesource.XYTileSource
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.TilesOverlay
 
 object MapDefaults {
   val tileSource: XYTileSource
@@ -39,21 +34,4 @@ object MapDefaults {
   const val LONGITUDE = 0.0
   const val ORIENTATION = 0f
   const val LABEL = ""
-}
-
-@SuppressLint("ClickableViewAccessibility")
-fun MapView.setDefaultDisabledConfig(darkMode: Boolean) {
-  setTileSource(MapDefaults.tileSource)
-  isTilesScaledToDpi = true
-  setMultiTouchControls(false)
-  zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-  isFlingEnabled = false
-  setOnTouchListener { _, _ -> true }
-  if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
-}
-
-fun MapView.setPosition(latitude: Double, longitude: Double, zoom: Double) {
-  controller.setZoom(zoom)
-  mapOrientation = MapDefaults.ORIENTATION
-  setExpectedCenter(GeoPoint(latitude, longitude))
 }

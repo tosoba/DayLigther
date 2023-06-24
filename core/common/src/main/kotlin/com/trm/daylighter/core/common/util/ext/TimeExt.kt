@@ -2,8 +2,10 @@ package com.trm.daylighter.core.common.util.ext
 
 import android.content.Context
 import com.trm.daylighter.core.common.R
+import com.trm.daylighter.core.common.model.DayMode
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -71,3 +73,12 @@ fun formatTimeMillis(millis: Long): String =
     TimeUnit.MILLISECONDS.toMinutes(millis) % 60,
     TimeUnit.MILLISECONDS.toSeconds(millis) % 60
   )
+
+fun ZoneId.currentDayMode(): DayMode =
+  if (LocalTime.now(this).isBefore(LocalTime.NOON)) DayMode.SUNRISE else DayMode.SUNSET
+
+fun LocalTime.formatTimeUntilNow(zoneId: ZoneId) =
+  formatTimeMillis(millis = secondsUntilNow(zoneId) * 1_000L)
+
+fun LocalTime.secondsUntilNow(zoneId: ZoneId) =
+  toSecondOfDay() - LocalTime.now(zoneId).toSecondOfDay()

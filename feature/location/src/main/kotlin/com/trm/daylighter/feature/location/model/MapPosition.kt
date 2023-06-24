@@ -2,7 +2,7 @@ package com.trm.daylighter.feature.location.model
 
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
-import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.common.model.MapDefaults
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

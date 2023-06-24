@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.MapDefaults
+import com.trm.daylighter.core.common.model.MapDefaults
 
 @Composable
 fun ZoomControlsRow(
