@@ -191,10 +191,10 @@ private fun DayScreen(
 
             DayPeriodChart(
               change = pageChange.value,
+              modifier = Modifier.fillMaxSize(),
               dayMode = dayMode,
               now = now.value,
-              appBarHeightPx = appBarHeightPx,
-              modifier = Modifier.fillMaxSize()
+              appBarHeightPx = appBarHeightPx
             )
           }
 
@@ -212,10 +212,8 @@ private fun DayScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(
               change = Empty.asStable(),
-              dayMode = dayMode,
-              now = LocalTime.now(),
-              appBarHeightPx = appBarHeightPx,
-              modifier = Modifier.fillMaxSize().alpha(.5f)
+              modifier = Modifier.fillMaxSize().alpha(.5f),
+              appBarHeightPx = appBarHeightPx
             )
 
             AnimatedVisibility(

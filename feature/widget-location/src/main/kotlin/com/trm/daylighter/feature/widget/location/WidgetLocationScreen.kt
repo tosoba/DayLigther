@@ -37,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +52,7 @@ import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DisabledMapView
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
@@ -58,6 +60,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
 import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.core.ui.model.asStable
 import kotlinx.coroutines.flow.collectLatest
 
 const val newWidgetRoute = "widget_location_route"
@@ -181,6 +184,8 @@ private fun WidgetLocationScreen(
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
       }
       else -> {
+        DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
+
         NoLocationsCard(
           modifier = Modifier.align(Alignment.Center).padding(20.dp),
           onAddLocationClick = onAddLocationClick

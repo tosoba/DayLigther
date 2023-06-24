@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -28,6 +29,7 @@ import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
+import com.trm.daylighter.core.ui.model.asStable
 import kotlinx.coroutines.launch
 
 const val locationsRoute = "locations_route"
@@ -131,6 +133,8 @@ private fun LocationsScreen(
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
       }
       else -> {
+        DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
+
         NoLocationsCard(
           modifier = Modifier.align(Alignment.Center).padding(20.dp),
           onAddLocationClick = onAddLocationClick

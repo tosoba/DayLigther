@@ -30,6 +30,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R
+import com.trm.daylighter.core.common.model.DayMode
+import com.trm.daylighter.core.common.model.DayPeriod
+import com.trm.daylighter.core.common.util.ext.currentPeriodIn
+import com.trm.daylighter.core.common.util.ext.dayPeriodEndTime
+import com.trm.daylighter.core.common.util.ext.dayPeriodStartTime
 import com.trm.daylighter.core.common.util.ext.radians
 import com.trm.daylighter.core.common.util.ext.timeDifferenceLabel
 import com.trm.daylighter.core.common.util.ext.timeLabel
@@ -40,11 +45,6 @@ import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.model.WithData
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
-import com.trm.daylighter.core.common.util.ext.currentPeriodIn
-import com.trm.daylighter.core.common.util.ext.dayPeriodEndTime
-import com.trm.daylighter.core.common.util.ext.dayPeriodStartTime
-import com.trm.daylighter.core.common.model.DayMode
-import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
@@ -61,10 +61,10 @@ import kotlin.math.sin
 @Composable
 fun DayPeriodChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
-  dayMode: DayMode,
-  now: LocalTime,
-  appBarHeightPx: Float,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  dayMode: DayMode = DayMode.SUNRISE,
+  now: LocalTime = LocalTime.now(),
+  appBarHeightPx: Float = 0f
 ) {
   val orientation = LocalConfiguration.current.orientation
 
