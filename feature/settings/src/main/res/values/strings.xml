@@ -3,6 +3,8 @@
     <string name="locations_pref_group_title">Locations</string>
     <string name="clear_locations_data_pref_title">Clear locations</string>
     <string name="clear_locations_data_summary">Clears all saved locations. Added home screen widgets must be removed manually.</string>
+    <string name="clear_locations_data_pref_dialog_title">Clear locations</string>
+    <string name="clear_locations_data_pref_dialog_message">This will delete all saved locations. Do you want to continue?</string>
     <string name="geocoding_pref_group_title">Geocoding</string>
     <string name="geocoding_email_pref_title">Email</string>
     <string name="geocoding_email_pref_summary">Email used for authorizing geocoding (retrieving location address) API requests.</string>

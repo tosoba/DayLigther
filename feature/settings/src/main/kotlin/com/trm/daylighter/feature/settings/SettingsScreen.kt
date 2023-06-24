@@ -26,14 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -113,7 +110,6 @@ private fun SettingsRoute(
   )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SettingsScreen(
   isGeocodeEmailPreferenceSet: Boolean,
@@ -129,25 +125,7 @@ private fun SettingsScreen(
         color = MaterialTheme.colorScheme.secondary
       )
     }) {
-      prefsItem {
-        val emailEmptyError = stringResource(id = R.string.email_empty_error)
-        val invalidEmailAddress = stringResource(id = R.string.invalid_email_error)
-        EditTextPref(
-          key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
-          title = stringResource(R.string.geocoding_email_pref_title),
-          summary = stringResource(R.string.geocoding_email_pref_summary),
-          autoShowDialog = autoShowEmailDialog,
-          dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
-          dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
-          validateValue = {
-            when {
-              it.isBlank() -> emailEmptyError
-              !Patterns.EMAIL_ADDRESS.matcher(it).matches() -> invalidEmailAddress
-              else -> null
-            }
-          },
-        )
-      }
+      editGeocodingEmailPreferenceItem(autoShowEmailDialog = autoShowEmailDialog)
 
       if (isGeocodeEmailPreferenceSet) {
         disableGeocodingPreferenceItem(onClick = onDisableGeocodingClick)
@@ -160,14 +138,77 @@ private fun SettingsScreen(
         color = MaterialTheme.colorScheme.secondary
       )
     }) {
-      prefsItem {
-        TextPref(
-          title = stringResource(R.string.clear_locations_data_pref_title),
-          summary = stringResource(R.string.clear_locations_data_summary),
-          enabled = true,
-          onClick = onClearLocationsClick
-        )
-      }
+      clearLocationsPreferenceItem(onClearLocationsClick = onClearLocationsClick)
+    }
+  }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+private fun PrefsScope.editGeocodingEmailPreferenceItem(autoShowEmailDialog: Boolean) {
+  prefsItem {
+    val emailEmptyError = stringResource(id = R.string.email_empty_error)
+    val invalidEmailAddress = stringResource(id = R.string.invalid_email_error)
+    EditTextPref(
+      key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
+      title = stringResource(R.string.geocoding_email_pref_title),
+      summary = stringResource(R.string.geocoding_email_pref_summary),
+      autoShowDialog = autoShowEmailDialog,
+      dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
+      dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
+      validateValue = {
+        when {
+          it.isBlank() -> emailEmptyError
+          !Patterns.EMAIL_ADDRESS.matcher(it).matches() -> invalidEmailAddress
+          else -> null
+        }
+      },
+    )
+  }
+}
+
+private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () -> Unit) {
+  prefsItem {
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+
+    TextPref(
+      title = stringResource(R.string.clear_locations_data_pref_title),
+      summary = stringResource(R.string.clear_locations_data_summary),
+      enabled = true,
+      onClick = { showDialog = true }
+    )
+
+    if (showDialog) {
+      AlertDialog(
+        onDismissRequest = { showDialog = false },
+        title = {
+          DialogHeader(
+            dialogTitle = stringResource(R.string.clear_locations_data_pref_title),
+            dialogMessage = stringResource(R.string.clear_locations_data_pref_dialog_message)
+          )
+        },
+        confirmButton = {
+          TextButton(
+            modifier = Modifier.padding(end = 16.dp),
+            onClick = {
+              onClearLocationsClick()
+              showDialog = false
+            }
+          ) {
+            Text(
+              text = stringResource(id = android.R.string.ok),
+              style = MaterialTheme.typography.bodyLarge
+            )
+          }
+        },
+        dismissButton = {
+          TextButton(modifier = Modifier.padding(end = 16.dp), onClick = { showDialog = false }) {
+            Text(
+              text = stringResource(id = android.R.string.cancel),
+              style = MaterialTheme.typography.bodyLarge
+            )
+          }
+        },
+      )
     }
   }
 }
@@ -225,7 +266,6 @@ private fun EditTextPref(
   }
 
   var showDialog by rememberSaveable { mutableStateOf(autoShowDialog) }
-  var dialogSize by remember { mutableStateOf(Size.Zero) }
 
   TextPref(
     title = title,
@@ -240,17 +280,17 @@ private fun EditTextPref(
     LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
 
     AlertDialog(
-      modifier = Modifier.fillMaxWidth(0.9f).onGloballyPositioned { dialogSize = it.size.toSize() },
+      modifier = Modifier.fillMaxWidth(0.9f),
       onDismissRequest = {
         textValueChanged = false
         textValue = prefValue
         showDialog = false
       },
-      title = { DialogHeader(dialogTitle, dialogMessage) },
+      title = { DialogHeader(dialogTitle = dialogTitle, dialogMessage = dialogMessage) },
       text = {
         OutlinedTextField(
           value = textValue,
-          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
           placeholder = { Text(text = stringResource(R.string.geocoding_email_value_placeholder)) },
           singleLine = true,
           isError = validationMsg != null,
