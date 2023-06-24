@@ -13,6 +13,7 @@ constructor(
 ) {
   suspend operator fun invoke(latitude: Double, longitude: Double, name: String) {
     locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
+    widgetManager.updateAllLocationWidgets()
   }
 
   suspend operator fun invoke(id: Long, latitude: Double, longitude: Double, name: String) {
