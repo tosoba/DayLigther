@@ -43,7 +43,7 @@ fun ZoomOutButton(mapZoom: Double, onClick: () -> Unit, modifier: Modifier = Mod
     SmallFloatingActionButton(onClick = onClick) {
       Icon(
         imageVector = Icons.Filled.ZoomOut,
-        contentDescription = stringResource(id = commonR.string.zoom_out)
+        contentDescription = stringResource(commonR.string.zoom_out)
       )
     }
   }
@@ -60,7 +60,7 @@ fun ZoomInButton(mapZoom: Double, onClick: () -> Unit, modifier: Modifier = Modi
     SmallFloatingActionButton(onClick = onClick) {
       Icon(
         imageVector = Icons.Filled.ZoomIn,
-        contentDescription = stringResource(id = commonR.string.zoom_in)
+        contentDescription = stringResource(commonR.string.zoom_in)
       )
     }
   }

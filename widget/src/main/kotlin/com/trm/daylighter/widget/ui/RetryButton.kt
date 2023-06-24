@@ -9,6 +9,6 @@ import com.trm.daylighter.core.common.R
 @Composable
 internal fun RetryButton(onClick: Action) {
   AppWidgetBox(contentAlignment = Alignment.Center) {
-    Button(text = stringResource(id = R.string.retry), onClick = onClick)
+    Button(text = stringResource(R.string.retry), onClick = onClick)
   }
 }

@@ -146,8 +146,8 @@ private fun SettingsScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 private fun PrefsScope.editGeocodingEmailPreferenceItem(autoShowEmailDialog: Boolean) {
   prefsItem {
-    val emailEmptyError = stringResource(id = R.string.email_empty_error)
-    val invalidEmailAddress = stringResource(id = R.string.invalid_email_error)
+    val emailEmptyError = stringResource(R.string.email_empty_error)
+    val invalidEmailAddress = stringResource(R.string.invalid_email_error)
     EditTextPref(
       key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
       title = stringResource(R.string.geocoding_email_pref_title),
@@ -195,7 +195,7 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
             }
           ) {
             Text(
-              text = stringResource(id = android.R.string.ok),
+              text = stringResource(android.R.string.ok),
               style = MaterialTheme.typography.bodyLarge
             )
           }
@@ -203,7 +203,7 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
         dismissButton = {
           TextButton(modifier = Modifier.padding(end = 16.dp), onClick = { showDialog = false }) {
             Text(
-              text = stringResource(id = android.R.string.cancel),
+              text = stringResource(android.R.string.cancel),
               style = MaterialTheme.typography.bodyLarge
             )
           }
@@ -325,7 +325,7 @@ private fun EditTextPref(
           }
         ) {
           Text(
-            text = stringResource(id = android.R.string.ok),
+            text = stringResource(android.R.string.ok),
             style = MaterialTheme.typography.bodyLarge
           )
         }
@@ -340,7 +340,7 @@ private fun EditTextPref(
           }
         ) {
           Text(
-            text = stringResource(id = android.R.string.cancel),
+            text = stringResource(android.R.string.cancel),
             style = MaterialTheme.typography.bodyLarge
           )
         }

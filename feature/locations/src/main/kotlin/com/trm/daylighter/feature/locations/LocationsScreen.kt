@@ -131,7 +131,7 @@ private fun LocationsScreen(
         ) {
           Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(id = R.string.add_a_location)
+            contentDescription = stringResource(R.string.add_a_location)
           )
         }
       }
@@ -162,12 +162,12 @@ private fun DeleteLocationConfirmationDialog(
       onDismissRequest = onDismissRequest,
       confirmButton = {
         TextButton(onClick = onConfirmClick) {
-          Text(text = stringResource(id = android.R.string.ok))
+          Text(text = stringResource(android.R.string.ok))
         }
       },
       dismissButton = {
         TextButton(onClick = onDismissRequest) {
-          Text(text = stringResource(id = android.R.string.cancel))
+          Text(text = stringResource(android.R.string.cancel))
         }
       },
       title = {
@@ -238,7 +238,7 @@ private fun LocationDropDrownMenu(
     ) {
       Icon(
         imageVector = Icons.Default.MoreVert,
-        contentDescription = stringResource(id = R.string.location_actions)
+        contentDescription = stringResource(R.string.location_actions)
       )
     }
 
@@ -263,7 +263,7 @@ private fun LocationDropDrownMenu(
               Spacer(modifier = Modifier.width(3.dp))
               Icon(
                 imageVector = Icons.Filled.Done,
-                contentDescription = stringResource(id = R.string.location_is_default)
+                contentDescription = stringResource(R.string.location_is_default)
               )
             }
           }

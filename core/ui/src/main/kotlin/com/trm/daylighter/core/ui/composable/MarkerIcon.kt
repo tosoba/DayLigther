@@ -11,7 +11,7 @@ import com.trm.daylighter.core.common.R
 fun MarkerIcon(modifier: Modifier = Modifier) {
   Icon(
     painter = painterResource(id = R.drawable.marker),
-    contentDescription = stringResource(id = R.string.location_marker),
+    contentDescription = stringResource(R.string.location_marker),
     modifier = modifier
   )
 }

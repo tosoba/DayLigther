@@ -350,7 +350,7 @@ private fun LocationAppBar(
     title = {
       Text(
         text = locationMap.state.savedMapPosition.label.takeIf(String::isNotEmpty)
-            ?: stringResource(id = commonR.string.new_location),
+            ?: stringResource(commonR.string.new_location),
         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -362,7 +362,7 @@ private fun LocationAppBar(
       IconButton(onClick = onBackClick) {
         Icon(
           imageVector = Icons.Filled.ArrowBack,
-          contentDescription = stringResource(id = commonR.string.back),
+          contentDescription = stringResource(commonR.string.back),
           tint = MaterialTheme.colorScheme.onSurface
         )
       }
@@ -371,7 +371,7 @@ private fun LocationAppBar(
       IconButton(onClick = onInfoClick) {
         Icon(
           imageVector = Icons.Filled.Info,
-          contentDescription = stringResource(id = R.string.center_map_on_location),
+          contentDescription = stringResource(R.string.center_map_on_location),
           tint = MaterialTheme.colorScheme.onSurface
         )
       }
@@ -422,7 +422,7 @@ private fun MapView(locationMap: LocationMap, modifier: Modifier = Modifier) {
 private fun MarkerIcon(modifier: Modifier = Modifier) {
   Icon(
     painter = painterResource(id = commonR.drawable.marker),
-    contentDescription = stringResource(id = commonR.string.location_marker),
+    contentDescription = stringResource(commonR.string.location_marker),
     modifier = modifier
   )
 }
@@ -464,7 +464,7 @@ private fun ModalSheetContent(
         AnimatedVisibility(visible = nameValue.isNotEmpty()) {
           Icon(
             imageVector = Icons.Filled.Clear,
-            contentDescription = stringResource(id = commonR.string.clear),
+            contentDescription = stringResource(commonR.string.clear),
             modifier = Modifier.clickable { onNameValueChange("") }
           )
         }
@@ -649,11 +649,11 @@ private fun LocationPermissionInfoDialog(
       modifier = modifier,
       onDismissRequest = onDismiss,
       confirmButton = {
-        TextButton(onClick = onOkClick) { Text(text = stringResource(id = android.R.string.ok)) }
+        TextButton(onClick = onOkClick) { Text(text = stringResource(android.R.string.ok)) }
       },
       dismissButton = {
         TextButton(onClick = onDismiss) {
-          Text(text = stringResource(id = android.R.string.cancel))
+          Text(text = stringResource(android.R.string.cancel))
         }
       },
       title = {

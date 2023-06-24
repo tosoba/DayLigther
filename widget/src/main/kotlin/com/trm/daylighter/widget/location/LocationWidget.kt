@@ -163,7 +163,7 @@ class LocationWidget(
 
       Image(
         provider = AndroidResourceImageProvider(R.drawable.settings),
-        contentDescription = stringResource(id = commonR.string.settings),
+        contentDescription = stringResource(commonR.string.settings),
         modifier =
           GlanceModifier.padding(5.dp)
             .clickable(
@@ -413,14 +413,14 @@ private fun DayLengthIcon() {
     Image(
       provider =
         IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_shadow)),
-      contentDescription = stringResource(id = R.string.day_length),
+      contentDescription = stringResource(R.string.day_length),
       modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp)
     )
 
     Image(
       provider =
         IconImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
-      contentDescription = stringResource(id = R.string.day_length)
+      contentDescription = stringResource(R.string.day_length)
     )
   }
 }

@@ -98,7 +98,7 @@ fun DayLighterMainContent() {
               IconButton(onClick = navController::popBackStack) {
                 Icon(
                   imageVector = Icons.Filled.ArrowBack,
-                  contentDescription = stringResource(id = commonR.string.back)
+                  contentDescription = stringResource(commonR.string.back)
                 )
               }
             }

@@ -12,7 +12,7 @@ internal fun AddLocationButton() {
   val context = LocalContext.current
   AppWidgetBox(contentAlignment = Alignment.Center) {
     Button(
-      text = stringResource(id = R.string.add_location),
+      text = stringResource(R.string.add_location),
       onClick = deepLinkAction(context.addLocationDeeplinkUri())
     )
   }

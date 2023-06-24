@@ -516,7 +516,7 @@ private fun NextDayPeriodTimer(
   val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
   val timerPositive =
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
-  val to = stringResource(id = R.string.to)
+  val to = stringResource(R.string.to)
 
   AnimatedVisibility(
     visible = nextPeriod != null && timerPositive,
@@ -564,14 +564,14 @@ private fun rememberNextDayPeriod(
   dayMode: DayMode,
   today: SunriseSunset,
 ): NextDayPeriod? {
-  val astronomicalDawn = stringResource(id = R.string.astronomical_dawn).lowercase()
-  val nauticalDawn = stringResource(id = R.string.nautical_dawn).lowercase()
-  val civilDawn = stringResource(id = R.string.civil_dawn).lowercase()
-  val sunrise = stringResource(id = R.string.sunrise).lowercase()
-  val sunset = stringResource(id = R.string.sunset).lowercase()
-  val civilDusk = stringResource(id = R.string.civil_dusk).lowercase()
-  val nauticalDusk = stringResource(id = R.string.nautical_dusk).lowercase()
-  val astronomicalDusk = stringResource(id = R.string.astronomical_dusk).lowercase()
+  val astronomicalDawn = stringResource(R.string.astronomical_dawn).lowercase()
+  val nauticalDawn = stringResource(R.string.nautical_dawn).lowercase()
+  val civilDawn = stringResource(R.string.civil_dawn).lowercase()
+  val sunrise = stringResource(R.string.sunrise).lowercase()
+  val sunset = stringResource(R.string.sunset).lowercase()
+  val civilDusk = stringResource(R.string.civil_dusk).lowercase()
+  val nauticalDusk = stringResource(R.string.nautical_dusk).lowercase()
+  val astronomicalDusk = stringResource(R.string.astronomical_dusk).lowercase()
   return remember(dayPeriod, today) {
     when (dayPeriod) {
       DayPeriod.NIGHT -> {
@@ -1283,8 +1283,8 @@ private fun dayChartSegments(
   orientation: Int,
   using24HFormat: Boolean
 ): List<DayChartSegment> {
-  val sunriseLabel = stringResource(id = R.string.sunrise)
-  val sunsetLabel = stringResource(id = R.string.sunset)
+  val sunriseLabel = stringResource(R.string.sunrise)
+  val sunsetLabel = stringResource(R.string.sunset)
 
   val dayLabel = stringResource(R.string.day)
   val civilTwilightLabel = stringResource(R.string.civil_twilight)
@@ -1304,16 +1304,16 @@ private fun dayChartSegments(
   fun String.padToLongestLabel(): String = padEnd(longestTwilightLabelLength)
 
   val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
-  val civilDawnLabel = stringResource(id = R.string.civil_dawn_degrees_below, edgeLabelSeparator)
-  val civilDuskLabel = stringResource(id = R.string.civil_dusk_degrees_below, edgeLabelSeparator)
+  val civilDawnLabel = stringResource(R.string.civil_dawn_degrees_below, edgeLabelSeparator)
+  val civilDuskLabel = stringResource(R.string.civil_dusk_degrees_below, edgeLabelSeparator)
   val nauticalDawnLabel =
-    stringResource(id = R.string.nautical_dawn_degrees_below, edgeLabelSeparator)
+    stringResource(R.string.nautical_dawn_degrees_below, edgeLabelSeparator)
   val nauticalDuskLabel =
-    stringResource(id = R.string.nautical_dusk_degrees_below, edgeLabelSeparator)
+    stringResource(R.string.nautical_dusk_degrees_below, edgeLabelSeparator)
   val astronomicalDawnLabel =
-    stringResource(id = R.string.astronomical_dawn_degrees_below, edgeLabelSeparator)
+    stringResource(R.string.astronomical_dawn_degrees_below, edgeLabelSeparator)
   val astronomicalDuskLabel =
-    stringResource(id = R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
+    stringResource(R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
 
   return remember(today, yesterday, using24HFormat) {
     var accumulatedSweepAngle = 0f
