@@ -76,51 +76,43 @@ private fun LocationsScreen(
     }
 
     when (locations) {
-      is WithData -> {
-        if (locations.data.isNotEmpty()) {
-          val columnsCount =
-            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
-            else 4
-          LazyVerticalGrid(
-            state = gridState,
-            contentPadding = PaddingValues(10.dp),
-            columns = GridCells.Fixed(columnsCount)
-          ) {
-            items(locations.data, key = { it.value.id }) { location ->
-              MapCard(
-                location = location,
-                zoom = zoom,
-                onSetDefaultLocationClick = onSetDefaultLocationClick,
-                onEditLocationClick = onEditLocationClick,
-                onDeleteLocationClick = { locationBeingDeleted = it },
-              )
-            }
-
-            if (bottomButtonsHeightPx > 0) {
-              item(span = { GridItemSpan(columnsCount) }) {
-                Spacer(
-                  modifier =
-                    Modifier.height(
-                      bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
-                    )
-                )
-              }
-            }
+      is Ready -> {
+        val columnsCount =
+          if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 4
+        LazyVerticalGrid(
+          state = gridState,
+          contentPadding = PaddingValues(10.dp),
+          columns = GridCells.Fixed(columnsCount)
+        ) {
+          items(locations.data, key = { it.value.id }) { location ->
+            MapCard(
+              location = location,
+              zoom = zoom,
+              onSetDefaultLocationClick = onSetDefaultLocationClick,
+              onEditLocationClick = onEditLocationClick,
+              onDeleteLocationClick = { locationBeingDeleted = it },
+            )
           }
 
-          ZoomControlsRow(
-            zoom = zoom,
-            incrementZoom = { ++zoom },
-            decrementZoom = { --zoom },
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
-          )
-        } else {
-          Text(
-            text = stringResource(commonR.string.no_locations),
-            modifier = Modifier.align(Alignment.Center)
-          )
+          if (bottomButtonsHeightPx > 0) {
+            item(span = { GridItemSpan(columnsCount) }) {
+              Spacer(
+                modifier =
+                  Modifier.height(
+                    bottomButtonsPaddingDp * 2 +
+                      with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                  )
+              )
+            }
+          }
         }
+
+        ZoomControlsRow(
+          zoom = zoom,
+          incrementZoom = { ++zoom },
+          decrementZoom = { --zoom },
+          modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+        )
 
         FloatingActionButton(
           onClick = onAddLocationClick,
@@ -135,7 +127,12 @@ private fun LocationsScreen(
           )
         }
       }
-      is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+      is Loading -> {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+      }
+      else -> {
+        NoLocationsCard(onAddLocationClick)
+      }
     }
 
     DeleteLocationConfirmationDialog(
@@ -151,6 +148,16 @@ private fun LocationsScreen(
 }
 
 @Composable
+private fun BoxScope.NoLocationsCard(onAddLocationClick: () -> Unit) {
+  InfoButtonCard(
+    infoText = stringResource(commonR.string.no_saved_locations_add_one),
+    actionText = stringResource(commonR.string.add_location),
+    onButtonClick = onAddLocationClick,
+    modifier = Modifier.align(Alignment.Center)
+  )
+}
+
+@Composable
 private fun DeleteLocationConfirmationDialog(
   locationBeingDeleted: Location?,
   onConfirmClick: () -> Unit,
@@ -161,9 +168,7 @@ private fun DeleteLocationConfirmationDialog(
     AlertDialog(
       onDismissRequest = onDismissRequest,
       confirmButton = {
-        TextButton(onClick = onConfirmClick) {
-          Text(text = stringResource(android.R.string.ok))
-        }
+        TextButton(onClick = onConfirmClick) { Text(text = stringResource(android.R.string.ok)) }
       },
       dismissButton = {
         TextButton(onClick = onDismissRequest) {
