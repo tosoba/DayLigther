@@ -48,7 +48,7 @@ private fun NavController.currentRoute(): String =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DaylighterMainContent() {
+fun DayLighterMainContent() {
   val scope = rememberCoroutineScope()
   val navController = rememberNavController()
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -58,7 +58,7 @@ fun DaylighterMainContent() {
     gesturesEnabled = currentRoute == dayRoute,
     drawerState = drawerState,
     drawerContent = {
-      DaylighterDrawerContent(
+      DayLighterDrawerContent(
         onItemClick = { destination ->
           scope.launch { drawerState.close() }
           navController.navigate(
@@ -110,7 +110,7 @@ fun DaylighterMainContent() {
 }
 
 @Composable
-private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
+private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
   val context = LocalContext.current
   val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
 
@@ -118,7 +118,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
     Spacer(Modifier.height(12.dp))
 
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DaylighterDrawerItem(
+      DayLighterDrawerItem(
         destination =
           DrawerDestination(
             route = newWidgetRoute,
@@ -129,7 +129,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
       )
     }
 
-    DaylighterDrawerItem(
+    DayLighterDrawerItem(
       destination =
         DrawerDestination(
           route = locationsRoute,
@@ -139,7 +139,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
       onItemClick = onItemClick
     )
 
-    DaylighterDrawerItem(
+    DayLighterDrawerItem(
       destination =
         DrawerDestination(
           route = settingsRoute,
@@ -149,7 +149,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
       onItemClick = onItemClick
     )
 
-    DaylighterDrawerItem(
+    DayLighterDrawerItem(
       destination =
         DrawerDestination(
           route = aboutRoute,
@@ -162,7 +162,7 @@ private fun DaylighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
 }
 
 @Composable
-private fun DaylighterDrawerItem(
+private fun DayLighterDrawerItem(
   destination: DrawerDestination,
   onItemClick: (DrawerDestination) -> Unit
 ) {
@@ -188,7 +188,7 @@ private fun DayLighterScaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
     topBar = topBar,
   ) {
-    DaylighterNavHost(
+    DayLighterNavHost(
       navController = navController,
       onDrawerMenuClick = onDrawerMenuClick,
       modifier =
@@ -198,7 +198,7 @@ private fun DayLighterScaffold(
 }
 
 @Composable
-private fun DaylighterNavHost(
+private fun DayLighterNavHost(
   navController: NavHostController,
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier

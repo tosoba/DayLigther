@@ -7,7 +7,7 @@ import org.osmdroid.config.Configuration
 import timber.log.Timber
 
 @HiltAndroidApp
-class DaylighterApp : Application() {
+class DayLighterApp : Application() {
   override fun onCreate() {
     super.onCreate()
     initializeTimber()

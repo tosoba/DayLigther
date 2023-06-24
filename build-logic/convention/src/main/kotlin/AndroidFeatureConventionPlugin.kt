@@ -17,7 +17,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
       extensions.configure<LibraryExtension> {
         defaultConfig {
-          testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
+          testInstrumentationRunner = "com.trm.daylighter.core.testing.DayLighterTestRunner"
         }
       }
 

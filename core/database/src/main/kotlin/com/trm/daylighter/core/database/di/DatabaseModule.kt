@@ -2,7 +2,7 @@ package com.trm.daylighter.core.database.di
 
 import android.content.Context
 import androidx.room.Room
-import com.trm.daylighter.core.database.DaylighterDatabase
+import com.trm.daylighter.core.database.DayLighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
 import dagger.Module
 import dagger.Provides
@@ -16,8 +16,8 @@ import javax.inject.Singleton
 object DatabaseModule {
   @Provides
   @Singleton
-  fun daylighterDatabase(@ApplicationContext context: Context): DaylighterDatabase =
-    Room.databaseBuilder(context, DaylighterDatabase::class.java, "daylighter.db").build()
+  fun daylighterDatabase(@ApplicationContext context: Context): DayLighterDatabase =
+    Room.databaseBuilder(context, DayLighterDatabase::class.java, "daylighter.db").build()
 
-  @Provides fun locationDao(db: DaylighterDatabase): LocationDao = db.locationDao()
+  @Provides fun locationDao(db: DayLighterDatabase): LocationDao = db.locationDao()
 }

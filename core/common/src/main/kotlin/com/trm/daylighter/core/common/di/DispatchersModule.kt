@@ -1,6 +1,6 @@
 package com.trm.daylighter.core.common.di
 
-import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.DayLighterDispatchers
 import com.trm.daylighter.core.domain.di.Dispatcher
 import dagger.Module
 import dagger.Provides
@@ -13,10 +13,10 @@ import kotlinx.coroutines.Dispatchers
 @InstallIn(SingletonComponent::class)
 object DispatchersModule {
   @Provides
-  @Dispatcher(DaylighterDispatchers.IO)
+  @Dispatcher(DayLighterDispatchers.IO)
   fun ioDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
   @Provides
-  @Dispatcher(DaylighterDispatchers.DEFAULT)
+  @Dispatcher(DayLighterDispatchers.DEFAULT)
   fun defaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }

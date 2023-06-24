@@ -10,6 +10,6 @@ import com.trm.daylighter.core.database.entity.LocationEntity
 
 @Database(entities = [LocationEntity::class], version = 1, exportSchema = false)
 @TypeConverters(LocalDateTimeConverter::class, ZoneIdConverter::class)
-abstract class DaylighterDatabase : RoomDatabase() {
+abstract class DayLighterDatabase : RoomDatabase() {
   abstract fun locationDao(): LocationDao
 }

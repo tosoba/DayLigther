@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.common.di
 
 import com.trm.daylighter.core.domain.di.ApplicationScope
-import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.DayLighterDispatchers
 import com.trm.daylighter.core.domain.di.Dispatcher
 import dagger.Module
 import dagger.Provides
@@ -19,6 +19,6 @@ object CoroutineScopesModule {
   @Singleton
   @ApplicationScope
   fun providesCoroutineScope(
-    @Dispatcher(DaylighterDispatchers.DEFAULT) defaultDispatcher: CoroutineDispatcher
+    @Dispatcher(DayLighterDispatchers.DEFAULT) defaultDispatcher: CoroutineDispatcher
   ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 }

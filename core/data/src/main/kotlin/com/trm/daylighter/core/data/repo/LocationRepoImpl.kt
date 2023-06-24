@@ -3,7 +3,7 @@ package com.trm.daylighter.core.data.repo
 import com.trm.daylighter.core.data.mapper.asDomainModel
 import com.trm.daylighter.core.database.dao.LocationDao
 import com.trm.daylighter.core.database.entity.LocationEntity
-import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.DayLighterDispatchers
 import com.trm.daylighter.core.domain.di.Dispatcher
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.repo.LocationRepo
@@ -19,7 +19,7 @@ class LocationRepoImpl
 @Inject
 constructor(
   private val locationDao: LocationDao,
-  @Dispatcher(DaylighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
+  @Dispatcher(DayLighterDispatchers.DEFAULT) private val defaultDispatcher: CoroutineDispatcher,
 ) : LocationRepo {
   override suspend fun saveLocation(latitude: Double, longitude: Double, name: String) {
     locationDao.insert(

@@ -7,7 +7,7 @@ plugins {
 android {
   namespace = "com.trm.daylighter.core.database"
   defaultConfig {
-    testInstrumentationRunner = "com.trm.daylighter.core.testing.DaylighterTestRunner"
+    testInstrumentationRunner = "com.trm.daylighter.core.testing.DayLighterTestRunner"
   }
   packagingOptions {
     resources {

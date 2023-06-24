@@ -1,6 +1,6 @@
 package com.trm.daylighter.core.domain.usecase
 
-import com.trm.daylighter.core.domain.di.DaylighterDispatchers
+import com.trm.daylighter.core.domain.di.DayLighterDispatchers
 import com.trm.daylighter.core.domain.di.Dispatcher
 import com.trm.daylighter.core.domain.model.FailedFirst
 import com.trm.daylighter.core.domain.model.Loadable
@@ -21,7 +21,7 @@ constructor(
   private val calculateLocationSunriseSunsetChangeUseCase:
     CalculateLocationSunriseSunsetChangeUseCase,
   private val repo: LocationRepo,
-  @Dispatcher(DaylighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
+  @Dispatcher(DayLighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) {
   operator fun invoke(id: Long): Flow<Loadable<LocationSunriseSunsetChange>> = flow {
     emit(LoadingFirst)
