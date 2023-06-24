@@ -27,7 +27,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,9 +48,9 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.Location
-import com.trm.daylighter.core.domain.model.WithData
-import com.trm.daylighter.core.domain.model.WithoutData
+import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.ui.composable.DisabledMapView
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
@@ -112,87 +111,81 @@ private fun WidgetLocationScreen(
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
 
     when (locations) {
-      is WithData -> {
-        if (locations.data.isNotEmpty()) {
-          val columnsCount =
-            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
-            else 4
-          LazyVerticalGrid(
-            contentPadding = PaddingValues(10.dp),
-            columns = GridCells.Fixed(columnsCount)
-          ) {
-            items(locations.data, key = { it.value.id }) { location ->
-              MapCard(
-                location = location,
-                zoom = zoom,
-                isSelected = location.value.id == selectedLocationId,
-                onSelected = onLocationSelected
-              )
-            }
-
-            val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
-            if (spacerHeightPx > 0) {
-              item(span = { GridItemSpan(columnsCount) }) {
-                Spacer(
-                  modifier =
-                    Modifier.height(
-                      bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) { spacerHeightPx.toDp() }
-                    )
-                )
-              }
-            }
+      is Ready -> {
+        val columnsCount =
+          if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 4
+        LazyVerticalGrid(
+          contentPadding = PaddingValues(10.dp),
+          columns = GridCells.Fixed(columnsCount)
+        ) {
+          items(locations.data, key = { it.value.id }) { location ->
+            MapCard(
+              location = location,
+              zoom = zoom,
+              isSelected = location.value.id == selectedLocationId,
+              onSelected = onLocationSelected
+            )
           }
 
-          ZoomControlsRow(
-            zoom = zoom,
-            incrementZoom = { ++zoom },
-            decrementZoom = { --zoom },
-            modifier =
-              Modifier.align(Alignment.BottomStart)
-                .padding(bottomButtonsPaddingDp)
-                .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
-          )
-
-          AnimatedVisibility(
-            visible = selectedLocationId != null,
-            modifier =
-              Modifier.align(Alignment.BottomEnd)
-                .padding(bottomButtonsPaddingDp)
-                .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
-          ) {
-            FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
-              Icon(
-                imageVector =
-                  when (mode) {
-                    WidgetLocationMode.ADD -> Icons.Filled.Add
-                    WidgetLocationMode.EDIT -> Icons.Filled.Done
-                  },
-                contentDescription =
-                  stringResource(
-                    id =
-                      when (mode) {
-                        WidgetLocationMode.ADD -> R.string.add_a_widget
-                        WidgetLocationMode.EDIT -> R.string.update_a_widget
-                      }
+          val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
+          if (spacerHeightPx > 0) {
+            item(span = { GridItemSpan(columnsCount) }) {
+              Spacer(
+                modifier =
+                  Modifier.height(
+                    bottomButtonsPaddingDp * 2 +
+                      with(LocalDensity.current) { spacerHeightPx.toDp() }
                   )
               )
             }
           }
-        } else {
-          InfoButtonCard(
-            infoText = stringResource(commonR.string.no_saved_locations_add_one),
-            actionText = stringResource(commonR.string.add_location),
-            onButtonClick = onAddLocationClick,
-            modifier = Modifier.align(Alignment.Center).padding(20.dp)
-          )
-          Text(
-            text = stringResource(commonR.string.no_locations),
-            modifier = Modifier.align(Alignment.Center)
-          )
+        }
+
+        ZoomControlsRow(
+          zoom = zoom,
+          incrementZoom = { ++zoom },
+          decrementZoom = { --zoom },
+          modifier =
+            Modifier.align(Alignment.BottomStart)
+              .padding(bottomButtonsPaddingDp)
+              .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
+        )
+
+        AnimatedVisibility(
+          visible = selectedLocationId != null,
+          modifier =
+            Modifier.align(Alignment.BottomEnd)
+              .padding(bottomButtonsPaddingDp)
+              .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
+        ) {
+          FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
+            Icon(
+              imageVector =
+                when (mode) {
+                  WidgetLocationMode.ADD -> Icons.Filled.Add
+                  WidgetLocationMode.EDIT -> Icons.Filled.Done
+                },
+              contentDescription =
+                stringResource(
+                  id =
+                    when (mode) {
+                      WidgetLocationMode.ADD -> R.string.add_a_widget
+                      WidgetLocationMode.EDIT -> R.string.update_a_widget
+                    }
+                )
+            )
+          }
         }
       }
-      is WithoutData -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+      is Loading -> {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+      }
+      else -> {
+        NoLocationsCard(
+          modifier = Modifier.align(Alignment.Center).padding(20.dp),
+          onAddLocationClick = onAddLocationClick
+        )
+      }
     }
   }
 }
@@ -233,4 +226,14 @@ private fun MapCard(
       )
     }
   }
+}
+
+@Composable
+private fun NoLocationsCard(modifier: Modifier = Modifier, onAddLocationClick: () -> Unit) {
+  InfoButtonCard(
+    infoText = stringResource(commonR.string.no_saved_locations_add_one),
+    actionText = stringResource(commonR.string.add_location),
+    onButtonClick = onAddLocationClick,
+    modifier = modifier
+  )
 }

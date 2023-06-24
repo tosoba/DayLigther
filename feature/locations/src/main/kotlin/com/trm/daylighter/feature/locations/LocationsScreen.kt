@@ -131,7 +131,10 @@ private fun LocationsScreen(
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
       }
       else -> {
-        NoLocationsCard(onAddLocationClick)
+        NoLocationsCard(
+          modifier = Modifier.align(Alignment.Center).padding(20.dp),
+          onAddLocationClick = onAddLocationClick
+        )
       }
     }
 
@@ -148,12 +151,12 @@ private fun LocationsScreen(
 }
 
 @Composable
-private fun BoxScope.NoLocationsCard(onAddLocationClick: () -> Unit) {
+private fun NoLocationsCard(modifier: Modifier = Modifier, onAddLocationClick: () -> Unit) {
   InfoButtonCard(
     infoText = stringResource(commonR.string.no_saved_locations_add_one),
     actionText = stringResource(commonR.string.add_location),
     onButtonClick = onAddLocationClick,
-    modifier = Modifier.align(Alignment.Center)
+    modifier = modifier
   )
 }
 
