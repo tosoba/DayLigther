@@ -232,7 +232,7 @@ private fun DayScreen(
               dayMode = dayMode,
               now = LocalTime.now(),
               appBarHeightPx = appBarHeightPx,
-              modifier = Modifier.fillMaxSize()
+              modifier = Modifier.fillMaxSize().alpha(.5f)
             )
 
             AnimatedVisibility(
