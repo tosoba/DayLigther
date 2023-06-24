@@ -96,6 +96,7 @@ private fun SettingsRoute(
   val isGeocodeEmailPreferenceSet =
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
   val geocodingDisabledMessage = stringResource(R.string.geocoding_is_disabled)
+  val locationsDeletedMessage = stringResource(R.string.locations_deleted)
 
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
@@ -103,6 +104,10 @@ private fun SettingsRoute(
     onDisableGeocodingClick = {
       viewModel.clearGeocodingEmail()
       Toast.makeText(context, geocodingDisabledMessage, Toast.LENGTH_SHORT).show()
+    },
+    onClearLocationsClick = {
+      viewModel.deleteLocations()
+      Toast.makeText(context, locationsDeletedMessage, Toast.LENGTH_SHORT).show()
     },
     modifier = modifier
   )
@@ -114,6 +119,7 @@ private fun SettingsScreen(
   isGeocodeEmailPreferenceSet: Boolean,
   autoShowEmailDialog: Boolean,
   onDisableGeocodingClick: () -> Unit,
+  onClearLocationsClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   PrefsScreen(dataStore = LocalContext.current.preferencesDataStore, modifier = modifier) {
@@ -157,7 +163,9 @@ private fun SettingsScreen(
       prefsItem {
         TextPref(
           title = stringResource(R.string.clear_locations_data_pref_title),
-          summary = stringResource(R.string.clear_locations_data_summary)
+          summary = stringResource(R.string.clear_locations_data_summary),
+          enabled = true,
+          onClick = onClearLocationsClick
         )
       }
     }

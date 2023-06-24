@@ -12,18 +12,15 @@ interface LocationRepo {
 
   suspend fun getDefaultLocation(): Location?
 
+  suspend fun deleteAllLocations()
+
   suspend fun deleteLocationById(id: Long, isDefault: Boolean)
 
   suspend fun setDefaultLocationById(id: Long)
 
   suspend fun getLocationById(id: Long): Location?
 
-  suspend fun updateLocationLatLngById(
-    id: Long,
-    latitude: Double,
-    longitude: Double,
-    name: String
-  )
+  suspend fun updateLocationLatLngById(id: Long, latitude: Double, longitude: Double, name: String)
 
   suspend fun getNonDefaultLocationOffsetById(id: Long): Int?
 }

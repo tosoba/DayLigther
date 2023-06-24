@@ -14,4 +14,5 @@
     <string name="disable_geocoding_email_pref_title">Disable geocoding</string>
     <string name="disable_geocoding_email_pref_summary">Disables geocoding by clearing saved email used to authorize requests.</string>
     <string name="geocoding_is_disabled">Geocoding is disabled.</string>
+    <string name="locations_deleted">All locations were deleted.</string>
 </resources>

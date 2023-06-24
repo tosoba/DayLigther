@@ -24,6 +24,8 @@ interface LocationDao {
     )
   }
 
+  @Query("DELETE FROM location") suspend fun deleteAll()
+
   @Query("DELETE FROM location WHERE id = :id") suspend fun deleteById(id: Long)
 
   @Transaction
