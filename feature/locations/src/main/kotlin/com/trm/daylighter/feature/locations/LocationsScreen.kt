@@ -1,9 +1,12 @@
 package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -58,6 +61,7 @@ fun LocationsRoute(
   )
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
@@ -84,68 +88,72 @@ private fun LocationsScreen(
       }
     }
 
-    when (locations) {
-      is Ready -> {
-        val columnsCount =
-          if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 4
-        LazyVerticalGrid(
-          state = gridState,
-          contentPadding = PaddingValues(10.dp),
-          columns = GridCells.Fixed(columnsCount)
-        ) {
-          items(locations.data, key = { it.value.id }) { location ->
-            MapCard(
-              location = location,
-              zoom = zoom,
-              onSetDefaultLocationClick = onSetDefaultLocationClick,
-              onEditLocationClick = onEditLocationClick,
-              onDeleteLocationClick = { locationBeingDeleted = it },
-            )
-          }
-
-          if (bottomButtonsHeightPx > 0) {
-            item(span = { GridItemSpan(columnsCount) }) {
-              Spacer(
-                modifier =
-                  Modifier.height(
-                    bottomButtonsPaddingDp * 2 +
-                      with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
-                  )
+    AnimatedContent(targetState = locations, transitionSpec = { fadeIn() with fadeOut() }) {
+      locations ->
+      when (locations) {
+        is Ready -> {
+          val columnsCount =
+            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
+            else 4
+          LazyVerticalGrid(
+            state = gridState,
+            contentPadding = PaddingValues(10.dp),
+            columns = GridCells.Fixed(columnsCount)
+          ) {
+            items(locations.data, key = { it.value.id }) { location ->
+              MapCard(
+                location = location,
+                zoom = zoom,
+                onSetDefaultLocationClick = onSetDefaultLocationClick,
+                onEditLocationClick = onEditLocationClick,
+                onDeleteLocationClick = { locationBeingDeleted = it },
               )
             }
+
+            if (bottomButtonsHeightPx > 0) {
+              item(span = { GridItemSpan(columnsCount) }) {
+                Spacer(
+                  modifier =
+                    Modifier.height(
+                      bottomButtonsPaddingDp * 2 +
+                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                    )
+                )
+              }
+            }
+          }
+
+          ZoomControlsRow(
+            zoom = zoom,
+            incrementZoom = { ++zoom },
+            decrementZoom = { --zoom },
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+          )
+
+          FloatingActionButton(
+            onClick = onAddLocationClick,
+            modifier =
+              Modifier.align(Alignment.BottomEnd)
+                .padding(bottomButtonsPaddingDp)
+                .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
+          ) {
+            Icon(
+              imageVector = Icons.Filled.Add,
+              contentDescription = stringResource(R.string.add_a_location)
+            )
           }
         }
+        is Loading -> {
+          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        else -> {
+          DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
 
-        ZoomControlsRow(
-          zoom = zoom,
-          incrementZoom = { ++zoom },
-          decrementZoom = { --zoom },
-          modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
-        )
-
-        FloatingActionButton(
-          onClick = onAddLocationClick,
-          modifier =
-            Modifier.align(Alignment.BottomEnd)
-              .padding(bottomButtonsPaddingDp)
-              .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
-        ) {
-          Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.add_a_location)
+          NoLocationsCard(
+            modifier = Modifier.align(Alignment.Center).padding(20.dp),
+            onAddLocationClick = onAddLocationClick
           )
         }
-      }
-      is Loading -> {
-        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-      }
-      else -> {
-        DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
-
-        NoLocationsCard(
-          modifier = Modifier.align(Alignment.Center).padding(20.dp),
-          onAddLocationClick = onAddLocationClick
-        )
       }
     }
 

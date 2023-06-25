@@ -1,11 +1,11 @@
 [versions]
-accompanist = "0.31.3-beta"
+accompanist = "0.31.4-beta"
 androidDesugarJdkLibs = "1.2.2"
 androidGradlePlugin = "7.4.0"
 androidxActivity = "1.6.1"
 androidxAppCompat = "1.5.1"
 androidxBrowser = "1.4.0"
-androidxComposeBom = "2023.05.01"
+androidxComposeBom = "2023.06.01"
 androidxComposeCompiler = "1.4.3"
 androidxComposeRuntimeTracing = "1.0.0-alpha01"
 androidxConstraintLayout = "1.0.1"

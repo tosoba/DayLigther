@@ -1,4 +1,5 @@
 import com.android.build.gradle.LibraryExtension
+import com.trm.daylighter.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension

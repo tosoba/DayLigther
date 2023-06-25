@@ -2,9 +2,12 @@ package com.trm.daylighter.feature.widget.location
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -104,6 +107,7 @@ fun WidgetLocationRoute(
   }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun WidgetLocationScreen(
   locations: Loadable<List<StableValue<Location>>>,
@@ -122,85 +126,89 @@ private fun WidgetLocationScreen(
     var addWidgetButtonHeightPx by remember { mutableStateOf(0) }
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
 
-    when (locations) {
-      is Ready -> {
-        val columnsCount =
-          if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 4
-        LazyVerticalGrid(
-          contentPadding = PaddingValues(10.dp),
-          columns = GridCells.Fixed(columnsCount)
-        ) {
-          items(locations.data, key = { it.value.id }) { location ->
-            MapCard(
-              location = location,
-              zoom = zoom,
-              isSelected = location.value.id == selectedLocationId,
-              onSelected = onLocationSelected
-            )
+    AnimatedContent(targetState = locations) {
+      locations ->
+      when (locations) {
+        is Ready -> {
+          val columnsCount =
+            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
+            else 4
+          LazyVerticalGrid(
+            contentPadding = PaddingValues(10.dp),
+            columns = GridCells.Fixed(columnsCount)
+          ) {
+            items(locations.data, key = { it.value.id }) { location ->
+              MapCard(
+                location = location,
+                zoom = zoom,
+                isSelected = location.value.id == selectedLocationId,
+                onSelected = onLocationSelected
+              )
+            }
+
+            val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
+            if (spacerHeightPx > 0) {
+              item(span = { GridItemSpan(columnsCount) }) {
+                Spacer(
+                  modifier =
+                    Modifier.height(
+                      bottomButtonsPaddingDp * 2 +
+                        with(LocalDensity.current) { spacerHeightPx.toDp() }
+                    )
+                )
+              }
+            }
           }
 
-          val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
-          if (spacerHeightPx > 0) {
-            item(span = { GridItemSpan(columnsCount) }) {
-              Spacer(
-                modifier =
-                  Modifier.height(
-                    bottomButtonsPaddingDp * 2 +
-                      with(LocalDensity.current) { spacerHeightPx.toDp() }
+          ZoomControlsRow(
+            zoom = zoom,
+            incrementZoom = { ++zoom },
+            decrementZoom = { --zoom },
+            modifier =
+              Modifier.align(Alignment.BottomStart)
+                .padding(bottomButtonsPaddingDp)
+                .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
+          )
+
+          AnimatedVisibility(
+            visible = selectedLocationId != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier =
+              Modifier.align(Alignment.BottomEnd)
+                .padding(bottomButtonsPaddingDp)
+                .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
+          ) {
+            FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
+              Icon(
+                imageVector =
+                  when (mode) {
+                    WidgetLocationMode.ADD -> Icons.Filled.Add
+                    WidgetLocationMode.EDIT -> Icons.Filled.Done
+                  },
+                contentDescription =
+                  stringResource(
+                    id =
+                      when (mode) {
+                        WidgetLocationMode.ADD -> R.string.add_a_widget
+                        WidgetLocationMode.EDIT -> R.string.update_a_widget
+                      }
                   )
               )
             }
           }
         }
-
-        ZoomControlsRow(
-          zoom = zoom,
-          incrementZoom = { ++zoom },
-          decrementZoom = { --zoom },
-          modifier =
-            Modifier.align(Alignment.BottomStart)
-              .padding(bottomButtonsPaddingDp)
-              .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
-        )
-
-        AnimatedVisibility(
-          visible = selectedLocationId != null,
-          enter = fadeIn(),
-          exit = fadeOut(),
-          modifier =
-            Modifier.align(Alignment.BottomEnd)
-              .padding(bottomButtonsPaddingDp)
-              .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
-        ) {
-          FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
-            Icon(
-              imageVector =
-                when (mode) {
-                  WidgetLocationMode.ADD -> Icons.Filled.Add
-                  WidgetLocationMode.EDIT -> Icons.Filled.Done
-                },
-              contentDescription =
-                stringResource(
-                  id =
-                    when (mode) {
-                      WidgetLocationMode.ADD -> R.string.add_a_widget
-                      WidgetLocationMode.EDIT -> R.string.update_a_widget
-                    }
-                )
-            )
-          }
+        is Loading -> {
+          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
-      }
-      is Loading -> {
-        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-      }
-      else -> {
-        DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
+        else -> {
+          DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
 
-        NoLocationsCard(
-          modifier = Modifier.align(Alignment.Center).padding(20.dp),
-          onAddLocationClick = onAddLocationClick
-        )
+          NoLocationsCard(
+            modifier = Modifier.align(Alignment.Center).padding(20.dp),
+            onAddLocationClick = onAddLocationClick
+          )
+        }
       }
     }
 
