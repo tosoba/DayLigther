@@ -35,12 +35,10 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import androidx.navigation.navOptions
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScope
@@ -57,12 +55,8 @@ const val settingsRoute = "settings_route"
 const val settingsAutoShowEmailDialogRoute =
   "$settingsRoute?$settingsAutoShowEmailDialogParam={$settingsAutoShowEmailDialogParam}"
 
-fun NavController.navigateToSettings(autoShowEmailDialog: Boolean) {
-  navigate(
-    route = "$settingsRoute?$settingsAutoShowEmailDialogParam=$autoShowEmailDialog",
-    navOptions = navOptions { launchSingleTop = true }
-  )
-}
+fun settingsNavigationRoute(autoShowEmailDialog: Boolean) =
+  "$settingsRoute?$settingsAutoShowEmailDialogParam=$autoShowEmailDialog"
 
 fun NavGraphBuilder.settingsComposable(modifier: Modifier = Modifier) {
   composable(

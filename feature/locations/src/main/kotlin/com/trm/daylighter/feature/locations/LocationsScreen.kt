@@ -3,6 +3,7 @@ package com.trm.daylighter.feature.locations
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -30,6 +31,7 @@ import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
+import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import kotlinx.coroutines.launch
 
 const val locationsRoute = "locations_route"
@@ -39,6 +41,7 @@ fun LocationsRoute(
   modifier: Modifier = Modifier,
   onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
+  onDrawerMenuClick: () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
@@ -48,7 +51,8 @@ fun LocationsRoute(
     onSetDefaultLocationClick = viewModel::setDefaultLocation,
     onEditLocationClick = onEditLocationClick,
     onDeleteLocationClick = viewModel::deleteLocation,
-    onAddLocationClick = onAddLocationClick
+    onAddLocationClick = onAddLocationClick,
+    onDrawerMenuClick = onDrawerMenuClick,
   )
 }
 
@@ -59,6 +63,7 @@ private fun LocationsScreen(
   onSetDefaultLocationClick: (Long) -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
+  onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
@@ -141,6 +146,16 @@ private fun LocationsScreen(
         )
       }
     }
+
+    DrawerMenuTopAppBar(
+      modifier =
+        Modifier.align(Alignment.TopCenter)
+          .fillMaxWidth()
+          .background(backgroundToTransparentVerticalGradient)
+          .padding(10.dp),
+      title = stringResource(commonR.string.locations),
+      onDrawerMenuClick = onDrawerMenuClick
+    )
 
     DeleteLocationConfirmationDialog(
       locationBeingDeleted = locationBeingDeleted,

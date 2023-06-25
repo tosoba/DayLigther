@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,6 +55,7 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DisabledMapView
+import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
@@ -61,6 +63,7 @@ import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
+import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import kotlinx.coroutines.flow.collectLatest
 
 const val newWidgetRoute = "widget_location_route"
@@ -68,6 +71,8 @@ const val newWidgetRoute = "widget_location_route"
 @Composable
 fun WidgetLocationRoute(
   modifier: Modifier = Modifier,
+  onAddLocationClick: () -> Unit,
+  onDrawerMenuClick: () -> Unit,
   viewModel: WidgetLocationViewModel = hiltViewModel()
 ) {
   val locations = viewModel.locations.collectAsState(initial = Empty)
@@ -79,7 +84,8 @@ fun WidgetLocationRoute(
     onLocationSelected = { viewModel.selectedLocationId = it },
     mode = viewModel.mode,
     onConfirmLocationSelectionClick = viewModel::confirmLocationSelection,
-    onAddLocationClick = {},
+    onAddLocationClick = onAddLocationClick,
+    onDrawerMenuClick = onDrawerMenuClick,
     modifier = modifier
   )
 
@@ -104,6 +110,7 @@ private fun WidgetLocationScreen(
   mode: WidgetLocationMode,
   onConfirmLocationSelectionClick: () -> Unit,
   onAddLocationClick: () -> Unit,
+  onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
@@ -192,6 +199,16 @@ private fun WidgetLocationScreen(
         )
       }
     }
+
+    DrawerMenuTopAppBar(
+      modifier =
+        Modifier.align(Alignment.TopCenter)
+          .fillMaxWidth()
+          .background(backgroundToTransparentVerticalGradient)
+          .padding(10.dp),
+      title = stringResource(commonR.string.choose_widget_location),
+      onDrawerMenuClick = onDrawerMenuClick
+    )
   }
 }
 

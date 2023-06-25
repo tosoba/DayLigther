@@ -5,5 +5,5 @@
     <string name="locations_item">Locations</string>
     <string name="about_item">About</string>
     <string name="settings_item">Settings</string>
-    <string name="choose_widget_location">Choose widget location</string>
+    <string name="day_periods_item">Day periods</string>
 </resources>

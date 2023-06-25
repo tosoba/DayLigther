@@ -17,7 +17,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -238,9 +237,6 @@ private fun DayScreen(
       }
     }
 
-    val topBarGradient =
-      Brush.verticalGradient(0f to MaterialTheme.colorScheme.background, 1f to Color.Transparent)
-
     fun onEditLocationClick() {
       currentChange.value.takeIfInstance<Ready<LocationSunriseSunsetChange>>()?.let { (data) ->
         onEditLocationClick(data.location.id)
@@ -255,7 +251,7 @@ private fun DayScreen(
               linkTo(mainContent.start, mainContent.end)
               top.linkTo(parent.top)
             }
-            .background(topBarGradient)
+            .background(backgroundToTransparentVerticalGradient)
             .onGloballyPositioned { coordinates ->
               appBarHeightPx = coordinates.size.height.toFloat()
             }
@@ -314,7 +310,7 @@ private fun DayScreen(
               height = Dimension.wrapContent
               width = Dimension.fillToConstraints
             }
-            .background(topBarGradient)
+            .background(backgroundToTransparentVerticalGradient)
             .onGloballyPositioned { coordinates ->
               appBarHeightPx = coordinates.size.height.toFloat()
             }
@@ -363,16 +359,6 @@ private fun DayScreen(
         )
       }
     }
-  }
-}
-
-@Composable
-private fun DrawerMenuButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-  SmallFloatingActionButton(onClick = onClick, modifier = modifier) {
-    Icon(
-      imageVector = Icons.Filled.Menu,
-      contentDescription = stringResource(R.string.application_menu)
-    )
   }
 }
 
