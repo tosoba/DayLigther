@@ -66,6 +66,7 @@ fun DayLighterMainContent() {
     drawerState = drawerState,
     drawerContent = {
       DayLighterDrawerContent(
+        currentRoute = navController.currentRoute(),
         onItemClick = { destination ->
           scope.launch { drawerState.close() }
           navController.navigate(
@@ -110,7 +111,10 @@ fun DayLighterMainContent() {
 }
 
 @Composable
-private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
+private fun DayLighterDrawerContent(
+  currentRoute: String,
+  onItemClick: (DrawerDestination) -> Unit
+) {
   val context = LocalContext.current
   val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
 
@@ -124,6 +128,7 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
           icon = Icons.Filled.SettingsSystemDaydream,
           label = stringResource(R.string.day_periods_item)
         ),
+      selected = currentRoute.startsWith(dayRoute),
       onItemClick = onItemClick
     )
 
@@ -135,6 +140,7 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
             icon = Icons.Filled.Widgets,
             label = stringResource(R.string.new_widget_item)
           ),
+        selected = currentRoute.startsWith(newWidgetRoute),
         onItemClick = onItemClick
       )
     }
@@ -146,6 +152,7 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
           icon = Icons.Filled.LocationOn,
           label = stringResource(R.string.locations_item)
         ),
+      selected = currentRoute.startsWith(locationsRoute),
       onItemClick = onItemClick
     )
 
@@ -156,6 +163,7 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
           icon = Icons.Filled.Settings,
           label = stringResource(R.string.settings_item)
         ),
+      selected = currentRoute.startsWith(settingsRoute),
       onItemClick = onItemClick
     )
 
@@ -166,6 +174,7 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
           icon = Icons.Filled.Info,
           label = stringResource(R.string.about_item)
         ),
+      selected = currentRoute.startsWith(aboutRoute),
       onItemClick = onItemClick
     )
   }
@@ -174,12 +183,13 @@ private fun DayLighterDrawerContent(onItemClick: (DrawerDestination) -> Unit) {
 @Composable
 private fun DayLighterDrawerItem(
   destination: DrawerDestination,
+  selected: Boolean = false,
   onItemClick: (DrawerDestination) -> Unit
 ) {
   NavigationDrawerItem(
     icon = { Icon(imageVector = destination.icon, contentDescription = destination.label) },
     label = { Text(text = destination.label) },
-    selected = false,
+    selected = selected,
     onClick = { onItemClick(destination) }
   )
 }
