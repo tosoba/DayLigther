@@ -316,7 +316,7 @@ private fun LocationScaffold(
         locationMap = locationMap,
         onBackClick = onBackClick,
         onInfoClick = {
-          Toast.makeText(context, R.string.center_map_on_location, Toast.LENGTH_LONG).also {
+          Toast.makeText(context, R.string.new_location_info, Toast.LENGTH_LONG).also {
             it.show()
             infoToast?.cancel()
             infoToast = it
@@ -373,7 +373,7 @@ private fun LocationAppBar(
       IconButton(onClick = onInfoClick) {
         Icon(
           imageVector = Icons.Filled.Info,
-          contentDescription = stringResource(R.string.center_map_on_location),
+          contentDescription = stringResource(R.string.new_location_info),
           tint = MaterialTheme.colorScheme.onSurface
         )
       }

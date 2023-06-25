@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="center_map_on_location">Center the map on a desired location.</string>
+    <string name="new_location_info">Center the map on a desired location. Use the button in the bottom right to confirm your choice.</string>
     <string name="my_location">My location</string>
     <string name="save_location">Save location</string>
 
