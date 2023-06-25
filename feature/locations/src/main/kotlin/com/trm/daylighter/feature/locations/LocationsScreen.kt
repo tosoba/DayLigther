@@ -72,7 +72,11 @@ private fun LocationsScreen(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier) {
+  AnimatedContent(
+    targetState = locations,
+    transitionSpec = { fadeIn() with fadeOut() },
+    modifier = modifier
+  ) { locations ->
     val scope = rememberCoroutineScope()
 
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
@@ -88,8 +92,7 @@ private fun LocationsScreen(
       }
     }
 
-    AnimatedContent(targetState = locations, transitionSpec = { fadeIn() with fadeOut() }) {
-      locations ->
+    Box {
       when (locations) {
         is Ready -> {
           val columnsCount =
@@ -155,27 +158,27 @@ private fun LocationsScreen(
           )
         }
       }
+
+      DrawerMenuTopAppBar(
+        modifier =
+          Modifier.align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .background(backgroundToTransparentVerticalGradient)
+            .padding(10.dp),
+        title = stringResource(commonR.string.locations),
+        onDrawerMenuClick = onDrawerMenuClick
+      )
+
+      DeleteLocationConfirmationDialog(
+        locationBeingDeleted = locationBeingDeleted,
+        onConfirmClick = {
+          onDeleteLocationClick(requireNotNull(locationBeingDeleted))
+          locationBeingDeleted = null
+        },
+        onDismissRequest = { locationBeingDeleted = null },
+        modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+      )
     }
-
-    DrawerMenuTopAppBar(
-      modifier =
-        Modifier.align(Alignment.TopCenter)
-          .fillMaxWidth()
-          .background(backgroundToTransparentVerticalGradient)
-          .padding(10.dp),
-      title = stringResource(commonR.string.locations),
-      onDrawerMenuClick = onDrawerMenuClick
-    )
-
-    DeleteLocationConfirmationDialog(
-      locationBeingDeleted = locationBeingDeleted,
-      onConfirmClick = {
-        onDeleteLocationClick(requireNotNull(locationBeingDeleted))
-        locationBeingDeleted = null
-      },
-      onDismissRequest = { locationBeingDeleted = null },
-      modifier = Modifier.align(Alignment.Center).wrapContentHeight()
-    )
   }
 }
 

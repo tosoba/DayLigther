@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -126,8 +127,11 @@ private fun WidgetLocationScreen(
     var addWidgetButtonHeightPx by remember { mutableStateOf(0) }
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
 
-    AnimatedContent(targetState = locations) {
-      locations ->
+    AnimatedContent(
+      targetState = locations,
+      transitionSpec = { fadeIn() with fadeOut() },
+      modifier = Modifier.fillMaxSize()
+    ) { locations ->
       when (locations) {
         is Ready -> {
           val columnsCount =
@@ -205,7 +209,7 @@ private fun WidgetLocationScreen(
           DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
 
           NoLocationsCard(
-            modifier = Modifier.align(Alignment.Center).padding(20.dp),
+            modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(20.dp),
             onAddLocationClick = onAddLocationClick
           )
         }
