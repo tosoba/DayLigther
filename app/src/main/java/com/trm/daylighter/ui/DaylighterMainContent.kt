@@ -213,13 +213,26 @@ private fun DayLighterNavHost(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
+  fun NavOptionsBuilder.fadeInAndOut() {
+    anim {
+      enter = android.R.anim.fade_in
+      exit = android.R.anim.fade_out
+      popEnter = android.R.anim.fade_in
+      popExit = android.R.anim.fade_out
+    }
+  }
+
   fun topLevelNavOptions(): NavOptions = navOptions {
     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
     launchSingleTop = true
     restoreState = true
+    fadeInAndOut()
   }
 
-  fun nextLevelNavOptions(): NavOptions = navOptions { launchSingleTop = true }
+  fun nextLevelNavOptions(): NavOptions = navOptions {
+    launchSingleTop = true
+    fadeInAndOut()
+  }
 
   fun navigateToAddLocation() {
     navController.navigate(route = locationRoute, navOptions = nextLevelNavOptions())
