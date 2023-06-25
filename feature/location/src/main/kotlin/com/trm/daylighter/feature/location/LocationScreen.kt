@@ -14,6 +14,8 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -388,7 +390,7 @@ private fun SaveSpecifiedLocationButton(imageVector: ImageVector, onClick: () ->
 
 @Composable
 private fun ColumnScope.UserLocationButton(visible: Boolean, onUserLocationClick: () -> Unit) {
-  AnimatedVisibility(visible = visible) {
+  AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
     FloatingActionButton(onClick = onUserLocationClick) {
       Icon(
         imageVector = Icons.Filled.MyLocation,
@@ -400,7 +402,7 @@ private fun ColumnScope.UserLocationButton(visible: Boolean, onUserLocationClick
 
 @Composable
 private fun LoadingProgressIndicator(visible: Boolean, modifier: Modifier = Modifier) {
-  AnimatedVisibility(visible = visible, modifier = modifier) {
+  AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut(), modifier = modifier) {
     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
   }
 }
@@ -461,7 +463,7 @@ private fun ModalSheetContent(
       singleLine = true,
       isError = nameError != LocationNameError.NO_ERROR,
       trailingIcon = {
-        AnimatedVisibility(visible = nameValue.isNotEmpty()) {
+        AnimatedVisibility(visible = nameValue.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
           Icon(
             imageVector = Icons.Filled.Clear,
             contentDescription = stringResource(commonR.string.clear),
@@ -477,7 +479,11 @@ private fun ModalSheetContent(
       modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
     )
 
-    AnimatedVisibility(visible = nameError != LocationNameError.NO_ERROR) {
+    AnimatedVisibility(
+      visible = nameError != LocationNameError.NO_ERROR,
+      enter = fadeIn(),
+      exit = fadeOut()
+    ) {
       Text(
         modifier = Modifier.padding(horizontal = 10.dp),
         text =
@@ -644,7 +650,7 @@ private fun LocationPermissionInfoDialog(
   onDismiss: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  AnimatedVisibility(visible = dialogVisible) {
+  AnimatedVisibility(visible = dialogVisible, enter = fadeIn(), exit = fadeOut()) {
     AlertDialog(
       modifier = modifier,
       onDismissRequest = onDismiss,
@@ -652,9 +658,7 @@ private fun LocationPermissionInfoDialog(
         TextButton(onClick = onOkClick) { Text(text = stringResource(android.R.string.ok)) }
       },
       dismissButton = {
-        TextButton(onClick = onDismiss) {
-          Text(text = stringResource(android.R.string.cancel))
-        }
+        TextButton(onClick = onDismiss) { Text(text = stringResource(android.R.string.cancel)) }
       },
       title = {
         Text(

@@ -217,6 +217,8 @@ private fun DayScreen(
 
             AnimatedVisibility(
               visible = locations is Loading,
+              enter = fadeIn(),
+              exit = fadeOut(),
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             ) {
               LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -224,6 +226,8 @@ private fun DayScreen(
 
             AnimatedVisibility(
               visible = locations is Empty,
+              enter = fadeIn(),
+              exit = fadeOut(),
               modifier = Modifier.align(Alignment.Center).padding(20.dp)
             ) {
               InfoButtonCard(
@@ -292,6 +296,8 @@ private fun DayScreen(
 
       AnimatedVisibility(
         visible = currentChange.value is Ready,
+        enter = fadeIn(),
+        exit = fadeOut(),
         modifier =
           Modifier.constrainAs(editLocationButton) {
             bottom.linkTo(navigation.top, 16.dp)
@@ -329,6 +335,8 @@ private fun DayScreen(
             footer = {
               AnimatedVisibility(
                 visible = currentChange.value is Ready,
+                enter = fadeIn(),
+                exit = fadeOut(),
                 modifier = Modifier.padding(bottom = 8.dp)
               ) {
                 EditLocationButton(onClick = ::onEditLocationClick)

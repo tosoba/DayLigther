@@ -2,6 +2,8 @@ package com.trm.daylighter.feature.locations
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -186,7 +188,12 @@ private fun DeleteLocationConfirmationDialog(
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  AnimatedVisibility(visible = locationBeingDeleted != null, modifier = modifier) {
+  AnimatedVisibility(
+    visible = locationBeingDeleted != null,
+    enter = fadeIn(),
+    exit = fadeOut(),
+    modifier = modifier
+  ) {
     AlertDialog(
       onDismissRequest = onDismissRequest,
       confirmButton = {

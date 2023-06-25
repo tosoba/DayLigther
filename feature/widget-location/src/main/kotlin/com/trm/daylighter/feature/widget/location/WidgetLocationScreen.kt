@@ -3,6 +3,8 @@ package com.trm.daylighter.feature.widget.location
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -163,6 +165,8 @@ private fun WidgetLocationScreen(
 
         AnimatedVisibility(
           visible = selectedLocationId != null,
+          enter = fadeIn(),
+          exit = fadeOut(),
           modifier =
             Modifier.align(Alignment.BottomEnd)
               .padding(bottomButtonsPaddingDp)
