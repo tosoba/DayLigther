@@ -72,11 +72,7 @@ private fun LocationsScreen(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  AnimatedContent(
-    targetState = locations,
-    transitionSpec = { fadeIn() with fadeOut() },
-    modifier = modifier
-  ) { locations ->
+  Box(modifier) {
     val scope = rememberCoroutineScope()
 
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
@@ -92,82 +88,113 @@ private fun LocationsScreen(
       }
     }
 
-    Box {
+    AnimatedContent(
+      targetState = locations,
+      transitionSpec = { fadeIn() with fadeOut() },
+      modifier = Modifier.fillMaxSize()
+    ) { locations ->
       when (locations) {
         is Ready -> {
-          val columnsCount =
-            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
-            else 4
-          LazyVerticalGrid(
-            state = gridState,
-            contentPadding = PaddingValues(10.dp),
-            columns = GridCells.Fixed(columnsCount)
-          ) {
-            items(locations.data, key = { it.value.id }) { location ->
-              MapCard(
-                location = location,
-                zoom = zoom,
-                onSetDefaultLocationClick = onSetDefaultLocationClick,
-                onEditLocationClick = onEditLocationClick,
-                onDeleteLocationClick = { locationBeingDeleted = it },
-              )
-            }
+          Column(modifier = Modifier.fillMaxSize()) {
+            DrawerMenuTopAppBar(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .background(backgroundToTransparentVerticalGradient)
+                  .padding(top = 10.dp, start = 10.dp, end = 10.dp),
+              title = stringResource(commonR.string.locations),
+              onDrawerMenuClick = onDrawerMenuClick
+            )
 
-            if (bottomButtonsHeightPx > 0) {
-              item(span = { GridItemSpan(columnsCount) }) {
-                Spacer(
-                  modifier =
-                    Modifier.height(
-                      bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+            Box(modifier = Modifier.weight(1f)) {
+              val columnsCount =
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
+                else 4
+              LazyVerticalGrid(
+                state = gridState,
+                contentPadding = PaddingValues(10.dp),
+                columns = GridCells.Fixed(columnsCount)
+              ) {
+                items(locations.data, key = { it.value.id }) { location ->
+                  MapCard(
+                    location = location,
+                    zoom = zoom,
+                    onSetDefaultLocationClick = onSetDefaultLocationClick,
+                    onEditLocationClick = onEditLocationClick,
+                    onDeleteLocationClick = { locationBeingDeleted = it },
+                  )
+                }
+
+                if (bottomButtonsHeightPx > 0) {
+                  item(span = { GridItemSpan(columnsCount) }) {
+                    Spacer(
+                      modifier =
+                        Modifier.height(
+                          bottomButtonsPaddingDp * 2 +
+                            with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                        )
                     )
+                  }
+                }
+              }
+
+              ZoomControlsRow(
+                zoom = zoom,
+                incrementZoom = { ++zoom },
+                decrementZoom = { --zoom },
+                modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+              )
+
+              FloatingActionButton(
+                onClick = onAddLocationClick,
+                modifier =
+                  Modifier.align(Alignment.BottomEnd)
+                    .padding(bottomButtonsPaddingDp)
+                    .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.Add,
+                  contentDescription = stringResource(R.string.add_a_location)
                 )
               }
             }
           }
+        }
+        is Loading -> {
+          Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
-          ZoomControlsRow(
-            zoom = zoom,
-            incrementZoom = { ++zoom },
-            decrementZoom = { --zoom },
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
-          )
-
-          FloatingActionButton(
-            onClick = onAddLocationClick,
-            modifier =
-              Modifier.align(Alignment.BottomEnd)
-                .padding(bottomButtonsPaddingDp)
-                .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
-          ) {
-            Icon(
-              imageVector = Icons.Filled.Add,
-              contentDescription = stringResource(R.string.add_a_location)
+            DrawerMenuTopAppBar(
+              modifier =
+                Modifier.align(Alignment.TopCenter)
+                  .fillMaxWidth()
+                  .background(backgroundToTransparentVerticalGradient)
+                  .padding(10.dp),
+              title = stringResource(commonR.string.locations),
+              onDrawerMenuClick = onDrawerMenuClick
             )
           }
         }
-        is Loading -> {
-          CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
         else -> {
-          DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
+          Box(modifier = Modifier.fillMaxSize()) {
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
 
-          NoLocationsCard(
-            modifier = Modifier.align(Alignment.Center).padding(20.dp),
-            onAddLocationClick = onAddLocationClick
-          )
+            NoLocationsCard(
+              modifier = Modifier.align(Alignment.Center).padding(20.dp),
+              onAddLocationClick = onAddLocationClick
+            )
+
+            DrawerMenuTopAppBar(
+              modifier =
+                Modifier.align(Alignment.TopCenter)
+                  .fillMaxWidth()
+                  .background(backgroundToTransparentVerticalGradient)
+                  .padding(10.dp),
+              title = stringResource(commonR.string.locations),
+              onDrawerMenuClick = onDrawerMenuClick
+            )
+          }
         }
       }
-
-      DrawerMenuTopAppBar(
-        modifier =
-          Modifier.align(Alignment.TopCenter)
-            .fillMaxWidth()
-            .background(backgroundToTransparentVerticalGradient)
-            .padding(10.dp),
-        title = stringResource(commonR.string.locations),
-        onDrawerMenuClick = onDrawerMenuClick
-      )
 
       DeleteLocationConfirmationDialog(
         locationBeingDeleted = locationBeingDeleted,
