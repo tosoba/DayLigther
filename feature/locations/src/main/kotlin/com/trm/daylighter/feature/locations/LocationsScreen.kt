@@ -72,7 +72,7 @@ private fun LocationsScreen(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier) {
+  Box(modifier = modifier) {
     val scope = rememberCoroutineScope()
 
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
