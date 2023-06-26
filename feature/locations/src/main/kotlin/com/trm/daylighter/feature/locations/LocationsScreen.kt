@@ -88,6 +88,15 @@ private fun LocationsScreen(
       }
     }
 
+    @Composable
+    fun TopAppBar(modifier: Modifier = Modifier) {
+      DrawerMenuTopAppBar(
+        modifier = modifier,
+        title = stringResource(commonR.string.locations),
+        onDrawerMenuClick = onDrawerMenuClick
+      )
+    }
+
     AnimatedContent(
       targetState = locations,
       transitionSpec = { fadeIn() with fadeOut() },
@@ -96,13 +105,11 @@ private fun LocationsScreen(
       when (locations) {
         is Ready -> {
           Column(modifier = Modifier.fillMaxSize()) {
-            DrawerMenuTopAppBar(
+            TopAppBar(
               modifier =
                 Modifier.fillMaxWidth()
                   .background(backgroundToTransparentVerticalGradient)
                   .padding(top = 10.dp, start = 10.dp, end = 10.dp),
-              title = stringResource(commonR.string.locations),
-              onDrawerMenuClick = onDrawerMenuClick
             )
 
             Box(modifier = Modifier.weight(1f)) {
@@ -163,14 +170,12 @@ private fun LocationsScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
-            DrawerMenuTopAppBar(
+            TopAppBar(
               modifier =
                 Modifier.align(Alignment.TopCenter)
                   .fillMaxWidth()
                   .background(backgroundToTransparentVerticalGradient)
                   .padding(10.dp),
-              title = stringResource(commonR.string.locations),
-              onDrawerMenuClick = onDrawerMenuClick
             )
           }
         }
@@ -183,14 +188,12 @@ private fun LocationsScreen(
               onAddLocationClick = onAddLocationClick
             )
 
-            DrawerMenuTopAppBar(
+            TopAppBar(
               modifier =
                 Modifier.align(Alignment.TopCenter)
                   .fillMaxWidth()
                   .background(backgroundToTransparentVerticalGradient)
                   .padding(10.dp),
-              title = stringResource(commonR.string.locations),
-              onDrawerMenuClick = onDrawerMenuClick
             )
           }
         }
