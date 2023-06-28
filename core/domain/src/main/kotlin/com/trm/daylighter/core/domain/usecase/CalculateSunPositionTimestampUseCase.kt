@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.domain.usecase
 
 import com.trm.daylighter.core.domain.model.HalfDay
-import com.trm.daylighter.core.domain.model.DawnOrTwilight
+import com.trm.daylighter.core.domain.model.SunPosition
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -10,12 +10,12 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.*
 
-class CalculateDawnOrTwilightUseCase @Inject constructor() {
+class CalculateSunPositionTimestampUseCase @Inject constructor() {
   operator fun invoke(
     latitude: Double,
     longitude: Double,
     date: LocalDateTime,
-    dawnOrTwilight: DawnOrTwilight,
+    sunPosition: SunPosition,
     halfDay: HalfDay,
     timeZone: TimeZone
   ): LocalDateTime? {
@@ -55,7 +55,7 @@ class CalculateDawnOrTwilightUseCase @Inject constructor() {
     val cosDec = cos(asin(sinDec))
 
     // calculate zenith (point right above viewer)
-    val zenith = -1 * dawnOrTwilight.degrees + 90
+    val zenith = -1 * sunPosition.degrees + 90
 
     // local hour angle
     val cosH =

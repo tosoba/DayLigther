@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.domain.usecase
 
-import com.trm.daylighter.core.domain.model.DawnOrTwilight
 import com.trm.daylighter.core.domain.model.HalfDay
+import com.trm.daylighter.core.domain.model.SunPosition
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -12,7 +12,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
-class CalculateDawnOrTwilightUseCaseTests {
+class CalculateSunPositionUseCaseTests {
   @Test
   fun london() {
     val lat = 52.13113642931021
@@ -61,22 +61,22 @@ class CalculateDawnOrTwilightUseCaseTests {
     val lat = 52.13113642931021
     val lng = 0.13225649369147163
     val zoneId = ZoneId.of("Europe/London")
-    val useCase = CalculateDawnOrTwilightUseCase()
+    val useCase = CalculateSunPositionTimestampUseCase()
     val date = LocalDateTime.now(zoneId)
 
     val start = System.currentTimeMillis()
 
     val results =
       HalfDay.values()
-        .flatMap { hd ->
-          DawnOrTwilight.values().map { dot ->
+        .flatMap { halfDay ->
+          SunPosition.values().map { sunPosition ->
             async(Dispatchers.Default) {
               useCase(
                 latitude = lat,
                 longitude = lng,
                 date = date,
-                dawnOrTwilight = dot,
-                halfDay = hd,
+                sunPosition = sunPosition,
+                halfDay = halfDay,
                 timeZone = TimeZone.getTimeZone(zoneId)
               )
             }
@@ -95,19 +95,21 @@ class CalculateDawnOrTwilightUseCaseTests {
     lng: Double,
     zoneId: ZoneId?
   ) {
-    val useCase = CalculateDawnOrTwilightUseCase()
-    HalfDay.values().forEach { hd ->
-      DawnOrTwilight.values().forEach { dot ->
+    val useCase = CalculateSunPositionTimestampUseCase()
+    HalfDay.values().forEach { halfDay ->
+      SunPosition.values().forEach { sunPosition ->
         val result =
           useCase(
             latitude = lat,
             longitude = lng,
             date = date,
-            dawnOrTwilight = dot,
-            halfDay = hd,
+            sunPosition = sunPosition,
+            halfDay = halfDay,
             timeZone = TimeZone.getTimeZone(zoneId)
           )
-        println("${hd.name} - ${dot.name} ${result?.format(DateTimeFormatter.ISO_DATE_TIME)}")
+        println(
+          "${halfDay.name} - ${sunPosition.name} ${result?.format(DateTimeFormatter.ISO_DATE_TIME)}"
+        )
       }
     }
   }

@@ -17,5 +17,9 @@ data class SunriseSunset(
   @Serializable(with = LocalDateTimeSerializer::class) val nauticalTwilightEnd: LocalDateTime?,
   @Serializable(with = LocalDateTimeSerializer::class) val sunrise: LocalDateTime?,
   @Serializable(with = LocalDateTimeSerializer::class) val sunset: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourStart: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourEnd: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val blueHourStart: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val blueHourEnd: LocalDateTime?,
   @Serializable(with = LocalDateSerializer::class) val date: LocalDate,
 )
