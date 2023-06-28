@@ -52,11 +52,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
@@ -81,7 +83,7 @@ fun WidgetLocationRoute(
   onDrawerMenuClick: () -> Unit,
   viewModel: WidgetLocationViewModel = hiltViewModel()
 ) {
-  val locations = viewModel.locations.collectAsState(initial = Empty)
+  val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   val selectedLocationId = viewModel.selectedLocationIdFlow.collectAsState()
 
   WidgetLocationScreen(

@@ -49,7 +49,7 @@ fun LocationsRoute(
   onDrawerMenuClick: () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
 ) {
-  val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = Empty)
+  val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   LocationsScreen(
     modifier = modifier,
     locations = locations.value,
