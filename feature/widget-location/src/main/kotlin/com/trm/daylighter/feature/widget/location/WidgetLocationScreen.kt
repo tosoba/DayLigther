@@ -131,7 +131,7 @@ private fun WidgetLocationScreen(
     fun TopAppBar(modifier: Modifier = Modifier) {
       DrawerMenuTopAppBar(
         modifier = modifier,
-        title = stringResource(commonR.string.locations),
+        title = stringResource(commonR.string.choose_widget_location),
         onDrawerMenuClick = onDrawerMenuClick
       )
     }
@@ -255,16 +255,6 @@ private fun WidgetLocationScreen(
         }
       }
     }
-
-    DrawerMenuTopAppBar(
-      modifier =
-        Modifier.align(Alignment.TopCenter)
-          .fillMaxWidth()
-          .background(backgroundToTransparentVerticalGradient)
-          .padding(10.dp),
-      title = stringResource(commonR.string.choose_widget_location),
-      onDrawerMenuClick = onDrawerMenuClick
-    )
   }
 }
 
