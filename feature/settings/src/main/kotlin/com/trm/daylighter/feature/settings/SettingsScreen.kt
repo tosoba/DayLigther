@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +34,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -85,7 +85,7 @@ private fun SettingsRoute(
 ) {
   val context = LocalContext.current
   val isGeocodeEmailPreferenceSet =
-    viewModel.isGeocodeEmailPreferenceSetFlow.collectAsState(initial = false)
+    viewModel.isGeocodeEmailPreferenceSetFlow.collectAsStateWithLifecycle(initialValue = false)
   val geocodingDisabledMessage = stringResource(R.string.geocoding_is_disabled)
   val locationsDeletedMessage = stringResource(R.string.locations_deleted)
 
@@ -242,7 +242,7 @@ private fun EditTextPref(
   val prefKey = stringPreferencesKey(key)
   val prefValue by
     remember { datastore.data.map { preferences -> preferences[prefKey] ?: defaultValue } }
-      .collectAsState(initial = defaultValue)
+      .collectAsStateWithLifecycle(initialValue = defaultValue)
 
   var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
   var textValueChanged by rememberSaveable { mutableStateOf(false) }

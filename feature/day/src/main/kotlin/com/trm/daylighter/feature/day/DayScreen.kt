@@ -43,6 +43,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
@@ -77,8 +78,9 @@ fun DayRoute(
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
-  val locations = viewModel.locationsFlow.collectAsState(initial = LoadingFirst)
-  val initialLocationIndex = viewModel.initialLocationIndexFlow.collectAsState(initial = 0)
+  val locations = viewModel.locationsFlow.collectAsStateWithLifecycle(initialValue = LoadingFirst)
+  val initialLocationIndex =
+    viewModel.initialLocationIndexFlow.collectAsStateWithLifecycle(initialValue = 0)
 
   DayScreen(
     locations = locations.value,
@@ -176,11 +178,13 @@ private fun DayScreen(
           ) { locationIndex ->
             val pageChange =
               sunriseSunsetChangeInLocationAt(locationIndex)
-                .collectAsState(initial = StableLoadable<LocationSunriseSunsetChange>(Empty))
+                .collectAsStateWithLifecycle(
+                  initialValue = StableLoadable<LocationSunriseSunsetChange>(Empty)
+                )
             val now =
               currentTimeInLocationAt(locationIndex)
-                .collectAsState(
-                  initial =
+                .collectAsStateWithLifecycle(
+                  initialValue =
                     LocalTime.now(
                       if (locations is WithData) locations.data[locationIndex].zoneId
                       else ZoneId.systemDefault()
@@ -421,7 +425,8 @@ private fun ClockAndDayLengthCard(
   modifier: Modifier = Modifier,
 ) {
   val dayPeriod =
-    remember(change) { dayPeriodFlow(change.value) }.collectAsState(initial = DayPeriod.DAY)
+    remember(change) { dayPeriodFlow(change.value) }
+      .collectAsStateWithLifecycle(initialValue = DayPeriod.DAY)
 
   Surface(
     shape = CardDefaults.shape,
