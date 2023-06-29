@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
@@ -125,8 +126,8 @@ private fun DayLighterDrawerContent(
       destination =
         DrawerDestination(
           route = dayRoute,
-          icon = Icons.Filled.SettingsSystemDaydream,
-          label = stringResource(R.string.day_periods_item)
+          icon = ImageVector.vectorResource(R.drawable.day_night_cycle_drawer_item),
+          label = stringResource(R.string.day_night_cycle_item)
         ),
       selected = currentRoute.startsWith(dayRoute),
       onItemClick = onItemClick
