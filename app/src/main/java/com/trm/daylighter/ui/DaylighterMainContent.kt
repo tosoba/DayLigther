@@ -13,10 +13,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
@@ -68,12 +69,9 @@ fun DayLighterMainContent() {
     drawerContent = {
       DayLighterDrawerContent(
         currentRoute = navController.currentRoute(),
-        onItemClick = { destination ->
+        onRouteSelected = { route ->
           scope.launch { drawerState.close() }
-          navController.navigate(
-            route = destination.route,
-            navOptions = navOptions { launchSingleTop = true }
-          )
+          navController.navigate(route = route, navOptions = navOptions { launchSingleTop = true })
         }
       )
     }
@@ -114,85 +112,66 @@ fun DayLighterMainContent() {
 @Composable
 private fun DayLighterDrawerContent(
   currentRoute: String,
-  onItemClick: (DrawerDestination) -> Unit
+  onRouteSelected: (route: String) -> Unit
 ) {
   val context = LocalContext.current
   val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
 
+  @Composable
+  fun DrawerRouteItem(
+    label: String,
+    route: String,
+    icon: @Composable () -> Unit,
+  ) {
+    NavigationDrawerItem(
+      icon = icon,
+      label = { Text(label) },
+      selected = currentRoute.startsWith(route),
+      onClick = { onRouteSelected(route) }
+    )
+  }
+
   ModalDrawerSheet {
     Spacer(Modifier.height(12.dp))
 
-    DayLighterDrawerItem(
-      destination =
-        DrawerDestination(
-          route = dayRoute,
-          icon = ImageVector.vectorResource(R.drawable.day_night_cycle_drawer_item),
-          label = stringResource(R.string.day_night_cycle_item)
-        ),
-      selected = currentRoute.startsWith(dayRoute),
-      onItemClick = onItemClick
-    )
-
-    if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DayLighterDrawerItem(
-        destination =
-          DrawerDestination(
-            route = newWidgetRoute,
-            icon = Icons.Filled.Widgets,
-            label = stringResource(R.string.new_widget_item)
-          ),
-        selected = currentRoute.startsWith(newWidgetRoute),
-        onItemClick = onItemClick
+    DrawerRouteItem(label = stringResource(R.string.day_night_cycle_item), route = dayRoute) {
+      Icon(
+        painter = painterResource(R.drawable.day_night_cycle_drawer_item),
+        tint = Color.Unspecified,
+        contentDescription = stringResource(R.string.day_night_cycle_item)
       )
     }
 
-    DayLighterDrawerItem(
-      destination =
-        DrawerDestination(
-          route = locationsRoute,
-          icon = Icons.Filled.LocationOn,
-          label = stringResource(R.string.locations_item)
-        ),
-      selected = currentRoute.startsWith(locationsRoute),
-      onItemClick = onItemClick
-    )
+    if (appWidgetManager.isRequestPinAppWidgetSupported) {
+      DrawerRouteItem(label = stringResource(R.string.new_widget_item), route = newWidgetRoute) {
+        Icon(
+          imageVector = Icons.Filled.Widgets,
+          contentDescription = stringResource(R.string.new_widget_item)
+        )
+      }
+    }
 
-    DayLighterDrawerItem(
-      destination =
-        DrawerDestination(
-          route = settingsRoute,
-          icon = Icons.Filled.Settings,
-          label = stringResource(R.string.settings_item)
-        ),
-      selected = currentRoute.startsWith(settingsRoute),
-      onItemClick = onItemClick
-    )
+    DrawerRouteItem(label = stringResource(R.string.locations_item), route = locationsRoute) {
+      Icon(
+        imageVector = Icons.Filled.LocationOn,
+        contentDescription = stringResource(R.string.locations_item)
+      )
+    }
 
-    DayLighterDrawerItem(
-      destination =
-        DrawerDestination(
-          route = aboutRoute,
-          icon = Icons.Filled.Info,
-          label = stringResource(R.string.about_item)
-        ),
-      selected = currentRoute.startsWith(aboutRoute),
-      onItemClick = onItemClick
-    )
+    DrawerRouteItem(label = stringResource(R.string.settings_item), route = settingsRoute) {
+      Icon(
+        imageVector = Icons.Filled.Settings,
+        contentDescription = stringResource(R.string.settings_item)
+      )
+    }
+
+    DrawerRouteItem(label = stringResource(R.string.about_item), route = aboutRoute) {
+      Icon(
+        imageVector = Icons.Filled.Info,
+        contentDescription = stringResource(R.string.about_item)
+      )
+    }
   }
-}
-
-@Composable
-private fun DayLighterDrawerItem(
-  destination: DrawerDestination,
-  selected: Boolean = false,
-  onItemClick: (DrawerDestination) -> Unit
-) {
-  NavigationDrawerItem(
-    icon = { Icon(imageVector = destination.icon, contentDescription = destination.label) },
-    label = { Text(text = destination.label) },
-    selected = selected,
-    onClick = { onItemClick(destination) }
-  )
 }
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
