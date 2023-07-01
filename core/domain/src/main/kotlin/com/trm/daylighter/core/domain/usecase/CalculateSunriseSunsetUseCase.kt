@@ -36,9 +36,9 @@ constructor(private val calculateSunPositionTimestampUseCase: CalculateSunPositi
       nauticalTwilightEnd = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.EVENING),
       sunrise = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.MORNING),
       sunset = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.EVENING),
-      goldenHourStart = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR, HalfDay.MORNING),
+      goldenHourBegin = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR, HalfDay.MORNING),
       goldenHourEnd = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR, HalfDay.EVENING),
-      blueHourStart = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.MORNING),
+      blueHourBegin = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.MORNING),
       blueHourEnd = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.EVENING),
       date = date.toLocalDate()
     )

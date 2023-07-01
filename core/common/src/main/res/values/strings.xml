@@ -29,6 +29,8 @@
     <string name="nautical_twilight">Nautical twilight</string>
     <string name="astronomical_twilight">Astronomical twilight</string>
     <string name="night">Night</string>
+    <string name="golden_hour">Golden hour</string>
+    <string name="blue_hour">Blue hour</string>
     <string name="civil_dawn">Civil dawn</string>
     <string name="civil_dusk">Civil dusk</string>
     <string name="nautical_dawn">Nautical dawn</string>
