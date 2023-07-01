@@ -223,6 +223,8 @@ fun DayPeriodChart(
           dayMode = dayMode,
           orientation = orientation
         )
+      if (timeAndDiffLabel.isBlank()) return@repeat
+
       val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeAndDiffLabel))
       val timeTopLeft =
         Offset(
@@ -278,18 +280,18 @@ private fun buildTimeAndDiffLabel(
   chartSegment: DayChartSegment,
   dayMode: DayMode,
   orientation: Int
-): String = buildString {
-  append(
-    chartSegment.run {
-      requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel)
-    }()
-  )
-  append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
-  append(
-    chartSegment.run {
-      requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseDiffLabel else sunsetDiffLabel)
-    }
-  )
+): String {
+  val timeLabel =
+    chartSegment.run { if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel }
+  if (timeLabel.isBlank()) return ""
+  val diffLabel =
+    chartSegment.run { if (dayMode == DayMode.SUNRISE) sunriseDiffLabel else sunsetDiffLabel }
+  if (diffLabel.isBlank()) return timeLabel
+  return buildString {
+    append(timeLabel)
+    append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
+    append(diffLabel)
+  }
 }
 
 @OptIn(ExperimentalTextApi::class)
@@ -521,10 +523,10 @@ private data class DayChartSegment(
   val periodLabel: String,
   val sunriseEndingEdgeLabel: String = "",
   val sunsetEndingEdgeLabel: String = "",
-  val sunriseTimeLabel: (() -> String)? = null,
-  val sunsetTimeLabel: (() -> String)? = null,
-  val sunriseDiffLabel: String? = null,
-  val sunsetDiffLabel: String? = null,
+  val sunriseTimeLabel: String = "",
+  val sunsetTimeLabel: String = "",
+  val sunriseDiffLabel: String = "",
+  val sunsetDiffLabel: String = "",
 )
 
 @Composable
@@ -581,8 +583,8 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = dayLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = sunriseLabel,
             sunsetEndingEdgeLabel = sunsetLabel,
-            sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
-            sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat) ?: { "" },
+            sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat) ?: "",
+            sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat) ?: "",
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change?.yesterday?.sunrise,
@@ -614,9 +616,8 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = civilTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = civilDawnLabel,
             sunsetEndingEdgeLabel = civilDuskLabel,
-            sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat)
-                ?: { "" },
-            sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: "",
+            sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: "",
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change?.yesterday?.civilTwilightBegin,
@@ -649,9 +650,8 @@ private fun dayLengthPeriodChartSegments(
             sunriseEndingEdgeLabel = nauticalDawnLabel,
             sunsetEndingEdgeLabel = nauticalDuskLabel,
             sunriseTimeLabel = change?.today?.nauticalTwilightBegin?.timeLabel(using24HFormat)
-                ?: { "" },
-            sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat)
-                ?: { "" },
+                ?: "",
+            sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: "",
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change?.yesterday?.nauticalTwilightBegin,
@@ -686,9 +686,9 @@ private fun dayLengthPeriodChartSegments(
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
             sunsetEndingEdgeLabel = astronomicalDuskLabel,
             sunriseTimeLabel = change?.today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
-                ?: { "" },
+                ?: "",
             sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat)
-                ?: { "" },
+                ?: "",
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change?.yesterday?.astronomicalTwilightBegin,

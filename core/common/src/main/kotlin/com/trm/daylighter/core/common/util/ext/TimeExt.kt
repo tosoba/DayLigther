@@ -26,8 +26,8 @@ val LocalDateTime.isoLocalTimeLabel24H: String
 val LocalDateTime.isoLocalTimeLabel12H: String
   get() = format(DateTimeFormatter.ofPattern("hh:mm:ss a"))
 
-fun LocalDateTime.timeLabel(using24HFormat: Boolean): () -> String =
-  if (using24HFormat) ::isoLocalTimeLabel24H else ::isoLocalTimeLabel12H
+fun LocalDateTime.timeLabel(using24HFormat: Boolean): String =
+  if (using24HFormat) isoLocalTimeLabel24H else isoLocalTimeLabel12H
 
 fun timeDifferenceLabel(from: LocalTime, to: LocalTime): String {
   val fromSecondOfDay = from.toSecondOfDay()
