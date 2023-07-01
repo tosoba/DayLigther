@@ -102,10 +102,10 @@ fun DayPeriodChart(
   val chartSegments =
     when (chartMode) {
       DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
-        dayNightCycleChartSegments(change = changeValue.dataOrNull())
+        dayNightCycleChartSegments(change = changeValue.dataOrNull(), dayMode = dayMode)
       }
       DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
-        goldenBlueHourChartSegments(change = changeValue.dataOrNull())
+        goldenBlueHourChartSegments(change = changeValue.dataOrNull(), dayMode = dayMode)
       }
     }
 
@@ -259,12 +259,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
   val chartCenter = chartCenter(orientation)
   val textRadiusMultiplier = chartTextRadiusMultiplier(orientation)
 
-  val endingEdgeLabel =
-    AnnotatedString(
-      chartSegment.run {
-        if (dayMode == DayMode.SUNRISE) sunriseEndingEdgeLabel else sunsetEndingEdgeLabel
-      }
-    )
+  val endingEdgeLabel = AnnotatedString(chartSegment.endingEdgeLabel)
   val endingEdgeLabelLayoutResult = textMeasurer.measure(text = endingEdgeLabel)
   val endingEdgeLabelTopLeft =
     Offset(
@@ -277,12 +272,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
           if (chartSegment.periodLabel.startsWith(dayLabel)) {
             0f
           } else {
-            endingEdgeLabelLayoutResult.size.height /
-              if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                2f
-              } else {
-                4f
-              }
+            endingEdgeLabelLayoutResult.size.height / 4f
           }
     )
   drawText(
@@ -310,8 +300,11 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
         ),
       y =
         chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-          if (chartSegment.periodLabel.startsWith(dayLabel)) 0f
-          else timeLayoutResult.size.height / 2f
+          if (chartSegment.periodLabel.startsWith(dayLabel)) {
+            0f
+          } else {
+            timeLayoutResult.size.height / 4f
+          }
     )
   drawText(
     textMeasurer = textMeasurer,
@@ -567,8 +560,7 @@ private data class DayChartSegment(
   val periodLabelAngle: Float,
   val color: Color,
   val periodLabel: String,
-  val sunriseEndingEdgeLabel: String = "",
-  val sunsetEndingEdgeLabel: String = "",
+  val endingEdgeLabel: String = "",
   val sunriseTimeLabel: String = "",
   val sunsetTimeLabel: String = "",
   val sunriseDiffLabel: String = "",
@@ -577,9 +569,9 @@ private data class DayChartSegment(
 
 @Composable
 private fun dayNightCycleChartSegments(
-  change: LocationSunriseSunsetChange?
+  change: LocationSunriseSunsetChange?,
+  dayMode: DayMode,
 ): List<DayChartSegment> {
-  val orientation = LocalConfiguration.current.orientation
   val using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
 
   val sunriseLabel = stringResource(R.string.sunrise)
@@ -603,17 +595,11 @@ private fun dayNightCycleChartSegments(
         .maxOf(String::length)
     )
 
-  val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
-  val civilDawnLabel = stringResource(R.string.civil_dawn_degrees_below, edgeLabelSeparator)
-  val civilDuskLabel = stringResource(R.string.civil_dusk_degrees_below, edgeLabelSeparator)
-  val nauticalDawnLabel = stringResource(R.string.nautical_dawn_degrees_below, edgeLabelSeparator)
-  val nauticalDuskLabel = stringResource(R.string.nautical_dusk_degrees_below, edgeLabelSeparator)
-  val astronomicalDawnLabel =
-    stringResource(R.string.astronomical_dawn_degrees_below, edgeLabelSeparator)
-  val astronomicalDuskLabel =
-    stringResource(R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
+  val civilDawnLabel = stringResource(R.string.six_degrees_below)
+  val nauticalDawnLabel = stringResource(R.string.twelve_degrees_below)
+  val astronomicalDawnLabel = stringResource(R.string.eighteen_degrees_below)
 
-  return remember(change, using24HFormat) {
+  return remember(change, dayMode, using24HFormat) {
     var accumulatedSweepAngle = 0f
     buildList {
       if (
@@ -627,8 +613,11 @@ private fun dayNightCycleChartSegments(
             sweepAngleDegrees = 90f + accumulatedSweepAngle,
             periodLabelAngle = 0f,
             periodLabel = dayLabel.padToLongestPeriodLabel(),
-            sunriseEndingEdgeLabel = sunriseLabel,
-            sunsetEndingEdgeLabel = sunsetLabel,
+            endingEdgeLabel =
+              when (dayMode) {
+                DayMode.SUNRISE -> sunriseLabel
+                DayMode.SUNSET -> sunsetLabel
+              },
             using24HFormat = using24HFormat,
             showDiffLabels = true,
           )
@@ -648,8 +637,7 @@ private fun dayNightCycleChartSegments(
             change = change,
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             periodLabel = civilTwilightLabel.padToLongestPeriodLabel(),
-            sunriseEndingEdgeLabel = civilDawnLabel,
-            sunsetEndingEdgeLabel = civilDuskLabel,
+            endingEdgeLabel = civilDawnLabel,
             using24HFormat = using24HFormat,
             showDiffLabels = true,
           )
@@ -669,8 +657,7 @@ private fun dayNightCycleChartSegments(
             change = change,
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             periodLabel = nauticalTwilightLabel.padToLongestPeriodLabel(),
-            nauticalDawnLabel = nauticalDawnLabel,
-            nauticalDuskLabel = nauticalDuskLabel,
+            endingEdgeLabel = nauticalDawnLabel,
             using24HFormat = using24HFormat,
             showDiffLabels = true,
           )
@@ -692,8 +679,7 @@ private fun dayNightCycleChartSegments(
             change = change,
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             periodLabel = astronomicalTwilightLabel.padToLongestPeriodLabel(),
-            astronomicalDawnLabel = astronomicalDawnLabel,
-            astronomicalDuskLabel = astronomicalDuskLabel,
+            endingEdgeLabel = astronomicalDawnLabel,
             using24HFormat = using24HFormat,
             showDiffLabels = true,
           )
@@ -735,7 +721,8 @@ private fun dayNightCycleChartSegments(
 
 @Composable
 private fun goldenBlueHourChartSegments(
-  change: LocationSunriseSunsetChange?
+  change: LocationSunriseSunsetChange?,
+  dayMode: DayMode,
 ): List<DayChartSegment> {
   val orientation = LocalConfiguration.current.orientation
   val using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
@@ -764,16 +751,11 @@ private fun goldenBlueHourChartSegments(
     )
 
   val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
-  val civilDawnLabel = stringResource(R.string.civil_dawn_degrees_below, edgeLabelSeparator)
-  val civilDuskLabel = stringResource(R.string.civil_dusk_degrees_below, edgeLabelSeparator)
-  val nauticalDawnLabel = stringResource(R.string.nautical_dawn_degrees_below, edgeLabelSeparator)
-  val nauticalDuskLabel = stringResource(R.string.nautical_dusk_degrees_below, edgeLabelSeparator)
-  val astronomicalDawnLabel =
-    stringResource(R.string.astronomical_dawn_degrees_below, edgeLabelSeparator)
-  val astronomicalDuskLabel =
-    stringResource(R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
+  val sixDegreesLabel = stringResource(R.string.six_degrees_below, edgeLabelSeparator)
+  val twelveDegreesLabel = stringResource(R.string.twelve_degrees_below, edgeLabelSeparator)
+  val eighteenDegreesLabel = stringResource(R.string.eighteen_degrees_below, edgeLabelSeparator)
 
-  return remember(change, using24HFormat) {
+  return remember(change, dayMode, using24HFormat) {
     var accumulatedSweepAngle = 0f
     buildList {
       if (
@@ -788,8 +770,11 @@ private fun goldenBlueHourChartSegments(
             periodLabelAngle =
               if (change?.today?.isPolarDayAtLocation(change.location) == true) 0f else -9f,
             periodLabel = dayLabel.padToLongestPeriodLabel(),
-            sunriseEndingEdgeLabel = sunriseLabel,
-            sunsetEndingEdgeLabel = sunsetLabel,
+            endingEdgeLabel =
+              when (dayMode) {
+                DayMode.SUNRISE -> sunriseLabel
+                DayMode.SUNSET -> sunsetLabel
+              },
             using24HFormat = using24HFormat,
             showDiffLabels = false
           )
@@ -809,8 +794,7 @@ private fun goldenBlueHourChartSegments(
             change = change,
             sweepAngleDegrees = 10f + accumulatedSweepAngle,
             periodLabel = goldenHourLabel.padToLongestPeriodLabel(),
-            sunriseEndingEdgeLabel = "",
-            sunsetEndingEdgeLabel = "",
+            endingEdgeLabel = "",
             using24HFormat = using24HFormat,
           )
         )
@@ -829,8 +813,7 @@ private fun goldenBlueHourChartSegments(
             change = change,
             sweepAngleDegrees = 2f + accumulatedSweepAngle,
             periodLabel = blueHourLabel.padToLongestPeriodLabel(),
-            sunriseEndingEdgeLabel = civilDawnLabel,
-            sunsetEndingEdgeLabel = civilDuskLabel,
+            endingEdgeLabel = sixDegreesLabel,
             using24HFormat = using24HFormat
           )
         )
@@ -849,8 +832,7 @@ private fun goldenBlueHourChartSegments(
             change = change,
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             periodLabel = nauticalTwilightLabel.padToLongestPeriodLabel(),
-            nauticalDawnLabel = nauticalDawnLabel,
-            nauticalDuskLabel = nauticalDuskLabel,
+            endingEdgeLabel = twelveDegreesLabel,
             using24HFormat = using24HFormat,
             showDiffLabels = false
           )
@@ -872,8 +854,7 @@ private fun goldenBlueHourChartSegments(
             change = change,
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
             periodLabel = astronomicalTwilightLabel.padToLongestPeriodLabel(),
-            astronomicalDawnLabel = astronomicalDawnLabel,
-            astronomicalDuskLabel = astronomicalDuskLabel,
+            endingEdgeLabel = eighteenDegreesLabel,
             using24HFormat = using24HFormat,
             showDiffLabels = false
           )
@@ -918,8 +899,7 @@ private fun dayChartSegment(
   sweepAngleDegrees: Float,
   periodLabelAngle: Float,
   periodLabel: String,
-  sunriseEndingEdgeLabel: String,
-  sunsetEndingEdgeLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean,
   showDiffLabels: Boolean,
 ): DayChartSegment =
@@ -929,8 +909,7 @@ private fun dayChartSegment(
     periodLabelAngle = periodLabelAngle,
     color = dayColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
-    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel =
@@ -957,8 +936,7 @@ private fun civilTwilightChartSegment(
   change: LocationSunriseSunsetChange?,
   sweepAngleDegrees: Float,
   periodLabel: String,
-  sunriseEndingEdgeLabel: String,
-  sunsetEndingEdgeLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean,
   showDiffLabels: Boolean,
 ): DayChartSegment =
@@ -968,8 +946,7 @@ private fun civilTwilightChartSegment(
     periodLabelAngle = 3f,
     color = civilTwilightColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
-    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel =
@@ -996,8 +973,7 @@ private fun nauticalTwilightChartSegment(
   change: LocationSunriseSunsetChange?,
   sweepAngleDegrees: Float,
   periodLabel: String,
-  nauticalDawnLabel: String,
-  nauticalDuskLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean,
   showDiffLabels: Boolean,
 ): DayChartSegment =
@@ -1007,8 +983,7 @@ private fun nauticalTwilightChartSegment(
     periodLabelAngle = 9f,
     color = nauticalTwilightColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = nauticalDawnLabel,
-    sunsetEndingEdgeLabel = nauticalDuskLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel = change?.today?.nauticalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel =
@@ -1035,8 +1010,7 @@ private fun astronomicalTwilightChartSegment(
   change: LocationSunriseSunsetChange?,
   sweepAngleDegrees: Float,
   periodLabel: String,
-  astronomicalDawnLabel: String,
-  astronomicalDuskLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean,
   showDiffLabels: Boolean,
 ): DayChartSegment =
@@ -1046,8 +1020,7 @@ private fun astronomicalTwilightChartSegment(
     periodLabelAngle = 15f,
     color = astronomicalTwilightColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = astronomicalDawnLabel,
-    sunsetEndingEdgeLabel = astronomicalDuskLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel =
       change?.today?.astronomicalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
@@ -1088,8 +1061,7 @@ private fun goldenHourChartSegment(
   change: LocationSunriseSunsetChange?,
   sweepAngleDegrees: Float,
   periodLabel: String,
-  sunriseEndingEdgeLabel: String,
-  sunsetEndingEdgeLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean
 ): DayChartSegment =
   DayChartSegment(
@@ -1098,8 +1070,7 @@ private fun goldenHourChartSegment(
     periodLabelAngle = -1f,
     color = goldenHourColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
-    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel = change?.today?.goldenHourBegin?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.goldenHourEnd?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel = "",
@@ -1110,8 +1081,7 @@ private fun blueHourChartSegment(
   change: LocationSunriseSunsetChange?,
   sweepAngleDegrees: Float,
   periodLabel: String,
-  sunriseEndingEdgeLabel: String,
-  sunsetEndingEdgeLabel: String,
+  endingEdgeLabel: String,
   using24HFormat: Boolean
 ): DayChartSegment =
   DayChartSegment(
@@ -1120,8 +1090,7 @@ private fun blueHourChartSegment(
     periodLabelAngle = 5f,
     color = blueHourColor,
     periodLabel = periodLabel,
-    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
-    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    endingEdgeLabel = endingEdgeLabel,
     sunriseTimeLabel = change?.today?.blueHourBegin?.timeLabel(using24HFormat).orEmpty(),
     sunsetTimeLabel = change?.today?.blueHourEnd?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel = "",

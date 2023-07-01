@@ -37,12 +37,9 @@
     <string name="nautical_dusk">Nautical dusk</string>
     <string name="astronomical_dawn">Astronomical dawn</string>
     <string name="astronomical_dusk">Astronomical dusk</string>
-    <string name="civil_dawn_degrees_below">Civil dawn %1$s 6º below</string>
-    <string name="civil_dusk_degrees_below">Civil dusk %1$s 6º below</string>
-    <string name="nautical_dawn_degrees_below">Nautical dawn %1$s 12º below</string>
-    <string name="nautical_dusk_degrees_below">Nautical dusk %1$s 12º below</string>
-    <string name="astronomical_dawn_degrees_below">Astronomical dawn %1$s 18º below</string>
-    <string name="astronomical_dusk_degrees_below">Astronomical dusk %1$s 18º below</string>
+    <string name="six_degrees_below">6º below</string>
+    <string name="twelve_degrees_below">12º below</string>
+    <string name="eighteen_degrees_below">18º below</string>
 
     <string name="deep_link_scheme">deeplink</string>
     <string name="deep_link_host">daylighter</string>
