@@ -54,6 +54,7 @@ import com.trm.daylighter.core.ui.theme.dayColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
 import java.lang.Float.max
+import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
 import kotlin.math.asin
@@ -287,7 +288,7 @@ private fun buildTimeAndDiffLabel(
   append(
     chartSegment.run {
       requireNotNull(if (dayMode == DayMode.SUNRISE) sunriseDiffLabel else sunsetDiffLabel)
-    }()
+    }
   )
 }
 
@@ -522,8 +523,8 @@ private data class DayChartSegment(
   val sunsetEndingEdgeLabel: String = "",
   val sunriseTimeLabel: (() -> String)? = null,
   val sunsetTimeLabel: (() -> String)? = null,
-  val sunriseDiffLabel: (() -> String)? = null,
-  val sunsetDiffLabel: (() -> String)? = null,
+  val sunriseDiffLabel: String? = null,
+  val sunsetDiffLabel: String? = null,
 )
 
 @Composable
@@ -582,24 +583,16 @@ private fun dayLengthPeriodChartSegments(
             sunsetEndingEdgeLabel = sunsetLabel,
             sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
             sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat) ?: { "" },
-            sunriseDiffLabel = {
-              val yesterdaySunrise = change?.yesterday?.sunrise
-              val todaySunrise = change?.today?.sunrise
-              if (todaySunrise != null && yesterdaySunrise != null) {
-                timeDifferenceLabel(yesterdaySunrise.toLocalTime(), todaySunrise.toLocalTime())
-              } else {
-                ""
-              }
-            },
-            sunsetDiffLabel = {
-              val yesterdaySunset = change?.yesterday?.sunset
-              val todaySunset = change?.today?.sunset
-              if (todaySunset != null && yesterdaySunset != null) {
-                timeDifferenceLabel(yesterdaySunset.toLocalTime(), todaySunset.toLocalTime())
-              } else {
-                ""
-              }
-            }
+            sunriseDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.sunrise,
+                todayTimestamp = change?.today?.sunrise
+              ),
+            sunsetDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.sunset,
+                todayTimestamp = change?.today?.sunset
+              )
           )
         )
         accumulatedSweepAngle = 0f
@@ -624,30 +617,16 @@ private fun dayLengthPeriodChartSegments(
             sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat)
                 ?: { "" },
             sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
-            sunriseDiffLabel = {
-              val yesterdayCivilTwilightBegin = change?.yesterday?.civilTwilightBegin
-              val todayCivilTwilightBegin = change?.today?.civilTwilightBegin
-              if (yesterdayCivilTwilightBegin != null && todayCivilTwilightBegin != null) {
-                timeDifferenceLabel(
-                  yesterdayCivilTwilightBegin.toLocalTime(),
-                  todayCivilTwilightBegin.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            },
-            sunsetDiffLabel = {
-              val yesterdayCivilTwilightEnd = change?.yesterday?.civilTwilightEnd
-              val todayCivilTwilightEnd = change?.today?.civilTwilightEnd
-              if (todayCivilTwilightEnd != null && yesterdayCivilTwilightEnd != null) {
-                timeDifferenceLabel(
-                  yesterdayCivilTwilightEnd.toLocalTime(),
-                  todayCivilTwilightEnd.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            }
+            sunriseDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.civilTwilightBegin,
+                todayTimestamp = change?.today?.civilTwilightBegin
+              ),
+            sunsetDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.civilTwilightEnd,
+                todayTimestamp = change?.today?.civilTwilightEnd
+              )
           )
         )
         accumulatedSweepAngle = 0f
@@ -673,30 +652,16 @@ private fun dayLengthPeriodChartSegments(
                 ?: { "" },
             sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat)
                 ?: { "" },
-            sunriseDiffLabel = {
-              val todayNauticalTwilightBegin = change?.today?.nauticalTwilightBegin
-              val yesterdayNauticalTwilightBegin = change?.yesterday?.nauticalTwilightBegin
-              if (todayNauticalTwilightBegin != null && yesterdayNauticalTwilightBegin != null) {
-                timeDifferenceLabel(
-                  yesterdayNauticalTwilightBegin.toLocalTime(),
-                  todayNauticalTwilightBegin.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            },
-            sunsetDiffLabel = {
-              val todayNauticalTwilightEnd = change?.today?.nauticalTwilightEnd
-              val yesterdayNauticalTwilightEnd = change?.yesterday?.nauticalTwilightEnd
-              if (todayNauticalTwilightEnd != null && yesterdayNauticalTwilightEnd != null) {
-                timeDifferenceLabel(
-                  yesterdayNauticalTwilightEnd.toLocalTime(),
-                  todayNauticalTwilightEnd.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            }
+            sunriseDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.nauticalTwilightBegin,
+                todayTimestamp = change?.today?.nauticalTwilightBegin
+              ),
+            sunsetDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.nauticalTwilightEnd,
+                todayTimestamp = change?.today?.nauticalTwilightEnd
+              )
           )
         )
         accumulatedSweepAngle = 0f
@@ -724,34 +689,16 @@ private fun dayLengthPeriodChartSegments(
                 ?: { "" },
             sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat)
                 ?: { "" },
-            sunriseDiffLabel = {
-              val yesterdayAstronomicalTwilightBegin = change?.yesterday?.astronomicalTwilightBegin
-              val todayAstronomicalTwilightBegin = change?.today?.astronomicalTwilightBegin
-              if (
-                todayAstronomicalTwilightBegin != null && yesterdayAstronomicalTwilightBegin != null
-              ) {
-                timeDifferenceLabel(
-                  yesterdayAstronomicalTwilightBegin.toLocalTime(),
-                  todayAstronomicalTwilightBegin.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            },
-            sunsetDiffLabel = {
-              val yesterdayAstronomicalTwilightEnd = change?.yesterday?.astronomicalTwilightEnd
-              val todayAstronomicalTwilightEnd = change?.today?.astronomicalTwilightEnd
-              if (
-                todayAstronomicalTwilightEnd != null && yesterdayAstronomicalTwilightEnd != null
-              ) {
-                timeDifferenceLabel(
-                  yesterdayAstronomicalTwilightEnd.toLocalTime(),
-                  todayAstronomicalTwilightEnd.toLocalTime()
-                )
-              } else {
-                ""
-              }
-            }
+            sunriseDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.astronomicalTwilightBegin,
+                todayTimestamp = change?.today?.astronomicalTwilightBegin
+              ),
+            sunsetDiffLabel =
+              timestampDiffLabel(
+                yesterdayTimestamp = change?.yesterday?.astronomicalTwilightEnd,
+                todayTimestamp = change?.today?.astronomicalTwilightEnd
+              )
           )
         )
         accumulatedSweepAngle = 0f
@@ -789,3 +736,13 @@ private fun dayLengthPeriodChartSegments(
     }
   }
 }
+
+private fun timestampDiffLabel(
+  yesterdayTimestamp: LocalDateTime?,
+  todayTimestamp: LocalDateTime?
+): String =
+  if (yesterdayTimestamp != null && todayTimestamp != null) {
+    timeDifferenceLabel(yesterdayTimestamp.toLocalTime(), todayTimestamp.toLocalTime())
+  } else {
+    ""
+  }
