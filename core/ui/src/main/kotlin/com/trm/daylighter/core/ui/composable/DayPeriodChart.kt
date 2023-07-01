@@ -94,62 +94,19 @@ fun DayPeriodChart(
   now: LocalTime = LocalTime.now(),
   appBarHeightPx: Float = 0f
 ) {
-  val orientation = LocalConfiguration.current.orientation
-
   val changeValue = change.value
-
   val chartSegments = dayLengthPeriodChartSegments(change = changeValue.dataOrNull())
 
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
+  val orientation = LocalConfiguration.current.orientation
   val dayLabel = stringResource(R.string.day)
   val nowLineColor = colorResource(id = R.color.now_line)
 
   Canvas(modifier = modifier) {
-    val topLeftOffset = chartTopLeftOffset(orientation)
-    var startAngle = -90f
-
-    fun DrawScope.drawChartSegment(segment: DayChartSegment) {
-      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-        drawIntoCanvas {
-          val paint =
-            Paint().apply {
-              style = PaintingStyle.Stroke
-              strokeWidth = 50f
-            }
-          paint.asFrameworkPaint().apply {
-            color = segment.color.copy(alpha = 0f).toArgb()
-            setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
-          }
-          it.drawArc(
-            left = topLeftOffset.x,
-            top = topLeftOffset.y,
-            bottom = topLeftOffset.y + chartSegmentSize.height,
-            right = topLeftOffset.x + chartSegmentSize.width,
-            startAngle = startAngle,
-            sweepAngle = segment.sweepAngleDegrees,
-            useCenter = false,
-            paint = paint,
-          )
-        }
-
-        drawArc(
-          color = segment.color,
-          startAngle = startAngle,
-          sweepAngle = segment.sweepAngleDegrees,
-          useCenter = true,
-          topLeft = topLeftOffset,
-          size = chartSegmentSize
-        )
-
-        startAngle += segment.sweepAngleDegrees
-      }
-    }
-
-    chartSegments.forEach(::drawChartSegment)
-
+    drawChartSegments(chartSegments = chartSegments, orientation = orientation)
     if (changeValue !is Ready) return@Canvas
 
     repeat(chartSegments.size - 1) { segmentIndex ->
@@ -195,6 +152,50 @@ fun DayPeriodChart(
       appBarHeightPx = appBarHeightPx,
     )
   }
+}
+
+private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>, orientation: Int) {
+  val topLeftOffset = chartTopLeftOffset(orientation)
+  var startAngle = -90f
+
+  fun DrawScope.drawChartSegment(segment: DayChartSegment) {
+    clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+      drawIntoCanvas {
+        val paint =
+          Paint().apply {
+            style = PaintingStyle.Stroke
+            strokeWidth = 50f
+          }
+        paint.asFrameworkPaint().apply {
+          color = segment.color.copy(alpha = 0f).toArgb()
+          setShadowLayer(40f, 0f, 0f, segment.color.copy(alpha = .75f).toArgb())
+        }
+        it.drawArc(
+          left = topLeftOffset.x,
+          top = topLeftOffset.y,
+          bottom = topLeftOffset.y + chartSegmentSize.height,
+          right = topLeftOffset.x + chartSegmentSize.width,
+          startAngle = startAngle,
+          sweepAngle = segment.sweepAngleDegrees,
+          useCenter = false,
+          paint = paint,
+        )
+      }
+
+      drawArc(
+        color = segment.color,
+        startAngle = startAngle,
+        sweepAngle = segment.sweepAngleDegrees,
+        useCenter = true,
+        topLeft = topLeftOffset,
+        size = chartSegmentSize
+      )
+
+      startAngle += segment.sweepAngleDegrees
+    }
+  }
+
+  chartSegments.forEach(::drawChartSegment)
 }
 
 private fun DrawScope.drawEndingEdge(
