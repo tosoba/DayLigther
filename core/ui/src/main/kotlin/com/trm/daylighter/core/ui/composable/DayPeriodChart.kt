@@ -579,17 +579,18 @@ private fun dayLengthPeriodChartSegments(
   val nauticalTwilightLabel = stringResource(R.string.nautical_twilight)
   val astronomicalTwilightLabel = stringResource(R.string.astronomical_twilight)
   val nightLabel = stringResource(R.string.night)
-  val longestTwilightLabelLength =
-    listOf(
-        dayLabel,
-        civilTwilightLabel,
-        nauticalTwilightLabel,
-        astronomicalTwilightLabel,
-        nightLabel
-      )
-      .maxOf(String::length)
 
-  fun String.padToLongestLabel(): String = padEnd(longestTwilightLabelLength)
+  fun String.padToLongestLabel(): String =
+    padEnd(
+      listOf(
+          dayLabel,
+          civilTwilightLabel,
+          nauticalTwilightLabel,
+          astronomicalTwilightLabel,
+          nightLabel
+        )
+        .maxOf(String::length)
+    )
 
   val edgeLabelSeparator = if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " - "
   val civilDawnLabel = stringResource(R.string.civil_dawn_degrees_below, edgeLabelSeparator)
