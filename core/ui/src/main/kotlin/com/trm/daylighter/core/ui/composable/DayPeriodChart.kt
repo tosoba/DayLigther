@@ -47,6 +47,7 @@ import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.model.dataOrNull
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
+import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
@@ -90,6 +91,7 @@ private fun chartTextRadiusMultiplier(orientation: Int): Float =
 fun DayPeriodChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
   modifier: Modifier = Modifier,
+  chartMode: DayPeriodChartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
   dayMode: DayMode = DayMode.SUNRISE,
   now: LocalTime = LocalTime.now(),
   appBarHeightPx: Float = 0f
@@ -98,7 +100,7 @@ fun DayPeriodChart(
   val chartSegments = dayLengthPeriodChartSegments(change = changeValue.dataOrNull())
 
   val textMeasurer = rememberTextMeasurer()
-  val labelSmallTextStyle = MaterialTheme.typography.labelSmall
+  val labelTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
   val orientation = LocalConfiguration.current.orientation
@@ -120,7 +122,7 @@ fun DayPeriodChart(
       drawEndingEdgeAndTimeDiffLabels(
         chartSegment = chartSegments[segmentIndex],
         textMeasurer = textMeasurer,
-        textStyle = labelSmallTextStyle.copy(color = textColor),
+        textStyle = labelTextStyle.copy(color = textColor),
         endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians,
         dayMode = dayMode,
         dayLabel = dayLabel,
@@ -131,7 +133,7 @@ fun DayPeriodChart(
     drawPeriodLabels(
       chartSegments = chartSegments,
       textMeasurer = textMeasurer,
-      textStyle = labelSmallTextStyle,
+      textStyle = labelTextStyle,
       dayLabel = dayLabel,
       orientation = orientation
     )

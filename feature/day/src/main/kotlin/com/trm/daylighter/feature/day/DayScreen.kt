@@ -57,6 +57,7 @@ import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.ext.color
 import com.trm.daylighter.core.ui.ext.textColor
 import com.trm.daylighter.core.ui.ext.textShadowColor
+import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
@@ -73,6 +74,7 @@ const val goldenBlueHourRoute = "golden_blue_hour_route"
 
 @Composable
 fun DayRoute(
+  chartMode: DayPeriodChartMode,
   onDrawerMenuClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
@@ -84,6 +86,7 @@ fun DayRoute(
     viewModel.initialLocationIndexFlow.collectAsStateWithLifecycle(initialValue = 0)
 
   DayScreen(
+    chartMode = chartMode,
     locations = locations.value,
     initialLocationIndex = initialLocationIndex.value,
     sunriseSunsetChangeInLocationAt = viewModel::sunriseSunsetChangeInLocationAt,
@@ -98,6 +101,7 @@ fun DayRoute(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DayScreen(
+  chartMode: DayPeriodChartMode,
   locations: Loadable<List<Location>>,
   initialLocationIndex: Int,
   sunriseSunsetChangeInLocationAt: (Int) -> Flow<StableLoadable<LocationSunriseSunsetChange>>,
@@ -113,7 +117,6 @@ private fun DayScreen(
     var appBarHeightPx by remember { mutableStateOf(0f) }
 
     val pagerState = rememberPagerState(initialPage = initialLocationIndex)
-
     var pageChanged by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(pagerState.currentPage) { if (pagerState.currentPage > 0) pageChanged = true }
     LaunchedEffect(initialLocationIndex) {
@@ -195,6 +198,7 @@ private fun DayScreen(
             DayPeriodChart(
               change = pageChange.value,
               modifier = Modifier.fillMaxSize(),
+              chartMode = chartMode,
               dayMode = dayMode,
               now = now.value,
               appBarHeightPx = appBarHeightPx
@@ -216,6 +220,7 @@ private fun DayScreen(
             DayPeriodChart(
               change = Empty.asStable(),
               modifier = Modifier.fillMaxSize().alpha(.5f),
+              chartMode = chartMode,
               appBarHeightPx = appBarHeightPx
             )
 

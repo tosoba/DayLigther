@@ -31,6 +31,7 @@ import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.core.ui.composable.DrawerMenuButton
+import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
@@ -268,6 +269,7 @@ private fun DayLighterNavHost(
     ) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
+        chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
         onDrawerMenuClick = onDrawerMenuClick,
         onAddLocationClick = ::navigateToAddLocation,
         onEditLocationClick = ::navigateToEditLocation,
@@ -280,6 +282,7 @@ private fun DayLighterNavHost(
     ) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
+        chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR,
         onDrawerMenuClick = onDrawerMenuClick,
         onAddLocationClick = ::navigateToAddLocation,
         onEditLocationClick = ::navigateToEditLocation,
