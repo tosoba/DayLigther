@@ -9,7 +9,9 @@ import javax.inject.Inject
 
 class CalculateSunriseSunsetUseCase
 @Inject
-constructor(private val calculateSunPositionTimestampUseCase: CalculateSunPositionTimestampUseCase) {
+constructor(
+  private val calculateSunPositionTimestampUseCase: CalculateSunPositionTimestampUseCase
+) {
   operator fun invoke(
     date: LocalDateTime,
     latitude: Double,
@@ -36,8 +38,14 @@ constructor(private val calculateSunPositionTimestampUseCase: CalculateSunPositi
       nauticalTwilightEnd = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.EVENING),
       sunrise = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.MORNING),
       sunset = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.EVENING),
-      goldenHourBegin = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR, HalfDay.MORNING),
-      goldenHourEnd = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR, HalfDay.EVENING),
+      goldenHourAboveMorning =
+        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.MORNING),
+      goldenHourBelowMorning =
+        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.MORNING),
+      goldenHourAboveEvening =
+        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.EVENING),
+      goldenHourBelowEvening =
+        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.EVENING),
       blueHourBegin = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.MORNING),
       blueHourEnd = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.EVENING),
       date = date.toLocalDate()

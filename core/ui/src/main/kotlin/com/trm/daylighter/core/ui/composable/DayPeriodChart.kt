@@ -786,8 +786,10 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.sunrise != null && change.today.sunset != null) ||
-          (change.today.goldenHourBegin != null && change.today.goldenHourEnd != null)
+          (change.today.goldenHourAboveMorning != null &&
+            change.today.goldenHourAboveMorning != null) ||
+          (change.today.goldenHourBelowMorning != null &&
+            change.today.goldenHourBelowMorning != null)
       ) {
         add(
           goldenHourChartSegment(
@@ -805,7 +807,8 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.goldenHourBegin != null && change.today.goldenHourEnd != null) ||
+          (change.today.goldenHourBelowMorning != null &&
+            change.today.goldenHourBelowMorning != null) ||
           (change.today.blueHourBegin != null && change.today.blueHourEnd != null)
       ) {
         add(
@@ -1071,8 +1074,8 @@ private fun goldenHourChartSegment(
     color = goldenHourColor,
     periodLabel = periodLabel,
     endingEdgeLabel = endingEdgeLabel,
-    sunriseTimeLabel = change?.today?.goldenHourBegin?.timeLabel(using24HFormat).orEmpty(),
-    sunsetTimeLabel = change?.today?.goldenHourEnd?.timeLabel(using24HFormat).orEmpty(),
+    sunriseTimeLabel = change?.today?.goldenHourBelowMorning?.timeLabel(using24HFormat).orEmpty(),
+    sunsetTimeLabel = change?.today?.goldenHourBelowEvening?.timeLabel(using24HFormat).orEmpty(),
     sunriseDiffLabel = "",
     sunsetDiffLabel = ""
   )
