@@ -153,32 +153,12 @@ fun DayPeriodChart(
     repeat(chartSegments.size - 1) { segmentIndex ->
       val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians
 
-      clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-        val lineRadiusMultiplier =
-          when {
-            chartSegments[segmentIndex].periodLabel.startsWith(dayLabel) -> 10f
-            orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
-            else -> landscapeLineRadiusMultiplier
-          }
-        val strokeWidth = 4f
-
-        drawLine(
-          color = chartSegments[segmentIndex + 1].color,
-          start = chartCenter,
-          end =
-            Offset(
-              x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(endingEdgeAngleRadians),
-              y =
-                chartCenter.y +
-                  chartRadius * lineRadiusMultiplier * sin(endingEdgeAngleRadians) +
-                  strokeWidth
-            ),
-          strokeWidth = strokeWidth,
-          pathEffect =
-            if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) null
-            else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-        )
-      }
+      drawEndingEdge(
+        chartSegments = chartSegments,
+        segmentIndex = segmentIndex,
+        dayLabel = dayLabel,
+        orientation = orientation,
+      )
 
       val textRadiusMultiplier =
         if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
@@ -272,6 +252,42 @@ fun DayPeriodChart(
       nowLineColor = nowLineColor,
       orientation = orientation,
       appBarHeightPx = appBarHeightPx,
+    )
+  }
+}
+
+private fun DrawScope.drawEndingEdge(
+  chartSegments: List<DayChartSegment>,
+  segmentIndex: Int,
+  dayLabel: String,
+  orientation: Int
+) {
+  clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+    val chartCenter = chartCenter(orientation)
+    val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians
+    val lineRadiusMultiplier =
+      when {
+        chartSegments[segmentIndex].periodLabel.startsWith(dayLabel) -> 10f
+        orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
+        else -> landscapeLineRadiusMultiplier
+      }
+    val strokeWidth = 4f
+
+    drawLine(
+      color = chartSegments[segmentIndex + 1].color,
+      start = chartCenter,
+      end =
+        Offset(
+          x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(endingEdgeAngleRadians),
+          y =
+            chartCenter.y +
+              chartRadius * lineRadiusMultiplier * sin(endingEdgeAngleRadians) +
+              strokeWidth
+        ),
+      strokeWidth = strokeWidth,
+      pathEffect =
+        if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) null
+        else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     )
   }
 }
