@@ -68,7 +68,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 
-const val dayRoute = "day_route"
+const val dayNightCycleRoute = "day_night_cycle_route"
+const val goldenBlueHourRoute = "golden_blue_hour_route"
 
 @Composable
 fun DayRoute(

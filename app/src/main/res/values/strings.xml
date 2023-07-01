@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">DayLighter</string>
     <string name="empty" />
+    <string name="day_night_cycle_item">Day/night cycle</string>
+    <string name="golden_blue_hour_item">Golden/blue hour</string>
     <string name="new_widget_item">New widget</string>
     <string name="locations_item">Locations</string>
     <string name="about_item">About</string>
     <string name="settings_item">Settings</string>
-    <string name="day_night_cycle_item">Day/night cycle</string>
 </resources>

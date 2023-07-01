@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,14 +26,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.R
-import com.trm.daylighter.core.common.navigation.addLocationDeepPattern
-import com.trm.daylighter.core.common.navigation.dayDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.core.ui.composable.DrawerMenuButton
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
-import com.trm.daylighter.feature.day.dayRoute
+import com.trm.daylighter.feature.day.dayNightCycleRoute
+import com.trm.daylighter.feature.day.goldenBlueHourRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
@@ -48,7 +49,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 private fun NavController.currentRoute(): String =
-  currentBackStackEntryAsState().value?.destination?.route ?: dayRoute
+  currentBackStackEntryAsState().value?.destination?.route ?: dayNightCycleRoute
+
+@Composable
+private fun NavController.currentRouteIsTopLevel(): Boolean =
+  currentRoute().let { route -> !route.startsWith(aboutRoute) && !route.startsWith(settingsRoute) }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +68,7 @@ fun DayLighterMainContent() {
   }
 
   ModalNavigationDrawer(
-    gesturesEnabled = currentRoute == dayRoute,
+    gesturesEnabled = navController.currentRouteIsTopLevel(),
     drawerState = drawerState,
     drawerContent = {
       DayLighterDrawerContent(
@@ -80,7 +85,7 @@ fun DayLighterMainContent() {
       onDrawerMenuClick = ::onDrawerMenuClick,
       topBar = {
         AnimatedVisibility(
-          visible = currentRoute == aboutRoute || currentRoute.startsWith(settingsRoute),
+          visible = !navController.currentRouteIsTopLevel(),
           enter = fadeIn(),
           exit = fadeOut(),
         ) {
@@ -117,11 +122,7 @@ private fun DayLighterDrawerContent(
   val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
 
   @Composable
-  fun DrawerRouteItem(
-    label: String,
-    route: String,
-    icon: @Composable () -> Unit,
-  ) {
+  fun DrawerRouteItem(label: String, route: String, icon: @Composable () -> Unit) {
     NavigationDrawerItem(
       icon = icon,
       label = { Text(label) },
@@ -133,11 +134,23 @@ private fun DayLighterDrawerContent(
   ModalDrawerSheet {
     Spacer(Modifier.height(12.dp))
 
-    DrawerRouteItem(label = stringResource(R.string.day_night_cycle_item), route = dayRoute) {
+    DrawerRouteItem(
+      label = stringResource(R.string.day_night_cycle_item),
+      route = dayNightCycleRoute
+    ) {
       Icon(
         painter = painterResource(R.drawable.day_night_cycle_drawer_item),
-        tint = Color.Unspecified,
         contentDescription = stringResource(R.string.day_night_cycle_item)
+      )
+    }
+
+    DrawerRouteItem(
+      label = stringResource(R.string.golden_blue_hour_item),
+      route = goldenBlueHourRoute
+    ) {
+      Icon(
+        imageVector = Icons.Filled.PhotoCamera,
+        contentDescription = stringResource(R.string.golden_blue_hour_item)
       )
     }
 
@@ -239,12 +252,32 @@ private fun DayLighterNavHost(
   }
 
   val context = LocalContext.current
-  val dayDeepLinkUri = context.dayDeepLinkPattern()
-  val addLocationDeepLinkUri = context.addLocationDeepPattern()
-  val widgetLocationDeepLinkUri = context.widgetLocationDeepLinkPattern()
+  val dayNightCycleDeepLinkUriPattern = context.dayNightCycleDeepLinkPattern()
+  val goldenBlueHourDeepLinkUriPattern = context.goldenBlueHourDeepLinkPattern()
+  val addLocationDeepLinkUriPattern = context.addLocationDeepLinkPattern()
+  val widgetLocationDeepLinkUriPattern = context.widgetLocationDeepLinkPattern()
 
-  NavHost(navController = navController, startDestination = dayRoute, modifier = modifier) {
-    composable(route = dayRoute, deepLinks = listOf(navDeepLink { uriPattern = dayDeepLinkUri })) {
+  NavHost(
+    navController = navController,
+    startDestination = dayNightCycleRoute,
+    modifier = modifier
+  ) {
+    composable(
+      route = dayNightCycleRoute,
+      deepLinks = listOf(navDeepLink { uriPattern = dayNightCycleDeepLinkUriPattern })
+    ) {
+      DayRoute(
+        modifier = Modifier.fillMaxSize(),
+        onDrawerMenuClick = onDrawerMenuClick,
+        onAddLocationClick = ::navigateToAddLocation,
+        onEditLocationClick = ::navigateToEditLocation,
+      )
+    }
+
+    composable(
+      route = goldenBlueHourRoute,
+      deepLinks = listOf(navDeepLink { uriPattern = goldenBlueHourDeepLinkUriPattern })
+    ) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
@@ -259,7 +292,7 @@ private fun DayLighterNavHost(
 
     composable(
       route = locationRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUri })
+      deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUriPattern })
     ) {
       LocationRoute(
         modifier = Modifier.fillMaxSize(),
@@ -290,7 +323,7 @@ private fun DayLighterNavHost(
 
     composable(
       route = newWidgetRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUri })
+      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern })
     ) {
       WidgetLocationRoute(
         modifier = Modifier.fillMaxSize(),

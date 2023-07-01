@@ -42,7 +42,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentSize
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.navigation.dayDeepLinkUri
+import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
@@ -133,7 +133,7 @@ class LocationWidget(
           .appWidgetBackgroundCornerRadius()
           .clickable(
             deepLinkAction(
-              context.dayDeepLinkUri(
+              context.dayNightCycleDeepLinkUri(
                 locationId = change.location.id,
                 isDefault = change.location.isDefault
               )

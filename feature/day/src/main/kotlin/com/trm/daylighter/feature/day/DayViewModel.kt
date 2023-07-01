@@ -3,7 +3,7 @@ package com.trm.daylighter.feature.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trm.daylighter.core.common.navigation.DayDeepLinkParams
+import com.trm.daylighter.core.common.navigation.DayNightCycleDeepLinkParams
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
@@ -38,11 +38,11 @@ constructor(
   val initialLocationIndexFlow: SharedFlow<Int> =
     flow {
         if (
-          savedStateHandle.contains(DayDeepLinkParams.LOCATION_ID) &&
-            !savedStateHandle.get<String>(DayDeepLinkParams.DEFAULT).toBoolean()
+          savedStateHandle.contains(DayNightCycleDeepLinkParams.LOCATION_ID) &&
+            !savedStateHandle.get<String>(DayNightCycleDeepLinkParams.DEFAULT).toBoolean()
         ) {
           val locationId =
-            requireNotNull(savedStateHandle.get<String>(DayDeepLinkParams.LOCATION_ID)).toLong()
+            requireNotNull(savedStateHandle.get<String>(DayNightCycleDeepLinkParams.LOCATION_ID)).toLong()
           emit(getNonDefaultLocationOffsetByIdUseCase(locationId) ?: 0)
         } else {
           emit(0)
