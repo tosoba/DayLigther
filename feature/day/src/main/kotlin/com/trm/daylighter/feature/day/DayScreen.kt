@@ -715,7 +715,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
 private fun DayLengthIcon(dayPeriod: DayPeriod) {
   Box {
     Icon(
-      painter = painterResource(id = commonR.drawable.day_length_shadow),
+      painter = painterResource(commonR.drawable.day_length_shadow),
       tint = Color.Unspecified,
       contentDescription = null,
       modifier = Modifier.offset(x = 1.dp, y = 1.dp)

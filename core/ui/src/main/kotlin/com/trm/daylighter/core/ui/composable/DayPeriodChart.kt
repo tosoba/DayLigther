@@ -103,7 +103,7 @@ fun DayPeriodChart(
 
   val orientation = LocalConfiguration.current.orientation
   val dayLabel = stringResource(R.string.day)
-  val nowLineColor = colorResource(id = R.color.now_line)
+  val nowLineColor = colorResource(R.color.now_line)
 
   Canvas(modifier = modifier) {
     drawChartSegments(chartSegments = chartSegments, orientation = orientation)

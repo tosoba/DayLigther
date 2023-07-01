@@ -423,7 +423,7 @@ private fun MapView(locationMap: LocationMap, modifier: Modifier = Modifier) {
 @Composable
 private fun MarkerIcon(modifier: Modifier = Modifier) {
   Icon(
-    painter = painterResource(id = commonR.drawable.marker),
+    painter = painterResource(commonR.drawable.marker),
     contentDescription = stringResource(commonR.string.location_marker),
     modifier = modifier
   )
