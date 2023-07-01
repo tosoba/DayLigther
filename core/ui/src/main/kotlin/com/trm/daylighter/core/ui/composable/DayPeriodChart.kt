@@ -120,7 +120,7 @@ fun DayPeriodChart(
       drawEndingEdgeAndTimeDiffLabels(
         chartSegment = chartSegments[segmentIndex],
         textMeasurer = textMeasurer,
-        textStyle = labelSmallTextStyle.copy(textAlign = TextAlign.Left, color = textColor),
+        textStyle = labelSmallTextStyle.copy(color = textColor),
         endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians,
         dayMode = dayMode,
         dayLabel = dayLabel,
@@ -277,7 +277,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
     textMeasurer = textMeasurer,
     text = endingEdgeLabel,
     topLeft = endingEdgeLabelTopLeft,
-    style = textStyle,
+    style = textStyle.copy(textAlign = TextAlign.Left),
     maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
     overflow = TextOverflow.Ellipsis,
   )
@@ -305,7 +305,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
     textMeasurer = textMeasurer,
     text = timeAndDiffLabel,
     topLeft = timeTopLeft,
-    style = textStyle,
+    style = textStyle.copy(textAlign = TextAlign.Right),
     maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
     overflow = TextOverflow.Ellipsis,
   )
