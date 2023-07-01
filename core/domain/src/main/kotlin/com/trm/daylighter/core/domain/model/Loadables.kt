@@ -96,3 +96,5 @@ inline fun <reified T : Collection<*>> T?.asLoadable(): Loadable<T> =
   if (isNullOrEmpty()) Empty else Ready(this)
 
 fun <T : Any> Loadable<T>.dataOrElse(fallback: T): T = if (this is WithData) data else fallback
+
+fun <T : Any> Loadable<T>.dataOrNull(): T? = if (this is WithData) data else null

@@ -44,7 +44,7 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
-import com.trm.daylighter.core.domain.model.WithData
+import com.trm.daylighter.core.domain.model.dataOrNull
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.model.StableLoadable
@@ -93,25 +93,14 @@ fun DayPeriodChart(
   val orientation = LocalConfiguration.current.orientation
 
   val changeValue = change.value
-  val location = if (changeValue is WithData) changeValue.data.location else null
-  val today = if (changeValue is WithData) changeValue.data.today else null
-  val yesterday = if (changeValue is WithData) changeValue.data.yesterday else null
 
-  val chartSegments =
-    dayLengthPeriodChartSegments(
-      location = location,
-      today = today,
-      yesterday = yesterday,
-      orientation = orientation,
-      using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
-    )
+  val chartSegments = dayLengthPeriodChartSegments(change = changeValue.dataOrNull())
 
   val textMeasurer = rememberTextMeasurer()
   val labelSmallTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
   val dayLabel = stringResource(R.string.day)
-
   val nowLineColor = colorResource(id = R.color.now_line)
 
   Canvas(modifier = modifier) {
@@ -273,8 +262,8 @@ fun DayPeriodChart(
     }
 
     drawNowLine(
-      today = requireNotNull(today),
-      location = requireNotNull(location),
+      today = changeValue.data.today,
+      location = changeValue.data.location,
       now = now,
       dayMode = dayMode,
       nowLineColor = nowLineColor,
@@ -539,12 +528,11 @@ private data class DayChartSegment(
 
 @Composable
 private fun dayLengthPeriodChartSegments(
-  location: Location?,
-  today: SunriseSunset?,
-  yesterday: SunriseSunset?,
-  orientation: Int,
-  using24HFormat: Boolean
+  change: LocationSunriseSunsetChange?
 ): List<DayChartSegment> {
+  val orientation = LocalConfiguration.current.orientation
+  val using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
+
   val sunriseLabel = stringResource(R.string.sunrise)
   val sunsetLabel = stringResource(R.string.sunset)
 
@@ -575,13 +563,13 @@ private fun dayLengthPeriodChartSegments(
   val astronomicalDuskLabel =
     stringResource(R.string.astronomical_dusk_degrees_below, edgeLabelSeparator)
 
-  return remember(today, yesterday, using24HFormat) {
+  return remember(change, using24HFormat) {
     var accumulatedSweepAngle = 0f
     buildList {
       if (
-        today == null ||
-          (today.sunrise != null && today.sunset != null) ||
-          today.isPolarDayAtLocation(requireNotNull(location))
+        change == null ||
+          (change.today.sunrise != null && change.today.sunset != null) ||
+          change.today.isPolarDayAtLocation(change.location)
       ) {
         add(
           DayChartSegment(
@@ -592,11 +580,11 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = dayLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = sunriseLabel,
             sunsetEndingEdgeLabel = sunsetLabel,
-            sunriseTimeLabel = today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
-            sunsetTimeLabel = today?.sunset?.timeLabel(using24HFormat) ?: { "" },
+            sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat) ?: { "" },
+            sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat) ?: { "" },
             sunriseDiffLabel = {
-              val yesterdaySunrise = yesterday?.sunrise
-              val todaySunrise = today?.sunrise
+              val yesterdaySunrise = change?.yesterday?.sunrise
+              val todaySunrise = change?.today?.sunrise
               if (todaySunrise != null && yesterdaySunrise != null) {
                 timeDifferenceLabel(yesterdaySunrise.toLocalTime(), todaySunrise.toLocalTime())
               } else {
@@ -604,8 +592,8 @@ private fun dayLengthPeriodChartSegments(
               }
             },
             sunsetDiffLabel = {
-              val yesterdaySunset = yesterday?.sunset
-              val todaySunset = today?.sunset
+              val yesterdaySunset = change?.yesterday?.sunset
+              val todaySunset = change?.today?.sunset
               if (todaySunset != null && yesterdaySunset != null) {
                 timeDifferenceLabel(yesterdaySunset.toLocalTime(), todaySunset.toLocalTime())
               } else {
@@ -620,9 +608,9 @@ private fun dayLengthPeriodChartSegments(
       }
 
       if (
-        today == null ||
-          (today.sunrise != null && today.sunset != null) ||
-          (today.civilTwilightBegin != null && today.civilTwilightEnd != null)
+        change == null ||
+          (change.today.sunrise != null && change.today.sunset != null) ||
+          (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null)
       ) {
         add(
           DayChartSegment(
@@ -633,11 +621,12 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = civilTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = civilDawnLabel,
             sunsetEndingEdgeLabel = civilDuskLabel,
-            sunriseTimeLabel = today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
-            sunsetTimeLabel = today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat)
+                ?: { "" },
+            sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
             sunriseDiffLabel = {
-              val yesterdayCivilTwilightBegin = yesterday?.civilTwilightBegin
-              val todayCivilTwilightBegin = today?.civilTwilightBegin
+              val yesterdayCivilTwilightBegin = change?.yesterday?.civilTwilightBegin
+              val todayCivilTwilightBegin = change?.today?.civilTwilightBegin
               if (yesterdayCivilTwilightBegin != null && todayCivilTwilightBegin != null) {
                 timeDifferenceLabel(
                   yesterdayCivilTwilightBegin.toLocalTime(),
@@ -648,8 +637,8 @@ private fun dayLengthPeriodChartSegments(
               }
             },
             sunsetDiffLabel = {
-              val yesterdayCivilTwilightEnd = yesterday?.civilTwilightEnd
-              val todayCivilTwilightEnd = today?.civilTwilightEnd
+              val yesterdayCivilTwilightEnd = change?.yesterday?.civilTwilightEnd
+              val todayCivilTwilightEnd = change?.today?.civilTwilightEnd
               if (todayCivilTwilightEnd != null && yesterdayCivilTwilightEnd != null) {
                 timeDifferenceLabel(
                   yesterdayCivilTwilightEnd.toLocalTime(),
@@ -667,9 +656,9 @@ private fun dayLengthPeriodChartSegments(
       }
 
       if (
-        today == null ||
-          (today.civilTwilightBegin != null && today.civilTwilightEnd != null) ||
-          (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null)
+        change == null ||
+          (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null) ||
+          (change.today.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null)
       ) {
         add(
           DayChartSegment(
@@ -680,11 +669,13 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = nauticalTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = nauticalDawnLabel,
             sunsetEndingEdgeLabel = nauticalDuskLabel,
-            sunriseTimeLabel = today?.nauticalTwilightBegin?.timeLabel(using24HFormat) ?: { "" },
-            sunsetTimeLabel = today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunriseTimeLabel = change?.today?.nauticalTwilightBegin?.timeLabel(using24HFormat)
+                ?: { "" },
+            sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat)
+                ?: { "" },
             sunriseDiffLabel = {
-              val todayNauticalTwilightBegin = today?.nauticalTwilightBegin
-              val yesterdayNauticalTwilightBegin = yesterday?.nauticalTwilightBegin
+              val todayNauticalTwilightBegin = change?.today?.nauticalTwilightBegin
+              val yesterdayNauticalTwilightBegin = change?.yesterday?.nauticalTwilightBegin
               if (todayNauticalTwilightBegin != null && yesterdayNauticalTwilightBegin != null) {
                 timeDifferenceLabel(
                   yesterdayNauticalTwilightBegin.toLocalTime(),
@@ -695,8 +686,8 @@ private fun dayLengthPeriodChartSegments(
               }
             },
             sunsetDiffLabel = {
-              val todayNauticalTwilightEnd = today?.nauticalTwilightEnd
-              val yesterdayNauticalTwilightEnd = yesterday?.nauticalTwilightEnd
+              val todayNauticalTwilightEnd = change?.today?.nauticalTwilightEnd
+              val yesterdayNauticalTwilightEnd = change?.yesterday?.nauticalTwilightEnd
               if (todayNauticalTwilightEnd != null && yesterdayNauticalTwilightEnd != null) {
                 timeDifferenceLabel(
                   yesterdayNauticalTwilightEnd.toLocalTime(),
@@ -714,9 +705,11 @@ private fun dayLengthPeriodChartSegments(
       }
 
       if (
-        today == null ||
-          (today.nauticalTwilightBegin != null && today.nauticalTwilightEnd != null) ||
-          (today.astronomicalTwilightBegin != null && today.astronomicalTwilightEnd != null)
+        change == null ||
+          (change.today.nauticalTwilightBegin != null &&
+            change.today.nauticalTwilightEnd != null) ||
+          (change.today.astronomicalTwilightBegin != null &&
+            change.today.astronomicalTwilightEnd != null)
       ) {
         add(
           DayChartSegment(
@@ -727,12 +720,13 @@ private fun dayLengthPeriodChartSegments(
             periodLabel = astronomicalTwilightLabel.padToLongestLabel(),
             sunriseEndingEdgeLabel = astronomicalDawnLabel,
             sunsetEndingEdgeLabel = astronomicalDuskLabel,
-            sunriseTimeLabel = today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
+            sunriseTimeLabel = change?.today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
                 ?: { "" },
-            sunsetTimeLabel = today?.astronomicalTwilightEnd?.timeLabel(using24HFormat) ?: { "" },
+            sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat)
+                ?: { "" },
             sunriseDiffLabel = {
-              val yesterdayAstronomicalTwilightBegin = yesterday?.astronomicalTwilightBegin
-              val todayAstronomicalTwilightBegin = today?.astronomicalTwilightBegin
+              val yesterdayAstronomicalTwilightBegin = change?.yesterday?.astronomicalTwilightBegin
+              val todayAstronomicalTwilightBegin = change?.today?.astronomicalTwilightBegin
               if (
                 todayAstronomicalTwilightBegin != null && yesterdayAstronomicalTwilightBegin != null
               ) {
@@ -745,8 +739,8 @@ private fun dayLengthPeriodChartSegments(
               }
             },
             sunsetDiffLabel = {
-              val yesterdayAstronomicalTwilightEnd = yesterday?.astronomicalTwilightEnd
-              val todayAstronomicalTwilightEnd = today?.astronomicalTwilightEnd
+              val yesterdayAstronomicalTwilightEnd = change?.yesterday?.astronomicalTwilightEnd
+              val todayAstronomicalTwilightEnd = change?.today?.astronomicalTwilightEnd
               if (
                 todayAstronomicalTwilightEnd != null && yesterdayAstronomicalTwilightEnd != null
               ) {
@@ -766,9 +760,10 @@ private fun dayLengthPeriodChartSegments(
       }
 
       if (
-        today == null ||
-          (today.astronomicalTwilightBegin != null && today.astronomicalTwilightEnd != null) ||
-          today.isPolarNightAtLocation(requireNotNull(location))
+        change == null ||
+          (change.today.astronomicalTwilightBegin != null &&
+            change.today.astronomicalTwilightEnd != null) ||
+          change.today.isPolarNightAtLocation(change.location)
       ) {
         add(
           DayChartSegment(
