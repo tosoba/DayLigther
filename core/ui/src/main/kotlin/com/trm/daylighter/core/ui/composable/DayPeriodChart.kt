@@ -82,7 +82,7 @@ private fun DrawScope.chartCenter(orientation: Int): Offset =
 private val DrawScope.chartTextPaddingPx: Float
   get() = 3.dp.toPx()
 
-fun chartTextRadiusMultiplier(orientation: Int): Float =
+private fun chartTextRadiusMultiplier(orientation: Int): Float =
   if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
 
 @OptIn(ExperimentalTextApi::class)
@@ -580,7 +580,7 @@ private fun dayLengthPeriodChartSegments(
   val astronomicalTwilightLabel = stringResource(R.string.astronomical_twilight)
   val nightLabel = stringResource(R.string.night)
 
-  fun String.padToLongestLabel(): String =
+  fun String.padToLongestPeriodLabel(): String =
     padEnd(
       listOf(
           dayLabel,
@@ -611,26 +611,13 @@ private fun dayLengthPeriodChartSegments(
           change.today.isPolarDayAtLocation(change.location)
       ) {
         add(
-          DayChartSegment(
-            sweepAngleDegrees = 90f + accumulatedSweepAngle,
-            endingEdgeAngle = 0f,
-            periodLabelAngle = 0f,
-            color = dayColor,
-            periodLabel = dayLabel.padToLongestLabel(),
+          dayChartSegment(
+            change = change,
+            accumulatedSweepAngle = accumulatedSweepAngle,
+            periodLabel = dayLabel.padToLongestPeriodLabel(),
             sunriseEndingEdgeLabel = sunriseLabel,
             sunsetEndingEdgeLabel = sunsetLabel,
-            sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat) ?: "",
-            sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat) ?: "",
-            sunriseDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.sunrise,
-                todayTimestamp = change?.today?.sunrise
-              ),
-            sunsetDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.sunset,
-                todayTimestamp = change?.today?.sunset
-              )
+            using24HFormat = using24HFormat
           )
         )
         accumulatedSweepAngle = 0f
@@ -644,26 +631,13 @@ private fun dayLengthPeriodChartSegments(
           (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null)
       ) {
         add(
-          DayChartSegment(
-            sweepAngleDegrees = 6f + accumulatedSweepAngle,
-            endingEdgeAngle = 0f,
-            periodLabelAngle = 6f,
-            color = civilTwilightColor,
-            periodLabel = civilTwilightLabel.padToLongestLabel(),
+          civilTwilightChartSegment(
+            change = change,
+            accumulatedSweepAngle = accumulatedSweepAngle,
+            periodLabel = civilTwilightLabel.padToLongestPeriodLabel(),
             sunriseEndingEdgeLabel = civilDawnLabel,
             sunsetEndingEdgeLabel = civilDuskLabel,
-            sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat) ?: "",
-            sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat) ?: "",
-            sunriseDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.civilTwilightBegin,
-                todayTimestamp = change?.today?.civilTwilightBegin
-              ),
-            sunsetDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.civilTwilightEnd,
-                todayTimestamp = change?.today?.civilTwilightEnd
-              )
+            using24HFormat = using24HFormat
           )
         )
         accumulatedSweepAngle = 0f
@@ -677,27 +651,13 @@ private fun dayLengthPeriodChartSegments(
           (change.today.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null)
       ) {
         add(
-          DayChartSegment(
-            sweepAngleDegrees = 6f + accumulatedSweepAngle,
-            endingEdgeAngle = 6f,
-            periodLabelAngle = 12f,
-            color = nauticalTwilightColor,
-            periodLabel = nauticalTwilightLabel.padToLongestLabel(),
-            sunriseEndingEdgeLabel = nauticalDawnLabel,
-            sunsetEndingEdgeLabel = nauticalDuskLabel,
-            sunriseTimeLabel = change?.today?.nauticalTwilightBegin?.timeLabel(using24HFormat)
-                ?: "",
-            sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat) ?: "",
-            sunriseDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.nauticalTwilightBegin,
-                todayTimestamp = change?.today?.nauticalTwilightBegin
-              ),
-            sunsetDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.nauticalTwilightEnd,
-                todayTimestamp = change?.today?.nauticalTwilightEnd
-              )
+          nauticalTwilightChartSegment(
+            change = change,
+            accumulatedSweepAngle = accumulatedSweepAngle,
+            periodLabel = nauticalTwilightLabel.padToLongestPeriodLabel(),
+            nauticalDawnLabel = nauticalDawnLabel,
+            nauticalDuskLabel = nauticalDuskLabel,
+            using24HFormat = using24HFormat
           )
         )
         accumulatedSweepAngle = 0f
@@ -713,28 +673,13 @@ private fun dayLengthPeriodChartSegments(
             change.today.astronomicalTwilightEnd != null)
       ) {
         add(
-          DayChartSegment(
-            sweepAngleDegrees = 6f + accumulatedSweepAngle,
-            endingEdgeAngle = 12f,
-            periodLabelAngle = 18f,
-            color = astronomicalTwilightColor,
-            periodLabel = astronomicalTwilightLabel.padToLongestLabel(),
-            sunriseEndingEdgeLabel = astronomicalDawnLabel,
-            sunsetEndingEdgeLabel = astronomicalDuskLabel,
-            sunriseTimeLabel = change?.today?.astronomicalTwilightBegin?.timeLabel(using24HFormat)
-                ?: "",
-            sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat)
-                ?: "",
-            sunriseDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.astronomicalTwilightBegin,
-                todayTimestamp = change?.today?.astronomicalTwilightBegin
-              ),
-            sunsetDiffLabel =
-              timestampDiffLabel(
-                yesterdayTimestamp = change?.yesterday?.astronomicalTwilightEnd,
-                todayTimestamp = change?.today?.astronomicalTwilightEnd
-              )
+          astronomicalTwilightChartSegment(
+            change = change,
+            accumulatedSweepAngle = accumulatedSweepAngle,
+            periodLabel = astronomicalTwilightLabel.padToLongestPeriodLabel(),
+            astronomicalDawnLabel = astronomicalDawnLabel,
+            astronomicalDuskLabel = astronomicalDuskLabel,
+            using24HFormat = using24HFormat
           )
         )
         accumulatedSweepAngle = 0f
@@ -749,12 +694,9 @@ private fun dayLengthPeriodChartSegments(
           change.today.isPolarNightAtLocation(change.location)
       ) {
         add(
-          DayChartSegment(
-            sweepAngleDegrees = 72f + accumulatedSweepAngle,
-            endingEdgeAngle = 18f,
-            periodLabelAngle = 24f,
-            color = nightColor,
-            periodLabel = nightLabel.padToLongestLabel()
+          nightChartSegment(
+            accumulatedSweepAngle = accumulatedSweepAngle,
+            periodLabel = nightLabel.padToLongestPeriodLabel()
           )
         )
         accumulatedSweepAngle = 0f
@@ -772,6 +714,136 @@ private fun dayLengthPeriodChartSegments(
     }
   }
 }
+
+private fun dayChartSegment(
+  change: LocationSunriseSunsetChange?,
+  accumulatedSweepAngle: Float,
+  periodLabel: String,
+  sunriseEndingEdgeLabel: String,
+  sunsetEndingEdgeLabel: String,
+  using24HFormat: Boolean
+): DayChartSegment =
+  DayChartSegment(
+    sweepAngleDegrees = 90f + accumulatedSweepAngle,
+    endingEdgeAngle = 0f,
+    periodLabelAngle = 0f,
+    color = dayColor,
+    periodLabel = periodLabel,
+    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
+    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    sunriseTimeLabel = change?.today?.sunrise?.timeLabel(using24HFormat).orEmpty(),
+    sunsetTimeLabel = change?.today?.sunset?.timeLabel(using24HFormat).orEmpty(),
+    sunriseDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.sunrise,
+        todayTimestamp = change?.today?.sunrise
+      ),
+    sunsetDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.sunset,
+        todayTimestamp = change?.today?.sunset
+      )
+  )
+
+private fun civilTwilightChartSegment(
+  change: LocationSunriseSunsetChange?,
+  accumulatedSweepAngle: Float,
+  periodLabel: String,
+  sunriseEndingEdgeLabel: String,
+  sunsetEndingEdgeLabel: String,
+  using24HFormat: Boolean
+): DayChartSegment =
+  DayChartSegment(
+    sweepAngleDegrees = 6f + accumulatedSweepAngle,
+    endingEdgeAngle = 0f,
+    periodLabelAngle = 6f,
+    color = civilTwilightColor,
+    periodLabel = periodLabel,
+    sunriseEndingEdgeLabel = sunriseEndingEdgeLabel,
+    sunsetEndingEdgeLabel = sunsetEndingEdgeLabel,
+    sunriseTimeLabel = change?.today?.civilTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
+    sunsetTimeLabel = change?.today?.civilTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+    sunriseDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.civilTwilightBegin,
+        todayTimestamp = change?.today?.civilTwilightBegin
+      ),
+    sunsetDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.civilTwilightEnd,
+        todayTimestamp = change?.today?.civilTwilightEnd
+      )
+  )
+
+private fun nauticalTwilightChartSegment(
+  change: LocationSunriseSunsetChange?,
+  accumulatedSweepAngle: Float,
+  periodLabel: String,
+  nauticalDawnLabel: String,
+  nauticalDuskLabel: String,
+  using24HFormat: Boolean
+): DayChartSegment =
+  DayChartSegment(
+    sweepAngleDegrees = 6f + accumulatedSweepAngle,
+    endingEdgeAngle = 6f,
+    periodLabelAngle = 12f,
+    color = nauticalTwilightColor,
+    periodLabel = periodLabel,
+    sunriseEndingEdgeLabel = nauticalDawnLabel,
+    sunsetEndingEdgeLabel = nauticalDuskLabel,
+    sunriseTimeLabel = change?.today?.nauticalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
+    sunsetTimeLabel = change?.today?.nauticalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+    sunriseDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.nauticalTwilightBegin,
+        todayTimestamp = change?.today?.nauticalTwilightBegin
+      ),
+    sunsetDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.nauticalTwilightEnd,
+        todayTimestamp = change?.today?.nauticalTwilightEnd
+      )
+  )
+
+private fun astronomicalTwilightChartSegment(
+  change: LocationSunriseSunsetChange?,
+  accumulatedSweepAngle: Float,
+  periodLabel: String,
+  astronomicalDawnLabel: String,
+  astronomicalDuskLabel: String,
+  using24HFormat: Boolean
+): DayChartSegment =
+  DayChartSegment(
+    sweepAngleDegrees = 6f + accumulatedSweepAngle,
+    endingEdgeAngle = 12f,
+    periodLabelAngle = 18f,
+    color = astronomicalTwilightColor,
+    periodLabel = periodLabel,
+    sunriseEndingEdgeLabel = astronomicalDawnLabel,
+    sunsetEndingEdgeLabel = astronomicalDuskLabel,
+    sunriseTimeLabel =
+      change?.today?.astronomicalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
+    sunsetTimeLabel = change?.today?.astronomicalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+    sunriseDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.astronomicalTwilightBegin,
+        todayTimestamp = change?.today?.astronomicalTwilightBegin
+      ),
+    sunsetDiffLabel =
+      timestampDiffLabel(
+        yesterdayTimestamp = change?.yesterday?.astronomicalTwilightEnd,
+        todayTimestamp = change?.today?.astronomicalTwilightEnd
+      )
+  )
+
+private fun nightChartSegment(accumulatedSweepAngle: Float, periodLabel: String): DayChartSegment =
+  DayChartSegment(
+    sweepAngleDegrees = 72f + accumulatedSweepAngle,
+    endingEdgeAngle = 18f,
+    periodLabelAngle = 24f,
+    color = nightColor,
+    periodLabel = periodLabel
+  )
 
 private fun timestampDiffLabel(
   yesterdayTimestamp: LocalDateTime?,
