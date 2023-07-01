@@ -705,7 +705,13 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
           MaterialTheme.typography.bodyLarge.copy(
             fontSize = 18.sp,
             shadow =
-              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+              Shadow(
+                color =
+                  if (diffPrefix == "+" || diffPrefix == "-") Color.Black
+                  else dayPeriod.textShadowColor(),
+                offset = Offset(1f, 1f),
+                blurRadius = 1f
+              )
           )
       )
     }
