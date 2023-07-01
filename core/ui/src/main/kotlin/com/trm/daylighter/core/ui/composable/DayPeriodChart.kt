@@ -82,6 +82,9 @@ private fun DrawScope.chartCenter(orientation: Int): Offset =
 private val DrawScope.chartTextPaddingPx: Float
   get() = 3.dp.toPx()
 
+fun chartTextRadiusMultiplier(orientation: Int): Float =
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
+
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun DayPeriodChart(
@@ -149,10 +152,7 @@ fun DayPeriodChart(
 
     if (changeValue !is Ready) return@Canvas
 
-    val chartCenter = chartCenter(orientation)
     repeat(chartSegments.size - 1) { segmentIndex ->
-      val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians
-
       drawEndingEdge(
         chartSegments = chartSegments,
         segmentIndex = segmentIndex,
@@ -160,73 +160,14 @@ fun DayPeriodChart(
         orientation = orientation,
       )
 
-      val textRadiusMultiplier =
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
-      val endingEdgeLabel =
-        AnnotatedString(
-          chartSegments[segmentIndex].run {
-            if (dayMode == DayMode.SUNRISE) sunriseEndingEdgeLabel else sunsetEndingEdgeLabel
-          }
-        )
-      val endingEdgeLabelLayoutResult = textMeasurer.measure(text = endingEdgeLabel)
-      val endingEdgeLabelTopLeft =
-        Offset(
-          x =
-            chartCenter.x +
-              chartRadius * textRadiusMultiplier * cos(endingEdgeAngleRadians) +
-              chartTextPaddingPx,
-          y =
-            chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) {
-                0f
-              } else {
-                endingEdgeLabelLayoutResult.size.height /
-                  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    2f
-                  } else {
-                    4f
-                  }
-              }
-        )
-      drawText(
+      drawEndingEdgeAndTimeDiffLabels(
+        chartSegment = chartSegments[segmentIndex],
         textMeasurer = textMeasurer,
-        text = endingEdgeLabel,
-        topLeft = endingEdgeLabelTopLeft,
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Left, color = textColor),
-        maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
-        overflow = TextOverflow.Ellipsis,
-      )
-
-      val timeAndDiffLabel =
-        buildTimeAndDiffLabel(
-          chartSegment = chartSegments[segmentIndex],
-          dayMode = dayMode,
-          orientation = orientation
-        )
-      if (timeAndDiffLabel.isBlank()) return@repeat
-
-      val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeAndDiffLabel))
-      val timeTopLeft =
-        Offset(
-          x =
-            max(
-              endingEdgeLabelTopLeft.x +
-                endingEdgeLabelLayoutResult.size.width.toFloat() +
-                chartTextPaddingPx,
-              size.width - timeLayoutResult.size.width - chartTextPaddingPx
-            ),
-          y =
-            chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
-              if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) 0f
-              else timeLayoutResult.size.height / 2f
-        )
-      drawText(
-        textMeasurer = textMeasurer,
-        text = timeAndDiffLabel,
-        topLeft = timeTopLeft,
-        style = labelSmallTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
-        maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
-        overflow = TextOverflow.Ellipsis,
+        textStyle = labelSmallTextStyle.copy(textAlign = TextAlign.Left, color = textColor),
+        endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngle.radians,
+        dayMode = dayMode,
+        dayLabel = dayLabel,
+        orientation = orientation
       )
     }
 
@@ -290,6 +231,83 @@ private fun DrawScope.drawEndingEdge(
         else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     )
   }
+}
+
+@OptIn(ExperimentalTextApi::class)
+private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
+  chartSegment: DayChartSegment,
+  textMeasurer: TextMeasurer,
+  textStyle: TextStyle,
+  endingEdgeAngleRadians: Float,
+  dayMode: DayMode,
+  dayLabel: String,
+  orientation: Int
+) {
+  val chartCenter = chartCenter(orientation)
+  val textRadiusMultiplier = chartTextRadiusMultiplier(orientation)
+
+  val endingEdgeLabel =
+    AnnotatedString(
+      chartSegment.run {
+        if (dayMode == DayMode.SUNRISE) sunriseEndingEdgeLabel else sunsetEndingEdgeLabel
+      }
+    )
+  val endingEdgeLabelLayoutResult = textMeasurer.measure(text = endingEdgeLabel)
+  val endingEdgeLabelTopLeft =
+    Offset(
+      x =
+        chartCenter.x +
+          chartRadius * textRadiusMultiplier * cos(endingEdgeAngleRadians) +
+          chartTextPaddingPx,
+      y =
+        chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
+          if (chartSegment.periodLabel.startsWith(dayLabel)) {
+            0f
+          } else {
+            endingEdgeLabelLayoutResult.size.height /
+              if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                2f
+              } else {
+                4f
+              }
+          }
+    )
+  drawText(
+    textMeasurer = textMeasurer,
+    text = endingEdgeLabel,
+    topLeft = endingEdgeLabelTopLeft,
+    style = textStyle,
+    maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
+    overflow = TextOverflow.Ellipsis,
+  )
+
+  val timeAndDiffLabel =
+    buildTimeAndDiffLabel(chartSegment = chartSegment, dayMode = dayMode, orientation = orientation)
+  if (timeAndDiffLabel.isBlank()) return
+
+  val timeLayoutResult = textMeasurer.measure(text = AnnotatedString(timeAndDiffLabel))
+  val timeTopLeft =
+    Offset(
+      x =
+        max(
+          endingEdgeLabelTopLeft.x +
+            endingEdgeLabelLayoutResult.size.width.toFloat() +
+            chartTextPaddingPx,
+          size.width - timeLayoutResult.size.width - chartTextPaddingPx
+        ),
+      y =
+        chartCenter.y + chartRadius * textRadiusMultiplier * sin(endingEdgeAngleRadians) -
+          if (chartSegment.periodLabel.startsWith(dayLabel)) 0f
+          else timeLayoutResult.size.height / 2f
+    )
+  drawText(
+    textMeasurer = textMeasurer,
+    text = timeAndDiffLabel,
+    topLeft = timeTopLeft,
+    style = textStyle,
+    maxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1,
+    overflow = TextOverflow.Ellipsis,
+  )
 }
 
 private fun buildTimeAndDiffLabel(
