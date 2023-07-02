@@ -284,6 +284,7 @@ private fun DayScreen(
       ) {
         ClockAndDayLengthCard(
           change = currentChange,
+          chartMode = chartMode,
           modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
         )
       }
@@ -372,6 +373,7 @@ private fun DayScreen(
       ) {
         ClockAndDayLengthCard(
           change = currentChange,
+          chartMode = chartMode,
           modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
         )
       }
@@ -428,6 +430,7 @@ private fun DayTopAppBar(
 @Composable
 private fun ClockAndDayLengthCard(
   change: StableLoadable<LocationSunriseSunsetChange>,
+  chartMode: DayPeriodChartMode,
   modifier: Modifier = Modifier,
 ) {
   val dayPeriod =
@@ -449,8 +452,10 @@ private fun ClockAndDayLengthCard(
         ) {
           Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
           NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-          Spacer(modifier = Modifier.height(5.dp))
-          DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
+          if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
+            Spacer(modifier = Modifier.height(5.dp))
+            DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
+          }
           Spacer(modifier = Modifier.height(5.dp))
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
@@ -473,8 +478,10 @@ private fun ClockAndDayLengthCard(
               Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
               NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
             }
-            Spacer(modifier = Modifier.width(5.dp))
-            DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
+            if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
+              Spacer(modifier = Modifier.width(5.dp))
+              DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
+            }
           }
           Spacer(modifier = Modifier.height(5.dp))
           NextDayPeriodTimer(
