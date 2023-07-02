@@ -37,6 +37,8 @@
     <string name="nautical_dusk">Nautical dusk</string>
     <string name="astronomical_dawn">Astronomical dawn</string>
     <string name="astronomical_dusk">Astronomical dusk</string>
+    <string name="six_degrees_above">6º above</string>
+    <string name="four_degrees_below">4º below</string>
     <string name="six_degrees_below">6º below</string>
     <string name="twelve_degrees_below">12º below</string>
     <string name="eighteen_degrees_below">18º below</string>
