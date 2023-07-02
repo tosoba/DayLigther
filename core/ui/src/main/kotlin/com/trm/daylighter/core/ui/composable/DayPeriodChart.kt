@@ -108,6 +108,15 @@ fun DayPeriodChart(
         goldenBlueHourChartSegments(change = changeValue.dataOrNull(), dayMode = dayMode)
       }
     }
+  val segmentEdges =
+    when (chartMode) {
+      DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+        dayNightCycleChartSegmentEdges(change = changeValue.dataOrNull())
+      }
+      DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+        goldenBlueHourChartSegmentEdges(change = changeValue.dataOrNull())
+      }
+    }
 
   val textMeasurer = rememberTextMeasurer()
   val labelTextStyle = MaterialTheme.typography.labelSmall
@@ -118,17 +127,23 @@ fun DayPeriodChart(
   val nowLineColor = colorResource(R.color.now_line)
 
   Canvas(modifier = modifier) {
+    if (changeValue !is Ready) {
+      drawChartSegments(chartSegments = chartSegments, orientation = orientation)
+      return@Canvas
+    }
+
+    segmentEdges.forEach { edge -> drawSegmentEdge(edge = edge, orientation = orientation) }
     drawChartSegments(chartSegments = chartSegments, orientation = orientation)
-    if (changeValue !is Ready) return@Canvas
+
+    drawPeriodLabels(
+      chartSegments = chartSegments,
+      textMeasurer = textMeasurer,
+      textStyle = labelTextStyle,
+      dayLabel = dayLabel,
+      orientation = orientation
+    )
 
     repeat(chartSegments.size - 1) { segmentIndex ->
-      drawEndingEdge(
-        chartSegments = chartSegments,
-        segmentIndex = segmentIndex,
-        dayLabel = dayLabel,
-        orientation = orientation,
-      )
-
       drawEndingEdgeAndTimeDiffLabels(
         chartSegment = chartSegments[segmentIndex],
         textMeasurer = textMeasurer,
@@ -139,14 +154,6 @@ fun DayPeriodChart(
         orientation = orientation
       )
     }
-
-    drawPeriodLabels(
-      chartSegments = chartSegments,
-      textMeasurer = textMeasurer,
-      textStyle = labelTextStyle,
-      dayLabel = dayLabel,
-      orientation = orientation
-    )
 
     if (
       (now.hour < 12 && dayMode == DayMode.SUNSET) || (now.hour >= 12 && dayMode == DayMode.SUNRISE)
@@ -210,38 +217,220 @@ private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>, or
   chartSegments.forEach(::drawChartSegment)
 }
 
-private fun DrawScope.drawEndingEdge(
+@OptIn(ExperimentalTextApi::class)
+private fun DrawScope.drawPeriodLabels(
   chartSegments: List<DayChartSegment>,
-  segmentIndex: Int,
+  textMeasurer: TextMeasurer,
+  textStyle: TextStyle,
   dayLabel: String,
-  orientation: Int
+  orientation: Int,
 ) {
+  val chartCenter = chartCenter(orientation)
+  chartSegments.forEach { segment ->
+    rotate(degrees = segment.periodLabelAngleDegrees, pivot = chartCenter) {
+      val periodLabel = AnnotatedString(segment.periodLabel)
+      val periodLabelTextStyle =
+        textStyle.copy(
+          color = if (segment.periodLabel.startsWith(dayLabel)) Color.Black else Color.White,
+          textAlign = TextAlign.Right
+        )
+      val periodLabelLayoutResult =
+        textMeasurer.measure(
+          text = periodLabel,
+          style = periodLabelTextStyle,
+          overflow = TextOverflow.Ellipsis,
+          maxLines = 1
+        )
+      drawText(
+        textMeasurer = textMeasurer,
+        text = segment.periodLabel,
+        topLeft =
+          Offset(
+            x =
+              chartCenter.x + chartRadius - periodLabelLayoutResult.size.width - chartTextPaddingPx,
+            y =
+              if (segment.periodLabel.startsWith(dayLabel)) {
+                chartCenter.y - periodLabelLayoutResult.size.height - chartTextPaddingPx
+              } else {
+                chartCenter.y - periodLabelLayoutResult.size.height / 2f
+              }
+          ),
+        style = periodLabelTextStyle,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
+  }
+}
+
+private data class DayChartSegmentEdge(
+  val endingEdgeAngleDegrees: Float,
+  val lineRadiusMultiplier: Float,
+  val color: Color,
+  val strokeWidth: Float = 4f,
+  val pathEffect: PathEffect? = null,
+)
+
+@Composable
+private fun dayNightCycleChartSegmentEdges(
+  change: LocationSunriseSunsetChange?,
+): List<DayChartSegmentEdge> {
+  val orientation = LocalConfiguration.current.orientation
+  val lineRadiusMultiplier =
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+    else landscapeLineRadiusMultiplier
+  val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
+  return remember(change) {
+    buildList {
+      if (change?.today?.sunrise != null && change.today.sunset != null) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 0f,
+            lineRadiusMultiplier = 10f,
+            color = civilTwilightColor,
+          )
+        )
+      }
+      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 6f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = nauticalTwilightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (
+        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
+      ) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 12f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = astronomicalTwilightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (
+        change?.today?.astronomicalTwilightBegin != null &&
+          change.today.astronomicalTwilightEnd != null
+      ) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 18f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = nightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun goldenBlueHourChartSegmentEdges(
+  change: LocationSunriseSunsetChange?,
+): List<DayChartSegmentEdge> {
+  val orientation = LocalConfiguration.current.orientation
+  val lineRadiusMultiplier =
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+    else landscapeLineRadiusMultiplier
+  val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+
+  return remember(change) {
+    buildList {
+      if (
+        change?.today?.goldenHourAboveMorning != null && change.today.goldenHourAboveMorning != null
+      ) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = -6f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = goldenHourColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (change?.today?.sunrise != null && change.today.sunset != null) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 0f,
+            lineRadiusMultiplier = 10f,
+            color = civilTwilightColor,
+          )
+        )
+      }
+      if (change?.today?.blueHourBegin != null && change.today.blueHourEnd != null) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 4f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = blueHourColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 6f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = nauticalTwilightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (
+        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
+      ) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 12f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = astronomicalTwilightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+      if (
+        change?.today?.astronomicalTwilightBegin != null &&
+          change.today.astronomicalTwilightEnd != null
+      ) {
+        add(
+          DayChartSegmentEdge(
+            endingEdgeAngleDegrees = 18f,
+            lineRadiusMultiplier = lineRadiusMultiplier,
+            color = nightColor,
+            pathEffect = dashPathEffect,
+          )
+        )
+      }
+    }
+  }
+}
+
+private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge, orientation: Int) {
   clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
     val chartCenter = chartCenter(orientation)
-    val endingEdgeAngleRadians = chartSegments[segmentIndex + 1].endingEdgeAngleDegrees.radians
-    val lineRadiusMultiplier =
-      when {
-        chartSegments[segmentIndex].periodLabel.startsWith(dayLabel) -> 10f
-        orientation == Configuration.ORIENTATION_PORTRAIT -> portraitLineRadiusMultiplier
-        else -> landscapeLineRadiusMultiplier
-      }
-    val strokeWidth = 4f
-
     drawLine(
-      color = chartSegments[segmentIndex + 1].color,
+      color = edge.color,
       start = chartCenter,
       end =
         Offset(
-          x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(endingEdgeAngleRadians),
+          x =
+            chartCenter.x +
+              chartRadius * edge.lineRadiusMultiplier * cos(edge.endingEdgeAngleDegrees.radians),
           y =
             chartCenter.y +
-              chartRadius * lineRadiusMultiplier * sin(endingEdgeAngleRadians) +
-              strokeWidth
+              chartRadius * edge.lineRadiusMultiplier * sin(edge.endingEdgeAngleDegrees.radians) +
+              edge.strokeWidth
         ),
-      strokeWidth = strokeWidth,
-      pathEffect =
-        if (chartSegments[segmentIndex].periodLabel.startsWith(dayLabel)) null
-        else PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+      strokeWidth = edge.strokeWidth,
+      pathEffect = edge.pathEffect
     )
   }
 }
@@ -352,52 +541,6 @@ private fun buildTimeAndDiffLabel(
     append(timeLabel)
     append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
     append(diffLabel)
-  }
-}
-
-@OptIn(ExperimentalTextApi::class)
-private fun DrawScope.drawPeriodLabels(
-  chartSegments: List<DayChartSegment>,
-  textMeasurer: TextMeasurer,
-  textStyle: TextStyle,
-  dayLabel: String,
-  orientation: Int,
-) {
-  val chartCenter = chartCenter(orientation)
-  chartSegments.forEach { segment ->
-    rotate(degrees = segment.periodLabelAngleDegrees, pivot = chartCenter) {
-      val periodLabel = AnnotatedString(segment.periodLabel)
-      val periodLabelTextStyle =
-        textStyle.copy(
-          color = if (segment.periodLabel.startsWith(dayLabel)) Color.Black else Color.White,
-          textAlign = TextAlign.Right
-        )
-      val periodLabelLayoutResult =
-        textMeasurer.measure(
-          text = periodLabel,
-          style = periodLabelTextStyle,
-          overflow = TextOverflow.Ellipsis,
-          maxLines = 1
-        )
-      drawText(
-        textMeasurer = textMeasurer,
-        text = segment.periodLabel,
-        topLeft =
-          Offset(
-            x =
-              chartCenter.x + chartRadius - periodLabelLayoutResult.size.width - chartTextPaddingPx,
-            y =
-              if (segment.periodLabel.startsWith(dayLabel)) {
-                chartCenter.y - periodLabelLayoutResult.size.height - chartTextPaddingPx
-              } else {
-                chartCenter.y - periodLabelLayoutResult.size.height / 2f
-              }
-          ),
-        style = periodLabelTextStyle,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-      )
-    }
   }
 }
 
