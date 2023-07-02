@@ -1,4 +1,4 @@
-package com.trm.daylighter.ui
+package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
 import androidx.compose.animation.AnimatedVisibility
@@ -25,7 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.trm.daylighter.R
 import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
@@ -76,7 +75,7 @@ fun DayLighterMainContent() {
         currentRoute = navController.currentRoute(),
         onRouteSelected = { route ->
           scope.launch { drawerState.close() }
-          navController.navigate(route = route, navOptions = navOptions { launchSingleTop = true })
+          navController.navigate(route = route, navOptions = navController.topLevelNavOptions())
         }
       )
     }
@@ -216,27 +215,6 @@ private fun DayLighterNavHost(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  fun NavOptionsBuilder.fadeInAndOut() {
-    anim {
-      enter = android.R.anim.fade_in
-      exit = android.R.anim.fade_out
-      popEnter = android.R.anim.fade_in
-      popExit = android.R.anim.fade_out
-    }
-  }
-
-  fun topLevelNavOptions(): NavOptions = navOptions {
-    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-    launchSingleTop = true
-    restoreState = true
-    fadeInAndOut()
-  }
-
-  fun nextLevelNavOptions(): NavOptions = navOptions {
-    launchSingleTop = true
-    fadeInAndOut()
-  }
-
   fun navigateToAddLocation() {
     navController.navigate(route = locationRoute, navOptions = nextLevelNavOptions())
   }
@@ -248,7 +226,7 @@ private fun DayLighterNavHost(
   fun navigateToSettingsOnEnableGeocodingClick() {
     navController.navigate(
       route = settingsNavigationRoute(autoShowEmailDialog = true),
-      navOptions = topLevelNavOptions()
+      navOptions = navController.topLevelNavOptions()
     )
   }
 
@@ -335,4 +313,25 @@ private fun DayLighterNavHost(
       )
     }
   }
+}
+
+private fun NavOptionsBuilder.fadeInAndOut() {
+  anim {
+    enter = android.R.anim.fade_in
+    exit = android.R.anim.fade_out
+    popEnter = android.R.anim.fade_in
+    popExit = android.R.anim.fade_out
+  }
+}
+
+private fun NavController.topLevelNavOptions(): NavOptions = navOptions {
+  popUpTo(graph.findStartDestination().id) { saveState = true }
+  launchSingleTop = true
+  restoreState = true
+  fadeInAndOut()
+}
+
+private fun nextLevelNavOptions(): NavOptions = navOptions {
+  launchSingleTop = true
+  fadeInAndOut()
 }
