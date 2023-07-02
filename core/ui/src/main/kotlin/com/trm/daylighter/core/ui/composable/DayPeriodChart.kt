@@ -278,7 +278,7 @@ private fun DrawScope.drawPeriodLabels(
 }
 
 private data class DayChartSegmentEdge(
-  val edgeAngleDegrees: Float,
+  val angleDegrees: Float,
   val lineRadiusMultiplier: Float,
   val color: Color,
   val strokeWidth: Float = 4f,
@@ -300,7 +300,7 @@ private fun dayNightCycleChartSegmentEdges(
       if (change?.today?.sunrise != null && change.today.sunset != null) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 0f,
+            angleDegrees = 0f,
             lineRadiusMultiplier = 10f,
             color = civilTwilightColor,
           )
@@ -309,7 +309,7 @@ private fun dayNightCycleChartSegmentEdges(
       if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 6f,
+            angleDegrees = 6f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = nauticalTwilightColor,
             pathEffect = dashPathEffect,
@@ -321,7 +321,7 @@ private fun dayNightCycleChartSegmentEdges(
       ) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 12f,
+            angleDegrees = 12f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = astronomicalTwilightColor,
             pathEffect = dashPathEffect,
@@ -334,7 +334,7 @@ private fun dayNightCycleChartSegmentEdges(
       ) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 18f,
+            angleDegrees = 18f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = nightColor,
             pathEffect = dashPathEffect,
@@ -362,7 +362,7 @@ private fun goldenBlueHourChartSegmentEdges(
       ) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = -6f,
+            angleDegrees = -6f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = goldenHourColor,
             pathEffect = dashPathEffect,
@@ -372,7 +372,7 @@ private fun goldenBlueHourChartSegmentEdges(
       if (change?.today?.sunrise != null && change.today.sunset != null) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 0f,
+            angleDegrees = 0f,
             lineRadiusMultiplier = 10f,
             color = civilTwilightColor,
           )
@@ -381,7 +381,7 @@ private fun goldenBlueHourChartSegmentEdges(
       if (change?.today?.blueHourBegin != null && change.today.blueHourEnd != null) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 4f,
+            angleDegrees = 4f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = blueHourColor,
             pathEffect = dashPathEffect,
@@ -391,7 +391,7 @@ private fun goldenBlueHourChartSegmentEdges(
       if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 6f,
+            angleDegrees = 6f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = nauticalTwilightColor,
             pathEffect = dashPathEffect,
@@ -403,7 +403,7 @@ private fun goldenBlueHourChartSegmentEdges(
       ) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 12f,
+            angleDegrees = 12f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = astronomicalTwilightColor,
             pathEffect = dashPathEffect,
@@ -416,7 +416,7 @@ private fun goldenBlueHourChartSegmentEdges(
       ) {
         add(
           DayChartSegmentEdge(
-            edgeAngleDegrees = 18f,
+            angleDegrees = 18f,
             lineRadiusMultiplier = lineRadiusMultiplier,
             color = nightColor,
             pathEffect = dashPathEffect,
@@ -437,10 +437,10 @@ private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge, orientation: In
         Offset(
           x =
             chartCenter.x +
-              chartRadius * edge.lineRadiusMultiplier * cos(edge.edgeAngleDegrees.radians),
+              chartRadius * edge.lineRadiusMultiplier * cos(edge.angleDegrees.radians),
           y =
             chartCenter.y +
-              chartRadius * edge.lineRadiusMultiplier * sin(edge.edgeAngleDegrees.radians) +
+              chartRadius * edge.lineRadiusMultiplier * sin(edge.angleDegrees.radians) +
               edge.strokeWidth
         ),
       strokeWidth = edge.strokeWidth,
@@ -965,7 +965,6 @@ private fun SunriseSunset.dayPeriodEndAngleRadians(
 
 private data class DayChartSegment(
   val sweepAngleDegrees: Float,
-  val endingEdgeAngleDegrees: Float,
   val periodLabelAngleDegrees: Float,
   val color: Color,
   val periodLabel: String,
@@ -1225,7 +1224,6 @@ private fun dayChartSegment(
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 0f,
     periodLabelAngleDegrees = periodLabelAngle,
     color = dayColor,
     periodLabel = periodLabel,
@@ -1237,7 +1235,6 @@ private fun civilTwilightChartSegment(
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 0f,
     periodLabelAngleDegrees = 3f,
     color = civilTwilightColor,
     periodLabel = periodLabel,
@@ -1249,7 +1246,6 @@ private fun nauticalTwilightChartSegment(
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 6f,
     periodLabelAngleDegrees = 9f,
     color = nauticalTwilightColor,
     periodLabel = periodLabel,
@@ -1261,7 +1257,6 @@ private fun astronomicalTwilightChartSegment(
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 12f,
     periodLabelAngleDegrees = 15f,
     color = astronomicalTwilightColor,
     periodLabel = periodLabel,
@@ -1274,7 +1269,6 @@ private fun nightChartSegment(
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 18f,
     periodLabelAngleDegrees = periodLabelAngle,
     color = nightColor,
     periodLabel = periodLabel
@@ -1283,7 +1277,6 @@ private fun nightChartSegment(
 private fun goldenHourChartSegment(sweepAngleDegrees: Float, periodLabel: String): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = -6f,
     periodLabelAngleDegrees = -1f,
     color = goldenHourColor,
     periodLabel = periodLabel,
@@ -1292,7 +1285,6 @@ private fun goldenHourChartSegment(sweepAngleDegrees: Float, periodLabel: String
 private fun blueHourChartSegment(sweepAngleDegrees: Float, periodLabel: String): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
-    endingEdgeAngleDegrees = 4f,
     periodLabelAngleDegrees = 5f,
     color = blueHourColor,
     periodLabel = periodLabel,
