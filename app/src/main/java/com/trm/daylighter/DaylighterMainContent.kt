@@ -29,7 +29,7 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.composable.DrawerMenuButton
+import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -68,7 +68,7 @@ fun DayLighterMainContent() {
   }
 
   ModalNavigationDrawer(
-    gesturesEnabled = navController.currentRouteIsTopLevel(),
+    gesturesEnabled = !currentRoute.startsWith(locationRoute),
     drawerState = drawerState,
     drawerContent = {
       DayLighterDrawerContent(
@@ -85,7 +85,7 @@ fun DayLighterMainContent() {
       onDrawerMenuClick = ::onDrawerMenuClick,
       topBar = {
         AnimatedVisibility(
-          visible = !navController.currentRouteIsTopLevel(),
+          visible = currentRoute.startsWith(aboutRoute) || currentRoute.startsWith(settingsRoute),
           enter = fadeIn(),
           exit = fadeOut(),
         ) {
@@ -103,9 +103,7 @@ fun DayLighterMainContent() {
                 )
               )
             },
-            navigationIcon = {
-              DrawerMenuButton(onClick = ::onDrawerMenuClick, modifier = Modifier.padding(10.dp))
-            }
+            navigationIcon = { DrawerMenuIconButton(onClick = ::onDrawerMenuClick) }
           )
         }
       }

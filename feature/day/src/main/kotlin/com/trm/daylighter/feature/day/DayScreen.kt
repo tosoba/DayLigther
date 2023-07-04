@@ -269,7 +269,7 @@ private fun DayScreen(
               appBarHeightPx = coordinates.size.height.toFloat()
             }
             .padding(10.dp),
-        navigationIcon = { DrawerMenuButton(onClick = onDrawerMenuClick) }
+        navigationIcon = { DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick) }
       )
 
       AnimatedVisibility(
@@ -335,7 +335,7 @@ private fun DayScreen(
 
       NavigationRail(
         header = {
-          DrawerMenuButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+          DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
         },
         content = {
           SunriseSunsetNavigationRailContent(

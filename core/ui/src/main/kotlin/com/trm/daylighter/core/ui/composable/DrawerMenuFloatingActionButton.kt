@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import com.trm.daylighter.core.common.R
 
 @Composable
-fun DrawerMenuButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun DrawerMenuFloatingActionButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
   SmallFloatingActionButton(onClick = onClick, modifier = modifier) {
     Icon(
       imageVector = Icons.Filled.Menu,

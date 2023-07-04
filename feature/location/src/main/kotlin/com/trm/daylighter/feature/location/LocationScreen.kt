@@ -361,7 +361,10 @@ private fun LocationAppBar(
       )
     },
     navigationIcon = {
-      IconButton(onClick = onBackClick) {
+      SmallFloatingActionButton(
+        onClick = onBackClick,
+        modifier = Modifier.padding(start = 5.dp, top = 5.dp)
+      ) {
         Icon(
           imageVector = Icons.Filled.ArrowBack,
           contentDescription = stringResource(commonR.string.back),
@@ -370,7 +373,10 @@ private fun LocationAppBar(
       }
     },
     actions = {
-      IconButton(onClick = onInfoClick) {
+      SmallFloatingActionButton(
+        onClick = onInfoClick,
+        modifier = Modifier.padding(end = 5.dp, top = 5.dp)
+      ) {
         Icon(
           imageVector = Icons.Filled.Info,
           contentDescription = stringResource(R.string.new_location_info),

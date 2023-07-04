@@ -18,13 +18,13 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DrawerMenuTopAppBar(
-  title: String,
   modifier: Modifier = Modifier,
+  title: String,
   onDrawerMenuClick: () -> Unit,
   trailing: @Composable () -> Unit = {},
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-    DrawerMenuButton(onClick = onDrawerMenuClick)
+    DrawerMenuIconButton(onClick = onDrawerMenuClick)
 
     Text(
       text = title,
