@@ -10,6 +10,7 @@ import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -165,7 +167,8 @@ private fun WidgetLocationScreen(
                     location = location,
                     zoom = zoom,
                     isSelected = location.value.id == selectedLocationId,
-                    onSelected = onLocationSelected
+                    onSelected = onLocationSelected,
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp)
                   )
                 }
 
@@ -265,17 +268,26 @@ private fun MapCard(
   location: StableValue<Location>,
   zoom: Double,
   isSelected: Boolean,
-  onSelected: (Long) -> Unit
+  onSelected: (Long) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+    modifier = modifier,
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       DisabledMapView(
         latitude = location.value.latitude,
         longitude = location.value.longitude,
-        zoom = zoom
+        zoom = zoom,
+        modifier = Modifier.fillMaxSize()
+      )
+
+      Box(
+        modifier =
+          Modifier.fillMaxSize()
+            .clickable(enabled = !isSelected) { onSelected(location.value.id) }
+            .background(color = Color.Transparent)
       )
 
       LocationNameGradientOverlay()
