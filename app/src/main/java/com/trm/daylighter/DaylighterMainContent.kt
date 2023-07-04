@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,6 +31,7 @@ import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
+import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -92,15 +94,19 @@ fun DayLighterMainContent() {
           CenterAlignedTopAppBar(
             title = {
               Text(
-                stringResource(
-                  id =
-                    when (currentRoute) {
-                      aboutRoute -> R.string.about_item
-                      settingsRoute,
-                      settingsAutoShowEmailDialogRoute -> R.string.settings_item
-                      else -> R.string.empty
-                    }
-                )
+                text =
+                  stringResource(
+                    id =
+                      when (currentRoute) {
+                        aboutRoute -> R.string.about_item
+                        settingsRoute,
+                        settingsAutoShowEmailDialogRoute -> R.string.settings_item
+                        else -> R.string.empty
+                      }
+                  ),
+                style = appBarTextStyle(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
               )
             },
             navigationIcon = { DrawerMenuIconButton(onClick = ::onDrawerMenuClick) }

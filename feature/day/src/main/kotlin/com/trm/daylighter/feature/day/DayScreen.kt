@@ -335,7 +335,10 @@ private fun DayScreen(
 
       NavigationRail(
         header = {
-          DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick, modifier = Modifier.padding(top = 8.dp))
+          DrawerMenuFloatingActionButton(
+            onClick = onDrawerMenuClick,
+            modifier = Modifier.padding(top = 8.dp)
+          )
         },
         content = {
           SunriseSunsetNavigationRailContent(
@@ -414,7 +417,7 @@ private fun DayTopAppBar(
       if (changeReady) {
         Text(
           text = changeValue.map { (location) -> location.name }.dataOrElse(""),
-          style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+          style = appBarTextStyle(),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           textAlign = TextAlign.Center,

@@ -10,6 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,7 +31,7 @@ fun DrawerMenuTopAppBar(
 
     Text(
       text = title,
-      style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+      style = appBarTextStyle(),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
       textAlign = TextAlign.Center,
@@ -38,3 +41,15 @@ fun DrawerMenuTopAppBar(
     trailing()
   }
 }
+
+@Composable
+fun appBarTextStyle(): TextStyle =
+  MaterialTheme.typography.titleLarge.copy(
+    fontWeight = FontWeight.SemiBold,
+    shadow =
+      Shadow(
+        color = MaterialTheme.colorScheme.inverseOnSurface,
+        offset = Offset(1f, 1f),
+        blurRadius = 1f
+      ),
+  )
