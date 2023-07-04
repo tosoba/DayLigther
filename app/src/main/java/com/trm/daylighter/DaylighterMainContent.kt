@@ -18,7 +18,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -30,8 +29,7 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.composable.appBarTextStyle
+import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -53,11 +51,6 @@ import kotlinx.coroutines.launch
 private fun NavController.currentRoute(): String =
   currentBackStackEntryAsState().value?.destination?.route ?: dayNightCycleRoute
 
-@Composable
-private fun NavController.currentRouteIsTopLevel(): Boolean =
-  currentRoute().let { route -> !route.startsWith(aboutRoute) && !route.startsWith(settingsRoute) }
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayLighterMainContent() {
   val scope = rememberCoroutineScope()
@@ -86,33 +79,31 @@ fun DayLighterMainContent() {
       navController = navController,
       onDrawerMenuClick = ::onDrawerMenuClick,
       topBar = {
-        AnimatedVisibility(
-          visible = currentRoute.startsWith(aboutRoute) || currentRoute.startsWith(settingsRoute),
-          enter = fadeIn(),
-          exit = fadeOut(),
-        ) {
-          CenterAlignedTopAppBar(
-            title = {
-              Text(
-                text =
-                  stringResource(
-                    id =
-                      when (currentRoute) {
-                        aboutRoute -> R.string.about_item
-                        settingsRoute,
-                        settingsAutoShowEmailDialogRoute -> R.string.settings_item
-                        else -> R.string.empty
-                      }
-                  ),
-                style = appBarTextStyle(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-            },
-            navigationIcon = { DrawerMenuIconButton(onClick = ::onDrawerMenuClick) }
-          )
-        }
+        DayLighterAppBar(currentRoute = currentRoute, onDrawerMenuClick = ::onDrawerMenuClick)
       }
+    )
+  }
+}
+
+@Composable
+private fun DayLighterAppBar(currentRoute: String, onDrawerMenuClick: () -> Unit) {
+  AnimatedVisibility(
+    visible = currentRoute.startsWith(aboutRoute) || currentRoute.startsWith(settingsRoute),
+    enter = fadeIn(),
+    exit = fadeOut(),
+  ) {
+    DrawerMenuTopAppBar(
+      title =
+        stringResource(
+          id =
+            when (currentRoute) {
+              aboutRoute -> R.string.about_item
+              settingsRoute,
+              settingsAutoShowEmailDialogRoute -> R.string.settings_item
+              else -> R.string.empty
+            }
+        ),
+      onDrawerMenuClick = onDrawerMenuClick
     )
   }
 }

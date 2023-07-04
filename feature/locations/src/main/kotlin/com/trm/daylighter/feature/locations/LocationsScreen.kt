@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -36,7 +35,6 @@ import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
-import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import kotlinx.coroutines.launch
 
 const val locationsRoute = "locations_route"
@@ -89,9 +87,8 @@ private fun LocationsScreen(
     }
 
     @Composable
-    fun TopAppBar(modifier: Modifier = Modifier) {
+    fun TopAppBar() {
       DrawerMenuTopAppBar(
-        modifier = modifier,
         title = stringResource(commonR.string.locations),
         onDrawerMenuClick = onDrawerMenuClick
       )
@@ -105,12 +102,7 @@ private fun LocationsScreen(
       when (locations) {
         is Ready -> {
           Column(modifier = Modifier.fillMaxSize()) {
-            TopAppBar(
-              modifier =
-                Modifier.fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(top = 10.dp, start = 10.dp, end = 10.dp),
-            )
+            TopAppBar()
 
             Box(modifier = Modifier.weight(1f)) {
               val columnsCount =
@@ -170,13 +162,7 @@ private fun LocationsScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
-            TopAppBar(
-              modifier =
-                Modifier.align(Alignment.TopCenter)
-                  .fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(10.dp),
-            )
+            TopAppBar()
           }
         }
         else -> {
@@ -188,13 +174,7 @@ private fun LocationsScreen(
               onAddLocationClick = onAddLocationClick
             )
 
-            TopAppBar(
-              modifier =
-                Modifier.align(Alignment.TopCenter)
-                  .fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(10.dp),
-            )
+            TopAppBar()
           }
         }
       }

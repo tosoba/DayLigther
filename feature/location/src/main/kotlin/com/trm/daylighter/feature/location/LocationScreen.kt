@@ -29,7 +29,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -48,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
+import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -344,10 +344,7 @@ private fun LocationAppBar(
   onInfoClick: () -> Unit
 ) {
   CenterAlignedTopAppBar(
-    modifier =
-      Modifier.background(
-        Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
-      ),
+    modifier = Modifier.background(surfaceToTransparentVerticalGradient),
     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
     title = {
       Text(

@@ -72,7 +72,6 @@ import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
-import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import kotlinx.coroutines.flow.collectLatest
 
 const val newWidgetRoute = "widget_location_route"
@@ -131,10 +130,9 @@ private fun WidgetLocationScreen(
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
 
     @Composable
-    fun TopAppBar(modifier: Modifier = Modifier) {
+    fun TopAppBar() {
       DrawerMenuTopAppBar(
-        modifier = modifier,
-        title = stringResource(commonR.string.choose_widget_location),
+        title = stringResource(commonR.string.select_widget_location),
         onDrawerMenuClick = onDrawerMenuClick
       )
     }
@@ -147,12 +145,7 @@ private fun WidgetLocationScreen(
       when (locations) {
         is Ready -> {
           Column(modifier = Modifier.fillMaxSize()) {
-            TopAppBar(
-              modifier =
-                Modifier.fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(top = 10.dp, start = 10.dp, end = 10.dp),
-            )
+            TopAppBar()
 
             Box(modifier = Modifier.weight(1f)) {
               val columnsCount =
@@ -230,13 +223,7 @@ private fun WidgetLocationScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
-            TopAppBar(
-              modifier =
-                Modifier.align(Alignment.TopCenter)
-                  .fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(10.dp),
-            )
+            TopAppBar()
           }
         }
         else -> {
@@ -248,13 +235,7 @@ private fun WidgetLocationScreen(
               onAddLocationClick = onAddLocationClick
             )
 
-            TopAppBar(
-              modifier =
-                Modifier.align(Alignment.TopCenter)
-                  .fillMaxWidth()
-                  .background(backgroundToTransparentVerticalGradient)
-                  .padding(10.dp),
-            )
+            TopAppBar()
           }
         }
       }
