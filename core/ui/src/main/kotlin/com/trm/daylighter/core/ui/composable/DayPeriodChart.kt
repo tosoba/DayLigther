@@ -140,6 +140,7 @@ fun DayPeriodChart(
 
   val orientation = LocalConfiguration.current.orientation
   val dayLabel = stringResource(R.string.day)
+  val horizonLabel = stringResource(R.string.horizon)
   val nowLineColor = colorResource(R.color.now_line)
 
   Canvas(modifier = modifier) {
@@ -165,6 +166,15 @@ fun DayPeriodChart(
         textMeasurer = textMeasurer,
         textStyle = labelTextStyle.copy(color = textColor),
         dayMode = dayMode,
+        orientation = orientation
+      )
+    }
+
+    if (changeValue.data.today.sunrise != null && changeValue.data.today.sunset != null) {
+      drawHorizonLabel(
+        textStyle = labelTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
+        textMeasurer = textMeasurer,
+        horizonLabel = horizonLabel,
         orientation = orientation
       )
     }
@@ -778,6 +788,34 @@ private fun buildTimeAndDiffLabel(
     append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
     append(diffLabel)
   }
+}
+
+@OptIn(ExperimentalTextApi::class)
+private fun DrawScope.drawHorizonLabel(
+  textStyle: TextStyle,
+  textMeasurer: TextMeasurer,
+  horizonLabel: String,
+  orientation: Int
+) {
+  val horizonLayoutResult =
+    textMeasurer.measure(
+      text = AnnotatedString(horizonLabel),
+      style = textStyle,
+      overflow = TextOverflow.Ellipsis,
+      maxLines = 1
+    )
+  drawText(
+    textMeasurer = textMeasurer,
+    text = horizonLabel,
+    topLeft =
+      Offset(
+        x = size.width - horizonLayoutResult.size.width - chartTextPaddingPx,
+        y = chartCenter(orientation).y - horizonLayoutResult.size.height - chartTextPaddingPx
+      ),
+    style = textStyle,
+    maxLines = 1,
+    overflow = TextOverflow.Ellipsis,
+  )
 }
 
 private fun DrawScope.drawNowLine(

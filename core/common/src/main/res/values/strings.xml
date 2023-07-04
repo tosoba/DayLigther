@@ -22,6 +22,7 @@
     <string name="timezone_ahead_of_you">You\'re %1$02d:%2$02d ahead</string>
     <string name="timezone_behind_of_you">You\'re %1$02d:%2$02d behind</string>
 
+    <string name="horizon">Horizon</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
     <string name="day">Day</string>
