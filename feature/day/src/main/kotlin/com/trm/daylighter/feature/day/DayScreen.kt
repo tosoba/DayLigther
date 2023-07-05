@@ -259,6 +259,7 @@ private fun DayScreen(
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
       DayTopAppBar(
         change = currentChange,
+        chartMode = chartMode,
         modifier =
           Modifier.constrainAs(topAppBar) {
               linkTo(mainContent.start, mainContent.end)
@@ -319,6 +320,7 @@ private fun DayScreen(
     } else {
       DayTopAppBar(
         change = currentChange,
+        chartMode = chartMode,
         modifier =
           Modifier.constrainAs(topAppBar) {
               linkTo(navigation.end, dayTimeCard.start)
@@ -406,27 +408,30 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 @Composable
 private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
+  chartMode: DayPeriodChartMode,
   modifier: Modifier = Modifier,
   navigationIcon: @Composable () -> Unit = {}
 ) {
-  val changeValue = change.value
   Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
     navigationIcon()
-
-    Crossfade(targetState = changeValue is Ready, modifier = Modifier.weight(1f)) { changeReady ->
-      if (changeReady) {
-        Text(
-          text = changeValue.map { (location) -> location.name }.dataOrElse(""),
-          style = appBarTextStyle(),
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
-        )
-      } else {
-        Spacer(modifier = Modifier.weight(1f))
-      }
-    }
+    Text(
+      text =
+        change.value
+          .map { (location) -> location.name }
+          .dataOrElse(
+            stringResource(
+              when (chartMode) {
+                DayPeriodChartMode.DAY_NIGHT_CYCLE -> commonR.string.day_night_cycle
+                DayPeriodChartMode.GOLDEN_BLUE_HOUR -> commonR.string.golden_hour
+              }
+            )
+          ),
+      style = appBarTextStyle(),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      textAlign = TextAlign.Center,
+      modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
+    )
   }
 }
 

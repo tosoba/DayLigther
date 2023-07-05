@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
@@ -96,52 +97,52 @@ private fun DayLighterDrawerContent(
     Spacer(Modifier.height(12.dp))
 
     DrawerRouteItem(
-      label = stringResource(R.string.day_night_cycle_item),
+      label = stringResource(commonR.string.day_night_cycle),
       route = dayNightCycleRoute
     ) {
       Icon(
         painter = painterResource(R.drawable.day_night_cycle_drawer_item),
-        contentDescription = stringResource(R.string.day_night_cycle_item)
+        contentDescription = stringResource(commonR.string.day_night_cycle)
       )
     }
 
     DrawerRouteItem(
-      label = stringResource(R.string.golden_blue_hour_item),
+      label = stringResource(commonR.string.golden_blue_hour),
       route = goldenBlueHourRoute
     ) {
       Icon(
         imageVector = Icons.Filled.PhotoCamera,
-        contentDescription = stringResource(R.string.golden_blue_hour_item)
+        contentDescription = stringResource(commonR.string.golden_blue_hour)
       )
     }
 
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DrawerRouteItem(label = stringResource(R.string.new_widget_item), route = newWidgetRoute) {
+      DrawerRouteItem(label = stringResource(commonR.string.new_widget), route = newWidgetRoute) {
         Icon(
           imageVector = Icons.Filled.Widgets,
-          contentDescription = stringResource(R.string.new_widget_item)
+          contentDescription = stringResource(commonR.string.new_widget)
         )
       }
     }
 
-    DrawerRouteItem(label = stringResource(R.string.locations_item), route = locationsRoute) {
+    DrawerRouteItem(label = stringResource(commonR.string.locations), route = locationsRoute) {
       Icon(
         imageVector = Icons.Filled.LocationOn,
-        contentDescription = stringResource(R.string.locations_item)
+        contentDescription = stringResource(commonR.string.locations)
       )
     }
 
-    DrawerRouteItem(label = stringResource(R.string.settings_item), route = settingsRoute) {
+    DrawerRouteItem(label = stringResource(commonR.string.settings), route = settingsRoute) {
       Icon(
         imageVector = Icons.Filled.Settings,
-        contentDescription = stringResource(R.string.settings_item)
+        contentDescription = stringResource(commonR.string.settings)
       )
     }
 
-    DrawerRouteItem(label = stringResource(R.string.about_item), route = aboutRoute) {
+    DrawerRouteItem(label = stringResource(commonR.string.about), route = aboutRoute) {
       Icon(
         imageVector = Icons.Filled.Info,
-        contentDescription = stringResource(R.string.about_item)
+        contentDescription = stringResource(commonR.string.about)
       )
     }
   }

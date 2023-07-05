@@ -10,6 +10,9 @@
     <string name="retry">Retry</string>
     <string name="clear">Clear</string>
     <string name="refresh">Refresh</string>
+    <string name="day_night_cycle">Day/night cycle</string>
+    <string name="golden_blue_hour">Golden/blue hour</string>
+    <string name="new_widget">New widget</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="locations">Locations</string>
