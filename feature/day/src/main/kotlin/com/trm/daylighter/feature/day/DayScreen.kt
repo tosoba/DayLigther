@@ -219,7 +219,7 @@ private fun DayScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(
               change = Empty.asStable(),
-              modifier = Modifier.fillMaxSize().alpha(.5f),
+              modifier = Modifier.fillMaxSize().alpha(.25f),
               chartMode = chartMode,
               appBarHeightPx = appBarHeightPx
             )
@@ -240,7 +240,7 @@ private fun DayScreen(
               modifier = Modifier.align(Alignment.Center).padding(20.dp)
             ) {
               InfoButtonCard(
-                infoText = stringResource(commonR.string.no_saved_locations_add_one),
+                infoText = stringResource(commonR.string.no_saved_locations),
                 actionText = stringResource(commonR.string.add_location),
                 onButtonClick = onAddLocationClick,
               )
@@ -422,7 +422,7 @@ private fun DayTopAppBar(
             stringResource(
               when (chartMode) {
                 DayPeriodChartMode.DAY_NIGHT_CYCLE -> commonR.string.day_night_cycle
-                DayPeriodChartMode.GOLDEN_BLUE_HOUR -> commonR.string.golden_hour
+                DayPeriodChartMode.GOLDEN_BLUE_HOUR -> commonR.string.golden_blue_hour
               }
             )
           ),

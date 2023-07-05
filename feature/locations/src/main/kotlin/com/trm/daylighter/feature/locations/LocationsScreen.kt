@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -21,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -35,6 +37,7 @@ import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
+import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import kotlinx.coroutines.launch
 
 const val locationsRoute = "locations_route"
@@ -59,7 +62,7 @@ fun LocationsRoute(
   )
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
@@ -90,7 +93,9 @@ private fun LocationsScreen(
     fun TopAppBar() {
       DrawerMenuTopAppBar(
         title = stringResource(commonR.string.locations),
-        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) }
+        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+        modifier = Modifier.background(backgroundToTransparentVerticalGradient)
       )
     }
 
@@ -101,73 +106,82 @@ private fun LocationsScreen(
     ) { locations ->
       when (locations) {
         is Ready -> {
-          Column(modifier = Modifier.fillMaxSize()) {
-            TopAppBar()
+          Box(modifier = Modifier.fillMaxSize()) {
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
-            Box(modifier = Modifier.weight(1f)) {
-              val columnsCount =
-                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 2
-                else 4
-              LazyVerticalGrid(
-                state = gridState,
-                contentPadding = PaddingValues(10.dp),
-                columns = GridCells.Fixed(columnsCount)
-              ) {
-                items(locations.data, key = { it.value.id }) { location ->
-                  MapCard(
-                    location = location,
-                    zoom = zoom,
-                    onSetDefaultLocationClick = onSetDefaultLocationClick,
-                    onEditLocationClick = onEditLocationClick,
-                    onDeleteLocationClick = { locationBeingDeleted = it },
-                  )
-                }
+            Column(modifier = Modifier.fillMaxSize()) {
+              TopAppBar()
 
-                if (bottomButtonsHeightPx > 0) {
-                  item(span = { GridItemSpan(columnsCount) }) {
-                    Spacer(
-                      modifier =
-                        Modifier.height(
-                          bottomButtonsPaddingDp * 2 +
-                            with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
-                        )
+              Box(modifier = Modifier.weight(1f)) {
+                val columnsCount =
+                  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT)
+                    2
+                  else 4
+                LazyVerticalGrid(
+                  state = gridState,
+                  contentPadding = PaddingValues(10.dp),
+                  columns = GridCells.Fixed(columnsCount)
+                ) {
+                  items(locations.data, key = { it.value.id }) { location ->
+                    MapCard(
+                      location = location,
+                      zoom = zoom,
+                      onSetDefaultLocationClick = onSetDefaultLocationClick,
+                      onEditLocationClick = onEditLocationClick,
+                      onDeleteLocationClick = { locationBeingDeleted = it },
                     )
                   }
+
+                  if (bottomButtonsHeightPx > 0) {
+                    item(span = { GridItemSpan(columnsCount) }) {
+                      Spacer(
+                        modifier =
+                          Modifier.height(
+                            bottomButtonsPaddingDp * 2 +
+                              with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                          )
+                      )
+                    }
+                  }
                 }
-              }
 
-              ZoomControlsRow(
-                zoom = zoom,
-                incrementZoom = { ++zoom },
-                decrementZoom = { --zoom },
-                modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
-              )
-
-              FloatingActionButton(
-                onClick = onAddLocationClick,
-                modifier =
-                  Modifier.align(Alignment.BottomEnd)
-                    .padding(bottomButtonsPaddingDp)
-                    .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
-              ) {
-                Icon(
-                  imageVector = Icons.Filled.Add,
-                  contentDescription = stringResource(R.string.add_a_location)
+                ZoomControlsRow(
+                  zoom = zoom,
+                  incrementZoom = { ++zoom },
+                  decrementZoom = { --zoom },
+                  modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
                 )
+
+                FloatingActionButton(
+                  onClick = onAddLocationClick,
+                  modifier =
+                    Modifier.align(Alignment.BottomEnd)
+                      .padding(bottomButtonsPaddingDp)
+                      .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
+                ) {
+                  Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.add_a_location)
+                  )
+                }
               }
             }
           }
         }
         is Loading -> {
           Box(modifier = Modifier.fillMaxSize()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
+
+            LinearProgressIndicator(
+              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+            )
 
             TopAppBar()
           }
         }
         else -> {
           Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.5f))
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).padding(20.dp),
@@ -195,7 +209,7 @@ private fun LocationsScreen(
 @Composable
 private fun NoLocationsCard(modifier: Modifier = Modifier, onAddLocationClick: () -> Unit) {
   InfoButtonCard(
-    infoText = stringResource(commonR.string.no_saved_locations_add_one),
+    infoText = stringResource(commonR.string.no_saved_locations),
     actionText = stringResource(commonR.string.add_location),
     onButtonClick = onAddLocationClick,
     modifier = modifier

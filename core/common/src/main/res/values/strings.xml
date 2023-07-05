@@ -18,7 +18,7 @@
     <string name="locations">Locations</string>
     <string name="new_location">New location</string>
     <string name="no_locations">No locations</string>
-    <string name="no_saved_locations_add_one">No saved locations - add one to track its day periods.</string>
+    <string name="no_saved_locations">No saved locations.</string>
     <string name="time_format_12_h">hh:mm:ss aa</string>
     <string name="time_format_24_h">HH:mm:ss</string>
 

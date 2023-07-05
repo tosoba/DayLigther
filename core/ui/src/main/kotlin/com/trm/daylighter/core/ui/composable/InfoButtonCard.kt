@@ -27,7 +27,7 @@ fun InfoButtonCard(
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.padding(10.dp)
+      modifier = Modifier.padding(20.dp)
     ) {
       Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
       Spacer(modifier = Modifier.height(10.dp))
