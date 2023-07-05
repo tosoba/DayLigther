@@ -182,7 +182,7 @@ private fun DayLighterNavHost(
   fun navigateToSettingsOnEnableGeocodingClick() {
     navController.navigate(
       route = settingsNavigationRoute(autoShowEmailDialog = true),
-      navOptions = navController.topLevelNavOptions()
+      navOptions = nextLevelNavOptions()
     )
   }
 
