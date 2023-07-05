@@ -478,9 +478,9 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
 
   val sunriseLabel = stringResource(R.string.sunrise)
   val sunsetLabel = stringResource(R.string.sunset)
-  val sixDegreesBelowLabel = stringResource(R.string.six_degrees_below)
-  val twelveDegreesBelowLabel = stringResource(R.string.twelve_degrees_below)
-  val eighteenDegreesBelowLabel = stringResource(R.string.eighteen_degrees_below)
+  val sixDegreesBelowLabel = stringResource(R.string.six_degrees)
+  val twelveDegreesBelowLabel = stringResource(R.string.twelve_degrees)
+  val eighteenDegreesBelowLabel = stringResource(R.string.eighteen_degrees)
 
   return remember(change, dayMode) {
     buildList {
@@ -592,11 +592,10 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
 
   val sunriseLabel = stringResource(R.string.sunrise)
   val sunsetLabel = stringResource(R.string.sunset)
-  val sixDegreesAboveLabel = stringResource(R.string.six_degrees_above)
-  val fourDegreesBelowLabel = stringResource(R.string.four_degrees_below)
-  val sixDegreesBelowLabel = stringResource(R.string.six_degrees_below)
-  val twelveDegreesBelowLabel = stringResource(R.string.twelve_degrees_below)
-  val eighteenDegreesBelowLabel = stringResource(R.string.eighteen_degrees_below)
+  val fourDegreesLabel = stringResource(R.string.four_degrees)
+  val sixDegreesLabel = stringResource(R.string.six_degrees)
+  val twelveDegreesLabel = stringResource(R.string.twelve_degrees)
+  val eighteenDegreesLabel = stringResource(R.string.eighteen_degrees)
 
   return remember(change, dayMode) {
     buildList {
@@ -607,7 +606,7 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = -6f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 2f) },
-            endingEdgeLabel = sixDegreesAboveLabel,
+            endingEdgeLabel = sixDegreesLabel,
             sunriseTimeLabel =
               change.today.goldenHourAboveMorning?.timeLabel(using24HFormat).orEmpty(),
             sunsetTimeLabel =
@@ -636,7 +635,7 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 4f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 2f) },
-            endingEdgeLabel = fourDegreesBelowLabel,
+            endingEdgeLabel = fourDegreesLabel,
             sunriseTimeLabel =
               change.today.goldenHourBelowMorning?.timeLabel(using24HFormat).orEmpty(),
             sunsetTimeLabel =
@@ -650,7 +649,7 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 6f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
-            endingEdgeLabel = sixDegreesBelowLabel,
+            endingEdgeLabel = sixDegreesLabel,
             sunriseTimeLabel = change.today.civilTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
             sunsetTimeLabel = change.today.civilTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
           )
@@ -663,7 +662,7 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 12f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
-            endingEdgeLabel = twelveDegreesBelowLabel,
+            endingEdgeLabel = twelveDegreesLabel,
             sunriseTimeLabel =
               change.today.nauticalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
             sunsetTimeLabel = change.today.nauticalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
@@ -678,7 +677,7 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 18f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
-            endingEdgeLabel = eighteenDegreesBelowLabel,
+            endingEdgeLabel = eighteenDegreesLabel,
             sunriseTimeLabel =
               change.today.astronomicalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
             sunsetTimeLabel =
