@@ -64,6 +64,7 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DisabledMapView
+import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
@@ -133,7 +134,7 @@ private fun WidgetLocationScreen(
     fun TopAppBar() {
       DrawerMenuTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
-        onDrawerMenuClick = onDrawerMenuClick
+        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) }
       )
     }
 

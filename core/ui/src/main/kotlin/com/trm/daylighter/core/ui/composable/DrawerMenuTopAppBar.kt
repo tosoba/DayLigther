@@ -23,11 +23,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DrawerMenuTopAppBar(
   title: String,
-  onDrawerMenuClick: () -> Unit,
+  navigationIcon: @Composable () -> Unit = {},
   trailing: @Composable RowScope.() -> Unit = {},
 ) {
   CenterAlignedTopAppBar(
-    navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
+    navigationIcon = navigationIcon,
     title = {
       Text(
         text = title,

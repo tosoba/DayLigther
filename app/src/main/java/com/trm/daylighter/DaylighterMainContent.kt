@@ -1,9 +1,6 @@
 package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,7 +26,6 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -39,7 +35,6 @@ import com.trm.daylighter.feature.day.goldenBlueHourRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.settings.settingsAutoShowEmailDialogRoute
 import com.trm.daylighter.feature.settings.settingsComposable
 import com.trm.daylighter.feature.settings.settingsNavigationRoute
 import com.trm.daylighter.feature.settings.settingsRoute
@@ -75,36 +70,7 @@ fun DayLighterMainContent() {
       )
     }
   ) {
-    DayLighterScaffold(
-      navController = navController,
-      onDrawerMenuClick = ::onDrawerMenuClick,
-      topBar = {
-        DayLighterAppBar(currentRoute = currentRoute, onDrawerMenuClick = ::onDrawerMenuClick)
-      }
-    )
-  }
-}
-
-@Composable
-private fun DayLighterAppBar(currentRoute: String, onDrawerMenuClick: () -> Unit) {
-  AnimatedVisibility(
-    visible = currentRoute.startsWith(aboutRoute) || currentRoute.startsWith(settingsRoute),
-    enter = fadeIn(),
-    exit = fadeOut(),
-  ) {
-    DrawerMenuTopAppBar(
-      title =
-        stringResource(
-          id =
-            when (currentRoute) {
-              aboutRoute -> R.string.about_item
-              settingsRoute,
-              settingsAutoShowEmailDialogRoute -> R.string.settings_item
-              else -> R.string.empty
-            }
-        ),
-      onDrawerMenuClick = onDrawerMenuClick
-    )
+    DayLighterScaffold(navController = navController, onDrawerMenuClick = ::onDrawerMenuClick)
   }
 }
 
@@ -183,17 +149,12 @@ private fun DayLighterDrawerContent(
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
-private fun DayLighterScaffold(
-  navController: NavHostController,
-  onDrawerMenuClick: () -> Unit,
-  topBar: @Composable () -> Unit
-) {
+private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuClick: () -> Unit) {
   Scaffold(
     modifier = Modifier.semantics { testTagsAsResourceId = true },
     containerColor = MaterialTheme.colorScheme.background,
     contentColor = MaterialTheme.colorScheme.onBackground,
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
-    topBar = topBar,
   ) {
     DayLighterNavHost(
       navController = navController,
@@ -262,9 +223,35 @@ private fun DayLighterNavHost(
       )
     }
 
-    composable(route = aboutRoute) { AboutScreen(modifier = Modifier.fillMaxSize()) }
+    composable(
+      route = newWidgetRoute,
+      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern })
+    ) {
+      WidgetLocationRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocationClick = ::navigateToAddLocation,
+        onDrawerMenuClick = onDrawerMenuClick,
+      )
+    }
 
-    settingsComposable(modifier = Modifier.fillMaxSize())
+    composable(route = locationsRoute) {
+      LocationsRoute(
+        modifier = Modifier.fillMaxSize(),
+        onAddLocationClick = ::navigateToAddLocation,
+        onEditLocationClick = ::navigateToEditLocation,
+        onDrawerMenuClick = onDrawerMenuClick,
+      )
+    }
+
+    settingsComposable(
+      modifier = Modifier.fillMaxSize(),
+      onBackClick = navController::popBackStack,
+      onDrawerMenuClick = onDrawerMenuClick,
+    )
+
+    composable(route = aboutRoute) {
+      AboutScreen(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = onDrawerMenuClick)
+    }
 
     composable(
       route = locationRoute,
@@ -285,26 +272,6 @@ private fun DayLighterNavHost(
         modifier = Modifier.fillMaxSize(),
         onBackClick = navController::popBackStack,
         onEnableGeocodingClick = ::navigateToSettingsOnEnableGeocodingClick
-      )
-    }
-
-    composable(route = locationsRoute) {
-      LocationsRoute(
-        modifier = Modifier.fillMaxSize(),
-        onAddLocationClick = ::navigateToAddLocation,
-        onEditLocationClick = ::navigateToEditLocation,
-        onDrawerMenuClick = onDrawerMenuClick,
-      )
-    }
-
-    composable(
-      route = newWidgetRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern })
-    ) {
-      WidgetLocationRoute(
-        modifier = Modifier.fillMaxSize(),
-        onAddLocationClick = ::navigateToAddLocation,
-        onDrawerMenuClick = onDrawerMenuClick,
       )
     }
   }

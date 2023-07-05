@@ -90,7 +90,7 @@ private fun LocationsScreen(
     fun TopAppBar() {
       DrawerMenuTopAppBar(
         title = stringResource(commonR.string.locations),
-        onDrawerMenuClick = onDrawerMenuClick
+        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) }
       )
     }
 

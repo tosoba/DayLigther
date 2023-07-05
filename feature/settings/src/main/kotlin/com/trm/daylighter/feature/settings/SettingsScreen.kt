@@ -44,8 +44,12 @@ import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScope
 import com.jamal.composeprefs3.ui.PrefsScreen
 import com.jamal.composeprefs3.ui.prefs.*
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
+import com.trm.daylighter.core.ui.composable.BackIconButton
+import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
+import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -58,7 +62,11 @@ const val settingsAutoShowEmailDialogRoute =
 fun settingsNavigationRoute(autoShowEmailDialog: Boolean) =
   "$settingsRoute?$settingsAutoShowEmailDialogParam=$autoShowEmailDialog"
 
-fun NavGraphBuilder.settingsComposable(modifier: Modifier = Modifier) {
+fun NavGraphBuilder.settingsComposable(
+  modifier: Modifier = Modifier,
+  onBackClick: () -> Unit,
+  onDrawerMenuClick: () -> Unit,
+) {
   composable(
     route = settingsAutoShowEmailDialogRoute,
     arguments =
@@ -72,6 +80,8 @@ fun NavGraphBuilder.settingsComposable(modifier: Modifier = Modifier) {
     SettingsRoute(
       autoShowEmailDialog = it.arguments?.getString(settingsAutoShowEmailDialogParam)?.toBoolean()
           ?: false,
+      onBackClick = onBackClick,
+      onDrawerMenuClick = onDrawerMenuClick,
       modifier = modifier
     )
   }
@@ -81,6 +91,8 @@ fun NavGraphBuilder.settingsComposable(modifier: Modifier = Modifier) {
 private fun SettingsRoute(
   modifier: Modifier = Modifier,
   autoShowEmailDialog: Boolean = false,
+  onBackClick: () -> Unit,
+  onDrawerMenuClick: () -> Unit,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
   val context = LocalContext.current
@@ -92,6 +104,8 @@ private fun SettingsRoute(
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
     autoShowEmailDialog = autoShowEmailDialog,
+    onBackClick = onBackClick,
+    onDrawerMenuClick = onDrawerMenuClick,
     onDisableGeocodingClick = {
       viewModel.clearGeocodingEmail()
       Toast.makeText(context, geocodingDisabledMessage, Toast.LENGTH_SHORT).show()
@@ -108,31 +122,46 @@ private fun SettingsRoute(
 private fun SettingsScreen(
   isGeocodeEmailPreferenceSet: Boolean,
   autoShowEmailDialog: Boolean,
+  onBackClick: () -> Unit,
+  onDrawerMenuClick: () -> Unit,
   onDisableGeocodingClick: () -> Unit,
   onClearLocationsClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  PrefsScreen(dataStore = LocalContext.current.preferencesDataStore, modifier = modifier) {
-    prefsGroup({
-      GroupHeader(
-        title = stringResource(R.string.geocoding_pref_group_title),
-        color = MaterialTheme.colorScheme.secondary
-      )
-    }) {
-      editGeocodingEmailPreferenceItem(autoShowEmailDialog = autoShowEmailDialog)
-
-      if (isGeocodeEmailPreferenceSet) {
-        disableGeocodingPreferenceItem(onClick = onDisableGeocodingClick)
+  Column(modifier = modifier) {
+    DrawerMenuTopAppBar(
+      title = stringResource(commonR.string.settings),
+      navigationIcon = {
+        if (autoShowEmailDialog) BackIconButton(onClick = onBackClick)
+        else DrawerMenuIconButton(onClick = onDrawerMenuClick)
       }
-    }
+    )
 
-    prefsGroup({
-      GroupHeader(
-        title = stringResource(R.string.locations_pref_group_title),
-        color = MaterialTheme.colorScheme.secondary
-      )
-    }) {
-      clearLocationsPreferenceItem(onClearLocationsClick = onClearLocationsClick)
+    PrefsScreen(
+      dataStore = LocalContext.current.preferencesDataStore,
+      modifier = Modifier.fillMaxWidth().weight(1f)
+    ) {
+      prefsGroup({
+        GroupHeader(
+          title = stringResource(R.string.geocoding_pref_group_title),
+          color = MaterialTheme.colorScheme.secondary
+        )
+      }) {
+        editGeocodingEmailPreferenceItem(autoShowEmailDialog = autoShowEmailDialog)
+
+        if (isGeocodeEmailPreferenceSet) {
+          disableGeocodingPreferenceItem(onClick = onDisableGeocodingClick)
+        }
+      }
+
+      prefsGroup({
+        GroupHeader(
+          title = stringResource(R.string.locations_pref_group_title),
+          color = MaterialTheme.colorScheme.secondary
+        )
+      }) {
+        clearLocationsPreferenceItem(onClearLocationsClick = onClearLocationsClick)
+      }
     }
   }
 }
