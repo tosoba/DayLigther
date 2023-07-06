@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="new_location_info">Center the map on a desired location. Use the button in the bottom right to confirm your choice.</string>
+    <string name="location_info_dialog_title">Define a location</string>
+    <string name="location_info_dialog_text">Center the map on a desired location. Use the button in the bottom right to confirm your choice.</string>
     <string name="my_location">My location</string>
     <string name="save_location">Save location</string>
 

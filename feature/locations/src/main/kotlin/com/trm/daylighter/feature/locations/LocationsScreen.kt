@@ -114,9 +114,13 @@ private fun LocationsScreen(
 
               Box(modifier = Modifier.weight(1f)) {
                 val columnsCount =
-                  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT)
+                  if (
+                    LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+                  ) {
                     2
-                  else 4
+                  } else {
+                    4
+                  }
                 LazyVerticalGrid(
                   state = gridState,
                   contentPadding = PaddingValues(10.dp),

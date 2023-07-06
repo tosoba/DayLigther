@@ -216,11 +216,16 @@ private fun LocationScreen(
     )
   }
 
+  var isInfoDialogShown by rememberSaveable { mutableStateOf(false) }
+
   @Composable
   fun LocationScaffold() {
     LocationScaffold(
       locationMap = locationMap,
       isLoading = isLoading,
+      isInfoDialogShown = isInfoDialogShown,
+      onInfoClick = { isInfoDialogShown = true },
+      onInfoDialogDismissRequest = { isInfoDialogShown = false },
       saveSpecifiedLocation = { latitude, longitude ->
         saveSpecifiedLocationClick(latitude, longitude)
         sheetVisible = true
@@ -280,6 +285,9 @@ private fun LocationScreen(
 private fun LocationScaffold(
   locationMap: LocationMap,
   isLoading: Boolean,
+  isInfoDialogShown: Boolean,
+  onInfoClick: () -> Unit,
+  onInfoDialogDismissRequest: () -> Unit,
   saveSpecifiedLocation: (lat: Double, lng: Double) -> Unit,
   onUserLocationClick: () -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
@@ -310,19 +318,15 @@ private fun LocationScaffold(
         }
       }
 
-      val context = LocalContext.current
-      var infoToast: Toast? by remember { mutableStateOf(null) }
       LocationAppBar(
         locationMap = locationMap,
         onBackClick = onBackClick,
-        onInfoClick = {
-          Toast.makeText(context, R.string.new_location_info, Toast.LENGTH_LONG).also {
-            it.show()
-            infoToast?.cancel()
-            infoToast = it
-          }
-        }
+        onInfoClick = onInfoClick
       )
+
+      if (isInfoDialogShown) {
+        LocationInfoDialog(onDismissRequest = onInfoDialogDismissRequest)
+      }
 
       LoadingProgressIndicator(
         visible = isLoading,
@@ -334,6 +338,20 @@ private fun LocationScaffold(
 
     modalSheet()
   }
+}
+
+@Composable
+private fun LocationInfoDialog(onDismissRequest: () -> Unit) {
+  AlertDialog(
+    onDismissRequest = onDismissRequest,
+    title = { Text(text = stringResource(R.string.location_info_dialog_title)) },
+    text = { Text(text = stringResource(R.string.location_info_dialog_text)) },
+    confirmButton = {
+      TextButton(onClick = onDismissRequest) {
+        Text(text = stringResource(android.R.string.ok), style = MaterialTheme.typography.bodyLarge)
+      }
+    }
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -376,7 +394,7 @@ private fun LocationAppBar(
       ) {
         Icon(
           imageVector = Icons.Filled.Info,
-          contentDescription = stringResource(R.string.new_location_info),
+          contentDescription = stringResource(R.string.location_info_dialog_text),
           tint = MaterialTheme.colorScheme.onSurface
         )
       }
