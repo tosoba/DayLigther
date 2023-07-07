@@ -8,20 +8,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SunriseSunset(
-  @Serializable(with = LocalDateTimeSerializer::class)
-  val astronomicalTwilightBegin: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val astronomicalTwilightEnd: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val civilTwilightBegin: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val civilTwilightEnd: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val nauticalTwilightBegin: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val nauticalTwilightEnd: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val morning18Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val evening18Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val morning6Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val evening6Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val morning12Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val evening12Below: LocalDateTime?,
   @Serializable(with = LocalDateTimeSerializer::class) val sunrise: LocalDateTime?,
   @Serializable(with = LocalDateTimeSerializer::class) val sunset: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourAboveMorning: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourBelowMorning: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourAboveEvening: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val goldenHourBelowEvening: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val blueHourBegin: LocalDateTime?,
-  @Serializable(with = LocalDateTimeSerializer::class) val blueHourEnd: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val morning6Above: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val morning4Below: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val evening6Above: LocalDateTime?,
+  @Serializable(with = LocalDateTimeSerializer::class) val evening4Below: LocalDateTime?,
   @Serializable(with = LocalDateSerializer::class) val date: LocalDate,
 )

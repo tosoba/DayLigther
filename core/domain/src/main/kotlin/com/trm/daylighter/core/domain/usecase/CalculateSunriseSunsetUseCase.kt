@@ -29,25 +29,18 @@ constructor(
       )
 
     return SunriseSunset(
-      astronomicalTwilightBegin =
-        calculateDawnOrTwilight(SunPosition.ASTRONOMICAL, HalfDay.MORNING),
-      astronomicalTwilightEnd = calculateDawnOrTwilight(SunPosition.ASTRONOMICAL, HalfDay.EVENING),
-      civilTwilightBegin = calculateDawnOrTwilight(SunPosition.CIVIL, HalfDay.MORNING),
-      civilTwilightEnd = calculateDawnOrTwilight(SunPosition.CIVIL, HalfDay.EVENING),
-      nauticalTwilightBegin = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.MORNING),
-      nauticalTwilightEnd = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.EVENING),
+      morning18Below = calculateDawnOrTwilight(SunPosition.ASTRONOMICAL, HalfDay.MORNING),
+      evening18Below = calculateDawnOrTwilight(SunPosition.ASTRONOMICAL, HalfDay.EVENING),
+      morning6Below = calculateDawnOrTwilight(SunPosition.CIVIL, HalfDay.MORNING),
+      evening6Below = calculateDawnOrTwilight(SunPosition.CIVIL, HalfDay.EVENING),
+      morning12Below = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.MORNING),
+      evening12Below = calculateDawnOrTwilight(SunPosition.NAUTICAL, HalfDay.EVENING),
       sunrise = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.MORNING),
       sunset = calculateDawnOrTwilight(SunPosition.OFFICIAL, HalfDay.EVENING),
-      goldenHourAboveMorning =
-        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.MORNING),
-      goldenHourBelowMorning =
-        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.MORNING),
-      goldenHourAboveEvening =
-        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.EVENING),
-      goldenHourBelowEvening =
-        calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.EVENING),
-      blueHourBegin = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.MORNING),
-      blueHourEnd = calculateDawnOrTwilight(SunPosition.BLUE_HOUR, HalfDay.EVENING),
+      morning6Above = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.MORNING),
+      morning4Below = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.MORNING),
+      evening6Above = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.EVENING),
+      evening4Below = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.EVENING),
       date = date.toLocalDate()
     )
   }

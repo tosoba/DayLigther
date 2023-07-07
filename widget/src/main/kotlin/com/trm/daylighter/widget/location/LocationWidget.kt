@@ -227,14 +227,14 @@ private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSu
     sunriseSunset.run {
       listOfNotNull(
           date.atStartOfDay(zoneId),
-          astronomicalTwilightBegin?.atZone(zoneId),
-          nauticalTwilightBegin?.atZone(zoneId),
-          civilTwilightBegin?.atZone(zoneId),
+          morning18Below?.atZone(zoneId),
+          morning12Below?.atZone(zoneId),
+          morning6Below?.atZone(zoneId),
           sunrise?.atZone(zoneId),
           sunset?.atZone(zoneId),
-          civilTwilightEnd?.atZone(zoneId),
-          nauticalTwilightEnd?.atZone(zoneId),
-          astronomicalTwilightEnd?.atZone(zoneId),
+          evening6Below?.atZone(zoneId),
+          evening12Below?.atZone(zoneId),
+          evening18Below?.atZone(zoneId),
           date.atStartOfDay(zoneId).plusDays(1L),
         )
         .map(ZonedDateTime::toInstant)
@@ -256,31 +256,31 @@ private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
 
   val paints = buildList {
-    if (astronomicalTwilightBegin != null) {
+    if (morning18Below != null) {
       add(nightPaint)
     }
-    if (astronomicalTwilightBegin != null || nauticalTwilightBegin != null) {
+    if (morning18Below != null || morning12Below != null) {
       add(astronomicalTwilightPaint)
     }
-    if (nauticalTwilightBegin != null || civilTwilightBegin != null) {
+    if (morning12Below != null || morning6Below != null) {
       add(nauticalTwilightPaint)
     }
-    if (civilTwilightBegin != null || sunrise != null) {
+    if (morning6Below != null || sunrise != null) {
       add(civilTwilightPaint)
     }
     if (sunrise != null && sunset != null) {
       add(dayPaint)
     }
-    if (sunset != null || civilTwilightEnd != null) {
+    if (sunset != null || evening6Below != null) {
       add(civilTwilightPaint)
     }
-    if (civilTwilightEnd != null || nauticalTwilightEnd != null) {
+    if (evening6Below != null || evening12Below != null) {
       add(nauticalTwilightPaint)
     }
-    if (nauticalTwilightEnd != null || astronomicalTwilightEnd != null) {
+    if (evening12Below != null || evening18Below != null) {
       add(astronomicalTwilightPaint)
     }
-    if (astronomicalTwilightEnd != null) {
+    if (evening18Below != null) {
       add(nightPaint)
     }
   }

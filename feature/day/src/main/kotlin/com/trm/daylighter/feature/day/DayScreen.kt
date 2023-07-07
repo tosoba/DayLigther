@@ -577,9 +577,7 @@ private fun rememberNextDayPeriod(
       DayPeriod.NIGHT -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.astronomicalTwilightBegin?.let {
-              NextDayPeriod(it.toLocalTime(), astronomicalDawn)
-            }
+            today.morning18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDawn) }
           }
           DayMode.SUNSET -> {
             null
@@ -589,24 +587,22 @@ private fun rememberNextDayPeriod(
       DayPeriod.ASTRONOMICAL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.nauticalTwilightBegin?.let { NextDayPeriod(it.toLocalTime(), nauticalDawn) }
-              ?: today.astronomicalTwilightEnd?.let {
-                NextDayPeriod(it.toLocalTime(), astronomicalDusk)
-              }
+            today.morning12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDawn) }
+              ?: today.evening18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
           }
           DayMode.SUNSET -> {
-            today.astronomicalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
+            today.evening18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
           }
         }
       }
       DayPeriod.NAUTICAL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.civilTwilightBegin?.let { NextDayPeriod(it.toLocalTime(), civilDawn) }
-              ?: today.nauticalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+            today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), civilDawn) }
+              ?: today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
           }
           DayMode.SUNSET -> {
-            today.nauticalTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+            today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
           }
         }
       }
@@ -614,10 +610,10 @@ private fun rememberNextDayPeriod(
         when (dayMode) {
           DayMode.SUNRISE -> {
             today.sunrise?.let { NextDayPeriod(it.toLocalTime(), sunrise) }
-              ?: today.civilTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+              ?: today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
           }
           DayMode.SUNSET -> {
-            today.civilTwilightEnd?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+            today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
           }
         }
       }

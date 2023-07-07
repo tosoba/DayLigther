@@ -316,7 +316,7 @@ private fun dayNightCycleChartSegmentEdges(
           )
         )
       }
-      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+      if (change?.today?.morning6Below != null && change.today.evening6Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 6f,
@@ -326,9 +326,7 @@ private fun dayNightCycleChartSegmentEdges(
           )
         )
       }
-      if (
-        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
-      ) {
+      if (change?.today?.morning12Below != null && change.today.evening12Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 12f,
@@ -338,10 +336,7 @@ private fun dayNightCycleChartSegmentEdges(
           )
         )
       }
-      if (
-        change?.today?.astronomicalTwilightBegin != null &&
-          change.today.astronomicalTwilightEnd != null
-      ) {
+      if (change?.today?.morning18Below != null && change.today.evening18Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 18f,
@@ -367,9 +362,7 @@ private fun goldenBlueHourChartSegmentEdges(
 
   return remember(change) {
     buildList {
-      if (
-        change?.today?.goldenHourAboveMorning != null && change.today.goldenHourAboveMorning != null
-      ) {
+      if (change?.today?.morning6Above != null && change.today.evening6Above != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = -6f,
@@ -388,7 +381,7 @@ private fun goldenBlueHourChartSegmentEdges(
           )
         )
       }
-      if (change?.today?.blueHourBegin != null && change.today.blueHourEnd != null) {
+      if (change?.today?.morning4Below != null && change.today.evening4Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 4f,
@@ -398,7 +391,7 @@ private fun goldenBlueHourChartSegmentEdges(
           )
         )
       }
-      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+      if (change?.today?.morning6Below != null && change.today.evening6Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 6f,
@@ -408,9 +401,7 @@ private fun goldenBlueHourChartSegmentEdges(
           )
         )
       }
-      if (
-        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
-      ) {
+      if (change?.today?.morning12Below != null && change.today.evening12Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 12f,
@@ -420,10 +411,7 @@ private fun goldenBlueHourChartSegmentEdges(
           )
         )
       }
-      if (
-        change?.today?.astronomicalTwilightBegin != null &&
-          change.today.astronomicalTwilightEnd != null
-      ) {
+      if (change?.today?.morning18Below != null && change.today.evening18Below != null) {
         add(
           DayChartSegmentEdge(
             angleDegrees = 18f,
@@ -508,73 +496,65 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
           )
         )
       }
-      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+      if (change?.today?.morning6Below != null && change.today.evening6Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 6f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = sixDegreesBelowLabel,
-            sunriseTimeLabel = change.today.civilTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel = change.today.civilTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning6Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening6Below?.timeLabel(using24HFormat).orEmpty(),
             sunriseDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.civilTwilightBegin,
-                todayTimestamp = change.today.civilTwilightBegin
+                yesterdayTimestamp = change.yesterday.morning6Below,
+                todayTimestamp = change.today.morning6Below
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.civilTwilightEnd,
-                todayTimestamp = change.today.civilTwilightEnd
+                yesterdayTimestamp = change.yesterday.evening6Below,
+                todayTimestamp = change.today.evening6Below
               )
           )
         )
       }
-      if (
-        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
-      ) {
+      if (change?.today?.morning12Below != null && change.today.evening12Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 12f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = twelveDegreesBelowLabel,
-            sunriseTimeLabel =
-              change.today.nauticalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel = change.today.nauticalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning12Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening12Below?.timeLabel(using24HFormat).orEmpty(),
             sunriseDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.nauticalTwilightBegin,
-                todayTimestamp = change.today.nauticalTwilightBegin
+                yesterdayTimestamp = change.yesterday.morning12Below,
+                todayTimestamp = change.today.morning12Below
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.nauticalTwilightEnd,
-                todayTimestamp = change.today.nauticalTwilightEnd
+                yesterdayTimestamp = change.yesterday.evening12Below,
+                todayTimestamp = change.today.evening12Below
               )
           )
         )
       }
-      if (
-        change?.today?.astronomicalTwilightBegin != null &&
-          change.today.astronomicalTwilightEnd != null
-      ) {
+      if (change?.today?.morning18Below != null && change.today.evening18Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 18f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = eighteenDegreesBelowLabel,
-            sunriseTimeLabel =
-              change.today.astronomicalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel =
-              change.today.astronomicalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning18Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening18Below?.timeLabel(using24HFormat).orEmpty(),
             sunriseDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.astronomicalTwilightBegin,
-                todayTimestamp = change.today.astronomicalTwilightBegin
+                yesterdayTimestamp = change.yesterday.morning18Below,
+                todayTimestamp = change.today.morning18Below
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
-                yesterdayTimestamp = change.yesterday.astronomicalTwilightEnd,
-                todayTimestamp = change.today.astronomicalTwilightEnd
+                yesterdayTimestamp = change.yesterday.evening18Below,
+                todayTimestamp = change.today.evening18Below
               )
           )
         )
@@ -599,18 +579,14 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
 
   return remember(change, dayMode) {
     buildList {
-      if (
-        change?.today?.goldenHourAboveMorning != null && change.today.goldenHourAboveEvening != null
-      ) {
+      if (change?.today?.morning6Above != null && change.today.evening6Above != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = -6f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 2f) },
             endingEdgeLabel = sixDegreesLabel,
-            sunriseTimeLabel =
-              change.today.goldenHourAboveMorning?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel =
-              change.today.goldenHourAboveEvening?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning6Above?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening6Above?.timeLabel(using24HFormat).orEmpty(),
           )
         )
       }
@@ -628,60 +604,48 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           )
         )
       }
-      if (
-        change?.today?.goldenHourBelowMorning != null && change.today.goldenHourAboveEvening != null
-      ) {
+      if (change?.today?.morning4Below != null && change.today.evening6Above != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 4f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 2f) },
             endingEdgeLabel = fourDegreesLabel,
-            sunriseTimeLabel =
-              change.today.goldenHourBelowMorning?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel =
-              change.today.goldenHourAboveEvening?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning4Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening6Above?.timeLabel(using24HFormat).orEmpty(),
           )
         )
       }
 
-      if (change?.today?.civilTwilightBegin != null && change.today.civilTwilightEnd != null) {
+      if (change?.today?.morning6Below != null && change.today.evening6Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 6f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = sixDegreesLabel,
-            sunriseTimeLabel = change.today.civilTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel = change.today.civilTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning6Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening6Below?.timeLabel(using24HFormat).orEmpty(),
           )
         )
       }
-      if (
-        change?.today?.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null
-      ) {
+      if (change?.today?.morning12Below != null && change.today.evening12Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 12f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = twelveDegreesLabel,
-            sunriseTimeLabel =
-              change.today.nauticalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel = change.today.nauticalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning12Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening12Below?.timeLabel(using24HFormat).orEmpty(),
           )
         )
       }
-      if (
-        change?.today?.astronomicalTwilightBegin != null &&
-          change.today.astronomicalTwilightEnd != null
-      ) {
+      if (change?.today?.morning18Below != null && change.today.evening18Below != null) {
         add(
           DayChartSegmentEdgeLabels(
             edgeAngleDegrees = 18f,
             extraOffset = { textLayoutResult -> Offset(0f, -textLayoutResult.size.height / 4f) },
             endingEdgeLabel = eighteenDegreesLabel,
-            sunriseTimeLabel =
-              change.today.astronomicalTwilightBegin?.timeLabel(using24HFormat).orEmpty(),
-            sunsetTimeLabel =
-              change.today.astronomicalTwilightEnd?.timeLabel(using24HFormat).orEmpty(),
+            sunriseTimeLabel = change.today.morning18Below?.timeLabel(using24HFormat).orEmpty(),
+            sunsetTimeLabel = change.today.evening18Below?.timeLabel(using24HFormat).orEmpty(),
           )
         )
       }
@@ -927,24 +891,24 @@ private fun SunriseSunset.dayPeriodStartAngleRadians(
     DayPeriod.NIGHT -> {
       when (dayMode) {
         DayMode.SUNRISE -> nightStart
-        DayMode.SUNSET -> astronomicalTwilightEnd?.let { 18f.radians } ?: dayStart
+        DayMode.SUNSET -> evening18Below?.let { 18f.radians } ?: dayStart
       }
     }
     DayPeriod.ASTRONOMICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> astronomicalTwilightBegin?.let { 18f.radians } ?: nightStart
-        DayMode.SUNSET -> nauticalTwilightEnd?.let { 12f.radians } ?: dayStart
+        DayMode.SUNRISE -> morning18Below?.let { 18f.radians } ?: nightStart
+        DayMode.SUNSET -> evening12Below?.let { 12f.radians } ?: dayStart
       }
     }
     DayPeriod.NAUTICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> nauticalTwilightBegin?.let { 12f.radians } ?: nightStart
-        DayMode.SUNSET -> civilTwilightEnd?.let { 6f.radians } ?: dayStart
+        DayMode.SUNRISE -> morning12Below?.let { 12f.radians } ?: nightStart
+        DayMode.SUNSET -> evening6Below?.let { 6f.radians } ?: dayStart
       }
     }
     DayPeriod.CIVIL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> civilTwilightBegin?.let { 6f.radians } ?: nightStart
+        DayMode.SUNRISE -> morning6Below?.let { 6f.radians } ?: nightStart
         DayMode.SUNSET -> sunset?.let { 0f.radians } ?: dayStart
       }
     }
@@ -969,26 +933,26 @@ private fun SunriseSunset.dayPeriodEndAngleRadians(
   return when (dayPeriod) {
     DayPeriod.NIGHT -> {
       when (dayMode) {
-        DayMode.SUNRISE -> astronomicalTwilightBegin?.let { 18f.radians } ?: dayEnd
+        DayMode.SUNRISE -> morning18Below?.let { 18f.radians } ?: dayEnd
         DayMode.SUNSET -> nightEnd
       }
     }
     DayPeriod.ASTRONOMICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> nauticalTwilightBegin?.let { 12f.radians } ?: dayEnd
-        DayMode.SUNSET -> astronomicalTwilightEnd?.let { 18f.radians } ?: nightEnd
+        DayMode.SUNRISE -> morning12Below?.let { 12f.radians } ?: dayEnd
+        DayMode.SUNSET -> evening18Below?.let { 18f.radians } ?: nightEnd
       }
     }
     DayPeriod.NAUTICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> civilTwilightBegin?.let { 6f.radians } ?: dayEnd
-        DayMode.SUNSET -> nauticalTwilightEnd?.let { 12f.radians } ?: nightEnd
+        DayMode.SUNRISE -> morning6Below?.let { 6f.radians } ?: dayEnd
+        DayMode.SUNSET -> evening12Below?.let { 12f.radians } ?: nightEnd
       }
     }
     DayPeriod.CIVIL -> {
       when (dayMode) {
         DayMode.SUNRISE -> sunrise?.let { 0f.radians } ?: dayEnd
-        DayMode.SUNSET -> civilTwilightEnd?.let { 6f.radians } ?: nightEnd
+        DayMode.SUNSET -> evening6Below?.let { 6f.radians } ?: nightEnd
       }
     }
     DayPeriod.DAY -> {
@@ -1043,7 +1007,7 @@ private fun dayNightCycleChartSegments(
       if (
         change == null ||
           (change.today.sunrise != null && change.today.sunset != null) ||
-          (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null)
+          (change.today.morning6Below != null && change.today.evening6Below != null)
       ) {
         add(
           civilTwilightChartSegment(
@@ -1058,8 +1022,8 @@ private fun dayNightCycleChartSegments(
 
       if (
         change == null ||
-          (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null) ||
-          (change.today.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null)
+          (change.today.morning6Below != null && change.today.evening6Below != null) ||
+          (change.today.morning12Below != null && change.today.evening12Below != null)
       ) {
         add(
           nauticalTwilightChartSegment(
@@ -1074,10 +1038,8 @@ private fun dayNightCycleChartSegments(
 
       if (
         change == null ||
-          (change.today.nauticalTwilightBegin != null &&
-            change.today.nauticalTwilightEnd != null) ||
-          (change.today.astronomicalTwilightBegin != null &&
-            change.today.astronomicalTwilightEnd != null)
+          (change.today.morning12Below != null && change.today.evening12Below != null) ||
+          (change.today.morning18Below != null && change.today.evening18Below != null)
       ) {
         add(
           astronomicalTwilightChartSegment(
@@ -1092,8 +1054,7 @@ private fun dayNightCycleChartSegments(
 
       if (
         change == null ||
-          (change.today.astronomicalTwilightBegin != null &&
-            change.today.astronomicalTwilightEnd != null) ||
+          (change.today.morning18Below != null && change.today.evening18Below != null) ||
           change.today.isPolarNightAtLocation(change.location)
       ) {
         add(
@@ -1157,10 +1118,8 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.goldenHourAboveMorning != null &&
-            change.today.goldenHourAboveMorning != null) ||
-          (change.today.goldenHourBelowMorning != null &&
-            change.today.goldenHourBelowMorning != null)
+          (change.today.morning6Above != null && change.today.evening6Above != null) ||
+          (change.today.morning4Below != null && change.today.evening4Below != null)
       ) {
         add(
           goldenHourChartSegment(
@@ -1175,9 +1134,8 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.goldenHourBelowMorning != null &&
-            change.today.goldenHourBelowMorning != null) ||
-          (change.today.blueHourBegin != null && change.today.blueHourEnd != null)
+          (change.today.morning4Below != null && change.today.evening4Below != null) ||
+          (change.today.morning6Below != null && change.today.evening6Below != null)
       ) {
         add(
           blueHourChartSegment(
@@ -1192,8 +1150,8 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.civilTwilightBegin != null && change.today.civilTwilightEnd != null) ||
-          (change.today.nauticalTwilightBegin != null && change.today.nauticalTwilightEnd != null)
+          (change.today.morning6Below != null && change.today.evening6Below != null) ||
+          (change.today.morning12Below != null && change.today.evening12Below != null)
       ) {
         add(
           nauticalTwilightChartSegment(
@@ -1208,10 +1166,8 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.nauticalTwilightBegin != null &&
-            change.today.nauticalTwilightEnd != null) ||
-          (change.today.astronomicalTwilightBegin != null &&
-            change.today.astronomicalTwilightEnd != null)
+          (change.today.morning12Below != null && change.today.evening12Below != null) ||
+          (change.today.morning18Below != null && change.today.evening18Below != null)
       ) {
         add(
           astronomicalTwilightChartSegment(
@@ -1226,8 +1182,7 @@ private fun goldenBlueHourChartSegments(
 
       if (
         change == null ||
-          (change.today.astronomicalTwilightBegin != null &&
-            change.today.astronomicalTwilightEnd != null) ||
+          (change.today.morning18Below != null && change.today.evening18Below != null) ||
           change.today.isPolarNightAtLocation(change.location)
       ) {
         add(

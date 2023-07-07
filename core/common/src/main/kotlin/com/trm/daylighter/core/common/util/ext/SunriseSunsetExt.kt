@@ -14,31 +14,30 @@ import kotlin.math.abs
 fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
   return when {
-    now.isBeforeOtherNotNull(astronomicalTwilightBegin) ||
-      now.isEqualOrAfterOtherNotNull(astronomicalTwilightEnd) -> {
+    now.isBeforeOtherNotNull(morning18Below) || now.isEqualOrAfterOtherNotNull(evening18Below) -> {
       DayPeriod.NIGHT
     }
     now.isInPeriod(
-      beginMorning = astronomicalTwilightBegin,
-      endMorning = nauticalTwilightBegin,
-      beginEvening = nauticalTwilightEnd,
-      endEvening = astronomicalTwilightEnd
+      beginMorning = morning18Below,
+      endMorning = morning12Below,
+      beginEvening = evening12Below,
+      endEvening = evening18Below
     ) -> {
       DayPeriod.ASTRONOMICAL
     }
     now.isInPeriod(
-      beginMorning = nauticalTwilightBegin,
-      endMorning = civilTwilightBegin,
-      beginEvening = civilTwilightEnd,
-      endEvening = nauticalTwilightEnd
+      beginMorning = morning12Below,
+      endMorning = morning6Below,
+      beginEvening = evening6Below,
+      endEvening = evening12Below
     ) -> {
       DayPeriod.NAUTICAL
     }
     now.isInPeriod(
-      beginMorning = civilTwilightBegin,
+      beginMorning = morning6Below,
       endMorning = sunrise,
       beginEvening = sunset,
-      endEvening = civilTwilightEnd
+      endEvening = evening6Below
     ) -> {
       DayPeriod.CIVIL
     }
@@ -67,24 +66,24 @@ fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): Lo
     DayPeriod.NIGHT -> {
       when (dayMode) {
         DayMode.SUNRISE -> nightStart
-        DayMode.SUNSET -> astronomicalTwilightEnd?.toLocalTime() ?: noon
+        DayMode.SUNSET -> evening18Below?.toLocalTime() ?: noon
       }
     }
     DayPeriod.ASTRONOMICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> astronomicalTwilightBegin?.toLocalTime() ?: nightStart
-        DayMode.SUNSET -> nauticalTwilightEnd?.toLocalTime() ?: noon
+        DayMode.SUNRISE -> morning18Below?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> evening12Below?.toLocalTime() ?: noon
       }
     }
     DayPeriod.NAUTICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> nauticalTwilightBegin?.toLocalTime() ?: nightStart
-        DayMode.SUNSET -> civilTwilightEnd?.toLocalTime() ?: noon
+        DayMode.SUNRISE -> morning12Below?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> evening6Below?.toLocalTime() ?: noon
       }
     }
     DayPeriod.CIVIL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> civilTwilightBegin?.toLocalTime() ?: nightStart
+        DayMode.SUNRISE -> morning6Below?.toLocalTime() ?: nightStart
         DayMode.SUNSET -> sunset?.toLocalTime() ?: noon
       }
     }
@@ -103,26 +102,26 @@ fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): Loca
   return when (dayPeriod) {
     DayPeriod.NIGHT -> {
       when (dayMode) {
-        DayMode.SUNRISE -> astronomicalTwilightBegin?.toLocalTime() ?: noon
+        DayMode.SUNRISE -> morning18Below?.toLocalTime() ?: noon
         DayMode.SUNSET -> nightEnd
       }
     }
     DayPeriod.ASTRONOMICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> nauticalTwilightBegin?.toLocalTime() ?: noon
-        DayMode.SUNSET -> astronomicalTwilightEnd?.toLocalTime() ?: nightEnd
+        DayMode.SUNRISE -> morning12Below?.toLocalTime() ?: noon
+        DayMode.SUNSET -> evening18Below?.toLocalTime() ?: nightEnd
       }
     }
     DayPeriod.NAUTICAL -> {
       when (dayMode) {
-        DayMode.SUNRISE -> civilTwilightBegin?.toLocalTime() ?: noon
-        DayMode.SUNSET -> nauticalTwilightEnd?.toLocalTime() ?: nightEnd
+        DayMode.SUNRISE -> morning6Below?.toLocalTime() ?: noon
+        DayMode.SUNSET -> evening12Below?.toLocalTime() ?: nightEnd
       }
     }
     DayPeriod.CIVIL -> {
       when (dayMode) {
         DayMode.SUNRISE -> sunrise?.toLocalTime() ?: noon
-        DayMode.SUNSET -> civilTwilightEnd?.toLocalTime() ?: nightEnd
+        DayMode.SUNSET -> evening6Below?.toLocalTime() ?: nightEnd
       }
     }
     DayPeriod.DAY -> {

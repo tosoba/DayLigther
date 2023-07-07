@@ -12,12 +12,12 @@ import kotlin.math.abs
 
 fun SunriseSunset.allTimestamps(): List<LocalDateTime?> =
   listOf(
-    astronomicalTwilightBegin,
-    astronomicalTwilightEnd,
-    civilTwilightBegin,
-    civilTwilightEnd,
-    nauticalTwilightBegin,
-    nauticalTwilightEnd,
+    morning18Below,
+    evening18Below,
+    morning6Below,
+    evening6Below,
+    morning12Below,
+    evening12Below,
     sunrise,
     sunset
   )
