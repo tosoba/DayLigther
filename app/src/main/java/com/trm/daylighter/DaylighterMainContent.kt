@@ -63,10 +63,17 @@ fun DayLighterMainContent() {
     drawerState = drawerState,
     drawerContent = {
       DayLighterDrawerContent(
-        currentRoute = navController.currentRoute(),
-        onRouteSelected = { route ->
+        currentRoute = currentRoute,
+        onRouteSelected = { destinationRoute ->
           scope.launch { drawerState.close() }
-          navController.navigate(route = route, navOptions = navController.topLevelNavOptions())
+          navController.navigate(
+            route = destinationRoute,
+            navOptions =
+              navController.topLevelNavOptions(
+                saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
+                restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
+              )
+          )
         }
       )
     }
@@ -287,10 +294,13 @@ private fun NavOptionsBuilder.fadeInAndOut() {
   }
 }
 
-private fun NavController.topLevelNavOptions(): NavOptions = navOptions {
-  popUpTo(graph.findStartDestination().id) { saveState = true }
+private fun NavController.topLevelNavOptions(
+  saveCurrentRouteState: Boolean,
+  restoreDestinationState: Boolean
+): NavOptions = navOptions {
+  popUpTo(graph.findStartDestination().id) { saveState = saveCurrentRouteState }
   launchSingleTop = true
-  restoreState = true
+  this.restoreState = restoreDestinationState
   fadeInAndOut()
 }
 
