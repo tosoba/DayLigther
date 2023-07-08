@@ -8,6 +8,8 @@ import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.widget.location.LocationWidgetExtras
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPinnedReceiver
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetReceiver
+import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
+import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -17,7 +19,7 @@ constructor(
   @ApplicationContext private val context: Context,
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
-    context.sendBroadcast(DayNightCycleWidgetReceiver.updateAllWidgetsIntent(context))
+    context.sendBroadcast(context.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>())
   }
 
   override suspend fun addDayNightCycleWidget(locationId: Long): Boolean =
@@ -38,8 +40,7 @@ constructor(
 
   override suspend fun editDayNightCycleWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
-      DayNightCycleWidgetReceiver.updateWidgetIntent(
-        context = context,
+      context.updateWidgetIntent<DayNightCycleWidgetReceiver>(
         widgetId = widgetId,
         locationId = locationId
       )

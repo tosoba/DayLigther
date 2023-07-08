@@ -1,37 +1,27 @@
 package com.trm.daylighter.widget.location.daynight
 
-import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
-import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.LocationWidgetExtras
+import com.trm.daylighter.widget.util.ext.getLastWidgetId
+import com.trm.daylighter.widget.util.ext.showWidgetPinnedToast
+import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 
 class DayNightCycleWidgetPinnedReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
     context.sendBroadcast(
-      DayNightCycleWidgetReceiver.updateWidgetIntent(
-        context = context,
-        widgetId =
-          AppWidgetManager.getInstance(context)
-            .getAppWidgetIds(DayNightCycleWidgetReceiver.componentName(context))
-            .lastOrNull()
+      context.updateWidgetIntent<DayNightCycleWidgetReceiver>(
+        widgetId = context.getLastWidgetId<DayNightCycleWidgetReceiver>()
             ?: throw IllegalArgumentException(
-              "Did not find any glance ids for DayNightCycleWidget."
+              "Did not find any widget ids for ${DayNightCycleWidget::class.java.simpleName}."
             ),
         locationId = intent.extras?.getLong(LocationWidgetExtras.LOCATION_ID, -1L)
             ?: throw IllegalArgumentException(
-              "LOCATION_ID extra was not passed to DayNightCycleWidget."
+              "LOCATION_ID extra was not passed to ${DayNightCycleWidget::class.java.simpleName}."
             )
       )
     )
-
-    Toast.makeText(
-        context,
-        context.getString(R.string.widget_pinned_to_home_screen),
-        Toast.LENGTH_LONG
-      )
-      .show()
+    context.showWidgetPinnedToast()
   }
 }

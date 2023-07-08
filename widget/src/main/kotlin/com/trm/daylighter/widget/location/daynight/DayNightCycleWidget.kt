@@ -54,6 +54,7 @@ import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.dayPeriodChartBitmap
 import com.trm.daylighter.widget.ui.deepLinkAction
 import com.trm.daylighter.widget.ui.stringResource
+import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
 
 class DayNightCycleWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -85,7 +86,13 @@ class DayNightCycleWidget(
         Empty -> AddLocationButton()
         is Loading -> ProgressIndicator()
         is Ready -> DayChart(change = change.data, id = id)
-        is Failed -> RetryButton(onClick = updateWidgetAction())
+        is Failed ->
+          RetryButton(
+            onClick =
+              actionSendBroadcast(
+                LocalContext.current.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>()
+              )
+          )
       }
     }
   }
@@ -149,9 +156,5 @@ class DayNightCycleWidget(
 
   companion object {
     private val tallMode = DpSize(200.dp, 100.dp)
-
-    @Composable
-    private fun updateWidgetAction() =
-      actionSendBroadcast(DayNightCycleWidgetReceiver.updateAllWidgetsIntent(LocalContext.current))
   }
 }

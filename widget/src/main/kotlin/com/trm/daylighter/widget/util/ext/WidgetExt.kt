@@ -1,16 +1,34 @@
 package com.trm.daylighter.widget.util.ext
 
 import android.content.Context
-import android.content.Intent
-import androidx.glance.GlanceId
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
-suspend inline fun <reified T : GlanceAppWidget> Context.getGlanceIds(): List<GlanceId> =
-  GlanceAppWidgetManager(this).getGlanceIds(T::class.java)
+internal fun GlanceAppWidget.updateWidget(
+  widgetId: Int,
+  context: Context,
+  updateState: suspend (MutablePreferences) -> Unit,
+) {
+  CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
+    val glanceId = context.getGlanceIdByWidgetId(widgetId)
+    updateAppWidgetState(context = context, glanceId = glanceId, updateState = updateState)
+    update(context, glanceId)
+  }
+}
 
-fun Context.getGlanceIdByWidgetId(widgetId: Int): GlanceId =
-  GlanceAppWidgetManager(this).getGlanceIdBy(widgetId)
-
-inline fun <reified T> Context.actionIntent(action: String): Intent =
-  Intent(this, T::class.java).apply { this.action = action }
+internal inline fun <reified T : GlanceAppWidget> T.updateAllWidgets(
+  context: Context,
+  noinline updateState: suspend (MutablePreferences) -> Unit,
+) {
+  CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
+    for (glanceId in context.getGlanceIds<T>()) {
+      updateAppWidgetState(context = context, glanceId = glanceId, updateState = updateState)
+      update(context, glanceId)
+    }
+  }
+}
