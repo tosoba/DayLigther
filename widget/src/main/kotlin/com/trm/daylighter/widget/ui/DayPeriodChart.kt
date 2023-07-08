@@ -17,9 +17,12 @@ import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
+import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
+import com.trm.daylighter.core.ui.theme.blueHourColor
 import com.trm.daylighter.core.ui.theme.civilTwilightColor
 import com.trm.daylighter.core.ui.theme.dayColor
+import com.trm.daylighter.core.ui.theme.goldenHourColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
@@ -28,7 +31,10 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Composable
-internal fun dayPeriodChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
+internal fun dayPeriodChartBitmap(
+  change: LocationSunriseSunsetChange,
+  chartMode: DayPeriodChartMode
+): Bitmap {
   val context = LocalContext.current
   val bitmap =
     with(LocalSize.current) {
@@ -41,20 +47,29 @@ internal fun dayPeriodChartBitmap(change: LocationSunriseSunsetChange): Bitmap {
 
   Canvas(bitmap).apply {
     val (location, today, _) = change
-    drawDayPeriods(zoneId = location.zoneId, today = today, location = location)
+    drawDayPeriods(today = today, location = location, chartMode = chartMode)
     drawTimeLine(dateTime = ZonedDateTime.now(location.zoneId), paint = nowLinePaint(context))
   }
 
   return bitmap
 }
 
-private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset, location: Location) {
+private fun Canvas.drawDayPeriods(
+  today: SunriseSunset,
+  location: Location,
+  chartMode: DayPeriodChartMode
+) {
   val widthPx = width.toFloat()
   val heightPx = height.toFloat()
 
   val secondsInDay = Duration.ofDays(1L).seconds.toFloat()
-  val durations = dayPeriodDurationsInSeconds(zoneId = zoneId, sunriseSunset = today)
-  val paints = today.dayPeriodPaintsFor(location)
+  val durations =
+    dayPeriodDurationsInSeconds(
+      sunriseSunset = today,
+      zoneId = location.zoneId,
+      chartMode = chartMode
+    )
+  val paints = today.dayPeriodPaintsFor(location = location, chartMode = chartMode)
 
   var left = 0f
   var right = left + durations.first() / secondsInDay * widthPx
@@ -66,21 +81,36 @@ private fun Canvas.drawDayPeriods(zoneId: ZoneId, today: SunriseSunset, location
   }
 }
 
-private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSunset): List<Float> {
+private fun dayPeriodDurationsInSeconds(
+  sunriseSunset: SunriseSunset,
+  zoneId: ZoneId,
+  chartMode: DayPeriodChartMode
+): List<Float> {
   val periodInstants =
     sunriseSunset.run {
-      listOfNotNull(
-          date.atStartOfDay(zoneId),
-          morning18Below?.atZone(zoneId),
-          morning12Below?.atZone(zoneId),
-          morning6Below?.atZone(zoneId),
-          sunrise?.atZone(zoneId),
-          sunset?.atZone(zoneId),
-          evening6Below?.atZone(zoneId),
-          evening12Below?.atZone(zoneId),
-          evening18Below?.atZone(zoneId),
-          date.atStartOfDay(zoneId).plusDays(1L),
-        )
+      buildList {
+          add(date.atStartOfDay(zoneId))
+          add(morning18Below?.atZone(zoneId))
+          add(morning12Below?.atZone(zoneId))
+          add(morning6Below?.atZone(zoneId))
+          when (chartMode) {
+            DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+              add(sunrise?.atZone(zoneId))
+              add(sunset?.atZone(zoneId))
+            }
+            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+              add(morning4Below?.atZone(zoneId))
+              add(morning6Above?.atZone(zoneId))
+              add(evening6Above?.atZone(zoneId))
+              add(evening4Below?.atZone(zoneId))
+            }
+          }
+          add(evening6Below?.atZone(zoneId))
+          add(evening12Below?.atZone(zoneId))
+          add(evening18Below?.atZone(zoneId))
+          add(date.atStartOfDay(zoneId).plusDays(1L))
+        }
+        .filterNotNull()
         .map(ZonedDateTime::toInstant)
     }
   return periodInstants.indices.drop(1).map { index ->
@@ -88,7 +118,10 @@ private fun dayPeriodDurationsInSeconds(zoneId: ZoneId, sunriseSunset: SunriseSu
   }
 }
 
-private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
+private fun SunriseSunset.dayPeriodPaintsFor(
+  location: Location,
+  chartMode: DayPeriodChartMode
+): List<Paint> {
   val nightPaint = antiAliasPaint(color = nightColor.toArgb())
   if (isPolarNightAtLocation(location)) return listOf(nightPaint)
 
@@ -98,6 +131,8 @@ private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
   val astronomicalTwilightPaint = antiAliasPaint(color = astronomicalTwilightColor.toArgb())
   val nauticalTwilightPaint = antiAliasPaint(color = nauticalTwilightColor.toArgb())
   val civilTwilightPaint = antiAliasPaint(color = civilTwilightColor.toArgb())
+  val blueHourPaint = antiAliasPaint(color = blueHourColor.toArgb())
+  val goldenHourPaint = antiAliasPaint(color = goldenHourColor.toArgb())
 
   val paints = buildList {
     if (morning18Below != null) {
@@ -109,14 +144,35 @@ private fun SunriseSunset.dayPeriodPaintsFor(location: Location): List<Paint> {
     if (morning12Below != null || morning6Below != null) {
       add(nauticalTwilightPaint)
     }
-    if (morning6Below != null || sunrise != null) {
-      add(civilTwilightPaint)
-    }
-    if (sunrise != null && sunset != null) {
-      add(dayPaint)
-    }
-    if (sunset != null || evening6Below != null) {
-      add(civilTwilightPaint)
+    when (chartMode) {
+      DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+        if (morning6Below != null || sunrise != null) {
+          add(civilTwilightPaint)
+        }
+        if (sunrise != null && sunset != null) {
+          add(dayPaint)
+        }
+        if (sunset != null || evening6Below != null) {
+          add(civilTwilightPaint)
+        }
+      }
+      DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+        if (morning6Below != null || morning4Below != null) {
+          add(blueHourPaint)
+        }
+        if (morning4Below != null || morning6Above != null) {
+          add(goldenHourPaint)
+        }
+        if (morning6Above != null || evening6Above != null) {
+          add(dayPaint)
+        }
+        if (evening6Above != null || evening4Below != null) {
+          add(goldenHourPaint)
+        }
+        if (evening4Below != null || evening6Below != null) {
+          add(blueHourPaint)
+        }
+      }
     }
     if (evening6Below != null || evening12Below != null) {
       add(nauticalTwilightPaint)

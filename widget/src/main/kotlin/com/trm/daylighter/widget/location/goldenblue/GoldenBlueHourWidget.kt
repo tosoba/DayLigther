@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.location.daynight
+package com.trm.daylighter.widget.location.goldenblue
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -30,7 +30,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
+import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
@@ -46,7 +46,6 @@ import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.locationIdKey
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.Clock
-import com.trm.daylighter.widget.ui.DayLengthInfo
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.LocationName
 import com.trm.daylighter.widget.ui.ProgressIndicator
@@ -57,7 +56,7 @@ import com.trm.daylighter.widget.ui.deepLinkAction
 import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
 
-class DayNightCycleWidget(
+class GoldenBlueHourWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
     GetDefaultLocationSunriseSunsetChangeFlowUseCase,
   private val getLocationSunriseSunsetChangeFlowByIdUseCase:
@@ -91,7 +90,7 @@ class DayNightCycleWidget(
           RetryButton(
             onClick =
               actionSendBroadcast(
-                LocalContext.current.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>()
+                LocalContext.current.updateAllWidgetsIntent<GoldenBlueHourWidgetReceiver>()
               )
           )
       }
@@ -110,7 +109,7 @@ class DayNightCycleWidget(
           .appWidgetBackgroundCornerRadius()
           .clickable(
             deepLinkAction(
-              context.dayNightCycleDeepLinkUri(
+              context.goldenBlueHourDeepLinkUri(
                 locationId = change.location.id,
                 isDefault = change.location.isDefault
               )
@@ -120,7 +119,7 @@ class DayNightCycleWidget(
       Image(
         provider =
           BitmapImageProvider(
-            dayPeriodChartBitmap(change = change, chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE)
+            dayPeriodChartBitmap(change = change, chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR)
           ),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
@@ -136,7 +135,6 @@ class DayNightCycleWidget(
           ) {
             LocationName(location = change.location)
             Clock(zoneId = change.location.zoneId)
-            DayLengthInfo(change = change)
           }
         }
       }

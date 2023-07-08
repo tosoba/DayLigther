@@ -1,6 +1,8 @@
 package com.trm.daylighter.widget.util.ext
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -42,3 +44,13 @@ internal inline fun <reified T : GlanceAppWidgetReceiver> Context.widgetReceiver
 
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.getLastWidgetId(): Int? =
   AppWidgetManager.getInstance(this).getAppWidgetIds(widgetReceiverComponentName<T>()).lastOrNull()
+
+internal inline fun <reified T : BroadcastReceiver> Context.widgetPinSuccessCallback(
+  locationId: Long
+): PendingIntent =
+  PendingIntent.getBroadcast(
+    this,
+    0,
+    Intent(this, T::class.java).putExtra(LocationWidgetExtras.LOCATION_ID, locationId),
+    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+  )

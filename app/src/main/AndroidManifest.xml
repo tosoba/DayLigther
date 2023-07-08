@@ -45,7 +45,7 @@
         <receiver
             android:name=".widget.location.daynight.DayNightCycleWidgetReceiver"
             android:exported="false"
-            android:label="@string/day_night_widget_label">
+            android:label="@string/day_night_cycle_widget_label">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -53,7 +53,26 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/location_widget" />
+                android:resource="@xml/day_night_cycle_widget" />
+
+        </receiver>
+
+        <receiver
+            android:name=".widget.location.goldenblue.GoldenBlueHourWidgetPinnedReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.location.goldenblue.GoldenBlueHourWidgetReceiver"
+            android:exported="false"
+            android:label="@string/golden_blue_hour_widget_label">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/golden_blue_hour_widget" />
 
         </receiver>
 
