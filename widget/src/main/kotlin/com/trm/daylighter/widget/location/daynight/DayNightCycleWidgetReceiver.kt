@@ -9,8 +9,8 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.widget.location.LocationWidgetExtras
-import com.trm.daylighter.widget.location.LocationWidgetState
-import com.trm.daylighter.widget.location.LocationWidgetStateDefinition
+import com.trm.daylighter.widget.location.locationIdKey
+import com.trm.daylighter.widget.location.uuidKey
 import com.trm.daylighter.widget.util.ext.actionIntent
 import com.trm.daylighter.widget.util.ext.getGlanceIdByWidgetId
 import com.trm.daylighter.widget.util.ext.getGlanceIds
@@ -59,12 +59,9 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   private fun Context.updateAllWidgets() {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
       for (glanceId in getGlanceIds<DayNightCycleWidget>()) {
-        updateAppWidgetState(
-          context = this@updateAllWidgets,
-          definition = LocationWidgetStateDefinition,
-          glanceId = glanceId,
-          updateState = LocationWidgetState::copyWithNewUuid
-        )
+        updateAppWidgetState(context = this@updateAllWidgets, glanceId = glanceId) { prefs ->
+          prefs[uuidKey] = UUID.randomUUID().toString()
+        }
         glanceAppWidget.update(this@updateAllWidgets, glanceId)
       }
     }
@@ -73,15 +70,9 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   private fun Context.updateWidget(widgetId: Int, locationId: Long) {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
       val glanceId = getGlanceIdByWidgetId(widgetId)
-      updateAppWidgetState(
-        context = this@updateWidget,
-        definition = LocationWidgetStateDefinition,
-        glanceId = glanceId
-      ) {
-        LocationWidgetState.ChosenLocation(
-          locationId = locationId,
-          uuid = UUID.randomUUID().toString()
-        )
+      updateAppWidgetState(context = this@updateWidget, glanceId = glanceId) { prefs ->
+        prefs[locationIdKey] = locationId
+        prefs[uuidKey] = UUID.randomUUID().toString()
       }
       glanceAppWidget.update(this@updateWidget, glanceId)
     }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.Preferences
 import androidx.glance.AndroidResourceImageProvider
 import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceId
@@ -27,6 +28,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
@@ -40,8 +42,7 @@ import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.widget.R
-import com.trm.daylighter.widget.location.LocationWidgetState
-import com.trm.daylighter.widget.location.LocationWidgetStateDefinition
+import com.trm.daylighter.widget.location.locationIdKey
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.Clock
 import com.trm.daylighter.widget.ui.DayLengthInfo
@@ -60,22 +61,17 @@ class DayNightCycleWidget(
   private val getLocationSunriseSunsetChangeFlowByIdUseCase:
     GetLocationSunriseSunsetChangeFlowByIdUseCase
 ) : GlanceAppWidget() {
-  override val stateDefinition = LocationWidgetStateDefinition
+  override val stateDefinition = PreferencesGlanceStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent {
-      val state = currentState<LocationWidgetState>()
+      val state = currentState<Preferences>()
       val change by
         remember(state) {
-            when (state) {
-              is LocationWidgetState.ChosenLocation -> {
-                getLocationSunriseSunsetChangeFlowByIdUseCase(state.locationId)
-              }
-              is LocationWidgetState.DefaultLocation -> {
-                getDefaultLocationSunriseSunsetChangeFlowUseCase()
-              }
-            }
+            val locationId = state[locationIdKey]
+            if (locationId == null) getDefaultLocationSunriseSunsetChangeFlowUseCase()
+            else getLocationSunriseSunsetChangeFlowByIdUseCase(locationId)
           }
           .collectAsState(initial = LoadingFirst)
       Content(change = change, id = id)

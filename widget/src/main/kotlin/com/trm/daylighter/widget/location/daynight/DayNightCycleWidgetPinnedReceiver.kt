@@ -16,7 +16,7 @@ class DayNightCycleWidgetPinnedReceiver : BroadcastReceiver() {
         widgetId =
           AppWidgetManager.getInstance(context)
             .getAppWidgetIds(DayNightCycleWidgetReceiver.componentName(context))
-            .maxOrNull()
+            .lastOrNull()
             ?: throw IllegalArgumentException(
               "Did not find any glance ids for DayNightCycleWidget."
             ),
