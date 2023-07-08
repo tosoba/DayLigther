@@ -68,7 +68,7 @@ constructor(
   private fun addSelectedLocationWidget() {
     val locationId = selectedLocationId ?: return
     viewModelScope.launch {
-      if (!widgetManager.addLocationWidget(locationId = locationId)) {
+      if (!widgetManager.addDayNightCycleWidget(locationId = locationId)) {
         _toastMessageResId.emit(R.string.failed_to_add_widget)
       }
     }
@@ -77,7 +77,7 @@ constructor(
   private fun editSelectedLocationWidget() {
     val locationId = selectedLocationId ?: return
     viewModelScope.launch {
-      widgetManager.editLocationWidget(
+      widgetManager.editDayNightCycleWidget(
         widgetId =
           requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.GLANCE_ID))
             .toInt(),

@@ -1,4 +1,4 @@
-package com.trm.daylighter.widget.location
+package com.trm.daylighter.widget.location.daynight
 
 import android.content.ComponentName
 import android.content.Context
@@ -8,6 +8,9 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.widget.location.LocationWidgetExtras
+import com.trm.daylighter.widget.location.LocationWidgetState
+import com.trm.daylighter.widget.location.LocationWidgetStateDefinition
 import com.trm.daylighter.widget.util.ext.actionIntent
 import com.trm.daylighter.widget.util.ext.getGlanceIdByWidgetId
 import com.trm.daylighter.widget.util.ext.getGlanceIds
@@ -20,7 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
+class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   @Inject
   internal lateinit var getDefaultLocationSunriseSunsetChangeFlowUseCase:
     GetDefaultLocationSunriseSunsetChangeFlowUseCase
@@ -31,7 +34,7 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
 
   override val glanceAppWidget: GlanceAppWidget
     get() =
-      LocationWidget(
+      DayNightCycleWidget(
         getDefaultLocationSunriseSunsetChangeFlowUseCase,
         getLocationSunriseSunsetChangeFlowByIdUseCase
       )
@@ -55,7 +58,7 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
 
   private fun Context.updateAllWidgets() {
     CoroutineScope(context = SupervisorJob() + Dispatchers.Default).launch {
-      for (glanceId in getGlanceIds<LocationWidget>()) {
+      for (glanceId in getGlanceIds<DayNightCycleWidget>()) {
         updateAppWidgetState(
           context = this@updateAllWidgets,
           definition = LocationWidgetStateDefinition,
@@ -89,14 +92,17 @@ class LocationWidgetReceiver : GlanceAppWidgetReceiver() {
     private const val ACTION_UPDATE_WIDGET = "ACTION_UPDATE_WIDGET"
 
     fun componentName(context: Context): ComponentName =
-      ComponentName(context.applicationContext.packageName, LocationWidgetReceiver::class.java.name)
+      ComponentName(
+        context.applicationContext.packageName,
+        DayNightCycleWidgetReceiver::class.java.name
+      )
 
     fun updateAllWidgetsIntent(context: Context): Intent =
-      context.actionIntent<LocationWidgetReceiver>(ACTION_UPDATE_ALL_WIDGETS)
+      context.actionIntent<DayNightCycleWidgetReceiver>(ACTION_UPDATE_ALL_WIDGETS)
 
     fun updateWidgetIntent(context: Context, widgetId: Int, locationId: Long): Intent =
       context
-        .actionIntent<LocationWidgetReceiver>(ACTION_UPDATE_WIDGET)
+        .actionIntent<DayNightCycleWidgetReceiver>(ACTION_UPDATE_WIDGET)
         .putExtra(LocationWidgetExtras.WIDGET_ID, widgetId)
         .putExtra(LocationWidgetExtras.LOCATION_ID, locationId)
   }

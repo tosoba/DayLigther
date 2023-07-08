@@ -39,13 +39,13 @@
         </activity>
 
         <receiver
-            android:name=".widget.LocationWidgetPinnedReceiver"
+            android:name=".widget.location.daynight.DayNightCycleWidgetPinnedReceiver"
             android:exported="false" />
 
         <receiver
-            android:name=".widget.location.LocationWidgetReceiver"
+            android:name=".widget.location.daynight.DayNightCycleWidgetReceiver"
             android:exported="false"
-            android:label="@string/location_chart">
+            android:label="@string/day_night_widget_label">
 
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

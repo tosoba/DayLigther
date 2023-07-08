@@ -6,7 +6,8 @@ import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.widget.location.LocationWidgetExtras
-import com.trm.daylighter.widget.location.LocationWidgetReceiver
+import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPinnedReceiver
+import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -16,28 +17,28 @@ constructor(
   @ApplicationContext private val context: Context,
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
-    context.sendBroadcast(LocationWidgetReceiver.updateAllWidgetsIntent(context))
+    context.sendBroadcast(DayNightCycleWidgetReceiver.updateAllWidgetsIntent(context))
   }
 
-  override suspend fun addLocationWidget(locationId: Long): Boolean =
+  override suspend fun addDayNightCycleWidget(locationId: Long): Boolean =
     GlanceAppWidgetManager(context)
       .requestPinGlanceAppWidget(
-        receiver = LocationWidgetReceiver::class.java,
+        receiver = DayNightCycleWidgetReceiver::class.java,
         preview = null,
         previewState = null,
         successCallback =
           PendingIntent.getBroadcast(
             context,
             0,
-            Intent(context, LocationWidgetPinnedReceiver::class.java)
+            Intent(context, DayNightCycleWidgetPinnedReceiver::class.java)
               .putExtra(LocationWidgetExtras.LOCATION_ID, locationId),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
           )
       )
 
-  override suspend fun editLocationWidget(widgetId: Int, locationId: Long) {
+  override suspend fun editDayNightCycleWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
-      LocationWidgetReceiver.updateWidgetIntent(
+      DayNightCycleWidgetReceiver.updateWidgetIntent(
         context = context,
         widgetId = widgetId,
         locationId = locationId
