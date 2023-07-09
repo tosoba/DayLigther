@@ -13,6 +13,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,24 +22,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +56,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -95,7 +100,9 @@ fun WidgetLocationRoute(
     selectedLocationId = selectedLocationId.value,
     onLocationSelected = { viewModel.selectedLocationId = it },
     mode = viewModel.mode,
-    onConfirmLocationSelectionClick = viewModel::confirmLocationSelection,
+    onConfirmDayNightCycleLocationSelectionClick = viewModel::confirmDayNightCycleLocationSelection,
+    onConfirmGoldenBlueHourLocationSelectionClick =
+      viewModel::confirmGoldenBlueHourLocationSelection,
     onAddLocationClick = onAddLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
     modifier = modifier
@@ -119,9 +126,10 @@ fun WidgetLocationRoute(
 private fun WidgetLocationScreen(
   locations: Loadable<List<StableValue<Location>>>,
   selectedLocationId: Long?,
-  onLocationSelected: (Long) -> Unit,
+  onLocationSelected: (Long?) -> Unit,
   mode: WidgetLocationMode,
-  onConfirmLocationSelectionClick: () -> Unit,
+  onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
+  onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -132,6 +140,12 @@ private fun WidgetLocationScreen(
     val bottomButtonsPaddingDp = 20.dp
     var addWidgetButtonHeightPx by remember { mutableStateOf(0) }
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
+    val spacerHeightPx by
+      remember(selectedLocationId) {
+        derivedStateOf {
+          if (selectedLocationId == null) zoomButtonsRowHeightPx else addWidgetButtonHeightPx
+        }
+      }
 
     @Composable
     fun TopAppBar() {
@@ -158,9 +172,13 @@ private fun WidgetLocationScreen(
 
               Box(modifier = Modifier.weight(1f)) {
                 val columnsCount =
-                  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT)
+                  if (
+                    LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+                  ) {
                     2
-                  else 4
+                  } else {
+                    4
+                  }
                 LazyVerticalGrid(
                   contentPadding = PaddingValues(10.dp),
                   columns = GridCells.Fixed(columnsCount)
@@ -175,7 +193,6 @@ private fun WidgetLocationScreen(
                     )
                   }
 
-                  val spacerHeightPx = maxOf(addWidgetButtonHeightPx, zoomButtonsRowHeightPx)
                   if (spacerHeightPx > 0) {
                     item(span = { GridItemSpan(columnsCount) }) {
                       Spacer(
@@ -189,15 +206,21 @@ private fun WidgetLocationScreen(
                   }
                 }
 
-                ZoomControlsRow(
-                  zoom = zoom,
-                  incrementZoom = { ++zoom },
-                  decrementZoom = { --zoom },
+                androidx.compose.animation.AnimatedVisibility(
+                  visible = selectedLocationId == null,
+                  enter = fadeIn(),
+                  exit = fadeOut(),
                   modifier =
                     Modifier.align(Alignment.BottomStart)
                       .padding(bottomButtonsPaddingDp)
                       .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
-                )
+                ) {
+                  ZoomControlsRow(
+                    zoom = zoom,
+                    incrementZoom = { ++zoom },
+                    decrementZoom = { --zoom },
+                  )
+                }
 
                 androidx.compose.animation.AnimatedVisibility(
                   visible = selectedLocationId != null,
@@ -208,23 +231,13 @@ private fun WidgetLocationScreen(
                       .padding(bottomButtonsPaddingDp)
                       .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
                 ) {
-                  FloatingActionButton(onClick = onConfirmLocationSelectionClick) {
-                    Icon(
-                      imageVector =
-                        when (mode) {
-                          WidgetLocationMode.ADD -> Icons.Filled.Add
-                          WidgetLocationMode.EDIT -> Icons.Filled.Done
-                        },
-                      contentDescription =
-                        stringResource(
-                          id =
-                            when (mode) {
-                              WidgetLocationMode.ADD -> R.string.add_a_widget
-                              WidgetLocationMode.EDIT -> R.string.update_a_widget
-                            }
-                        )
-                    )
-                  }
+                  ConfirmLocationSelectionControls(
+                    mode = mode,
+                    onConfirmDayNightCycleLocationSelectionClick =
+                      onConfirmDayNightCycleLocationSelectionClick,
+                    onConfirmGoldenBlueHourLocationSelectionClick =
+                      onConfirmGoldenBlueHourLocationSelectionClick
+                  )
                 }
               }
             }
@@ -258,13 +271,85 @@ private fun WidgetLocationScreen(
   }
 }
 
+@Composable
+private fun ConfirmLocationSelectionControls(
+  mode: WidgetLocationMode,
+  onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
+  onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit
+) {
+  when (mode) {
+    WidgetLocationMode.ADD -> {
+      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+        ConfirmSelectionButton(
+          modifier = Modifier.fillMaxWidth(),
+          text = stringResource(commonR.string.day_night_cycle),
+          icon = {
+            Icon(
+              painter = painterResource(commonR.drawable.day_night_cycle),
+              contentDescription = stringResource(commonR.string.day_night_cycle)
+            )
+          },
+          onClick = onConfirmDayNightCycleLocationSelectionClick
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        ConfirmSelectionButton(
+          modifier = Modifier.fillMaxWidth(),
+          text = stringResource(commonR.string.golden_blue_hour),
+          icon = {
+            Icon(
+              painter = painterResource(commonR.drawable.day_night_cycle),
+              contentDescription = stringResource(commonR.string.golden_blue_hour)
+            )
+          },
+          onClick = onConfirmGoldenBlueHourLocationSelectionClick
+        )
+      }
+    }
+    WidgetLocationMode.EDIT -> {
+      ConfirmSelectionButton(
+        text = stringResource(commonR.string.confirm),
+        icon = {
+          Icon(
+            imageVector = Icons.Filled.Done,
+            contentDescription = stringResource(commonR.string.confirm)
+          )
+        },
+        onClick = onConfirmDayNightCycleLocationSelectionClick //TODO: proper callback!
+      )
+    }
+  }
+}
+
+@Composable
+private fun ConfirmSelectionButton(
+  text: String,
+  icon: @Composable () -> Unit,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  ExtendedFloatingActionButton(
+    modifier = modifier,
+    text = {
+      Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.fillMaxWidth()
+      )
+    },
+    icon = icon,
+    onClick = onClick
+  )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MapCard(
   location: StableValue<Location>,
   zoom: Double,
   isSelected: Boolean,
-  onSelected: (Long) -> Unit,
+  onSelected: (Long?) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Card(
@@ -282,7 +367,7 @@ private fun MapCard(
       Box(
         modifier =
           Modifier.fillMaxSize()
-            .clickable(enabled = !isSelected) { onSelected(location.value.id) }
+            .clickable { onSelected(if (isSelected) null else location.value.id) }
             .background(color = Color.Transparent)
       )
 
@@ -298,7 +383,7 @@ private fun MapCard(
 
       Checkbox(
         checked = isSelected,
-        onCheckedChange = { if (it) onSelected(location.value.id) },
+        onCheckedChange = { isChecked -> onSelected(if (isChecked) location.value.id else null) },
         modifier = Modifier.align(Alignment.TopEnd)
       )
     }

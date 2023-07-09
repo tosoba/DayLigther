@@ -58,31 +58,42 @@ constructor(
   private val _toastMessageResId = MutableSharedFlow<Int>()
   val toastMessageResId: SharedFlow<Int> = _toastMessageResId.asSharedFlow()
 
-  fun confirmLocationSelection() {
+  fun confirmDayNightCycleLocationSelection() {
     when (mode) {
-      WidgetLocationMode.ADD -> addSelectedLocationWidget()
-      WidgetLocationMode.EDIT -> editSelectedLocationWidget()
-    }
-  }
-
-  private fun addSelectedLocationWidget() {
-    val locationId = selectedLocationId ?: return
-    viewModelScope.launch {
-      if (!widgetManager.addDayNightCycleWidget(locationId = locationId)) {
-        _toastMessageResId.emit(R.string.failed_to_add_widget)
+      WidgetLocationMode.ADD -> {
+        addSelectedLocationWidget(addWidget = widgetManager::addDayNightCycleWidget)
+      }
+      WidgetLocationMode.EDIT -> {
+        editSelectedLocationWidget(editWidget = widgetManager::editDayNightCycleWidget)
       }
     }
-    selectedLocationId = null
   }
 
-  private fun editSelectedLocationWidget() {
+  fun confirmGoldenBlueHourLocationSelection() {
+    when (mode) {
+      WidgetLocationMode.ADD -> {
+        addSelectedLocationWidget(addWidget = widgetManager::addGoldenBlueHourWidget)
+      }
+      WidgetLocationMode.EDIT -> {
+        editSelectedLocationWidget(editWidget = widgetManager::editGoldenBlueHourWidget)
+      }
+    }
+  }
+
+  private fun addSelectedLocationWidget(addWidget: suspend (Long) -> Boolean) {
     val locationId = selectedLocationId ?: return
     viewModelScope.launch {
-      widgetManager.editDayNightCycleWidget(
-        widgetId =
-          requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.GLANCE_ID))
-            .toInt(),
-        locationId = locationId
+      if (!addWidget(locationId)) _toastMessageResId.emit(R.string.failed_to_add_widget)
+    }
+  }
+
+  private fun editSelectedLocationWidget(editWidget: suspend (Int, Long) -> Unit) {
+    val locationId = selectedLocationId ?: return
+    viewModelScope.launch {
+      editWidget(
+        requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.GLANCE_ID))
+          .toInt(),
+        locationId
       )
       _toastMessageResId.emit(R.string.widget_location_updated)
     }

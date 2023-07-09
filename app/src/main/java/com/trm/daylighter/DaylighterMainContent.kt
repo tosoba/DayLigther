@@ -110,7 +110,7 @@ private fun DayLighterDrawerContent(
       route = dayNightCycleRoute
     ) {
       Icon(
-        painter = painterResource(R.drawable.day_night_cycle_drawer_item),
+        painter = painterResource(commonR.drawable.day_night_cycle),
         contentDescription = stringResource(commonR.string.day_night_cycle)
       )
     }

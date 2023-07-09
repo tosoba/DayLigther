@@ -9,6 +9,7 @@
     <string name="select_widget_location">Select widget location</string>
     <string name="retry">Retry</string>
     <string name="clear">Clear</string>
+    <string name="confirm">Confirm</string>
     <string name="refresh">Refresh</string>
     <string name="day_night_cycle">Day/night cycle</string>
     <string name="golden_blue_hour">Golden/blue hour</string>
