@@ -85,7 +85,7 @@ class GoldenBlueHourWidget(
       when (change) {
         Empty -> AddLocationButton()
         is Loading -> ProgressIndicator()
-        is Ready -> DayChart(change = change.data, id = id)
+        is Ready -> GoldenBlueHourChart(change = change.data, id = id)
         is Failed ->
           RetryButton(
             onClick =
@@ -98,7 +98,7 @@ class GoldenBlueHourWidget(
   }
 
   @Composable
-  private fun DayChart(change: LocationSunriseSunsetChange, id: GlanceId) {
+  private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceId) {
     val context = LocalContext.current
     val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
 

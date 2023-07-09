@@ -2,10 +2,10 @@ package com.trm.daylighter.widget
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPinnedReceiver
+import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPreview
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetReceiver
 import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetPinnedReceiver
 import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetReceiver
@@ -19,10 +19,8 @@ class WidgetManagerImpl
 @Inject
 constructor(
   @ApplicationContext private val context: Context,
-  private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
-    GetDefaultLocationSunriseSunsetChangeFlowUseCase,
-  private val getLocationSunriseSunsetChangeFlowByIdUseCase:
-    GetLocationSunriseSunsetChangeFlowByIdUseCase
+  private val getDefaultLocationSunriseSunsetChangeUseCase:
+    GetDefaultLocationSunriseSunsetChangeUseCase
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
     context.sendBroadcast(context.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>())
@@ -32,7 +30,7 @@ constructor(
     GlanceAppWidgetManager(context)
       .requestPinGlanceAppWidget(
         receiver = DayNightCycleWidgetReceiver::class.java,
-        preview = null,
+        preview = DayNightCycleWidgetPreview(getDefaultLocationSunriseSunsetChangeUseCase),
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId)
