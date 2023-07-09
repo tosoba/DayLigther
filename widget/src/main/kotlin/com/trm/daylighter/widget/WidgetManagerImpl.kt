@@ -8,6 +8,7 @@ import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPinnedRece
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPreview
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetReceiver
 import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetPinnedReceiver
+import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetPreview
 import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetReceiver
 import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
 import com.trm.daylighter.widget.util.ext.updateWidgetIntent
@@ -49,7 +50,7 @@ constructor(
     GlanceAppWidgetManager(context)
       .requestPinGlanceAppWidget(
         receiver = GoldenBlueHourWidgetReceiver::class.java,
-        preview = null,
+        preview = GoldenBlueHourWidgetPreview(getDefaultLocationSunriseSunsetChangeUseCase),
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId)

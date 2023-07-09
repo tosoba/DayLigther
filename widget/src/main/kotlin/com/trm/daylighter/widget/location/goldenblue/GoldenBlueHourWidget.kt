@@ -14,7 +14,6 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.LocalContext
-import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -40,6 +39,7 @@ import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.widget.R
@@ -63,7 +63,7 @@ class GoldenBlueHourWidget(
     GetLocationSunriseSunsetChangeFlowByIdUseCase
 ) : GlanceAppWidget() {
   override val stateDefinition = PreferencesGlanceStateDefinition
-  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(tallMode))
+  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent {
@@ -75,88 +75,95 @@ class GoldenBlueHourWidget(
             else getLocationSunriseSunsetChangeFlowByIdUseCase(locationId)
           }
           .collectAsState(initial = LoadingFirst)
-      Content(change = change, id = id)
+      GoldenBlueHourContent(change = change, id = id)
     }
   }
+}
 
-  @Composable
-  private fun Content(change: Loadable<LocationSunriseSunsetChange>, id: GlanceId) {
-    GlanceTheme {
-      when (change) {
-        Empty -> AddLocationButton()
-        is Loading -> ProgressIndicator()
-        is Ready -> GoldenBlueHourChart(change = change.data, id = id)
-        is Failed ->
-          RetryButton(
-            onClick =
-              actionSendBroadcast(
-                LocalContext.current.updateAllWidgetsIntent<GoldenBlueHourWidgetReceiver>()
-              )
+class GoldenBlueHourWidgetPreview(
+  private val getDefaultLocationSunriseSunsetChangeUseCase:
+    GetDefaultLocationSunriseSunsetChangeUseCase
+) : GlanceAppWidget() {
+  override val stateDefinition = PreferencesGlanceStateDefinition
+  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
+
+  override suspend fun provideGlance(context: Context, id: GlanceId) {
+    val change = getDefaultLocationSunriseSunsetChangeUseCase()
+    provideContent { GoldenBlueHourContent(change = change, id = id) }
+  }
+}
+
+private fun goldenBlueHourWidgetSize() = DpSize(200.dp, 100.dp)
+
+@Composable
+private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>, id: GlanceId) {
+  GlanceTheme {
+    when (change) {
+      Empty -> AddLocationButton()
+      is Loading -> ProgressIndicator()
+      is Ready -> GoldenBlueHourChart(change = change.data, id = id)
+      is Failed ->
+        RetryButton(
+          onClick =
+            actionSendBroadcast(
+              LocalContext.current.updateAllWidgetsIntent<GoldenBlueHourWidgetReceiver>()
+            )
+        )
+    }
+  }
+}
+
+@Composable
+private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceId) {
+  val context = LocalContext.current
+  val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
+
+  Box(
+    contentAlignment = Alignment.TopEnd,
+    modifier =
+      GlanceModifier.fillMaxSize()
+        .appWidgetBackgroundCornerRadius()
+        .clickable(
+          deepLinkAction(
+            context.goldenBlueHourDeepLinkUri(
+              locationId = change.location.id,
+              isDefault = change.location.isDefault
+            )
           )
-      }
+        )
+  ) {
+    Image(
+      provider =
+        BitmapImageProvider(
+          dayPeriodChartBitmap(change = change, chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR)
+        ),
+      contentDescription = null,
+      contentScale = ContentScale.FillBounds,
+      modifier = GlanceModifier.fillMaxSize()
+    )
+
+    Column(
+      verticalAlignment = Alignment.Vertical.CenterVertically,
+      horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+    ) {
+      LocationName(location = change.location)
+      Clock(zoneId = change.location.zoneId)
     }
-  }
 
-  @Composable
-  private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceId) {
-    val context = LocalContext.current
-    val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
-
-    Box(
-      contentAlignment = Alignment.TopEnd,
+    Image(
+      provider = AndroidResourceImageProvider(R.drawable.settings),
+      contentDescription = stringResource(commonR.string.settings),
       modifier =
-        GlanceModifier.fillMaxSize()
-          .appWidgetBackgroundCornerRadius()
+        GlanceModifier.padding(5.dp)
           .clickable(
             deepLinkAction(
-              context.goldenBlueHourDeepLinkUri(
-                locationId = change.location.id,
-                isDefault = change.location.isDefault
+              context.widgetLocationDeepLinkUri(
+                glanceId = widgetManager.getAppWidgetId(id),
+                locationId = change.location.id
               )
             )
           )
-    ) {
-      Image(
-        provider =
-          BitmapImageProvider(
-            dayPeriodChartBitmap(change = change, chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR)
-          ),
-        contentDescription = null,
-        contentScale = ContentScale.FillBounds,
-        modifier = GlanceModifier.fillMaxSize()
-      )
-
-      when (LocalSize.current) {
-        tallMode -> {
-          Column(
-            verticalAlignment = Alignment.Vertical.CenterVertically,
-            horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-            modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
-          ) {
-            LocationName(location = change.location)
-            Clock(zoneId = change.location.zoneId)
-          }
-        }
-      }
-
-      Image(
-        provider = AndroidResourceImageProvider(R.drawable.settings),
-        contentDescription = stringResource(commonR.string.settings),
-        modifier =
-          GlanceModifier.padding(5.dp)
-            .clickable(
-              deepLinkAction(
-                context.widgetLocationDeepLinkUri(
-                  glanceId = widgetManager.getAppWidgetId(id),
-                  locationId = change.location.id
-                )
-              )
-            )
-      )
-    }
-  }
-
-  companion object {
-    private val tallMode = DpSize(200.dp, 100.dp)
+    )
   }
 }
