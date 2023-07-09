@@ -2,7 +2,7 @@ package com.trm.daylighter.widget
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPinnedReceiver
 import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetPreview
@@ -20,8 +20,7 @@ class WidgetManagerImpl
 @Inject
 constructor(
   @ApplicationContext private val context: Context,
-  private val getDefaultLocationSunriseSunsetChangeUseCase:
-    GetDefaultLocationSunriseSunsetChangeUseCase
+  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
     context.sendBroadcast(context.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>())
@@ -31,7 +30,10 @@ constructor(
     GlanceAppWidgetManager(context)
       .requestPinGlanceAppWidget(
         receiver = DayNightCycleWidgetReceiver::class.java,
-        preview = DayNightCycleWidgetPreview(getDefaultLocationSunriseSunsetChangeUseCase),
+        preview =
+          DayNightCycleWidgetPreview(
+            change = getLocationSunriseSunsetChangeByIdUseCase(locationId)
+          ),
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId)
@@ -50,7 +52,8 @@ constructor(
     GlanceAppWidgetManager(context)
       .requestPinGlanceAppWidget(
         receiver = GoldenBlueHourWidgetReceiver::class.java,
-        preview = GoldenBlueHourWidgetPreview(getDefaultLocationSunriseSunsetChangeUseCase),
+        preview =
+          GoldenBlueHourWidgetPreview(getLocationSunriseSunsetChangeByIdUseCase(id = locationId)),
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId)

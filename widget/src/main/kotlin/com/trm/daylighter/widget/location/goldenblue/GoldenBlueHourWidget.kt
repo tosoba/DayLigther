@@ -27,7 +27,6 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
-import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
@@ -39,7 +38,6 @@ import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.widget.R
@@ -62,7 +60,6 @@ class GoldenBlueHourWidget(
   private val getLocationSunriseSunsetChangeFlowByIdUseCase:
     GetLocationSunriseSunsetChangeFlowByIdUseCase
 ) : GlanceAppWidget() {
-  override val stateDefinition = PreferencesGlanceStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -81,14 +78,11 @@ class GoldenBlueHourWidget(
 }
 
 class GoldenBlueHourWidgetPreview(
-  private val getDefaultLocationSunriseSunsetChangeUseCase:
-    GetDefaultLocationSunriseSunsetChangeUseCase
+  private val change: Loadable<LocationSunriseSunsetChange>,
 ) : GlanceAppWidget() {
-  override val stateDefinition = PreferencesGlanceStateDefinition
   override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
-    val change = getDefaultLocationSunriseSunsetChangeUseCase()
     provideContent { GoldenBlueHourContent(change = change, id = id) }
   }
 }
