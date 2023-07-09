@@ -39,6 +39,12 @@ fun Context.widgetLocationDeepLinkUri(glanceId: Int, locationId: Long): Uri =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/${glanceId}/location/${locationId}".toUri()
 
 object WidgetLocationDeepLinkParams {
+  const val WIDGET_TYPE = "widget_type"
   const val GLANCE_ID = "widget_location_glance_id"
   const val LOCATION_ID = "widget_location_location_id"
+}
+
+enum class WidgetTypeParam {
+  DAY_NIGHT_CYCLE_WIDGET,
+  GOLDEN_BLUE_HOUR_WIDGET
 }
