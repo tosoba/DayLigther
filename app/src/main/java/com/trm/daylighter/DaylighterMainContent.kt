@@ -66,14 +66,16 @@ fun DayLighterMainContent() {
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
           scope.launch { drawerState.close() }
-          navController.navigate(
-            route = destinationRoute,
-            navOptions =
-              navController.topLevelNavOptions(
-                saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
-                restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
-              )
-          )
+          if (destinationRoute != currentRoute) {
+            navController.navigate(
+              route = destinationRoute,
+              navOptions =
+                navController.topLevelNavOptions(
+                  saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
+                  restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
+                )
+            )
+          }
         }
       )
     }
