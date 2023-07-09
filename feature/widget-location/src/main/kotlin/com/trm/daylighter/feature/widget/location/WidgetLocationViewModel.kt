@@ -72,6 +72,7 @@ constructor(
         _toastMessageResId.emit(R.string.failed_to_add_widget)
       }
     }
+    selectedLocationId = null
   }
 
   private fun editSelectedLocationWidget() {
