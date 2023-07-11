@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.navigation.DayNightCycleDeepLinkParams
+import com.trm.daylighter.core.common.navigation.GoldenBlueHourDeepLinkParams
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
@@ -37,18 +38,35 @@ constructor(
 ) : ViewModel() {
   val initialLocationIndexFlow: SharedFlow<Int> =
     flow {
-        if (
-          savedStateHandle.contains(DayNightCycleDeepLinkParams.LOCATION_ID) &&
-            !savedStateHandle.get<String>(DayNightCycleDeepLinkParams.DEFAULT).toBoolean()
-        ) {
-          val locationId =
-            requireNotNull(savedStateHandle.get<String>(DayNightCycleDeepLinkParams.LOCATION_ID)).toLong()
-          emit(getNonDefaultLocationOffsetByIdUseCase(locationId) ?: 0)
-        } else {
-          emit(0)
+        when {
+          isStartedFromDeeplink(
+            locationIdParam = DayNightCycleDeepLinkParams.LOCATION_ID,
+            defaultParam = DayNightCycleDeepLinkParams.DEFAULT
+          ) -> {
+            emit(getNonDefaultLocationOffset(DayNightCycleDeepLinkParams.LOCATION_ID))
+          }
+          isStartedFromDeeplink(
+            locationIdParam = GoldenBlueHourDeepLinkParams.LOCATION_ID,
+            defaultParam = GoldenBlueHourDeepLinkParams.DEFAULT
+          ) -> {
+            emit(getNonDefaultLocationOffset(GoldenBlueHourDeepLinkParams.LOCATION_ID))
+          }
+          else -> {
+            emit(0)
+          }
         }
       }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
+
+  private fun isStartedFromDeeplink(locationIdParam: String, defaultParam: String): Boolean =
+    savedStateHandle.contains(locationIdParam) &&
+      !savedStateHandle.get<String>(defaultParam).toBoolean()
+
+  private suspend fun getNonDefaultLocationOffset(locationIdParam: String): Int =
+    getNonDefaultLocationOffsetByIdUseCase(
+      id = requireNotNull(savedStateHandle.get<String>(locationIdParam)).toLong()
+    )
+      ?: 0
 
   val locationsFlow: SharedFlow<Loadable<List<Location>>> =
     getAllLocationsFlowUseCase()
