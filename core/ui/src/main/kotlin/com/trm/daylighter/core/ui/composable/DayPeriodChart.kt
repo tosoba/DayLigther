@@ -773,7 +773,7 @@ private fun DrawScope.drawHorizonLabel(
     topLeft =
       Offset(
         x = size.width - horizonLayoutResult.size.width - chartTextPaddingPx,
-        y = chartCenter(orientation).y - horizonLayoutResult.size.height - chartTextPaddingPx
+        y = chartCenter(orientation).y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
       ),
     style = textStyle,
     maxLines = 1,
