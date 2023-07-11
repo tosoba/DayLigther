@@ -33,10 +33,10 @@ object GoldenBlueHourDeepLinkParams {
 }
 
 fun Context.widgetLocationDeepLinkPattern(): String =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/{${WidgetLocationDeepLinkParams.GLANCE_ID}}/location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/{${WidgetLocationDeepLinkParams.WIDGET_TYPE}}/{${WidgetLocationDeepLinkParams.GLANCE_ID}}/location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
 
-fun Context.widgetLocationDeepLinkUri(glanceId: Int, locationId: Long): Uri =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/${glanceId}/location/${locationId}".toUri()
+fun Context.widgetLocationDeepLinkUri(type: WidgetTypeParam, glanceId: Int, locationId: Long): Uri =
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/widget/${type.name.lowercase()}/${glanceId}/location/${locationId}".toUri()
 
 object WidgetLocationDeepLinkParams {
   const val WIDGET_TYPE = "widget_type"
@@ -45,6 +45,11 @@ object WidgetLocationDeepLinkParams {
 }
 
 enum class WidgetTypeParam {
-  DAY_NIGHT_CYCLE_WIDGET,
-  GOLDEN_BLUE_HOUR_WIDGET
+  DAY_NIGHT_CYCLE,
+  GOLDEN_BLUE_HOUR;
+
+  companion object {
+    fun fromName(name: String): WidgetTypeParam =
+      requireNotNull(WidgetTypeParam.values().find { it.name.lowercase() == name.lowercase() })
+  }
 }

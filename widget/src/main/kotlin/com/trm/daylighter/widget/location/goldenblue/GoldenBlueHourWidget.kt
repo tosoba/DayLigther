@@ -28,6 +28,7 @@ import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.WidgetTypeParam
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.domain.model.Empty
@@ -153,6 +154,7 @@ private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceI
           .clickable(
             deepLinkAction(
               context.widgetLocationDeepLinkUri(
+                type = WidgetTypeParam.GOLDEN_BLUE_HOUR,
                 glanceId = widgetManager.getAppWidgetId(id),
                 locationId = change.location.id
               )

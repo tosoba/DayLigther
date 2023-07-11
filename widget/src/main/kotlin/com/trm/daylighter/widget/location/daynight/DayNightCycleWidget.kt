@@ -28,6 +28,7 @@ import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.WidgetTypeParam
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.domain.model.Empty
@@ -155,6 +156,7 @@ private fun DayNightCycleChart(change: LocationSunriseSunsetChange, id: GlanceId
           .clickable(
             deepLinkAction(
               context.widgetLocationDeepLinkUri(
+                type = WidgetTypeParam.DAY_NIGHT_CYCLE,
                 glanceId = widgetManager.getAppWidgetId(id),
                 locationId = change.location.id
               )

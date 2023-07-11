@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.navigation.WidgetLocationDeepLinkParams
+import com.trm.daylighter.core.common.navigation.WidgetTypeParam
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
@@ -58,26 +59,25 @@ constructor(
   private val _toastMessageResId = MutableSharedFlow<Int>()
   val toastMessageResId: SharedFlow<Int> = _toastMessageResId.asSharedFlow()
 
-  fun confirmDayNightCycleLocationSelection() {
-    when (mode) {
-      WidgetLocationMode.ADD -> {
-        addSelectedLocationWidget(addWidget = widgetManager::addDayNightCycleWidget)
-      }
-      WidgetLocationMode.EDIT -> {
-        editSelectedLocationWidget(editWidget = widgetManager::editDayNightCycleWidget)
-      }
-    }
+  fun onAddDayNightCycleWidget() {
+    addSelectedLocationWidget(addWidget = widgetManager::addDayNightCycleWidget)
   }
 
-  fun confirmGoldenBlueHourLocationSelection() {
-    when (mode) {
-      WidgetLocationMode.ADD -> {
-        addSelectedLocationWidget(addWidget = widgetManager::addGoldenBlueHourWidget)
+  fun onAddGoldenBlueHourWidget() {
+    addSelectedLocationWidget(addWidget = widgetManager::addGoldenBlueHourWidget)
+  }
+
+  fun onEditWidgetLocationClick() {
+    editSelectedLocationWidget(
+      when (
+        WidgetTypeParam.fromName(
+          requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.WIDGET_TYPE))
+        )
+      ) {
+        WidgetTypeParam.DAY_NIGHT_CYCLE -> widgetManager::editDayNightCycleWidget
+        WidgetTypeParam.GOLDEN_BLUE_HOUR -> widgetManager::editGoldenBlueHourWidget
       }
-      WidgetLocationMode.EDIT -> {
-        editSelectedLocationWidget(editWidget = widgetManager::editGoldenBlueHourWidget)
-      }
-    }
+    )
   }
 
   private fun addSelectedLocationWidget(addWidget: suspend (Long) -> Boolean) {

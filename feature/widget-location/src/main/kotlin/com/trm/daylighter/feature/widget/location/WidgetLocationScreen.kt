@@ -100,9 +100,9 @@ fun WidgetLocationRoute(
     selectedLocationId = selectedLocationId.value,
     onLocationSelected = { viewModel.selectedLocationId = it },
     mode = viewModel.mode,
-    onConfirmDayNightCycleLocationSelectionClick = viewModel::confirmDayNightCycleLocationSelection,
-    onConfirmGoldenBlueHourLocationSelectionClick =
-      viewModel::confirmGoldenBlueHourLocationSelection,
+    onAddDayNightCycleWidget = viewModel::onAddDayNightCycleWidget,
+    onAddGoldenBlueHourWidget = viewModel::onAddGoldenBlueHourWidget,
+    onEditWidgetLocationClick = viewModel::onEditWidgetLocationClick,
     onAddLocationClick = onAddLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
     modifier = modifier
@@ -128,8 +128,9 @@ private fun WidgetLocationScreen(
   selectedLocationId: Long?,
   onLocationSelected: (Long?) -> Unit,
   mode: WidgetLocationMode,
-  onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
-  onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit,
+  onAddDayNightCycleWidget: () -> Unit,
+  onAddGoldenBlueHourWidget: () -> Unit,
+  onEditWidgetLocationClick: () -> Unit,
   onAddLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
@@ -232,11 +233,11 @@ private fun WidgetLocationScreen(
                       .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
                 ) {
                   ConfirmLocationSelectionControls(
+                    modifier = Modifier.width(IntrinsicSize.Max),
                     mode = mode,
-                    onConfirmDayNightCycleLocationSelectionClick =
-                      onConfirmDayNightCycleLocationSelectionClick,
-                    onConfirmGoldenBlueHourLocationSelectionClick =
-                      onConfirmGoldenBlueHourLocationSelectionClick
+                    onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
+                    onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
+                    onEditWidgetLocationClick = onEditWidgetLocationClick,
                   )
                 }
               }
@@ -275,11 +276,13 @@ private fun WidgetLocationScreen(
 private fun ConfirmLocationSelectionControls(
   mode: WidgetLocationMode,
   onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
-  onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit
+  onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit,
+  onEditWidgetLocationClick: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   when (mode) {
     WidgetLocationMode.ADD -> {
-      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+      Column(modifier = modifier) {
         ConfirmSelectionButton(
           modifier = Modifier.fillMaxWidth(),
           text = stringResource(commonR.string.day_night_cycle),
@@ -309,6 +312,7 @@ private fun ConfirmLocationSelectionControls(
     }
     WidgetLocationMode.EDIT -> {
       ConfirmSelectionButton(
+        modifier = modifier,
         text = stringResource(commonR.string.confirm),
         icon = {
           Icon(
@@ -316,7 +320,7 @@ private fun ConfirmLocationSelectionControls(
             contentDescription = stringResource(commonR.string.confirm)
           )
         },
-        onClick = onConfirmDayNightCycleLocationSelectionClick //TODO: proper callback!
+        onClick = onEditWidgetLocationClick
       )
     }
   }
