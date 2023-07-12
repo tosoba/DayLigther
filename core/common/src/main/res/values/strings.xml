@@ -37,12 +37,6 @@
     <string name="night">Night</string>
     <string name="golden_hour">Golden hour</string>
     <string name="blue_hour">Blue hour</string>
-    <string name="civil_dawn">Civil dawn</string>
-    <string name="civil_dusk">Civil dusk</string>
-    <string name="nautical_dawn">Nautical dawn</string>
-    <string name="nautical_dusk">Nautical dusk</string>
-    <string name="astronomical_dawn">Astronomical dawn</string>
-    <string name="astronomical_dusk">Astronomical dusk</string>
     <string name="four_degrees">4º</string>
     <string name="six_degrees">6º</string>
     <string name="twelve_degrees">12º</string>

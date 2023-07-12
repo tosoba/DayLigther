@@ -4,5 +4,5 @@
     <string name="edit_location">Edit location</string>
     <string name="error_occurred">Error occurred.</string>
     <string name="day_length">Day length</string>
-    <string name="to">to</string>
+    <string name="till">till</string>
 </resources>

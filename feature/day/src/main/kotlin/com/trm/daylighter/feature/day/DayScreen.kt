@@ -516,7 +516,7 @@ private fun NextDayPeriodTimer(
   val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
   val timerPositive =
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
-  val to = stringResource(R.string.to)
+  val till = stringResource(R.string.till)
 
   AnimatedVisibility(
     visible = nextPeriod != null && timerPositive,
@@ -525,7 +525,7 @@ private fun NextDayPeriodTimer(
   ) {
     var timerText by rememberSaveable {
       mutableStateOf(
-        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $to ${nextPeriod?.label ?: ""}"
+        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $till ${nextPeriod?.label ?: ""}"
       )
     }
 
@@ -534,7 +534,7 @@ private fun NextDayPeriodTimer(
         flow {
             delay(System.currentTimeMillis() % 1_000L)
             while (currentCoroutineContext().isActive) {
-              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $to ${nextPeriod.label}")
+              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $till ${nextPeriod.label}")
               delay(1_000L)
             }
           }
@@ -564,20 +564,17 @@ private fun rememberNextDayPeriod(
   dayMode: DayMode,
   today: SunriseSunset,
 ): NextDayPeriod? {
-  val astronomicalDawn = stringResource(commonR.string.astronomical_dawn).lowercase()
-  val nauticalDawn = stringResource(commonR.string.nautical_dawn).lowercase()
-  val civilDawn = stringResource(commonR.string.civil_dawn).lowercase()
-  val sunrise = stringResource(commonR.string.sunrise).lowercase()
-  val sunset = stringResource(commonR.string.sunset).lowercase()
-  val civilDusk = stringResource(commonR.string.civil_dusk).lowercase()
-  val nauticalDusk = stringResource(commonR.string.nautical_dusk).lowercase()
-  val astronomicalDusk = stringResource(commonR.string.astronomical_dusk).lowercase()
+  val nightLabel = stringResource(commonR.string.night).lowercase()
+  val astronomicalLabel = stringResource(commonR.string.astronomical_twilight).lowercase()
+  val nauticalLabel = stringResource(commonR.string.nautical_twilight).lowercase()
+  val civilLabel = stringResource(commonR.string.civil_twilight).lowercase()
+  val dayLabel = stringResource(commonR.string.day).lowercase()
   return remember(dayPeriod, today) {
     when (dayPeriod) {
       DayPeriod.NIGHT -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.morning18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDawn) }
+            today.morning18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalLabel) }
           }
           DayMode.SUNSET -> {
             null
@@ -587,37 +584,34 @@ private fun rememberNextDayPeriod(
       DayPeriod.ASTRONOMICAL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.morning12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDawn) }
-              ?: today.evening18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
+            today.morning12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalLabel) }
           }
           DayMode.SUNSET -> {
-            today.evening18Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalDusk) }
+            today.evening18Below?.let { NextDayPeriod(it.toLocalTime(), nightLabel) }
           }
         }
       }
       DayPeriod.NAUTICAL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), civilDawn) }
-              ?: today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+            today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
           }
           DayMode.SUNSET -> {
-            today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), nauticalDusk) }
+            today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalLabel) }
           }
         }
       }
       DayPeriod.CIVIL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.sunrise?.let { NextDayPeriod(it.toLocalTime(), sunrise) }
-              ?: today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+            today.sunrise?.let { NextDayPeriod(it.toLocalTime(), dayLabel) }
           }
           DayMode.SUNSET -> {
-            today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), civilDusk) }
+            today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), nauticalLabel) }
           }
         }
       }
-      DayPeriod.DAY -> today.sunset?.let { NextDayPeriod(it.toLocalTime(), sunset) }
+      DayPeriod.DAY -> today.sunset?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
     }
   }
 }
