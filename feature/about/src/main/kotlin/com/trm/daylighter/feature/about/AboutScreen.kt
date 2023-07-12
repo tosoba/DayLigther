@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
+import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 
 const val aboutRoute = "about_route"
 
@@ -19,7 +19,7 @@ const val aboutRoute = "about_route"
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
   Column(modifier = modifier) {
-    DrawerMenuTopAppBar(
+    DayLighterTopAppBar(
       title = stringResource(commonR.string.about),
       navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) }
     )

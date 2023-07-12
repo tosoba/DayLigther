@@ -90,12 +90,12 @@ private fun LocationsScreen(
     }
 
     @Composable
-    fun TopAppBar() {
-      DrawerMenuTopAppBar(
+    fun TopAppBar(modifier: Modifier = Modifier) {
+      DayLighterTopAppBar(
         title = stringResource(commonR.string.locations),
         navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        modifier = Modifier.background(backgroundToTransparentVerticalGradient)
+        modifier = modifier
       )
     }
 
@@ -106,69 +106,79 @@ private fun LocationsScreen(
     ) { locations ->
       when (locations) {
         is Ready -> {
+          var topAppBarHeightPx by remember { mutableStateOf(0) }
+
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
-            Column(modifier = Modifier.fillMaxSize()) {
-              TopAppBar()
-
-              Box(modifier = Modifier.weight(1f)) {
-                val columnsCount =
-                  if (
-                    LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
-                  ) {
-                    2
-                  } else {
-                    4
-                  }
-                LazyVerticalGrid(
-                  state = gridState,
-                  contentPadding = PaddingValues(10.dp),
-                  columns = GridCells.Fixed(columnsCount)
-                ) {
-                  items(locations.data, key = { it.value.id }) { location ->
-                    MapCard(
-                      location = location,
-                      zoom = zoom,
-                      onSetDefaultLocationClick = onSetDefaultLocationClick,
-                      onEditLocationClick = onEditLocationClick,
-                      onDeleteLocationClick = { locationBeingDeleted = it },
-                    )
-                  }
-
-                  if (bottomButtonsHeightPx > 0) {
-                    item(span = { GridItemSpan(columnsCount) }) {
-                      Spacer(
-                        modifier =
-                          Modifier.height(
-                            bottomButtonsPaddingDp * 2 +
-                              with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
-                          )
-                      )
-                    }
-                  }
-                }
-
-                ZoomControlsRow(
-                  zoom = zoom,
-                  incrementZoom = { ++zoom },
-                  decrementZoom = { --zoom },
-                  modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
-                )
-
-                FloatingActionButton(
-                  onClick = onAddLocationClick,
-                  modifier =
-                    Modifier.align(Alignment.BottomEnd)
-                      .padding(bottomButtonsPaddingDp)
-                      .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
-                ) {
-                  Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_a_location)
-                  )
-                }
+            val columnsCount =
+              if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                2
+              } else {
+                4
               }
+
+            @Suppress("UnusedReceiverParameter")
+            fun LazyGridItemSpanScope.fullWidthSpan(): GridItemSpan = GridItemSpan(columnsCount)
+
+            LazyVerticalGrid(
+              state = gridState,
+              contentPadding = PaddingValues(10.dp),
+              columns = GridCells.Fixed(columnsCount)
+            ) {
+              item(span = LazyGridItemSpanScope::fullWidthSpan) {
+                Spacer(
+                  modifier =
+                    Modifier.height(with(LocalDensity.current) { topAppBarHeightPx.toDp() })
+                )
+              }
+
+              items(locations.data, key = { it.value.id }) { location ->
+                MapCard(
+                  location = location,
+                  zoom = zoom,
+                  onSetDefaultLocationClick = onSetDefaultLocationClick,
+                  onEditLocationClick = onEditLocationClick,
+                  onDeleteLocationClick = { locationBeingDeleted = it },
+                )
+              }
+
+              item(span = LazyGridItemSpanScope::fullWidthSpan) {
+                Spacer(
+                  modifier =
+                    Modifier.height(
+                      bottomButtonsPaddingDp * 2 +
+                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
+                    )
+                )
+              }
+            }
+
+            TopAppBar(
+              modifier =
+                Modifier.background(backgroundToTransparentVerticalGradient).onGloballyPositioned {
+                  topAppBarHeightPx = it.size.height
+                }
+            )
+
+            ZoomControlsRow(
+              zoom = zoom,
+              incrementZoom = { ++zoom },
+              decrementZoom = { --zoom },
+              modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+            )
+
+            FloatingActionButton(
+              onClick = onAddLocationClick,
+              modifier =
+                Modifier.align(Alignment.BottomEnd)
+                  .padding(bottomButtonsPaddingDp)
+                  .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
+            ) {
+              Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.add_a_location)
+              )
             }
           }
         }
@@ -180,7 +190,7 @@ private fun LocationsScreen(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             )
 
-            TopAppBar()
+            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
         }
         else -> {
@@ -192,7 +202,7 @@ private fun LocationsScreen(
               onAddLocationClick = onAddLocationClick
             )
 
-            TopAppBar()
+            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
         }
       }

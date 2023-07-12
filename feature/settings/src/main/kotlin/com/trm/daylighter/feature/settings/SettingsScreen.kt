@@ -50,7 +50,7 @@ import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
 import com.trm.daylighter.core.ui.composable.BackIconButton
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
+import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -131,7 +131,7 @@ private fun SettingsScreen(
   modifier: Modifier = Modifier
 ) {
   Column(modifier = modifier) {
-    DrawerMenuTopAppBar(
+    DayLighterTopAppBar(
       title = stringResource(commonR.string.settings),
       navigationIcon = {
         if (autoShowEmailDialog) BackIconButton(onClick = onBackClick)

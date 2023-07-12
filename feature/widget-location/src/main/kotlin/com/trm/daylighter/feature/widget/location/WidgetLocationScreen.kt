@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
@@ -69,10 +70,10 @@ import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DisabledMapView
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.composable.DrawerMenuTopAppBar
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
@@ -150,7 +151,7 @@ private fun WidgetLocationScreen(
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
-      DrawerMenuTopAppBar(
+      DayLighterTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
         navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
@@ -176,11 +177,15 @@ private fun WidgetLocationScreen(
               } else {
                 4
               }
+
+            @Suppress("UnusedReceiverParameter")
+            fun LazyGridItemSpanScope.fullWidthSpan(): GridItemSpan = GridItemSpan(columnsCount)
+
             LazyVerticalGrid(
               contentPadding = PaddingValues(10.dp),
               columns = GridCells.Fixed(columnsCount)
             ) {
-              item(span = { GridItemSpan(columnsCount) }) {
+              item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(
                   modifier =
                     Modifier.height(with(LocalDensity.current) { topAppBarHeightPx.toDp() })
@@ -197,7 +202,7 @@ private fun WidgetLocationScreen(
                 )
               }
 
-              item(span = { GridItemSpan(columnsCount) }) {
+              item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(
                   modifier =
                     Modifier.height(

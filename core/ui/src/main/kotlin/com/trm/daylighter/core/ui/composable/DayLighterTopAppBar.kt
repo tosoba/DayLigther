@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun DrawerMenuTopAppBar(
+fun DayLighterTopAppBar(
   title: String,
   modifier: Modifier = Modifier,
   colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
