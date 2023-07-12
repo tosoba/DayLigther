@@ -149,12 +149,12 @@ private fun WidgetLocationScreen(
       }
 
     @Composable
-    fun TopAppBar() {
+    fun TopAppBar(modifier: Modifier = Modifier) {
       DrawerMenuTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
         navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        modifier = Modifier.background(backgroundToTransparentVerticalGradient)
+        modifier = modifier
       )
     }
 
@@ -165,82 +165,88 @@ private fun WidgetLocationScreen(
     ) { locations ->
       when (locations) {
         is Ready -> {
+          var topAppBarHeightPx by remember { mutableStateOf(0) }
+
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
-            Column(modifier = Modifier.fillMaxSize()) {
-              TopAppBar()
-
-              Box(modifier = Modifier.weight(1f)) {
-                val columnsCount =
-                  if (
-                    LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
-                  ) {
-                    2
-                  } else {
-                    4
-                  }
-                LazyVerticalGrid(
-                  contentPadding = PaddingValues(10.dp),
-                  columns = GridCells.Fixed(columnsCount)
-                ) {
-                  items(locations.data, key = { it.value.id }) { location ->
-                    MapCard(
-                      location = location,
-                      zoom = zoom,
-                      isSelected = location.value.id == selectedLocationId,
-                      onSelected = onLocationSelected,
-                      modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp)
-                    )
-                  }
-
-                  if (spacerHeightPx > 0) {
-                    item(span = { GridItemSpan(columnsCount) }) {
-                      Spacer(
-                        modifier =
-                          Modifier.height(
-                            bottomButtonsPaddingDp * 2 +
-                              with(LocalDensity.current) { spacerHeightPx.toDp() }
-                          )
-                      )
-                    }
-                  }
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                  visible = selectedLocationId == null,
-                  enter = fadeIn(),
-                  exit = fadeOut(),
-                  modifier =
-                    Modifier.align(Alignment.BottomStart)
-                      .padding(bottomButtonsPaddingDp)
-                      .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
-                ) {
-                  ZoomControlsRow(
-                    zoom = zoom,
-                    incrementZoom = { ++zoom },
-                    decrementZoom = { --zoom },
-                  )
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                  visible = selectedLocationId != null,
-                  enter = fadeIn(),
-                  exit = fadeOut(),
-                  modifier =
-                    Modifier.align(Alignment.BottomEnd)
-                      .padding(bottomButtonsPaddingDp)
-                      .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
-                ) {
-                  ConfirmLocationSelectionControls(
-                    modifier = Modifier.width(IntrinsicSize.Max),
-                    mode = mode,
-                    onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
-                    onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
-                    onEditWidgetLocationClick = onEditWidgetLocationClick,
-                  )
-                }
+            val columnsCount =
+              if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                2
+              } else {
+                4
               }
+            LazyVerticalGrid(
+              contentPadding = PaddingValues(10.dp),
+              columns = GridCells.Fixed(columnsCount)
+            ) {
+              item(span = { GridItemSpan(columnsCount) }) {
+                Spacer(
+                  modifier =
+                    Modifier.height(with(LocalDensity.current) { topAppBarHeightPx.toDp() })
+                )
+              }
+
+              items(locations.data, key = { it.value.id }) { location ->
+                MapCard(
+                  location = location,
+                  zoom = zoom,
+                  isSelected = location.value.id == selectedLocationId,
+                  onSelected = onLocationSelected,
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp)
+                )
+              }
+
+              item(span = { GridItemSpan(columnsCount) }) {
+                Spacer(
+                  modifier =
+                    Modifier.height(
+                      bottomButtonsPaddingDp * 2 +
+                        with(LocalDensity.current) { spacerHeightPx.toDp() }
+                    )
+                )
+              }
+            }
+
+            TopAppBar(
+              modifier =
+                Modifier.background(backgroundToTransparentVerticalGradient).onGloballyPositioned {
+                  topAppBarHeightPx = it.size.height
+                }
+            )
+
+            androidx.compose.animation.AnimatedVisibility(
+              visible = selectedLocationId == null,
+              enter = fadeIn(),
+              exit = fadeOut(),
+              modifier =
+                Modifier.align(Alignment.BottomStart)
+                  .padding(bottomButtonsPaddingDp)
+                  .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
+            ) {
+              ZoomControlsRow(
+                zoom = zoom,
+                incrementZoom = { ++zoom },
+                decrementZoom = { --zoom },
+              )
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+              visible = selectedLocationId != null,
+              enter = fadeIn(),
+              exit = fadeOut(),
+              modifier =
+                Modifier.align(Alignment.BottomEnd)
+                  .padding(bottomButtonsPaddingDp)
+                  .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
+            ) {
+              ConfirmLocationSelectionControls(
+                modifier = Modifier.width(IntrinsicSize.Max),
+                mode = mode,
+                onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
+                onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
+                onEditWidgetLocationClick = onEditWidgetLocationClick,
+              )
             }
           }
         }
@@ -252,7 +258,7 @@ private fun WidgetLocationScreen(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             )
 
-            TopAppBar()
+            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
         }
         else -> {
@@ -264,7 +270,7 @@ private fun WidgetLocationScreen(
               onAddLocationClick = onAddLocationClick
             )
 
-            TopAppBar()
+            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
         }
       }
