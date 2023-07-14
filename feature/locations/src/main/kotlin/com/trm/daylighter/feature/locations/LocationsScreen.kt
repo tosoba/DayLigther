@@ -135,6 +135,7 @@ private fun LocationsScreen(
 
               items(locations.data, key = { it.value.id }) { location ->
                 MapCard(
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
                   location = location,
                   zoom = zoom,
                   onSetDefaultLocationClick = onSetDefaultLocationClick,
@@ -269,10 +270,11 @@ private fun MapCard(
   onSetDefaultLocationClick: (Long) -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Card(
     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+    modifier = modifier,
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       DisabledMapView(
@@ -287,7 +289,6 @@ private fun MapCard(
 
       Row(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
         LocationNameLabel(

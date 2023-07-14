@@ -28,7 +28,7 @@ fun DayLighterTopAppBar(
   modifier: Modifier = Modifier,
   colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
-  trailing: @Composable RowScope.() -> Unit = {},
+  actions: @Composable RowScope.() -> Unit = {},
 ) {
   CenterAlignedTopAppBar(
     modifier = modifier,
@@ -44,7 +44,7 @@ fun DayLighterTopAppBar(
         modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
       )
     },
-    actions = trailing
+    actions = actions
   )
 }
 

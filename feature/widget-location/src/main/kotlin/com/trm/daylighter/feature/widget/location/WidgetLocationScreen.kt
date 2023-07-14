@@ -393,7 +393,10 @@ private fun MapCard(
       LocationNameLabel(
         name = location.value.name,
         modifier =
-          Modifier.fillMaxWidth().align(Alignment.BottomCenter).basicMarquee().padding(5.dp)
+          Modifier.fillMaxWidth()
+            .align(Alignment.BottomCenter)
+            .basicMarquee()
+            .padding(vertical = 10.dp, horizontal = 5.dp)
       )
 
       Checkbox(
