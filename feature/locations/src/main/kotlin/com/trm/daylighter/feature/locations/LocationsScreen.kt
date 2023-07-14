@@ -286,9 +286,9 @@ private fun MapCard(
       MarkerIcon(modifier = Modifier.align(Alignment.Center).size(36.dp))
 
       Row(
-        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(5.dp),
+        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom
+        verticalAlignment = Alignment.CenterVertically
       ) {
         LocationNameLabel(
           name = location.value.name,
@@ -315,10 +315,7 @@ private fun LocationDropDrownMenu(
 ) {
   Box(modifier = modifier) {
     var expanded by remember { mutableStateOf(false) }
-    SmallFloatingActionButton(
-      onClick = { expanded = true },
-      modifier = Modifier.align(Alignment.BottomEnd)
-    ) {
+    IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
       Icon(
         imageVector = Icons.Default.MoreVert,
         contentDescription = stringResource(R.string.location_actions)
