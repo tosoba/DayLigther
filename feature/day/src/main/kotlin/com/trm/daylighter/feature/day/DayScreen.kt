@@ -442,7 +442,7 @@ private fun ClockAndDayLengthCard(
   modifier: Modifier = Modifier,
 ) {
   val dayPeriod =
-    remember(change) { dayPeriodFlow(change.value) }
+    remember(change, chartMode) { dayPeriodFlow(change = change.value, chartMode = chartMode) }
       .collectAsStateWithLifecycle(initialValue = DayPeriod.DAY)
 
   Surface(
@@ -569,6 +569,9 @@ private fun rememberNextDayPeriod(
   val nauticalLabel = stringResource(commonR.string.nautical_twilight).lowercase()
   val civilLabel = stringResource(commonR.string.civil_twilight).lowercase()
   val dayLabel = stringResource(commonR.string.day).lowercase()
+  val goldenHourLabel = stringResource(commonR.string.golden_hour).lowercase()
+  val blueHourLabel = stringResource(commonR.string.blue_hour).lowercase()
+
   return remember(dayPeriod, today) {
     when (dayPeriod) {
       DayPeriod.NIGHT -> {
@@ -611,15 +614,47 @@ private fun rememberNextDayPeriod(
           }
         }
       }
-      DayPeriod.DAY -> today.sunset?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+      DayPeriod.DAY -> {
+        today.sunset?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+      }
+      DayPeriod.GOLDEN_HOUR -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.morning6Above?.let { NextDayPeriod(it.toLocalTime(), dayLabel) }
+          }
+          DayMode.SUNSET -> {
+            today.evening4Below?.let { NextDayPeriod(it.toLocalTime(), blueHourLabel) }
+          }
+        }
+      }
+      DayPeriod.BLUE_HOUR -> {
+        when (dayMode) {
+          DayMode.SUNRISE -> {
+            today.morning4Below?.let { NextDayPeriod(it.toLocalTime(), goldenHourLabel) }
+          }
+          DayMode.SUNSET -> {
+            today.evening6Below?.let { NextDayPeriod(it.toLocalTime(), nauticalLabel) }
+          }
+        }
+      }
     }
   }
 }
 
-private fun dayPeriodFlow(change: Loadable<LocationSunriseSunsetChange>): Flow<DayPeriod> = flow {
+private fun dayPeriodFlow(
+  change: Loadable<LocationSunriseSunsetChange>,
+  chartMode: DayPeriodChartMode
+): Flow<DayPeriod> = flow {
   while (currentCoroutineContext().isActive) {
     emit(
-      change.map { (location, today) -> today.currentPeriodIn(location) }.dataOrElse(DayPeriod.DAY)
+      change
+        .map { (location, today) ->
+          today.currentPeriodIn(
+            location = location,
+            useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+          )
+        }
+        .dataOrElse(DayPeriod.DAY)
     )
     delay(1_000L)
   }

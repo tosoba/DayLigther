@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
 
-fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
+fun SunriseSunset.currentPeriodIn(location: Location, useGoldenBlueHour: Boolean): DayPeriod {
   val now = LocalDateTime.now(location.zoneId)
   return when {
     now.isBeforeOtherNotNull(morning18Below) || now.isEqualOrAfterOtherNotNull(evening18Below) -> {
@@ -33,15 +33,41 @@ fun SunriseSunset.currentPeriodIn(location: Location): DayPeriod {
     ) -> {
       DayPeriod.NAUTICAL
     }
-    now.isInPeriod(
-      beginMorning = morning6Below,
-      endMorning = sunrise,
-      beginEvening = sunset,
-      endEvening = evening6Below
-    ) -> {
+    !useGoldenBlueHour &&
+      now.isInPeriod(
+        beginMorning = morning6Below,
+        endMorning = sunrise,
+        beginEvening = sunset,
+        endEvening = evening6Below
+      ) -> {
       DayPeriod.CIVIL
     }
-    now.isEqualOrAfterOtherNotNull(sunrise) && now.isBeforeOtherNotNull(sunset) -> {
+    useGoldenBlueHour &&
+      now.isInPeriod(
+        beginMorning = morning4Below,
+        endMorning = morning6Above,
+        beginEvening = evening6Above,
+        endEvening = evening4Below
+      ) -> {
+      DayPeriod.GOLDEN_HOUR
+    }
+    useGoldenBlueHour &&
+      now.isInPeriod(
+        beginMorning = morning6Below,
+        endMorning = morning4Below,
+        beginEvening = evening4Below,
+        endEvening = evening6Below
+      ) -> {
+      DayPeriod.BLUE_HOUR
+    }
+    !useGoldenBlueHour &&
+      now.isEqualOrAfterOtherNotNull(sunrise) &&
+      now.isBeforeOtherNotNull(sunset) -> {
+      DayPeriod.DAY
+    }
+    useGoldenBlueHour &&
+      now.isEqualOrAfterOtherNotNull(morning6Above) &&
+      now.isBeforeOtherNotNull(evening6Above) -> {
       DayPeriod.DAY
     }
     else -> {
@@ -93,6 +119,18 @@ fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): Lo
         DayMode.SUNSET -> noon
       }
     }
+    DayPeriod.GOLDEN_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning4Below?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> evening6Above?.toLocalTime() ?: noon
+      }
+    }
+    DayPeriod.BLUE_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning6Below?.toLocalTime() ?: nightStart
+        DayMode.SUNSET -> evening4Below?.toLocalTime() ?: noon
+      }
+    }
   }
 }
 
@@ -128,6 +166,18 @@ fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): Loca
       when (dayMode) {
         DayMode.SUNRISE -> noon
         DayMode.SUNSET -> sunset?.toLocalTime() ?: nightEnd
+      }
+    }
+    DayPeriod.GOLDEN_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning6Above?.toLocalTime() ?: noon
+        DayMode.SUNSET -> evening4Below?.toLocalTime() ?: nightEnd
+      }
+    }
+    DayPeriod.BLUE_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning4Below?.toLocalTime() ?: noon
+        DayMode.SUNSET -> evening6Above?.toLocalTime() ?: nightEnd
       }
     }
   }

@@ -190,6 +190,7 @@ fun DayPeriodChart(
       location = changeValue.data.location,
       now = now,
       dayMode = dayMode,
+      chartMode = chartMode,
       nowLineColor = nowLineColor,
       orientation = orientation,
       appBarHeightPx = appBarHeightPx,
@@ -786,6 +787,7 @@ private fun DrawScope.drawNowLine(
   location: Location,
   now: LocalTime,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   nowLineColor: Color,
   orientation: Int,
   appBarHeightPx: Float,
@@ -801,6 +803,7 @@ private fun DrawScope.drawNowLine(
         location = location,
         now = now,
         dayMode = dayMode,
+        chartMode = chartMode,
         canvasHeight = size.height,
         appBarHeight = appBarHeightPx,
         chartRadius = chartRadius
@@ -845,16 +848,22 @@ private fun currentTimeLineAngleRadians(
   location: Location,
   now: LocalTime,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   canvasHeight: Float,
   appBarHeight: Float,
   chartRadius: Float,
 ): Float {
-  val dayPeriod = sunriseSunset.currentPeriodIn(location)
+  val dayPeriod =
+    sunriseSunset.currentPeriodIn(
+      location = location,
+      useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+    )
 
   val startAngle =
     sunriseSunset.dayPeriodStartAngleRadians(
       dayPeriod = dayPeriod,
       dayMode = dayMode,
+      chartMode = chartMode,
       canvasHeight = canvasHeight,
       appBarHeight = appBarHeight,
       chartRadius = chartRadius
@@ -863,6 +872,7 @@ private fun currentTimeLineAngleRadians(
     sunriseSunset.dayPeriodEndAngleRadians(
       dayPeriod = dayPeriod,
       dayMode = dayMode,
+      chartMode = chartMode,
       canvasHeight = canvasHeight,
       appBarHeight = appBarHeight,
       chartRadius = chartRadius
@@ -881,6 +891,7 @@ private fun currentTimeLineAngleRadians(
 private fun SunriseSunset.dayPeriodStartAngleRadians(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   canvasHeight: Float,
   appBarHeight: Float,
   chartRadius: Float,
@@ -914,8 +925,28 @@ private fun SunriseSunset.dayPeriodStartAngleRadians(
     }
     DayPeriod.DAY -> {
       when (dayMode) {
-        DayMode.SUNRISE -> sunset?.let { 0f.radians } ?: nightStart
-        DayMode.SUNSET -> dayStart
+        DayMode.SUNRISE -> {
+          when (chartMode) {
+            DayPeriodChartMode.DAY_NIGHT_CYCLE -> sunset?.let { 0f.radians }
+            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> morning6Above?.let { (-6f).radians }
+          }
+            ?: nightStart
+        }
+        DayMode.SUNSET -> {
+          dayStart
+        }
+      }
+    }
+    DayPeriod.GOLDEN_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning4Below?.let { 4f.radians } ?: nightStart
+        DayMode.SUNSET -> evening6Above?.let { (-6f).radians } ?: dayStart
+      }
+    }
+    DayPeriod.BLUE_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning6Below?.let { 6f.radians } ?: nightStart
+        DayMode.SUNSET -> evening4Below?.let { 4f.radians } ?: dayStart
       }
     }
   }
@@ -924,6 +955,7 @@ private fun SunriseSunset.dayPeriodStartAngleRadians(
 private fun SunriseSunset.dayPeriodEndAngleRadians(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   canvasHeight: Float,
   appBarHeight: Float,
   chartRadius: Float,
@@ -957,8 +989,28 @@ private fun SunriseSunset.dayPeriodEndAngleRadians(
     }
     DayPeriod.DAY -> {
       when (dayMode) {
-        DayMode.SUNRISE -> dayEnd
-        DayMode.SUNSET -> sunset?.let { 0f.radians } ?: nightEnd
+        DayMode.SUNRISE -> {
+          dayEnd
+        }
+        DayMode.SUNSET -> {
+          when (chartMode) {
+            DayPeriodChartMode.DAY_NIGHT_CYCLE -> sunset?.let { 0f.radians }
+            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> evening6Above?.let { (-6f).radians }
+          }
+            ?: nightEnd
+        }
+      }
+    }
+    DayPeriod.GOLDEN_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning6Above?.let { (-6f).radians } ?: dayEnd
+        DayMode.SUNSET -> evening4Below?.let { 4f.radians } ?: nightEnd
+      }
+    }
+    DayPeriod.BLUE_HOUR -> {
+      when (dayMode) {
+        DayMode.SUNRISE -> morning4Below?.let { 4f.radians } ?: dayEnd
+        DayMode.SUNSET -> evening6Below?.let { 6f.radians } ?: nightEnd
       }
     }
   }

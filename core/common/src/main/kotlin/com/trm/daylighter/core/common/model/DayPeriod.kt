@@ -5,5 +5,7 @@ enum class DayPeriod {
   ASTRONOMICAL,
   NAUTICAL,
   CIVIL,
-  DAY
+  DAY,
+  GOLDEN_HOUR,
+  BLUE_HOUR
 }
