@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -80,6 +82,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
@@ -294,32 +297,62 @@ private fun ConfirmLocationSelectionControls(
 ) {
   when (mode) {
     WidgetLocationMode.ADD -> {
-      Column(modifier = modifier) {
-        ConfirmSelectionButton(
-          modifier = Modifier.fillMaxWidth(),
-          text = stringResource(commonR.string.day_night_cycle),
-          icon = {
-            Icon(
-              painter = painterResource(commonR.drawable.day_night_cycle),
-              contentDescription = stringResource(commonR.string.day_night_cycle)
-            )
-          },
-          onClick = onConfirmDayNightCycleLocationSelectionClick
-        )
+      if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
+        Column(modifier = modifier) {
+          ConfirmSelectionButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.add_day_night_cycle_widget),
+            icon = {
+              Icon(
+                painter = painterResource(commonR.drawable.day_night_cycle),
+                contentDescription = stringResource(R.string.add_day_night_cycle_widget)
+              )
+            },
+            onClick = onConfirmDayNightCycleLocationSelectionClick
+          )
 
-        Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(5.dp))
 
-        ConfirmSelectionButton(
-          modifier = Modifier.fillMaxWidth(),
-          text = stringResource(commonR.string.golden_blue_hour),
-          icon = {
-            Icon(
-              imageVector = Icons.Filled.PhotoCamera,
-              contentDescription = stringResource(commonR.string.golden_blue_hour)
-            )
-          },
-          onClick = onConfirmGoldenBlueHourLocationSelectionClick
-        )
+          ConfirmSelectionButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.add_golden_blue_hour_widget),
+            icon = {
+              Icon(
+                imageVector = Icons.Filled.PhotoCamera,
+                contentDescription = stringResource(R.string.add_golden_blue_hour_widget)
+              )
+            },
+            onClick = onConfirmGoldenBlueHourLocationSelectionClick
+          )
+        }
+      } else {
+        Row(modifier = modifier) {
+          ConfirmSelectionButton(
+            modifier = Modifier.weight(1f),
+            text = stringResource(R.string.add_day_night_cycle_widget),
+            icon = {
+              Icon(
+                painter = painterResource(commonR.drawable.day_night_cycle),
+                contentDescription = stringResource(R.string.add_day_night_cycle_widget)
+              )
+            },
+            onClick = onConfirmDayNightCycleLocationSelectionClick
+          )
+
+          Spacer(modifier = Modifier.width(5.dp))
+
+          ConfirmSelectionButton(
+            modifier = Modifier.weight(1f),
+            text = stringResource(R.string.add_golden_blue_hour_widget),
+            icon = {
+              Icon(
+                imageVector = Icons.Filled.PhotoCamera,
+                contentDescription = stringResource(R.string.add_golden_blue_hour_widget)
+              )
+            },
+            onClick = onConfirmGoldenBlueHourLocationSelectionClick
+          )
+        }
       }
     }
     WidgetLocationMode.EDIT -> {
@@ -338,6 +371,7 @@ private fun ConfirmLocationSelectionControls(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ConfirmSelectionButton(
   text: String,
@@ -349,9 +383,10 @@ private fun ConfirmSelectionButton(
     modifier = modifier,
     text = {
       Text(
+        modifier = Modifier.fillMaxWidth().basicMarquee(),
         text = text,
         style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.fillMaxWidth()
+        maxLines = 1
       )
     },
     icon = icon,

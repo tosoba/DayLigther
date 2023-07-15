@@ -7,4 +7,5 @@ android { namespace = "com.trm.daylighter.feature.widget.location" }
 
 dependencies {
   implementation(project(":core:common"))
+  implementation(project(":core:ui"))
 }

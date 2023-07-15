@@ -4,4 +4,6 @@
     <string name="update_a_widget">Update a widget</string>
     <string name="failed_to_add_widget">Failed to add a widget. Try to add it directly from the home screen.</string>
     <string name="widget_location_updated">Widget location was updated.</string>
+    <string name="add_day_night_cycle_widget">Add day/night cycle widget</string>
+    <string name="add_golden_blue_hour_widget">Add golden/blue hour widget</string>
 </resources>

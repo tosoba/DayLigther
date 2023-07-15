@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,7 +40,7 @@ fun ZoomOutButton(mapZoom: Double, onClick: () -> Unit, modifier: Modifier = Mod
     exit = fadeOut(),
     modifier = modifier
   ) {
-    SmallFloatingActionButton(onClick = onClick) {
+    FloatingActionButton(onClick = onClick) {
       Icon(
         imageVector = Icons.Filled.ZoomOut,
         contentDescription = stringResource(commonR.string.zoom_out)
@@ -57,7 +57,7 @@ fun ZoomInButton(mapZoom: Double, onClick: () -> Unit, modifier: Modifier = Modi
     exit = fadeOut(),
     modifier = modifier
   ) {
-    SmallFloatingActionButton(onClick = onClick) {
+    FloatingActionButton(onClick = onClick) {
       Icon(
         imageVector = Icons.Filled.ZoomIn,
         contentDescription = stringResource(commonR.string.zoom_in)
