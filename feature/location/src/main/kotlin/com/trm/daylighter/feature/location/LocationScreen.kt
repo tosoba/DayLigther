@@ -3,7 +3,6 @@ package com.trm.daylighter.feature.location
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -22,16 +21,18 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -47,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
@@ -161,7 +163,6 @@ private fun LocationScreen(
 
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
 
-  val orientation = LocalConfiguration.current.orientation
   val locationMap = rememberLocationMap(mapPosition = mapPosition)
   val saveLocationState =
     rememberSaveLocationState(
@@ -234,7 +235,7 @@ private fun LocationScreen(
       cancelCurrentSaveLocation = cancelCurrentSaveLocation,
       onBackClick = onBackClick,
       modalSheet = {
-        if (sheetVisible && orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (sheetVisible && LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
           ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
             ModalSheetContent(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth())
           }
@@ -258,7 +259,7 @@ private fun LocationScreen(
 
   LaunchedEffect(sheetVisible) { if (!sheetVisible) clearLocationName() }
 
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+  if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
     LocationScaffold()
   } else {
     val drawerState = remember {
@@ -273,7 +274,11 @@ private fun LocationScreen(
       gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = {
-        ModalDrawerSheet { ModalSheetContent(modifier = Modifier.padding(20.dp).fillMaxHeight()) }
+        ModalDrawerSheet {
+          ModalSheetContent(
+            modifier = Modifier.padding(20.dp).fillMaxHeight().verticalScroll(rememberScrollState())
+          )
+        }
       }
     ) {
       LocationScaffold()
@@ -517,11 +522,19 @@ private fun ModalSheetContent(
       )
     }
 
-    ModalSheetButtons(
-      geocodeButtonText = geocodeButtonText,
-      onGeocodeClick = onGeocodeClick,
-      onSaveClick = onSaveClick
-    )
+    if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
+      ModalSheetButtonsRow(
+        geocodeButtonText = geocodeButtonText,
+        onGeocodeClick = onGeocodeClick,
+        onSaveClick = onSaveClick
+      )
+    } else {
+      ModalSheetButtons(
+        geocodeButtonText = geocodeButtonText,
+        onGeocodeClick = onGeocodeClick,
+        onSaveClick = onSaveClick
+      )
+    }
 
     Spacer(
       modifier =
@@ -536,7 +549,7 @@ private fun ModalSheetContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ModalSheetButtons(
+private fun ModalSheetButtonsRow(
   geocodeButtonText: String,
   onGeocodeClick: () -> Unit,
   onSaveClick: () -> Unit
@@ -545,10 +558,36 @@ private fun ModalSheetButtons(
     OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
       Text(text = geocodeButtonText, maxLines = 1, modifier = Modifier.basicMarquee())
     }
+
     Spacer(modifier = Modifier.width(5.dp))
+
     OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
       Text(text = stringResource(R.string.save), maxLines = 1, modifier = Modifier.basicMarquee())
     }
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ModalSheetButtons(
+  geocodeButtonText: String,
+  onGeocodeClick: () -> Unit,
+  onSaveClick: () -> Unit
+) {
+  OutlinedButton(
+    onClick = onGeocodeClick,
+    modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp)
+  ) {
+    Text(text = geocodeButtonText, maxLines = 1, modifier = Modifier.basicMarquee())
+  }
+
+  Spacer(modifier = Modifier.height(5.dp))
+
+  OutlinedButton(
+    onClick = onSaveClick,
+    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+  ) {
+    Text(text = stringResource(R.string.save), maxLines = 1, modifier = Modifier.basicMarquee())
   }
 }
 

@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.day
 
-import android.content.res.Configuration
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.View
@@ -18,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -45,29 +45,28 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
 import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.common.util.ext.*
-import com.trm.daylighter.core.common.util.ext.currentPeriodIn
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.ext.color
 import com.trm.daylighter.core.ui.ext.textColor
 import com.trm.daylighter.core.ui.ext.textShadowColor
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
-import java.time.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import java.time.*
+import com.trm.daylighter.core.common.R as commonR
 
 const val dayNightCycleRoute = "day_night_cycle_route"
 const val goldenBlueHourRoute = "golden_blue_hour_route"
@@ -112,7 +111,7 @@ private fun DayScreen(
   modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(modifier = modifier) {
-    val orientation = LocalConfiguration.current.orientation
+    val widthSizeClass = LocalWidthSizeClass.current
     val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
     var appBarHeightPx by remember { mutableStateOf(0f) }
 
@@ -156,7 +155,7 @@ private fun DayScreen(
     Box(
       modifier =
         Modifier.constrainAs(mainContent) {
-          if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+          if (widthSizeClass == WindowWidthSizeClass.Compact) {
             linkTo(parent.start, parent.end)
             linkTo(parent.top, navigation.top)
           } else {
@@ -256,7 +255,7 @@ private fun DayScreen(
       }
     }
 
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+    if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
       DayTopAppBar(
         change = currentChange,
         chartMode = chartMode,
@@ -396,8 +395,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
     )
   }
 
-  val orientation = LocalConfiguration.current.orientation
-  if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+  if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
     FloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
   } else {
     SmallFloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
@@ -453,7 +451,7 @@ private fun ClockAndDayLengthCard(
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
-      if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+      if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
           modifier = Modifier.padding(8.dp)
