@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -313,7 +314,7 @@ private fun ConfirmLocationSelectionControls(
           text = stringResource(commonR.string.golden_blue_hour),
           icon = {
             Icon(
-              painter = painterResource(commonR.drawable.day_night_cycle),
+              imageVector = Icons.Filled.PhotoCamera,
               contentDescription = stringResource(commonR.string.golden_blue_hour)
             )
           },
