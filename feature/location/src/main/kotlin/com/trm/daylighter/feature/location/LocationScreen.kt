@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -269,6 +270,7 @@ private fun LocationScreen(
     LaunchedEffect(drawerState.currentValue) {
       if (drawerState.isClosed && !drawerState.isAnimationRunning) sheetVisible = false
     }
+    BackHandler(enabled = drawerState.isOpen) { sheetVisible = false }
 
     ModalNavigationDrawer(
       gesturesEnabled = drawerState.isOpen,

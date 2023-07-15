@@ -1,6 +1,7 @@
 package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -53,6 +54,8 @@ fun DayLighterMainContent() {
   val navController = rememberNavController()
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val currentRoute = navController.currentRoute()
+
+  BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
 
   fun onDrawerMenuClick() {
     scope.launch { with(drawerState) { if (isOpen) close() else open() } }
