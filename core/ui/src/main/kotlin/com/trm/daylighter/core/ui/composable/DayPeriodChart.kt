@@ -1,9 +1,9 @@
 package com.trm.daylighter.core.ui.composable
 
+import android.content.res.Configuration
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -47,7 +48,6 @@ import com.trm.daylighter.core.domain.model.SunriseSunset
 import com.trm.daylighter.core.domain.model.dataOrNull
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
-import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
@@ -65,8 +65,8 @@ import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val compactLineRadiusMultiplier = 1.025f
-private const val mediumExpandedLineRadiusMultiplier = 1.1f
+private const val portraitLineRadiusMultiplier = 1.025f
+private const val landscapeLineRadiusMultiplier = 1.1f
 
 private val DrawScope.chartSegmentSize: Size
   get() = Size(size.height, size.height) * 2f
@@ -74,20 +74,20 @@ private val DrawScope.chartSegmentSize: Size
 private val DrawScope.chartRadius: Float
   get() = chartSegmentSize.maxDimension / 2f
 
-private fun DrawScope.chartTopLeftOffset(widthSizeClass: WindowWidthSizeClass): Offset =
+private fun DrawScope.chartTopLeftOffset(orientation: Int): Offset =
   Offset(
-    x = -size.height * if (widthSizeClass == WindowWidthSizeClass.Compact) 1.7f else 1f,
+    x = -size.height * if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.7f else 1f,
     y = -size.height * .5f
   )
 
-private fun DrawScope.chartCenter(widthSizeClass: WindowWidthSizeClass): Offset =
-  Offset(x = chartTopLeftOffset(widthSizeClass).x + chartRadius, y = size.height / 2f)
+private fun DrawScope.chartCenter(orientation: Int): Offset =
+  Offset(x = chartTopLeftOffset(orientation).x + chartRadius, y = size.height / 2f)
 
 private val DrawScope.chartTextPaddingPx: Float
   get() = 10.dp.toPx()
 
-private fun chartTextRadiusMultiplier(widthSizeClass: WindowWidthSizeClass): Float =
-  if (widthSizeClass == WindowWidthSizeClass.Compact) 1.025f else 1.1f
+private fun chartTextRadiusMultiplier(orientation: Int): Float =
+  if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.025f else 1.1f
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -138,26 +138,26 @@ fun DayPeriodChart(
   val labelTextStyle = MaterialTheme.typography.labelSmall
   val textColor = MaterialTheme.colorScheme.onBackground
 
-  val widthSizeClass = LocalWidthSizeClass.current
+  val orientation = LocalConfiguration.current.orientation
   val dayLabel = stringResource(R.string.day)
   val horizonLabel = stringResource(R.string.horizon)
   val nowLineColor = colorResource(R.color.now_line)
 
   Canvas(modifier = modifier) {
     if (changeValue !is Ready) {
-      drawChartSegments(chartSegments = chartSegments, widthSizeClass = widthSizeClass)
+      drawChartSegments(chartSegments = chartSegments, orientation = orientation)
       return@Canvas
     }
 
-    segmentEdges.forEach { edge -> drawSegmentEdge(edge = edge, widthSizeClass = widthSizeClass) }
-    drawChartSegments(chartSegments = chartSegments, widthSizeClass = widthSizeClass)
+    segmentEdges.forEach { edge -> drawSegmentEdge(edge = edge, orientation = orientation) }
+    drawChartSegments(chartSegments = chartSegments, orientation = orientation)
 
     drawPeriodLabels(
       chartSegments = chartSegments,
       textMeasurer = textMeasurer,
       textStyle = labelTextStyle,
       dayLabel = dayLabel,
-      widthSizeClass = widthSizeClass
+      orientation = orientation
     )
 
     segmentEdgeLabels.forEach { edgeLabels ->
@@ -166,7 +166,7 @@ fun DayPeriodChart(
         textMeasurer = textMeasurer,
         textStyle = labelTextStyle.copy(color = textColor),
         dayMode = dayMode,
-        widthSizeClass = widthSizeClass
+        orientation = orientation
       )
     }
 
@@ -175,7 +175,7 @@ fun DayPeriodChart(
         textStyle = labelTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
         textMeasurer = textMeasurer,
         horizonLabel = horizonLabel,
-        widthSizeClass = widthSizeClass
+        orientation = orientation
       )
     }
 
@@ -192,17 +192,14 @@ fun DayPeriodChart(
       dayMode = dayMode,
       chartMode = chartMode,
       nowLineColor = nowLineColor,
-      widthSizeClass = widthSizeClass,
+      orientation = orientation,
       appBarHeightPx = appBarHeightPx,
     )
   }
 }
 
-private fun DrawScope.drawChartSegments(
-  chartSegments: List<DayChartSegment>,
-  widthSizeClass: WindowWidthSizeClass
-) {
-  val topLeftOffset = chartTopLeftOffset(widthSizeClass)
+private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>, orientation: Int) {
+  val topLeftOffset = chartTopLeftOffset(orientation)
   var startAngle = -90f
 
   fun DrawScope.drawChartSegment(segment: DayChartSegment) {
@@ -251,9 +248,9 @@ private fun DrawScope.drawPeriodLabels(
   textMeasurer: TextMeasurer,
   textStyle: TextStyle,
   dayLabel: String,
-  widthSizeClass: WindowWidthSizeClass,
+  orientation: Int,
 ) {
-  val chartCenter = chartCenter(widthSizeClass)
+  val chartCenter = chartCenter(orientation)
   chartSegments.forEach { segment ->
     rotate(degrees = segment.periodLabelAngleDegrees, pivot = chartCenter) {
       val periodLabel = AnnotatedString(segment.periodLabel)
@@ -303,10 +300,10 @@ private data class DayChartSegmentEdge(
 private fun dayNightCycleChartSegmentEdges(
   change: LocationSunriseSunsetChange?,
 ): List<DayChartSegmentEdge> {
-  val widthSizeClass = LocalWidthSizeClass.current
+  val orientation = LocalConfiguration.current.orientation
   val lineRadiusMultiplier =
-    if (widthSizeClass == WindowWidthSizeClass.Compact) compactLineRadiusMultiplier
-    else mediumExpandedLineRadiusMultiplier
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+    else landscapeLineRadiusMultiplier
   val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
   return remember(change) {
@@ -358,10 +355,10 @@ private fun dayNightCycleChartSegmentEdges(
 private fun goldenBlueHourChartSegmentEdges(
   change: LocationSunriseSunsetChange?,
 ): List<DayChartSegmentEdge> {
-  val widthSizeClass = LocalWidthSizeClass.current
+  val orientation = LocalConfiguration.current.orientation
   val lineRadiusMultiplier =
-    if (widthSizeClass == WindowWidthSizeClass.Compact) compactLineRadiusMultiplier
-    else mediumExpandedLineRadiusMultiplier
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+    else landscapeLineRadiusMultiplier
   val dashPathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
   return remember(change) {
@@ -429,12 +426,9 @@ private fun goldenBlueHourChartSegmentEdges(
   }
 }
 
-private fun DrawScope.drawSegmentEdge(
-  edge: DayChartSegmentEdge,
-  widthSizeClass: WindowWidthSizeClass
-) {
+private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge, orientation: Int) {
   clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-    val chartCenter = chartCenter(widthSizeClass)
+    val chartCenter = chartCenter(orientation)
     drawLine(
       color = edge.color,
       start = chartCenter,
@@ -666,10 +660,10 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
   textMeasurer: TextMeasurer,
   textStyle: TextStyle,
   dayMode: DayMode,
-  widthSizeClass: WindowWidthSizeClass
+  orientation: Int
 ) {
-  val chartCenter = chartCenter(widthSizeClass)
-  val textRadiusMultiplier = chartTextRadiusMultiplier(widthSizeClass)
+  val chartCenter = chartCenter(orientation)
+  val textRadiusMultiplier = chartTextRadiusMultiplier(orientation)
 
   val endingEdgeLabel = AnnotatedString(edgeLabels.endingEdgeLabel)
   val endingEdgeTextStyle = textStyle.copy(textAlign = TextAlign.Left)
@@ -704,16 +698,12 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
 
   val timeAndDiffLabel =
     AnnotatedString(
-      buildTimeAndDiffLabel(
-        edgeLabels = edgeLabels,
-        dayMode = dayMode,
-        widthSizeClass = widthSizeClass
-      )
+      buildTimeAndDiffLabel(edgeLabels = edgeLabels, dayMode = dayMode, orientation = orientation)
     )
   if (timeAndDiffLabel.isBlank()) return
 
   val timeAndDiffLabelTextStyle = textStyle.copy(textAlign = TextAlign.Right)
-  val timeAndDiffLabelMaxLines = if (widthSizeClass == WindowWidthSizeClass.Compact) 2 else 1
+  val timeAndDiffLabelMaxLines = if (orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 1
   val timeLayoutResult =
     textMeasurer.measure(
       text = timeAndDiffLabel,
@@ -749,7 +739,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
 private fun buildTimeAndDiffLabel(
   edgeLabels: DayChartSegmentEdgeLabels,
   dayMode: DayMode,
-  widthSizeClass: WindowWidthSizeClass
+  orientation: Int
 ): String {
   val timeLabel =
     edgeLabels.run { if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel }
@@ -759,7 +749,7 @@ private fun buildTimeAndDiffLabel(
   if (diffLabel.isBlank()) return timeLabel
   return buildString {
     append(timeLabel)
-    append(if (widthSizeClass == WindowWidthSizeClass.Compact) "\n" else " ")
+    append(if (orientation == Configuration.ORIENTATION_PORTRAIT) "\n" else " ")
     append(diffLabel)
   }
 }
@@ -769,7 +759,7 @@ private fun DrawScope.drawHorizonLabel(
   textStyle: TextStyle,
   textMeasurer: TextMeasurer,
   horizonLabel: String,
-  widthSizeClass: WindowWidthSizeClass
+  orientation: Int
 ) {
   val horizonLayoutResult =
     textMeasurer.measure(
@@ -784,8 +774,7 @@ private fun DrawScope.drawHorizonLabel(
     topLeft =
       Offset(
         x = size.width - horizonLayoutResult.size.width - chartTextPaddingPx,
-        y =
-          chartCenter(widthSizeClass).y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
+        y = chartCenter(orientation).y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
       ),
     style = textStyle,
     maxLines = 1,
@@ -800,14 +789,14 @@ private fun DrawScope.drawNowLine(
   dayMode: DayMode,
   chartMode: DayPeriodChartMode,
   nowLineColor: Color,
-  widthSizeClass: WindowWidthSizeClass,
+  orientation: Int,
   appBarHeightPx: Float,
 ) {
-  val chartCenter = chartCenter(widthSizeClass)
+  val chartCenter = chartCenter(orientation)
   clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
     val lineRadiusMultiplier =
-      if (widthSizeClass == WindowWidthSizeClass.Compact) compactLineRadiusMultiplier
-      else mediumExpandedLineRadiusMultiplier
+      if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
+      else landscapeLineRadiusMultiplier
     val currentTimeAngleRadians =
       currentTimeLineAngleRadians(
         sunriseSunset = today,
