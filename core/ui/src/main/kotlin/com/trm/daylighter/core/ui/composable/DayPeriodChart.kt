@@ -808,6 +808,16 @@ private fun DrawScope.drawNowLine(
         appBarHeight = appBarHeightPx,
         chartRadius = chartRadius
       )
+    val nowLineEnd =
+      Offset(
+        x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
+        y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
+      )
+    val sunCenter =
+      Offset(
+        x = chartCenter.x + chartRadius * cos(currentTimeAngleRadians),
+        y = chartCenter.y + chartRadius * sin(currentTimeAngleRadians)
+      )
 
     drawIntoCanvas {
       val paint =
@@ -817,29 +827,14 @@ private fun DrawScope.drawNowLine(
         }
       paint.asFrameworkPaint().apply {
         color = nowLineColor.copy(alpha = 0f).toArgb()
-        setShadowLayer(15f, 0f, 0f, nowLineColor.copy(alpha = .75f).toArgb())
+        setShadowLayer(10f, 0f, 0f, nowLineColor.copy(alpha = .75f).toArgb())
       }
-      it.drawLine(
-        p1 = chartCenter,
-        p2 =
-          Offset(
-            x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
-            y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
-          ),
-        paint
-      )
+      it.drawLine(p1 = chartCenter, p2 = nowLineEnd, paint)
+      it.drawCircle(center = sunCenter, radius = 30f, paint = paint)
     }
 
-    drawLine(
-      color = nowLineColor,
-      start = chartCenter,
-      end =
-        Offset(
-          x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
-          y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
-        ),
-      strokeWidth = 8f,
-    )
+    drawLine(color = nowLineColor, start = chartCenter, end = nowLineEnd, strokeWidth = 4f)
+    drawCircle(color = nowLineColor, radius = 25f, center = sunCenter)
   }
 }
 
