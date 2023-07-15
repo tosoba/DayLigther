@@ -78,11 +78,11 @@ import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
-import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
+import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import kotlinx.coroutines.flow.collectLatest
 
 const val newWidgetRoute = "widget_location_route"
@@ -148,7 +148,11 @@ private fun WidgetLocationScreen(
     fun TopAppBar(modifier: Modifier = Modifier) {
       DayLighterTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
-        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
+        navigationIcon = {
+          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+            DrawerMenuIconButton(onClick = onDrawerMenuClick)
+          }
+        },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
         modifier = modifier
       )

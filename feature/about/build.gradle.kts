@@ -5,4 +5,7 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.about" }
 
-dependencies {}
+dependencies {
+  implementation(project(":core:common"))
+  implementation(project(":core:ui"))
+}

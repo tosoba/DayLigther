@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +29,7 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -61,9 +63,9 @@ fun DayLighterMainContent() {
     scope.launch { with(drawerState) { if (isOpen) close() else open() } }
   }
 
-  ModalNavigationDrawer(
-    gesturesEnabled = !currentRoute.startsWith(locationRoute),
+  DayLighterNavigationDrawer(
     drawerState = drawerState,
+    visible = !currentRoute.startsWith(locationRoute),
     drawerContent = {
       DayLighterDrawerContent(
         currentRoute = currentRoute,
@@ -84,6 +86,25 @@ fun DayLighterMainContent() {
     }
   ) {
     DayLighterScaffold(navController = navController, onDrawerMenuClick = ::onDrawerMenuClick)
+  }
+}
+
+@Composable
+fun DayLighterNavigationDrawer(
+  drawerState: DrawerState,
+  visible: Boolean,
+  drawerContent: @Composable () -> Unit,
+  content: @Composable () -> Unit
+) {
+  if (LocalWidthSizeClass.current == WindowWidthSizeClass.Expanded && visible) {
+    PermanentNavigationDrawer(drawerContent = drawerContent, content = content)
+  } else {
+    ModalNavigationDrawer(
+      gesturesEnabled = visible,
+      drawerState = drawerState,
+      drawerContent = drawerContent,
+      content = content
+    )
   }
 }
 

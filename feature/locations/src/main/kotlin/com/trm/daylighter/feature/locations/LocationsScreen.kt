@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -33,10 +34,11 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
+import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 
 const val locationsRoute = "locations_route"
 
@@ -82,7 +84,11 @@ private fun LocationsScreen(
     fun TopAppBar(modifier: Modifier = Modifier) {
       DayLighterTopAppBar(
         title = stringResource(commonR.string.locations),
-        navigationIcon = { DrawerMenuIconButton(onClick = onDrawerMenuClick) },
+        navigationIcon = {
+          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+            DrawerMenuIconButton(onClick = onDrawerMenuClick)
+          }
+        },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
         modifier = modifier
       )

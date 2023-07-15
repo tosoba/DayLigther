@@ -52,14 +52,14 @@ import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.util.ext.color
-import com.trm.daylighter.core.ui.util.ext.textColor
-import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
+import com.trm.daylighter.core.ui.util.ext.color
+import com.trm.daylighter.core.ui.util.ext.textColor
+import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import java.time.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -269,7 +269,11 @@ private fun DayScreen(
               appBarHeightPx = coordinates.size.height.toFloat()
             }
             .padding(10.dp),
-        navigationIcon = { DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick) }
+        navigationIcon = {
+          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+            DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick)
+          }
+        }
       )
 
       AnimatedVisibility(
@@ -336,10 +340,12 @@ private fun DayScreen(
 
       NavigationRail(
         header = {
-          DrawerMenuFloatingActionButton(
-            onClick = onDrawerMenuClick,
-            modifier = Modifier.padding(top = 8.dp)
-          )
+          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+            DrawerMenuFloatingActionButton(
+              onClick = onDrawerMenuClick,
+              modifier = Modifier.padding(top = 8.dp)
+            )
+          }
         },
         content = {
           SunriseSunsetNavigationRailContent(
