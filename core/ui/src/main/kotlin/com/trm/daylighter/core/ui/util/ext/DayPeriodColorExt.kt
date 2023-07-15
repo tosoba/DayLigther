@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.ui.ext
+package com.trm.daylighter.core.ui.util.ext
 
 import androidx.compose.ui.graphics.Color
 import com.trm.daylighter.core.common.model.DayPeriod

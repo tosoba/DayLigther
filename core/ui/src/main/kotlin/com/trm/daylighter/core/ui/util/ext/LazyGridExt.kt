@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.ui.ext
+package com.trm.daylighter.core.ui.util.ext
 
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope

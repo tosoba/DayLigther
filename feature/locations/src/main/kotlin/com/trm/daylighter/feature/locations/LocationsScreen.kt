@@ -33,7 +33,7 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.ext.fullWidthSpan
+import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
@@ -140,7 +140,7 @@ private fun LocationsScreen(
                 }
             )
 
-            ZoomControlsRow(
+            ZoomButtonsRow(
               zoom = zoom,
               incrementZoom = { ++zoom },
               decrementZoom = { --zoom },

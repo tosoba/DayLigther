@@ -44,7 +44,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,8 +77,8 @@ import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
-import com.trm.daylighter.core.ui.composable.ZoomControlsRow
-import com.trm.daylighter.core.ui.ext.fullWidthSpan
+import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
+import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
@@ -142,14 +141,8 @@ private fun WidgetLocationScreen(
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
-    var addWidgetButtonHeightPx by remember { mutableStateOf(0) }
+    var addWidgetButtonsHeightPx by remember { mutableStateOf(0) }
     var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
-    val spacerHeightPx by
-      remember(selectedLocationId) {
-        derivedStateOf {
-          if (selectedLocationId == null) zoomButtonsRowHeightPx else addWidgetButtonHeightPx
-        }
-      }
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
@@ -199,7 +192,14 @@ private fun WidgetLocationScreen(
                   modifier =
                     Modifier.height(
                       bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) { spacerHeightPx.toDp() }
+                        with(LocalDensity.current) {
+                          if (selectedLocationId == null) {
+                              zoomButtonsRowHeightPx
+                            } else {
+                              addWidgetButtonsHeightPx
+                            }
+                            .toDp()
+                        }
                     )
                 )
               }
@@ -221,7 +221,7 @@ private fun WidgetLocationScreen(
                   .padding(bottomButtonsPaddingDp)
                   .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
             ) {
-              ZoomControlsRow(
+              ZoomButtonsRow(
                 zoom = zoom,
                 incrementZoom = { ++zoom },
                 decrementZoom = { --zoom },
@@ -235,7 +235,7 @@ private fun WidgetLocationScreen(
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { addWidgetButtonHeightPx = it.size.height }
+                  .onGloballyPositioned { addWidgetButtonsHeightPx = it.size.height }
             ) {
               ConfirmLocationSelectionControls(
                 modifier = Modifier.width(IntrinsicSize.Max),

@@ -52,9 +52,9 @@ import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.ext.color
-import com.trm.daylighter.core.ui.ext.textColor
-import com.trm.daylighter.core.ui.ext.textShadowColor
+import com.trm.daylighter.core.ui.util.ext.color
+import com.trm.daylighter.core.ui.util.ext.textColor
+import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
