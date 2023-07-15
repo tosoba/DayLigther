@@ -874,9 +874,21 @@ private fun currentTimeLineAngleRadians(
     )
 
   val startTimeSecond =
-    sunriseSunset.dayPeriodStartTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
+    sunriseSunset
+      .dayPeriodStartTime(
+        dayPeriod = dayPeriod,
+        dayMode = dayMode,
+        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+      )
+      .toSecondOfDay()
   val endTimeSecond =
-    sunriseSunset.dayPeriodEndTime(dayPeriod = dayPeriod, dayMode = dayMode).toSecondOfDay()
+    sunriseSunset
+      .dayPeriodEndTime(
+        dayPeriod = dayPeriod,
+        dayMode = dayMode,
+        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+      )
+      .toSecondOfDay()
   val nowSecond = now.toSecondOfDay()
 
   return ((endAngle - startAngle) * abs(nowSecond - startTimeSecond)) /

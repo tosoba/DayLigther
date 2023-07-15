@@ -85,7 +85,11 @@ fun SunriseSunset.currentPeriodIn(location: Location, useGoldenBlueHour: Boolean
   }
 }
 
-fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+fun SunriseSunset.dayPeriodStartTime(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  useGoldenBlueHour: Boolean
+): LocalTime {
   val nightStart = LocalTime.ofSecondOfDay(1L)
   val noon = LocalTime.NOON
   return when (dayPeriod) {
@@ -115,8 +119,17 @@ fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): Lo
     }
     DayPeriod.DAY -> {
       when (dayMode) {
-        DayMode.SUNRISE -> sunrise?.toLocalTime() ?: nightStart
-        DayMode.SUNSET -> noon
+        DayMode.SUNRISE -> {
+          if (useGoldenBlueHour) {
+            morning6Above?.toLocalTime()
+          } else {
+            sunrise?.toLocalTime()
+          }
+            ?: nightStart
+        }
+        DayMode.SUNSET -> {
+          noon
+        }
       }
     }
     DayPeriod.GOLDEN_HOUR -> {
@@ -134,7 +147,11 @@ fun SunriseSunset.dayPeriodStartTime(dayPeriod: DayPeriod, dayMode: DayMode): Lo
   }
 }
 
-fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): LocalTime {
+fun SunriseSunset.dayPeriodEndTime(
+  dayPeriod: DayPeriod,
+  dayMode: DayMode,
+  useGoldenBlueHour: Boolean
+): LocalTime {
   val nightEnd = LocalTime.MAX
   val noon = LocalTime.NOON
   return when (dayPeriod) {
@@ -164,8 +181,17 @@ fun SunriseSunset.dayPeriodEndTime(dayPeriod: DayPeriod, dayMode: DayMode): Loca
     }
     DayPeriod.DAY -> {
       when (dayMode) {
-        DayMode.SUNRISE -> noon
-        DayMode.SUNSET -> sunset?.toLocalTime() ?: nightEnd
+        DayMode.SUNRISE -> {
+          noon
+        }
+        DayMode.SUNSET -> {
+          if (useGoldenBlueHour) {
+            evening6Above?.toLocalTime()
+          } else {
+            sunset?.toLocalTime()
+          }
+            ?: nightEnd
+        }
       }
     }
     DayPeriod.GOLDEN_HOUR -> {
