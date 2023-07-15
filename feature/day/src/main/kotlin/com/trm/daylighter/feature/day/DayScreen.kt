@@ -45,6 +45,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
 import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.common.util.ext.*
@@ -59,14 +60,13 @@ import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
+import java.time.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import java.time.*
-import com.trm.daylighter.core.common.R as commonR
 
 const val dayNightCycleRoute = "day_night_cycle_route"
 const val goldenBlueHourRoute = "golden_blue_hour_route"
@@ -466,6 +466,7 @@ private fun ClockAndDayLengthCard(
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
             dayMode = location.zoneId.currentDayMode(),
+            chartMode = chartMode,
             today = today,
             zoneId = location.zoneId
           )
@@ -493,6 +494,7 @@ private fun ClockAndDayLengthCard(
           NextDayPeriodTimer(
             dayPeriod = dayPeriod.value,
             dayMode = location.zoneId.currentDayMode(),
+            chartMode = chartMode,
             today = today,
             zoneId = location.zoneId
           )
@@ -508,10 +510,17 @@ private data class NextDayPeriod(val timestamp: LocalTime, val label: String)
 private fun NextDayPeriodTimer(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   today: SunriseSunset,
   zoneId: ZoneId
 ) {
-  val nextPeriod = rememberNextDayPeriod(dayPeriod, dayMode, today)
+  val nextPeriod =
+    rememberNextDayPeriod(
+      dayPeriod = dayPeriod,
+      dayMode = dayMode,
+      chartMode = chartMode,
+      today = today
+    )
   val timerPositive =
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
   val till = stringResource(R.string.till)
@@ -560,6 +569,7 @@ private fun NextDayPeriodTimer(
 private fun rememberNextDayPeriod(
   dayPeriod: DayPeriod,
   dayMode: DayMode,
+  chartMode: DayPeriodChartMode,
   today: SunriseSunset,
 ): NextDayPeriod? {
   val nightLabel = stringResource(commonR.string.night).lowercase()
@@ -595,7 +605,14 @@ private fun rememberNextDayPeriod(
       DayPeriod.NAUTICAL -> {
         when (dayMode) {
           DayMode.SUNRISE -> {
-            today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+            when (chartMode) {
+              DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+                today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+              }
+              DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+                today.morning6Below?.let { NextDayPeriod(it.toLocalTime(), blueHourLabel) }
+              }
+            }
           }
           DayMode.SUNSET -> {
             today.evening12Below?.let { NextDayPeriod(it.toLocalTime(), astronomicalLabel) }
@@ -613,7 +630,14 @@ private fun rememberNextDayPeriod(
         }
       }
       DayPeriod.DAY -> {
-        today.sunset?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+        when (chartMode) {
+          DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+            today.sunset?.let { NextDayPeriod(it.toLocalTime(), civilLabel) }
+          }
+          DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+            today.evening6Above?.let { NextDayPeriod(it.toLocalTime(), goldenHourLabel) }
+          }
+        }
       }
       DayPeriod.GOLDEN_HOUR -> {
         when (dayMode) {
