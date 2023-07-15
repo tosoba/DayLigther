@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.locations
 
-import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,10 +33,10 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
+import com.trm.daylighter.core.ui.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
-import kotlinx.coroutines.launch
 
 const val locationsRoute = "locations_route"
 
@@ -74,20 +72,11 @@ private fun LocationsScreen(
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
-    val scope = rememberCoroutineScope()
-
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
     var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
     var bottomButtonsHeightPx by remember { mutableStateOf(0) }
-
-    val gridState = rememberLazyGridState()
-    LaunchedEffect(locations) {
-      if (locations is Ready) {
-        scope.launch { gridState.animateScrollToItem(0) }
-      }
-    }
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
@@ -111,20 +100,9 @@ private fun LocationsScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
-            val columnsCount =
-              if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                2
-              } else {
-                4
-              }
-
-            @Suppress("UnusedReceiverParameter")
-            fun LazyGridItemSpanScope.fullWidthSpan(): GridItemSpan = GridItemSpan(columnsCount)
-
             LazyVerticalGrid(
-              state = gridState,
               contentPadding = PaddingValues(10.dp),
-              columns = GridCells.Fixed(columnsCount)
+              columns = GridCells.Adaptive(175.dp)
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(

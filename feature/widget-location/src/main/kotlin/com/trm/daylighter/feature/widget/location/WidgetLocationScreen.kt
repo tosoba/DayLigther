@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.widget.location
 
-import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -57,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -82,6 +79,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomControlsRow
+import com.trm.daylighter.core.ui.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
@@ -175,19 +173,9 @@ private fun WidgetLocationScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
 
-            val columnsCount =
-              if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                2
-              } else {
-                4
-              }
-
-            @Suppress("UnusedReceiverParameter")
-            fun LazyGridItemSpanScope.fullWidthSpan(): GridItemSpan = GridItemSpan(columnsCount)
-
             LazyVerticalGrid(
               contentPadding = PaddingValues(10.dp),
-              columns = GridCells.Fixed(columnsCount)
+              columns = GridCells.Adaptive(175.dp)
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(
