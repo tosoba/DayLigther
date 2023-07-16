@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
+import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.DayLighterTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,8 +17,11 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
-      val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-      CompositionLocalProvider(LocalWidthSizeClass provides widthSizeClass) {
+      val windowSizeClass = calculateWindowSizeClass(this)
+      CompositionLocalProvider(
+        LocalWidthSizeClass provides windowSizeClass.widthSizeClass,
+        LocalHeightSizeClass provides windowSizeClass.heightSizeClass
+      ) {
         DayLighterTheme { DayLighterMainContent() }
       }
     }
