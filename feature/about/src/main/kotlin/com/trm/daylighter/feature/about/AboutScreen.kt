@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
+import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
 
 const val aboutRoute = "about_route"
 
@@ -24,7 +23,7 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
     DayLighterTopAppBar(
       title = stringResource(commonR.string.about),
       navigationIcon = {
-        if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+        if (!usingPermanentNavigationDrawer) {
           DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
       }

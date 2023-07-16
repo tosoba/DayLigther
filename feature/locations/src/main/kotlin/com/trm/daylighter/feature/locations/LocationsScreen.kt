@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -34,7 +33,7 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
+import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
@@ -85,7 +84,7 @@ private fun LocationsScreen(
       DayLighterTopAppBar(
         title = stringResource(commonR.string.locations),
         navigationIcon = {
-          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+          if (!usingPermanentNavigationDrawer) {
             DrawerMenuIconButton(onClick = onDrawerMenuClick)
           }
         },

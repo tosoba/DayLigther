@@ -79,6 +79,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
+import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
@@ -149,7 +150,7 @@ private fun WidgetLocationScreen(
       DayLighterTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
         navigationIcon = {
-          if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+          if (!usingPermanentNavigationDrawer) {
             DrawerMenuIconButton(onClick = onDrawerMenuClick)
           }
         },

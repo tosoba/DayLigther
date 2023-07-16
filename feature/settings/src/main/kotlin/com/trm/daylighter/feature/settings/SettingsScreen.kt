@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,7 +51,7 @@ import com.trm.daylighter.core.datastore.preferencesDataStore
 import com.trm.daylighter.core.ui.composable.BackIconButton
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
+import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -138,7 +137,7 @@ private fun SettingsScreen(
       navigationIcon = {
         if (autoShowEmailDialog) {
           BackIconButton(onClick = onBackClick)
-        } else if (LocalWidthSizeClass.current != WindowWidthSizeClass.Expanded) {
+        } else if (!usingPermanentNavigationDrawer) {
           DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
       }

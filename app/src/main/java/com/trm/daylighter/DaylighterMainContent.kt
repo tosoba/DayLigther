@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,7 +28,7 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
+import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -96,7 +95,7 @@ fun DayLighterNavigationDrawer(
   drawerContent: @Composable () -> Unit,
   content: @Composable () -> Unit
 ) {
-  if (LocalWidthSizeClass.current == WindowWidthSizeClass.Expanded && visible) {
+  if (usingPermanentNavigationDrawer && visible) {
     PermanentNavigationDrawer(drawerContent = drawerContent, content = content)
   } else {
     ModalNavigationDrawer(
