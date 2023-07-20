@@ -79,7 +79,7 @@ import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
-import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient

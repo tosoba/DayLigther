@@ -51,7 +51,7 @@ import com.trm.daylighter.core.datastore.preferencesDataStore
 import com.trm.daylighter.core.ui.composable.BackIconButton
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber

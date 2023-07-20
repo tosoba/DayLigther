@@ -53,7 +53,7 @@ import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.*
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
-import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable

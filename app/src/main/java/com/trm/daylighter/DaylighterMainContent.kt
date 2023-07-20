@@ -28,7 +28,7 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute

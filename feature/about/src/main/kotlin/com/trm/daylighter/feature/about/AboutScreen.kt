@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
-import com.trm.daylighter.core.ui.local.usingPermanentNavigationDrawer
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 
 const val aboutRoute = "about_route"
 
