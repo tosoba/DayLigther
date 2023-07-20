@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -52,8 +53,8 @@ import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.*
+import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
-import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
@@ -61,6 +62,7 @@ import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import java.time.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -112,7 +114,7 @@ private fun DayScreen(
   modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(modifier = modifier) {
-    val widthSizeClass = LocalWidthSizeClass.current
+    val heightSizeClass = LocalHeightSizeClass.current
     val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
     var appBarHeightPx by remember { mutableStateOf(0f) }
 
@@ -156,7 +158,7 @@ private fun DayScreen(
     Box(
       modifier =
         Modifier.constrainAs(mainContent) {
-          if (widthSizeClass == WindowWidthSizeClass.Compact) {
+          if (heightSizeClass != WindowHeightSizeClass.Compact) {
             linkTo(parent.start, parent.end)
             linkTo(parent.top, navigation.top)
           } else {
@@ -256,7 +258,7 @@ private fun DayScreen(
       }
     }
 
-    if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
+    if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
       DayTopAppBar(
         change = currentChange,
         chartMode = chartMode,
@@ -290,7 +292,7 @@ private fun DayScreen(
         ClockAndDayLengthCard(
           change = currentChange,
           chartMode = chartMode,
-          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
+          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
         )
       }
 
@@ -385,7 +387,7 @@ private fun DayScreen(
         ClockAndDayLengthCard(
           change = currentChange,
           chartMode = chartMode,
-          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp / 5 * 2)
+          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
         )
       }
     }
@@ -458,7 +460,7 @@ private fun ClockAndDayLengthCard(
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
-      if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
+      if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
           modifier = Modifier.padding(8.dp)
