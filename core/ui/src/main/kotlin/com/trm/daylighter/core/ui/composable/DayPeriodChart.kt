@@ -74,14 +74,11 @@ private val DrawScope.chartSegmentSize: Size
 private val DrawScope.chartRadius: Float
   get() = chartSegmentSize.maxDimension / 2f
 
-private fun DrawScope.chartTopLeftOffset(orientation: Int): Offset =
-  Offset(
-    x = -size.height * if (orientation == Configuration.ORIENTATION_PORTRAIT) 1.7f else 1f,
-    y = -size.height * .5f
-  )
+private val DrawScope.chartTopLeftOffset: Offset
+  get() = Offset(x = -2 * chartRadius + size.width / 2f, y = -size.height * .5f)
 
-private fun DrawScope.chartCenter(orientation: Int): Offset =
-  Offset(x = chartTopLeftOffset(orientation).x + chartRadius, y = size.height / 2f)
+private val DrawScope.chartCenter: Offset
+  get() = Offset(x = chartTopLeftOffset.x + chartRadius, y = size.height / 2f)
 
 private val DrawScope.chartTextPaddingPx: Float
   get() = 10.dp.toPx()
@@ -145,19 +142,18 @@ fun DayPeriodChart(
 
   Canvas(modifier = modifier) {
     if (changeValue !is Ready) {
-      drawChartSegments(chartSegments = chartSegments, orientation = orientation)
+      drawChartSegments(chartSegments = chartSegments)
       return@Canvas
     }
 
-    segmentEdges.forEach { edge -> drawSegmentEdge(edge = edge, orientation = orientation) }
-    drawChartSegments(chartSegments = chartSegments, orientation = orientation)
+    segmentEdges.forEach { edge -> drawSegmentEdge(edge = edge) }
+    drawChartSegments(chartSegments = chartSegments)
 
     drawPeriodLabels(
       chartSegments = chartSegments,
       textMeasurer = textMeasurer,
       textStyle = labelTextStyle,
-      dayLabel = dayLabel,
-      orientation = orientation
+      dayLabel = dayLabel
     )
 
     segmentEdgeLabels.forEach { edgeLabels ->
@@ -174,8 +170,7 @@ fun DayPeriodChart(
       drawHorizonLabel(
         textStyle = labelTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
         textMeasurer = textMeasurer,
-        horizonLabel = horizonLabel,
-        orientation = orientation
+        horizonLabel = horizonLabel
       )
     }
 
@@ -198,8 +193,8 @@ fun DayPeriodChart(
   }
 }
 
-private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>, orientation: Int) {
-  val topLeftOffset = chartTopLeftOffset(orientation)
+private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>) {
+  val topLeftOffset = chartTopLeftOffset
   var startAngle = -90f
 
   fun DrawScope.drawChartSegment(segment: DayChartSegment) {
@@ -248,9 +243,7 @@ private fun DrawScope.drawPeriodLabels(
   textMeasurer: TextMeasurer,
   textStyle: TextStyle,
   dayLabel: String,
-  orientation: Int,
 ) {
-  val chartCenter = chartCenter(orientation)
   chartSegments.forEach { segment ->
     rotate(degrees = segment.periodLabelAngleDegrees, pivot = chartCenter) {
       val periodLabel = AnnotatedString(segment.periodLabel)
@@ -426,19 +419,17 @@ private fun goldenBlueHourChartSegmentEdges(
   }
 }
 
-private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge, orientation: Int) {
+private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge) {
   clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-    val chartCenter = chartCenter(orientation)
+    val center = chartCenter
     drawLine(
       color = edge.color,
-      start = chartCenter,
+      start = center,
       end =
         Offset(
-          x =
-            chartCenter.x +
-              chartRadius * edge.lineRadiusMultiplier * cos(edge.angleDegrees.radians),
+          x = center.x + chartRadius * edge.lineRadiusMultiplier * cos(edge.angleDegrees.radians),
           y =
-            chartCenter.y +
+            center.y +
               chartRadius * edge.lineRadiusMultiplier * sin(edge.angleDegrees.radians) +
               edge.strokeWidth
         ),
@@ -662,7 +653,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
   dayMode: DayMode,
   orientation: Int
 ) {
-  val chartCenter = chartCenter(orientation)
+  val center = chartCenter
   val textRadiusMultiplier = chartTextRadiusMultiplier(orientation)
 
   val endingEdgeLabel = AnnotatedString(edgeLabels.endingEdgeLabel)
@@ -678,12 +669,12 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
   val endingEdgeLabelTopLeft =
     Offset(
       x =
-        chartCenter.x +
+        center.x +
           chartRadius * textRadiusMultiplier * cos(edgeLabels.edgeAngleDegrees.radians) +
           chartTextPaddingPx +
           endingEdgeLabelExtraOffset.x,
       y =
-        chartCenter.y +
+        center.y +
           chartRadius * textRadiusMultiplier * sin(edgeLabels.edgeAngleDegrees.radians) +
           endingEdgeLabelExtraOffset.y
     )
@@ -722,7 +713,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
           size.width - timeLayoutResult.size.width - chartTextPaddingPx
         ),
       y =
-        chartCenter.y +
+        center.y +
           chartRadius * textRadiusMultiplier * sin(edgeLabels.edgeAngleDegrees.radians) +
           timeAndDiffLabelExtraOffset.y
     )
@@ -758,8 +749,7 @@ private fun buildTimeAndDiffLabel(
 private fun DrawScope.drawHorizonLabel(
   textStyle: TextStyle,
   textMeasurer: TextMeasurer,
-  horizonLabel: String,
-  orientation: Int
+  horizonLabel: String
 ) {
   val horizonLayoutResult =
     textMeasurer.measure(
@@ -774,7 +764,7 @@ private fun DrawScope.drawHorizonLabel(
     topLeft =
       Offset(
         x = size.width - horizonLayoutResult.size.width - chartTextPaddingPx,
-        y = chartCenter(orientation).y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
+        y = chartCenter.y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
       ),
     style = textStyle,
     maxLines = 1,
@@ -792,7 +782,8 @@ private fun DrawScope.drawNowLine(
   orientation: Int,
   appBarHeightPx: Float,
 ) {
-  val chartCenter = chartCenter(orientation)
+  val center = chartCenter
+
   clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
     val lineRadiusMultiplier =
       if (orientation == Configuration.ORIENTATION_PORTRAIT) portraitLineRadiusMultiplier
@@ -810,13 +801,13 @@ private fun DrawScope.drawNowLine(
       )
     val nowLineEnd =
       Offset(
-        x = chartCenter.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
-        y = chartCenter.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
+        x = center.x + chartRadius * lineRadiusMultiplier * cos(currentTimeAngleRadians),
+        y = center.y + chartRadius * lineRadiusMultiplier * sin(currentTimeAngleRadians)
       )
     val sunCenter =
       Offset(
-        x = chartCenter.x + chartRadius * cos(currentTimeAngleRadians),
-        y = chartCenter.y + chartRadius * sin(currentTimeAngleRadians)
+        x = center.x + chartRadius * cos(currentTimeAngleRadians),
+        y = center.y + chartRadius * sin(currentTimeAngleRadians)
       )
 
     drawIntoCanvas {
@@ -829,11 +820,11 @@ private fun DrawScope.drawNowLine(
         color = nowLineColor.copy(alpha = 0f).toArgb()
         setShadowLayer(10f, 0f, 0f, nowLineColor.copy(alpha = .75f).toArgb())
       }
-      it.drawLine(p1 = chartCenter, p2 = nowLineEnd, paint)
+      it.drawLine(p1 = center, p2 = nowLineEnd, paint)
       it.drawCircle(center = sunCenter, radius = 30f, paint = paint)
     }
 
-    drawLine(color = nowLineColor, start = chartCenter, end = nowLineEnd, strokeWidth = 4f)
+    drawLine(color = nowLineColor, start = center, end = nowLineEnd, strokeWidth = 4f)
     drawCircle(color = nowLineColor, radius = 25f, center = sunCenter)
   }
 }
