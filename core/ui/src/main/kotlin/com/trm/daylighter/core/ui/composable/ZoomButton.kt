@@ -36,7 +36,7 @@ fun ZoomButtonsRow(
       )
     }
 
-    Spacer(modifier = Modifier.width(5.dp))
+    Spacer(modifier = Modifier.width(10.dp))
 
     ZoomButton(
       enabled = zoom > MapDefaults.MIN_ZOOM,
