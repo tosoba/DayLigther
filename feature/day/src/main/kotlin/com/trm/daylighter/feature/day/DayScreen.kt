@@ -258,6 +258,33 @@ private fun DayScreen(
       }
     }
 
+    val usingMaxWidthTopAppBar = LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
+
+    DayTopAppBar(
+      change = currentChange,
+      chartMode = chartMode,
+      navigationIcon = {
+        if (!usingPermanentNavigationDrawer && usingNavigationBar) {
+          DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick)
+        }
+      },
+      modifier =
+        Modifier.constrainAs(topAppBar) {
+            linkTo(
+              start = if (usingNavigationBar) mainContent.start else navigation.end,
+              end = if (usingMaxWidthTopAppBar) mainContent.end else dayTimeCard.start
+            )
+            top.linkTo(parent.top)
+            width = Dimension.fillToConstraints
+            height = Dimension.wrapContent
+          }
+          .background(backgroundToTransparentVerticalGradient)
+          .onGloballyPositioned { coordinates ->
+            appBarHeightPx = coordinates.size.height.toFloat()
+          }
+          .padding(10.dp)
+    )
+
     fun onEditLocationClick() {
       currentChange.value.takeIfInstance<Ready<LocationSunriseSunsetChange>>()?.let { (data) ->
         onEditLocationClick(data.location.id)
@@ -314,44 +341,27 @@ private fun DayScreen(
       )
     }
 
-    if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-      DayTopAppBar(
+    AnimatedVisibility(
+      visible = locations is Ready,
+      enter = fadeIn(),
+      exit = fadeOut(),
+      modifier =
+        Modifier.constrainAs(dayTimeCard) {
+          top.run {
+            if (usingMaxWidthTopAppBar) linkTo(topAppBar.bottom, 5.dp)
+            else linkTo(parent.top, 16.dp)
+          }
+          end.linkTo(parent.end, 16.dp)
+        },
+    ) {
+      ClockAndDayLengthCard(
         change = currentChange,
         chartMode = chartMode,
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(mainContent.start, mainContent.end)
-              top.linkTo(parent.top)
-            }
-            .background(backgroundToTransparentVerticalGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .padding(10.dp),
-        navigationIcon = {
-          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick)
-          }
-        }
+        modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
       )
+    }
 
-      AnimatedVisibility(
-        visible = locations is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(topAppBar.bottom, 5.dp)
-            end.linkTo(parent.end, 16.dp)
-          },
-      ) {
-        ClockAndDayLengthCard(
-          change = currentChange,
-          chartMode = chartMode,
-          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
-        )
-      }
-
+    if (usingNavigationBar) {
       AnimatedVisibility(
         visible = currentChange.value is Ready,
         enter = fadeIn(),
@@ -363,45 +373,6 @@ private fun DayScreen(
           }
       ) {
         EditLocationButton(onClick = ::onEditLocationClick)
-      }
-    } else {
-      DayTopAppBar(
-        change = currentChange,
-        chartMode = chartMode,
-        navigationIcon = {
-          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick)
-          }
-        },
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(navigation.end, dayTimeCard.start)
-              top.linkTo(parent.top)
-              height = Dimension.wrapContent
-              width = Dimension.fillToConstraints
-            }
-            .background(backgroundToTransparentVerticalGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .padding(10.dp)
-      )
-
-      AnimatedVisibility(
-        visible = currentChange.value is Ready,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier =
-          Modifier.constrainAs(dayTimeCard) {
-            top.linkTo(parent.top, 16.dp)
-            end.linkTo(parent.end, 16.dp)
-          },
-      ) {
-        ClockAndDayLengthCard(
-          change = currentChange,
-          chartMode = chartMode,
-          modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
-        )
       }
     }
   }
