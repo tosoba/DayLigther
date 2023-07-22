@@ -9,13 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -28,8 +25,8 @@ import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
 import com.trm.daylighter.feature.day.DayRoute
@@ -63,6 +60,7 @@ fun DayLighterMainContent() {
   }
 
   DayLighterNavigationDrawer(
+    modifier = Modifier.statusBarsPadding(),
     drawerState = drawerState,
     visible = !currentRoute.startsWith(locationRoute),
     drawerContent = {
@@ -90,15 +88,17 @@ fun DayLighterMainContent() {
 
 @Composable
 fun DayLighterNavigationDrawer(
+  modifier: Modifier = Modifier,
   drawerState: DrawerState,
   visible: Boolean,
   drawerContent: @Composable () -> Unit,
   content: @Composable () -> Unit
 ) {
   if (usingPermanentNavigationDrawer && visible) {
-    PermanentNavigationDrawer(drawerContent = drawerContent, content = content)
+    PermanentNavigationDrawer(modifier = modifier, drawerContent = drawerContent, content = content)
   } else {
     ModalNavigationDrawer(
+      modifier = modifier,
       gesturesEnabled = visible,
       drawerState = drawerState,
       drawerContent = drawerContent,
@@ -180,11 +180,11 @@ private fun DayLighterDrawerContent(
   }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuClick: () -> Unit) {
   Scaffold(
-    modifier = Modifier.semantics { testTagsAsResourceId = true },
+    modifier = Modifier.statusBarsPadding(),
     containerColor = MaterialTheme.colorScheme.background,
     contentColor = MaterialTheme.colorScheme.onBackground,
     contentWindowInsets = WindowInsets(0, 0, 0, 0),

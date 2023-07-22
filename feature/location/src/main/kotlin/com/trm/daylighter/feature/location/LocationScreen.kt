@@ -308,7 +308,10 @@ private fun LocationScaffold(
   locationPermissionDialog: @Composable BoxScope.() -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Scaffold(modifier = modifier) { padding ->
+  Scaffold(
+    modifier = modifier,
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+  ) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       MapView(locationMap = locationMap, modifier = Modifier.fillMaxSize())
       MarkerIcon(modifier = Modifier.align(Alignment.Center))

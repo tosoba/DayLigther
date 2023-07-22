@@ -7,8 +7,6 @@
         <item name="windowSplashScreenBackground">#FFFEFCFC</item>
     </style>
 
-    <style name="Theme.DayLighter" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:navigationBarColor">@android:color/black</item>
-    </style>
+    <style name="Theme.DayLighter" parent="android:Theme.Material.Light.NoActionBar" />
 
 </resources>
