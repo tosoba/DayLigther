@@ -4,6 +4,7 @@ import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -49,6 +50,7 @@ import com.trm.daylighter.core.domain.model.dataOrNull
 import com.trm.daylighter.core.domain.util.ext.isPolarDayAtLocation
 import com.trm.daylighter.core.domain.util.ext.isPolarNightAtLocation
 import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
+import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.theme.astronomicalTwilightColor
@@ -140,7 +142,20 @@ fun DayPeriodChart(
     }
 
   val textMeasurer = rememberTextMeasurer()
-  val labelTextStyle = MaterialTheme.typography.labelSmall
+  val labelTextStyle =
+    when {
+      LocalHeightSizeClass.current == WindowHeightSizeClass.Compact ||
+        LocalWidthSizeClass.current == WindowWidthSizeClass.Compact -> {
+        MaterialTheme.typography.labelSmall
+      }
+      LocalHeightSizeClass.current == WindowHeightSizeClass.Expanded ||
+        LocalWidthSizeClass.current == WindowWidthSizeClass.Expanded -> {
+        MaterialTheme.typography.bodyLarge
+      }
+      else -> {
+        MaterialTheme.typography.labelLarge
+      }
+    }
   val textColor = MaterialTheme.colorScheme.onBackground
 
   val heightSizeClass = LocalHeightSizeClass.current
