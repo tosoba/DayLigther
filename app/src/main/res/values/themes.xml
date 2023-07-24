@@ -4,7 +4,6 @@
     <style name="Theme.DayLighter.Splash" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.DayLighter</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_background</item>
-        <item name="windowSplashScreenBackground">#FFFEFCFC</item>
     </style>
 
     <style name="Theme.DayLighter" parent="android:Theme.Material.Light.NoActionBar" />
