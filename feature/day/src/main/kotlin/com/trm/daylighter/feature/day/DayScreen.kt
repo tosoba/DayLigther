@@ -265,7 +265,7 @@ private fun DayScreen(
       chartMode = chartMode,
       navigationIcon = {
         if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-          DrawerMenuFloatingActionButton(onClick = onDrawerMenuClick)
+          DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
       },
       modifier =
@@ -310,10 +310,7 @@ private fun DayScreen(
       NavigationRail(
         header = {
           if (!usingPermanentNavigationDrawer) {
-            DrawerMenuFloatingActionButton(
-              onClick = onDrawerMenuClick,
-              modifier = Modifier.padding(top = 8.dp)
-            )
+            DrawerMenuIconButton(onClick = onDrawerMenuClick)
           }
         },
         content = {
