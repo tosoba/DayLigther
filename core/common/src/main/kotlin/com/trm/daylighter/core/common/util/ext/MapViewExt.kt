@@ -18,7 +18,6 @@ fun MapView.setDefaultDisabledConfig(darkMode: Boolean) {
   isFlingEnabled = false
   setOnTouchListener { _, _ -> true }
   if (darkMode) overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
-  addCopyrightOverlay(darkMode)
 }
 
 fun MapView.setPosition(latitude: Double, longitude: Double, zoom: Double) {
