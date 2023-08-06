@@ -175,8 +175,11 @@ private fun DayScreen(
           width = Dimension.fillToConstraints
         }
     ) {
-      Crossfade(targetState = locations is WithData, modifier = Modifier.fillMaxSize()) {
-        pagerVisible ->
+      Crossfade(
+        targetState = locations is WithData,
+        modifier = Modifier.fillMaxSize(),
+        label = "chart-crossfade"
+      ) { pagerVisible ->
         if (pagerVisible) {
           HorizontalPager(
             state = pagerState,
@@ -510,12 +513,16 @@ private fun ClockAndDayLengthCard(
         modifier = Modifier.padding(8.dp)
       ) {
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+
         NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Spacer(modifier = Modifier.height(5.dp))
+          Spacer(modifier = Modifier.height(2.dp))
           DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
         }
-        Spacer(modifier = Modifier.height(5.dp))
+
+        Spacer(modifier = Modifier.height(2.dp))
+
         NextDayPeriodTimer(
           dayPeriod = dayPeriod.value,
           dayMode = location.zoneId.currentDayMode(),
@@ -743,7 +750,11 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
 }
 
 @Composable
-private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
+private fun NowTimezoneDiffText(
+  zoneId: ZoneId,
+  dayPeriod: DayPeriod,
+  modifier: Modifier = Modifier
+) {
   val context = LocalContext.current
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
@@ -754,45 +765,107 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
       MaterialTheme.typography.bodySmall.copy(
         shadow =
           Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
-      )
+      ),
+    modifier = modifier
   )
 }
 
 @Composable
 private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
-  Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-    DayLengthIcon(dayPeriod = dayPeriod)
+  val (location, today, yesterday) = change
+  val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
+  val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
+  val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
+  val diffPrefix =
+    dayLengthDiffPrefix(
+      todayLengthSeconds = todayLengthSeconds,
+      yesterdayLengthSeconds = yesterdayLengthSeconds
+    )
 
-    Spacer(modifier = Modifier.width(5.dp))
-
-    val (location, today, yesterday) = change
-    val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
-    val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
-    val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
-    val diffPrefix =
-      dayLengthDiffPrefix(
-        todayLengthSeconds = todayLengthSeconds,
-        yesterdayLengthSeconds = yesterdayLengthSeconds
+  ConstraintLayout {
+    val (icon, lengthText, diffText) = createRefs()
+    if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
+      DayLengthIcon(
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(icon) {
+            height = Dimension.fillToConstraints
+            width = Dimension.ratio("1:1")
+            top.linkTo(lengthText.top)
+            bottom.linkTo(diffText.bottom)
+            start.linkTo(parent.start)
+          }
       )
 
-    if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-      Column(horizontalAlignment = Alignment.End) {
-        DayLengthText(todayLengthSeconds = todayLengthSeconds, dayPeriod = dayPeriod)
-        DayLengthDiffText(diffPrefix, dayLengthDiffTime, dayPeriod)
-      }
+      DayLengthText(
+        todayLengthSeconds = todayLengthSeconds,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(lengthText) {
+            top.linkTo(parent.top)
+            bottom.linkTo(diffText.top)
+            start.linkTo(icon.end, 5.dp)
+            end.linkTo(parent.end)
+          }
+      )
+
+      DayLengthDiffText(
+        diffPrefix = diffPrefix,
+        dayLengthDiffTime = dayLengthDiffTime,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(diffText) {
+            width = Dimension.wrapContent
+            top.linkTo(lengthText.bottom)
+            bottom.linkTo(parent.bottom)
+            end.linkTo(parent.end)
+          }
+      )
     } else {
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        DayLengthText(todayLengthSeconds = todayLengthSeconds, dayPeriod = dayPeriod)
-        Spacer(modifier = Modifier.width(5.dp))
-        DayLengthDiffText(diffPrefix, dayLengthDiffTime, dayPeriod)
-      }
+      DayLengthIcon(
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(icon) {
+            height = Dimension.fillToConstraints
+            width = Dimension.ratio("1:1")
+            top.linkTo(lengthText.top, (-5).dp)
+            bottom.linkTo(lengthText.bottom, (-5).dp)
+            start.linkTo(parent.start)
+            end.linkTo(lengthText.start)
+          }
+      )
+
+      DayLengthText(
+        todayLengthSeconds = todayLengthSeconds,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(lengthText) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            start.linkTo(icon.end, 5.dp)
+            end.linkTo(diffText.end)
+          }
+      )
+
+      DayLengthDiffText(
+        diffPrefix = diffPrefix,
+        dayLengthDiffTime = dayLengthDiffTime,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(diffText) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            start.linkTo(lengthText.end, 5.dp)
+            end.linkTo(parent.end)
+          }
+      )
     }
   }
 }
 
 @Composable
-private fun DayLengthIcon(dayPeriod: DayPeriod) {
-  Box {
+private fun DayLengthIcon(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
+  Box(modifier = modifier) {
     Icon(
       painter = painterResource(commonR.drawable.day_length_shadow),
       tint = Color.Unspecified,
