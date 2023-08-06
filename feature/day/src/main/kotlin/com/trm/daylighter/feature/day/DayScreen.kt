@@ -505,54 +505,24 @@ private fun ClockAndDayLengthCard(
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
-      if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.padding(8.dp)
-        ) {
-          Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-          NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-          if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-            Spacer(modifier = Modifier.height(5.dp))
-            DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
-          }
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(8.dp)
+      ) {
+        Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+        NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+        if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
           Spacer(modifier = Modifier.height(5.dp))
-          NextDayPeriodTimer(
-            dayPeriod = dayPeriod.value,
-            dayMode = location.zoneId.currentDayMode(),
-            chartMode = chartMode,
-            today = today,
-            zoneId = location.zoneId
-          )
+          DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
         }
-      } else {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center,
-          modifier = Modifier.padding(8.dp)
-        ) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center
-            ) {
-              Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-              NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
-            }
-            if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-              Spacer(modifier = Modifier.width(5.dp))
-              DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
-            }
-          }
-          Spacer(modifier = Modifier.height(5.dp))
-          NextDayPeriodTimer(
-            dayPeriod = dayPeriod.value,
-            dayMode = location.zoneId.currentDayMode(),
-            chartMode = chartMode,
-            today = today,
-            zoneId = location.zoneId
-          )
-        }
+        Spacer(modifier = Modifier.height(5.dp))
+        NextDayPeriodTimer(
+          dayPeriod = dayPeriod.value,
+          dayMode = location.zoneId.currentDayMode(),
+          chartMode = chartMode,
+          today = today,
+          zoneId = location.zoneId
+        )
       }
     }
   }
@@ -792,49 +762,30 @@ private fun NowTimezoneDiffText(zoneId: ZoneId, dayPeriod: DayPeriod) {
 private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
     DayLengthIcon(dayPeriod = dayPeriod)
-    Spacer(modifier = Modifier.width(5.dp))
-    Column(horizontalAlignment = Alignment.End) {
-      val (location, today, yesterday) = change
-      val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
-      val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
-      val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
-      val diffPrefix =
-        dayLengthDiffPrefix(
-          todayLengthSeconds = todayLengthSeconds,
-          yesterdayLengthSeconds = yesterdayLengthSeconds
-        )
 
-      Text(
-        text = formatTimeMillis(todayLengthSeconds * 1_000L),
-        color = dayPeriod.textColor(),
-        style =
-          MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 18.sp,
-            shadow =
-              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
-          )
+    Spacer(modifier = Modifier.width(5.dp))
+
+    val (location, today, yesterday) = change
+    val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
+    val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
+    val dayLengthDiffTime = dayLengthDiffTime(todayLengthSeconds, yesterdayLengthSeconds)
+    val diffPrefix =
+      dayLengthDiffPrefix(
+        todayLengthSeconds = todayLengthSeconds,
+        yesterdayLengthSeconds = yesterdayLengthSeconds
       )
-      Text(
-        text = formatTimeDifference(diffPrefix, dayLengthDiffTime),
-        color =
-          when (diffPrefix) {
-            "+" -> Color.Green
-            "-" -> Color.Red
-            else -> dayPeriod.textColor()
-          },
-        style =
-          MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 18.sp,
-            shadow =
-              Shadow(
-                color =
-                  if (diffPrefix == "+" || diffPrefix == "-") Color.Black
-                  else dayPeriod.textShadowColor(),
-                offset = Offset(1f, 1f),
-                blurRadius = 1f
-              )
-          )
-      )
+
+    if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
+      Column(horizontalAlignment = Alignment.End) {
+        DayLengthText(todayLengthSeconds = todayLengthSeconds, dayPeriod = dayPeriod)
+        DayLengthDiffText(diffPrefix, dayLengthDiffTime, dayPeriod)
+      }
+    } else {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        DayLengthText(todayLengthSeconds = todayLengthSeconds, dayPeriod = dayPeriod)
+        Spacer(modifier = Modifier.width(5.dp))
+        DayLengthDiffText(diffPrefix, dayLengthDiffTime, dayPeriod)
+      }
     }
   }
 }
@@ -860,6 +811,56 @@ private fun DayLengthIcon(dayPeriod: DayPeriod) {
       contentDescription = stringResource(R.string.day_length)
     )
   }
+}
+
+@Composable
+private fun DayLengthText(
+  todayLengthSeconds: Long,
+  dayPeriod: DayPeriod,
+  modifier: Modifier = Modifier
+) {
+  Text(
+    text = formatTimeMillis(todayLengthSeconds * 1_000L),
+    color = dayPeriod.textColor(),
+    style =
+      MaterialTheme.typography.bodyLarge.copy(
+        fontSize = 18.sp,
+        shadow =
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+      ),
+    modifier = modifier,
+  )
+}
+
+@Composable
+private fun DayLengthDiffText(
+  diffPrefix: String,
+  dayLengthDiffTime: LocalTime,
+  dayPeriod: DayPeriod,
+  modifier: Modifier = Modifier
+) {
+  Text(
+    text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
+    color =
+      when (diffPrefix) {
+        "+" -> Color.Green
+        "-" -> Color.Red
+        else -> dayPeriod.textColor()
+      },
+    style =
+      MaterialTheme.typography.bodyLarge.copy(
+        fontSize = 18.sp,
+        shadow =
+          Shadow(
+            color =
+              if (diffPrefix == "+" || diffPrefix == "-") Color.Black
+              else dayPeriod.textShadowColor(),
+            offset = Offset(1f, 1f),
+            blurRadius = 1f
+          )
+      ),
+    modifier = modifier
+  )
 }
 
 @Composable
