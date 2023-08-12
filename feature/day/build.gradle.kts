@@ -11,4 +11,8 @@ dependencies {
   implementation(libs.androidx.constraintlayout)
 
   implementation(libs.osmdroid)
+
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation("io.mockk:mockk:1.13.5")
+  testImplementation("app.cash.turbine:turbine:1.0.0")
 }
