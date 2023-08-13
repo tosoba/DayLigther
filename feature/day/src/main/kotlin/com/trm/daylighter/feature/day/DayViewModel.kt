@@ -123,6 +123,7 @@ constructor(
     locationsFlow.transformLatest { locations ->
       when (locations) {
         is WithData -> {
+          delay(System.currentTimeMillis() % 1_000L)
           while (currentCoroutineContext().isActive) {
             emit(LocalTime.now(locations.data[index].zoneId))
             delay(1_000L)
