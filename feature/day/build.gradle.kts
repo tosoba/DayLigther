@@ -6,6 +6,8 @@ plugins {
 android { namespace = "com.trm.daylighter.feature.day" }
 
 dependencies {
+  implementation(project(":core:testing"))
+
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
