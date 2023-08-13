@@ -44,6 +44,7 @@ kotlinxSerializationJson = "1.4.1"
 ksp = "1.8.10-1.0.9"
 lint = "30.3.1"
 material = "1.9.0"
+mockk = "1.13.5"
 okhttp = "4.10.0"
 osmdroid = "6.1.14"
 playServicesLocation = "21.0.1"
@@ -54,7 +55,7 @@ retrofitKotlinxSerializationJson = "0.8.0"
 room = "2.5.0-rc01"
 secrets = "2.0.1"
 timber = "5.0.1"
-turbine = "0.12.1"
+turbine = "1.0.0"
 
 [libraries]
 accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
@@ -130,6 +131,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 lint-api = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

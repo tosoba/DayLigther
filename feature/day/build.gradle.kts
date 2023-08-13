@@ -6,15 +6,14 @@ plugins {
 android { namespace = "com.trm.daylighter.feature.day" }
 
 dependencies {
-  implementation(project(":core:testing"))
-
   implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
 
   implementation(libs.osmdroid)
 
+  testImplementation(project(":core:testing"))
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation("io.mockk:mockk:1.13.5")
-  testImplementation("app.cash.turbine:turbine:1.0.0")
+  testImplementation(libs.mockk)
+  testImplementation(libs.turbine)
 }
