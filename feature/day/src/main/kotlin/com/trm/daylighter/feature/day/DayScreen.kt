@@ -404,18 +404,11 @@ private fun DayScreen(
 
 @Composable
 private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-  @Composable
-  fun EditLocationIcon() {
+  FloatingActionButton(onClick = onClick, modifier = modifier) {
     Icon(
       imageVector = Icons.Filled.Edit,
       contentDescription = stringResource(R.string.edit_location)
     )
-  }
-
-  if (usingNavigationBar) {
-    FloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
-  } else {
-    SmallFloatingActionButton(onClick = onClick, modifier = modifier) { EditLocationIcon() }
   }
 }
 
