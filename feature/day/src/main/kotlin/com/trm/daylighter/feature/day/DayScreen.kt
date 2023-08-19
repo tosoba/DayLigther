@@ -60,6 +60,7 @@ import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
 import com.trm.daylighter.core.ui.util.ext.color
+import com.trm.daylighter.core.ui.util.enumTestTag
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
@@ -108,7 +109,7 @@ private val usingNavigationBar: Boolean
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun DayScreen(
+internal fun DayScreen(
   chartMode: DayPeriodChartMode,
   locations: Loadable<List<Location>>,
   initialLocationIndex: Int,
@@ -254,6 +255,7 @@ private fun DayScreen(
                 infoText = stringResource(commonR.string.no_saved_locations),
                 actionText = stringResource(commonR.string.add_location),
                 onButtonClick = onAddLocationClick,
+                modifier = Modifier.enumTestTag(DayTestTags.NO_LOCATIONS_CARD)
               )
             }
           }
