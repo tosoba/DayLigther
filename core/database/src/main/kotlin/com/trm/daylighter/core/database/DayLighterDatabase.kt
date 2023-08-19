@@ -12,4 +12,8 @@ import com.trm.daylighter.core.database.entity.LocationEntity
 @TypeConverters(LocalDateTimeConverter::class, ZoneIdConverter::class)
 abstract class DayLighterDatabase : RoomDatabase() {
   abstract fun locationDao(): LocationDao
+
+  companion object {
+    const val DB_NAME = "daylighter.db"
+  }
 }

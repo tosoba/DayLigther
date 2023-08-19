@@ -1,23 +1,23 @@
-package com.trm.daylighter.core.database.di
+package com.trm.daylighter.core.testing.di
 
 import android.content.Context
 import androidx.room.Room
 import com.trm.daylighter.core.database.DayLighterDatabase
 import com.trm.daylighter.core.database.dao.LocationDao
-import dagger.Module
+import com.trm.daylighter.core.database.di.DatabaseModule
 import dagger.Provides
-import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.testing.TestInstallIn
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-object DatabaseModule {
+@TestInstallIn(components = [SingletonComponent::class], replaces = [DatabaseModule::class])
+object TestDatabaseModule {
   @Provides
   @Singleton
   fun dayLighterDatabase(@ApplicationContext context: Context): DayLighterDatabase =
-    Room.databaseBuilder(context, DayLighterDatabase::class.java, DayLighterDatabase.DB_NAME)
+    Room.inMemoryDatabaseBuilder(context, DayLighterDatabase::class.java)
+      .allowMainThreadQueries()
       .build()
 
   @Provides fun locationDao(db: DayLighterDatabase): LocationDao = db.locationDao()
