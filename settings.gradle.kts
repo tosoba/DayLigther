@@ -50,8 +50,11 @@ include(":feature:locations")
 
 include(":feature:settings")
 
+include(":feature:widget-location")
+
 include(":work")
+
+include(":ui-test-hilt-manifest")
 
 include(":widget")
 
-include(":feature:widget-location")

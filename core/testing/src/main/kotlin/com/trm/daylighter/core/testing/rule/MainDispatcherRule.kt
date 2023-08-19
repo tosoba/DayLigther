@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.testing.util
+package com.trm.daylighter.core.testing.rule
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestDispatcher

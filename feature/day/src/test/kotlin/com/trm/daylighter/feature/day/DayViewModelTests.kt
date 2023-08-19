@@ -11,7 +11,7 @@ import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetChangeUseCas
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetUseCase
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetNonDefaultLocationOffsetByIdUseCase
-import com.trm.daylighter.core.testing.util.MainDispatcherRule
+import com.trm.daylighter.core.testing.rule.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

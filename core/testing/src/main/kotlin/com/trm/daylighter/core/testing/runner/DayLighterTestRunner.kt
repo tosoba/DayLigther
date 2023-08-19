@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.testing
+package com.trm.daylighter.core.testing.runner
 
 import android.app.Application
 import android.content.Context
