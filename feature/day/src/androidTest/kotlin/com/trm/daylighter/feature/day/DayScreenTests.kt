@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.trm.daylighter.core.common.R
+import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.WithoutData
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.uitesthiltmanifest.HiltComponentActivity
@@ -24,7 +25,7 @@ class DayScreenTests {
   @Before fun setup() = hiltRule.inject()
 
   @Test
-  fun givenWithoutDataLocations_emptyChartIsShown() {
+  fun givenWithoutDataLocations_emptyChartIsDisplayed() {
     with(composeTestRule) {
       setContent {
         TestDayScreen(modifier = Modifier.fillMaxSize(), locations = mockk<WithoutData>())
@@ -34,7 +35,15 @@ class DayScreenTests {
   }
 
   @Test
-  fun givenEmptyLocations_noSavedLocationsInfoButtonCardIsShown() {
+  fun givenLoadingLocations_progressIndicatorIsDisplayed() {
+    with(composeTestRule) {
+      setContent { TestDayScreen(modifier = Modifier.fillMaxSize(), locations = LoadingFirst) }
+      onNodeWithEnumTestTag(DayTestTags.LOADING_LOCATIONS_PROGRESS_INDICATOR).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun givenEmptyLocations_noSavedLocationsInfoButtonCardIsDisplayed() {
     with(composeTestRule) {
       setContent { TestDayScreen(modifier = Modifier.fillMaxSize()) }
       onNodeWithEnumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD).assertIsDisplayed()

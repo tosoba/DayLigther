@@ -245,7 +245,11 @@ internal fun DayScreen(
               exit = fadeOut(),
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             ) {
-              LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+              LinearProgressIndicator(
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .enumTestTag(DayTestTags.LOADING_LOCATIONS_PROGRESS_INDICATOR)
+              )
             }
 
             AnimatedVisibility(
