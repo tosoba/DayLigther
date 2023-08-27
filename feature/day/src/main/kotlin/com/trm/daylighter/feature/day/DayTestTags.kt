@@ -1,5 +1,6 @@
 package com.trm.daylighter.feature.day
 
 enum class DayTestTags {
-  NO_LOCATIONS_CARD
+  EMPTY_LOCATIONS_CARD,
+  WITHOUT_DATA_LOCATIONS_CHART
 }

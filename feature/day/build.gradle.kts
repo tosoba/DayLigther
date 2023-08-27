@@ -3,7 +3,10 @@ plugins {
   id("daylighter.android.library.compose")
 }
 
-android { namespace = "com.trm.daylighter.feature.day" }
+android {
+  namespace = "com.trm.daylighter.feature.day"
+  packagingOptions { resources { excludes += "META-INF/*" } }
+}
 
 dependencies {
   implementation(libs.accompanist.pager)
@@ -22,6 +25,7 @@ dependencies {
   androidTestImplementation(libs.accompanist.testharness)
 
   androidTestImplementation(project(":core:testing"))
+  androidTestImplementation(libs.mockk.android)
   androidTestImplementation(libs.androidx.compose.ui.test)
   androidTestImplementation(libs.hilt.android.testing)
 }

@@ -59,8 +59,8 @@ import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.*
-import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.enumTestTag
+import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
@@ -231,7 +231,10 @@ internal fun DayScreen(
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(
               change = Empty.asStable(),
-              modifier = Modifier.fillMaxSize().alpha(.25f),
+              modifier =
+                Modifier.fillMaxSize()
+                  .alpha(.25f)
+                  .enumTestTag(DayTestTags.WITHOUT_DATA_LOCATIONS_CHART),
               chartMode = chartMode,
               appBarHeightPx = appBarHeightPx
             )
@@ -255,7 +258,7 @@ internal fun DayScreen(
                 infoText = stringResource(commonR.string.no_saved_locations),
                 actionText = stringResource(commonR.string.add_location),
                 onButtonClick = onAddLocationClick,
-                modifier = Modifier.enumTestTag(DayTestTags.NO_LOCATIONS_CARD)
+                modifier = Modifier.enumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD)
               )
             }
           }
