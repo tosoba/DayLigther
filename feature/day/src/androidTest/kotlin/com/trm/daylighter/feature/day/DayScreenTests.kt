@@ -5,6 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.testharness.TestHarness
 import com.trm.daylighter.core.common.R
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.WithoutData
@@ -49,6 +52,14 @@ class DayScreenTests {
       onNodeWithEnumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD).assertIsDisplayed()
       onNodeWithText(activity.getString(R.string.no_saved_locations)).assertIsDisplayed()
       onNodeWithText(activity.getString(R.string.add_location)).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun whenPermanentNavigationDrawerIsDisplayed_drawerMenuIconButtonIsNotDisplayed() {
+    with(composeTestRule) {
+      setContent { TestHarness(size = DpSize(width = 400.dp, height = 400.dp)) { TestDayScreen() } }
+      onNodeWithEnumTestTag(DayTestTags.NAVIGATION_BAR).assertIsDisplayed()
     }
   }
 }

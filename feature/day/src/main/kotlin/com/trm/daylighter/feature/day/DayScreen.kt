@@ -277,7 +277,10 @@ internal fun DayScreen(
         chartMode = chartMode,
         navigationIcon = {
           if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuIconButton(onClick = onDrawerMenuClick)
+            DrawerMenuIconButton(
+              onClick = onDrawerMenuClick,
+              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+            )
           }
         },
         modifier =
@@ -295,6 +298,7 @@ internal fun DayScreen(
               appBarHeightPx = coordinates.size.height.toFloat()
             }
             .padding(10.dp)
+            .enumTestTag(DayTestTags.TOP_APP_BAR)
       )
     } else {
       DayTopAppBar(
@@ -303,7 +307,10 @@ internal fun DayScreen(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
         navigationIcon = {
           if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuIconButton(onClick = onDrawerMenuClick)
+            DrawerMenuIconButton(
+              onClick = onDrawerMenuClick,
+              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+            )
           }
         },
         modifier =
@@ -318,6 +325,7 @@ internal fun DayScreen(
             .onGloballyPositioned { coordinates ->
               appBarHeightPx = coordinates.size.height.toFloat()
             }
+            .enumTestTag(DayTestTags.TOP_APP_BAR)
       )
     }
 
@@ -338,9 +346,10 @@ internal fun DayScreen(
         },
         modifier =
           Modifier.constrainAs(navigation) {
-            linkTo(mainContent.bottom, parent.bottom)
-            linkTo(parent.start, parent.end)
-          }
+              linkTo(mainContent.bottom, parent.bottom)
+              linkTo(parent.start, parent.end)
+            }
+            .enumTestTag(DayTestTags.NAVIGATION_BAR)
       )
     } else {
       NavigationRail(
