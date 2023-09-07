@@ -12,6 +12,7 @@ dependencies {
   implementation(project(":core:data"))
   implementation(project(":core:database"))
   implementation(project(":core:domain"))
+  implementation(project(":core:ui"))
 
   implementation(libs.room.runtime)
   implementation(libs.room.ktx)
@@ -27,6 +28,7 @@ dependencies {
   api(libs.androidx.test.rules)
   api(libs.androidx.compose.ui.test)
   api(libs.hilt.android.testing)
+  api(libs.accompanist.testharness)
 
   debugApi(libs.androidx.compose.ui.testManifest)
 }

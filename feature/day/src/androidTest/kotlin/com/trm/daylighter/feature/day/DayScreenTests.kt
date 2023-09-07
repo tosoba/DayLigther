@@ -7,11 +7,12 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.testharness.TestHarness
 import com.trm.daylighter.core.common.R
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.WithoutData
+import com.trm.daylighter.core.testing.util.ext.setContentHarness
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
+import com.trm.daylighter.core.ui.util.permanentNavigationDrawerMinWidth
 import com.trm.daylighter.uitesthiltmanifest.HiltComponentActivity
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -56,10 +57,32 @@ class DayScreenTests {
   }
 
   @Test
-  fun whenPermanentNavigationDrawerIsDisplayed_drawerMenuIconButtonIsNotDisplayed() {
+  fun whenUsingPermanentNavigationDrawer_drawerMenuIconButtonDoesNotExist() {
     with(composeTestRule) {
-      setContent { TestHarness(size = DpSize(width = 400.dp, height = 400.dp)) { TestDayScreen() } }
-      onNodeWithEnumTestTag(DayTestTags.NAVIGATION_BAR).assertIsDisplayed()
+      setContentHarness(DpSize(width = permanentNavigationDrawerMinWidth, height = 400.dp)) {
+        TestDayScreen(modifier = Modifier.fillMaxSize())
+      }
+      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun whenNotUsingNavigationBar_drawerMenuIconButtonDoesNotExist() {
+    with(composeTestRule) {
+      setContentHarness(DpSize(width = 700.dp, height = 400.dp)) {
+        TestDayScreen(modifier = Modifier.fillMaxSize())
+      }
+      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun whenNotUsingPermanentNavigationDrawerAndUsingNavigationBar_drawerMenuIconButtonIsDisplayed() {
+    with(composeTestRule) {
+      setContentHarness(DpSize(width = 500.dp, height = 400.dp)) {
+        TestDayScreen(modifier = Modifier.fillMaxSize())
+      }
+      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertIsDisplayed()
     }
   }
 }

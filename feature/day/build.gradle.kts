@@ -22,7 +22,6 @@ dependencies {
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.mockk)
   testImplementation(libs.turbine)
-  androidTestImplementation(libs.accompanist.testharness)
 
   androidTestImplementation(project(":core:testing"))
   androidTestImplementation(libs.mockk.android)
