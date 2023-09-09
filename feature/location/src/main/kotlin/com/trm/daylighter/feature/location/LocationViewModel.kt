@@ -43,7 +43,7 @@ constructor(
             )
           }
           is SaveLocationRequest.User -> {
-            emitUserLocation(saveLocationType.zoom)
+            emitUserLocation()
           }
           is SaveLocationRequest.CancelCurrent -> {
             emit(Empty)
@@ -51,14 +51,17 @@ constructor(
         }
       }
       .onEach {
-        if (it !is Ready || !it.data.isUser) return@onEach
+        if (it !is Ready) return@onEach
+
+        val (latitude, longitude, isUser) = it.data
+        if (!isUser) return@onEach
 
         savedStateHandle.get<MapPosition>(MAP_POSITION)?.let { position ->
           savedStateHandle[MAP_POSITION] =
             position.copy(
-              latitude = it.data.latitude,
-              longitude = it.data.longitude,
-              zoom = it.data.zoom,
+              latitude = latitude,
+              longitude = longitude,
+              zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
               uuid = UUID.randomUUID()
             )
         }
@@ -160,8 +163,8 @@ constructor(
     }
   }
 
-  fun requestGetAndSaveUserLocation(zoom: Double) {
-    viewModelScope.launch { saveLocationRequestFlow.emit(SaveLocationRequest.User(zoom)) }
+  fun requestGetAndSaveUserLocation() {
+    viewModelScope.launch { saveLocationRequestFlow.emit(SaveLocationRequest.User) }
   }
 
   fun cancelCurrentSaveLocationRequest() {
@@ -208,14 +211,12 @@ constructor(
     longitude: Double
   ) {
     emit(
-      LocationPreparedToSave(latitude = latitude, longitude = longitude, zoom = 0.0, isUser = false)
+      LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false)
         .asLoadable()
     )
   }
 
-  private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitUserLocation(
-    zoom: Double
-  ) {
+  private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitUserLocation() {
     emit(LoadingFirst)
     val userLatLng = getCurrentUserLatLngUseCase()
     if (userLatLng == null) {
@@ -227,7 +228,6 @@ constructor(
         LocationPreparedToSave(
             latitude = userLatLng.latitude,
             longitude = userLatLng.longitude,
-            zoom = zoom,
             isUser = true
           )
           .asLoadable()

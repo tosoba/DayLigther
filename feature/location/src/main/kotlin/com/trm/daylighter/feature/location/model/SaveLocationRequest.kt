@@ -1,7 +1,7 @@
 package com.trm.daylighter.feature.location.model
 
 sealed interface SaveLocationRequest {
-  data class User(val zoom: Double) : SaveLocationRequest
+  object User : SaveLocationRequest
 
   data class Specified(val latitude: Double, val longitude: Double) : SaveLocationRequest
 

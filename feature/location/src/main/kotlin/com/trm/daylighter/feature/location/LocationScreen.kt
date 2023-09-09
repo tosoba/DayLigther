@@ -125,7 +125,7 @@ private fun LocationScreen(
   isLoading: Boolean,
   userLocationNotFound: Boolean,
   saveSpecifiedLocationClick: (lat: Double, lng: Double) -> Unit,
-  requestGetAndSaveUserLocation: (zoom: Double) -> Unit,
+  requestGetAndSaveUserLocation: () -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
   locationName: String,
@@ -180,7 +180,7 @@ private fun LocationScreen(
 
   CheckLocationSettingsEffect(
     userLocationRequestState = userLocationRequestState,
-    onLocationEnabled = { requestGetAndSaveUserLocation(mapView.zoomLevelDouble) }
+    onLocationEnabled = requestGetAndSaveUserLocation
   )
 
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
