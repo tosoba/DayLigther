@@ -1,4 +1,4 @@
-package com.trm.daylighter.core.testing.util.ext
+package com.trm.daylighter.core.testing.util
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
