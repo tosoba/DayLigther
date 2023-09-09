@@ -3,13 +3,16 @@ package com.trm.daylighter.feature.day
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R
 import com.trm.daylighter.core.domain.model.LoadingFirst
+import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.WithoutData
+import com.trm.daylighter.core.testing.model.testLocation
 import com.trm.daylighter.core.testing.util.ext.setContentHarness
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.ui.util.permanentNavigationDrawerMinWidth
@@ -83,6 +86,17 @@ class DayScreenTests {
         TestDayScreen(modifier = Modifier.fillMaxSize())
       }
       onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun whenWidthIsNotCompactAndUsingNavigationBar_usingMaxWidthTopAppBar() {
+    with(composeTestRule) {
+      val size = DpSize(width = 500.dp, height = 600.dp)
+      setContentHarness(size) {
+        TestDayScreen(modifier = Modifier.fillMaxSize(), locations = Ready(listOf(testLocation())))
+      }
+      onNodeWithEnumTestTag(DayTestTags.TOP_APP_BAR).assertWidthIsEqualTo(size.width)
     }
   }
 }
