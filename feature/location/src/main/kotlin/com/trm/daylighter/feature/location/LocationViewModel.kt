@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class LocationViewModel
 @Inject
 constructor(
-  savedStateHandle: SavedStateHandle,
+  private val savedStateHandle: SavedStateHandle,
   private val getLocationById: GetLocationById,
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
@@ -42,11 +42,23 @@ constructor(
             )
           }
           is SaveLocationRequest.User -> {
-            emitUserLocation()
+            emitUserLocation(saveLocationType.zoom)
           }
           is SaveLocationRequest.CancelCurrent -> {
             emit(Empty)
           }
+        }
+      }
+      .onEach {
+        if (it !is Ready || !it.data.isUser) return@onEach
+
+        savedStateHandle.get<MapPosition>(MAP_POSITION)?.let { position ->
+          savedStateHandle[MAP_POSITION] =
+            position.copy(
+              latitude = it.data.latitude,
+              longitude = it.data.longitude,
+              zoom = it.data.zoom
+            )
         }
       }
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
@@ -69,26 +81,27 @@ constructor(
 
   private val initialLocationId: Long? = savedStateHandle.get<Long>(locationIdParam)
 
-  val initialMapPositionFlow: StateFlow<MapPosition> =
-    flow {
-        initialLocationId
-          ?.let { getLocationById(it) }
-          ?.let { location ->
-            emit(
-              MapPosition(
-                latitude = location.latitude,
-                longitude = location.longitude,
-                zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
-                label = location.name
-              )
-            )
-          }
+  val mapPositionFlow: StateFlow<MapPosition> =
+    savedStateHandle.getStateFlow(MAP_POSITION, MapPosition())
+
+  fun onMapViewPause(mapPosition: MapPosition) {
+    savedStateHandle[MAP_POSITION] = mapPosition
+  }
+
+  init {
+    initialLocationId?.let {
+      viewModelScope.launch {
+        val location = getLocationById(it) ?: return@launch
+        savedStateHandle[MAP_POSITION] =
+          MapPosition(
+            latitude = location.latitude,
+            longitude = location.longitude,
+            zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
+            label = location.name
+          )
       }
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = MapPosition()
-      )
+    }
+  }
 
   private val locationNameRequestFlow = MutableSharedFlow<LocationNameRequest>()
   private val locationNameFlow: SharedFlow<Loadable<String>> =
@@ -145,8 +158,8 @@ constructor(
     }
   }
 
-  fun requestGetAndSaveUserLocation() {
-    viewModelScope.launch { saveLocationRequestFlow.emit(SaveLocationRequest.User) }
+  fun requestGetAndSaveUserLocation(zoom: Double) {
+    viewModelScope.launch { saveLocationRequestFlow.emit(SaveLocationRequest.User(zoom)) }
   }
 
   fun cancelCurrentSaveLocationRequest() {
@@ -193,12 +206,14 @@ constructor(
     longitude: Double
   ) {
     emit(
-      LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false)
+      LocationPreparedToSave(latitude = latitude, longitude = longitude, zoom = 0.0, isUser = false)
         .asLoadable()
     )
   }
 
-  private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitUserLocation() {
+  private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitUserLocation(
+    zoom: Double
+  ) {
     emit(LoadingFirst)
     val userLatLng = getCurrentUserLatLngUseCase()
     if (userLatLng == null) {
@@ -210,10 +225,15 @@ constructor(
         LocationPreparedToSave(
             latitude = userLatLng.latitude,
             longitude = userLatLng.longitude,
+            zoom = zoom,
             isUser = true
           )
           .asLoadable()
       )
     }
+  }
+
+  companion object {
+    private const val MAP_POSITION = "MAP_POSITION"
   }
 }

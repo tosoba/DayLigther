@@ -51,11 +51,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
+import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
+import org.osmdroid.views.MapView
 import timber.log.Timber
 
 const val locationRoute = "location_route"
@@ -71,7 +73,7 @@ fun LocationRoute(
 ) {
   LaunchedEffect(Unit) { viewModel.locationSavedFlow.collect { onBackClick() } }
 
-  val mapPosition = viewModel.initialMapPositionFlow.collectAsStateWithLifecycle()
+  val mapPosition = viewModel.mapPositionFlow.collectAsStateWithLifecycle()
   val locationPreparedToSave =
     viewModel.locationPreparedToSaveFlow.collectAsStateWithLifecycle(initialValue = null)
   val isLoading = viewModel.loadingFlow.collectAsStateWithLifecycle(initialValue = false)
@@ -88,6 +90,7 @@ fun LocationRoute(
   LocationScreen(
     screenMode = viewModel.screenMode,
     mapPosition = mapPosition.value,
+    onMapViewPause = viewModel::onMapViewPause,
     locationPreparedToSave = locationPreparedToSave.value,
     isLoading = isLoading.value,
     userLocationNotFound = userLocationNotFound.value,
@@ -117,11 +120,12 @@ fun LocationRoute(
 private fun LocationScreen(
   screenMode: LocationScreenMode,
   mapPosition: MapPosition,
+  onMapViewPause: (MapPosition) -> Unit,
   locationPreparedToSave: LocationPreparedToSave?,
   isLoading: Boolean,
   userLocationNotFound: Boolean,
   saveSpecifiedLocationClick: (lat: Double, lng: Double) -> Unit,
-  requestGetAndSaveUserLocation: () -> Unit,
+  requestGetAndSaveUserLocation: (zoom: Double) -> Unit,
   cancelCurrentSaveLocation: () -> Unit,
   onSaveLocationClick: (lat: Double, lng: Double, name: String) -> Unit,
   locationName: String,
@@ -159,14 +163,28 @@ private fun LocationScreen(
     )
   }
 
+  val mapView =
+    rememberMapViewWithLifecycle(
+      onPause = {
+        onMapViewPause(
+          MapPosition(
+            latitude = it.mapCenter.latitude,
+            longitude = it.mapCenter.longitude,
+            zoom = it.zoomLevelDouble,
+            orientation = it.mapOrientation,
+            label = mapPosition.label
+          )
+        )
+      }
+    )
+
   CheckLocationSettingsEffect(
     userLocationRequestState = userLocationRequestState,
-    onLocationEnabled = requestGetAndSaveUserLocation
+    onLocationEnabled = { requestGetAndSaveUserLocation(mapView.zoomLevelDouble) }
   )
 
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
 
-  val locationMap = rememberLocationMap(mapPosition = mapPosition)
   val saveLocationState =
     rememberSaveLocationState(
       latitude = locationPreparedToSave?.latitude ?: mapPosition.latitude,
@@ -185,12 +203,7 @@ private fun LocationScreen(
     )
 
   LaunchedEffect(locationPreparedToSave) {
-    if (locationPreparedToSave == null || !locationPreparedToSave.isUser) return@LaunchedEffect
-    sheetVisible = true
-    locationMap.state.updatePosition(
-      latitude = locationPreparedToSave.latitude,
-      longitude = locationPreparedToSave.longitude
-    )
+    if (locationPreparedToSave?.isUser == true) sheetVisible = true
   }
 
   @Composable
@@ -225,7 +238,8 @@ private fun LocationScreen(
   @Composable
   fun LocationScaffold() {
     LocationScaffold(
-      locationMap = locationMap,
+      mapView = mapView,
+      mapPosition = mapPosition,
       isLoading = isLoading,
       isInfoDialogShown = isInfoDialogShown,
       onInfoClick = { isInfoDialogShown = true },
@@ -263,7 +277,12 @@ private fun LocationScreen(
     )
   }
 
-  LaunchedEffect(sheetVisible) { if (!sheetVisible) clearLocationName() }
+  LaunchedEffect(sheetVisible) {
+    if (!sheetVisible) {
+      clearLocationName()
+      cancelCurrentSaveLocation()
+    }
+  }
 
   if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
     LocationScaffold()
@@ -295,7 +314,8 @@ private fun LocationScreen(
 
 @Composable
 private fun LocationScaffold(
-  locationMap: LocationMap,
+  mapView: MapView,
+  mapPosition: MapPosition,
   isLoading: Boolean,
   isInfoDialogShown: Boolean,
   onInfoClick: () -> Unit,
@@ -313,7 +333,7 @@ private fun LocationScaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
   ) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-      MapView(locationMap = locationMap, modifier = Modifier.fillMaxSize())
+      MapView(mapView, mapPosition, modifier = Modifier.fillMaxSize())
       MarkerIcon(modifier = Modifier.align(Alignment.Center))
 
       Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
@@ -325,7 +345,7 @@ private fun LocationScaffold(
           imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel
         ) {
           if (!isLoading) {
-            val mapCenter = locationMap.view.mapCenter
+            val mapCenter = mapView.mapCenter
             saveSpecifiedLocation(mapCenter.latitude, mapCenter.longitude)
           } else {
             cancelCurrentSaveLocation()
@@ -334,7 +354,7 @@ private fun LocationScaffold(
       }
 
       LocationAppBar(
-        locationMap = locationMap,
+        mapPosition = mapPosition,
         onBackClick = onBackClick,
         onInfoClick = onInfoClick
       )
@@ -371,7 +391,7 @@ private fun LocationInfoDialog(onDismissRequest: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun LocationAppBar(
-  locationMap: LocationMap,
+  mapPosition: MapPosition,
   onBackClick: () -> Unit,
   onInfoClick: () -> Unit
 ) {
@@ -380,7 +400,7 @@ private fun LocationAppBar(
     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
     title = {
       Text(
-        text = locationMap.state.savedMapPosition.label.takeIf(String::isNotEmpty)
+        text = mapPosition.label.takeIf(String::isNotEmpty)
             ?: stringResource(commonR.string.new_location),
         style = appBarTextStyle(),
         maxLines = 1,
@@ -443,13 +463,13 @@ private fun LoadingProgressIndicator(visible: Boolean, modifier: Modifier = Modi
 }
 
 @Composable
-private fun MapView(locationMap: LocationMap, modifier: Modifier = Modifier) {
+private fun MapView(mapView: MapView, mapPosition: MapPosition, modifier: Modifier = Modifier) {
   val darkMode = isSystemInDarkTheme()
   AndroidView(
-    factory = { locationMap.view },
+    factory = { mapView },
     update = {
       it.setDefaultConfig(darkMode = darkMode)
-      it.restorePosition(position = locationMap.state.savedMapPosition)
+      it.restorePosition(position = mapPosition)
     },
     modifier = modifier,
   )
