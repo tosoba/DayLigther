@@ -343,10 +343,9 @@ private fun LocationScaffold(
         LocationInfoDialog(onDismissRequest = onInfoDialogDismissRequest)
       }
 
-      LoadingProgressIndicator(
-        visible = isLoading,
-        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-      )
+      if (isLoading) {
+        LinearProgressIndicator(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth())
+      }
 
       locationPermissionDialog()
     }
