@@ -14,6 +14,7 @@ import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -57,7 +58,8 @@ constructor(
             position.copy(
               latitude = it.data.latitude,
               longitude = it.data.longitude,
-              zoom = it.data.zoom
+              zoom = it.data.zoom,
+              uuid = UUID.randomUUID()
             )
         }
       }
