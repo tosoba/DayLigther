@@ -26,6 +26,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -224,6 +225,43 @@ class DayViewModelTests {
         }
 
       coVerify(exactly = 2) { calculateSunriseSunsetChangeUseCase(any()) }
+    }
+  }
+
+  @Test
+  fun `GIVEN empty locations THEN currentTimeInLocationAt should return a single LocalTime`() {
+    runTest {
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Empty)
+            }
+        )
+        .currentTimeInLocationAt(0)
+        .test {
+          runCurrent()
+          assertIs<LocalTime>(awaitItem())
+          expectNoEvents()
+          cancelAndIgnoreRemainingEvents()
+        }
+    }
+  }
+
+  @Test
+  fun `GIVEN single ready location THEN currentTimeInLocationAt should return multiple LocalTimes every second`() {
+    runTest {
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+            }
+        )
+        .currentTimeInLocationAt(0)
+        .test {
+          runCurrent()
+          repeat(10) { assertIs<LocalTime>(awaitItem()) }
+          cancelAndIgnoreRemainingEvents()
+        }
     }
   }
 
