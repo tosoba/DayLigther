@@ -15,7 +15,9 @@ import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetChangeUseCas
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetUseCase
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetNonDefaultLocationOffsetByIdUseCase
+import com.trm.daylighter.core.testing.model.testLocation
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
+import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,6 +26,7 @@ import io.mockk.mockk
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
@@ -162,6 +165,25 @@ class DayViewModelTests {
           runCurrent()
           assertEquals(LoadingFirst.asStable<LocationSunriseSunsetChange>(), awaitItem())
           assertEquals(Empty.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+    }
+  }
+
+  @Test
+  fun `GIVEN single ready location THEN sunriseSunsetChangeInLocationAt 0 should emit LoadingFirst and Ready`() {
+    runTest {
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+            }
+        )
+        .sunriseSunsetChangeInLocationAt(0)
+        .test {
+          runCurrent()
+          assertEquals(LoadingFirst.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          assertIs<StableValue<Ready<LocationSunriseSunsetChange>>>(awaitItem())
           cancelAndIgnoreRemainingEvents()
         }
     }
