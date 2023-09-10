@@ -10,6 +10,8 @@ import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.core.domain.model.SunriseSunsetChange
 import com.trm.daylighter.core.domain.usecase.CalculateSunPositionTimestampUseCase
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetUseCase
@@ -23,6 +25,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -186,6 +189,41 @@ class DayViewModelTests {
           assertIs<StableValue<Ready<LocationSunriseSunsetChange>>>(awaitItem())
           cancelAndIgnoreRemainingEvents()
         }
+    }
+  }
+
+  @Test
+  fun `GIVEN single ready location WHEN day of month changes THEN sunriseSunsetChangeInLocationAt 0 should emit Ready after LoadingFirst and then another Ready`() {
+    runTest {
+      val calculateSunriseSunsetChangeUseCase =
+        mockk<CalculateSunriseSunsetChangeUseCase>().apply useCase@{
+          every { this@useCase(any()) } returns
+            SunriseSunsetChange(
+              today =
+                mockk<SunriseSunset>().apply sunriseSunset@{
+                  every { this@sunriseSunset.date } answers { LocalDate.now().minusDays(1L) }
+                },
+              yesterday = mockk()
+            )
+        }
+
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+            },
+          calculateSunriseSunsetChangeUseCase = calculateSunriseSunsetChangeUseCase
+        )
+        .sunriseSunsetChangeInLocationAt(0)
+        .test {
+          runCurrent()
+          assertEquals(LoadingFirst.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          assertIs<StableValue<Ready<LocationSunriseSunsetChange>>>(awaitItem())
+          assertIs<StableValue<Ready<LocationSunriseSunsetChange>>>(awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+
+      coVerify(exactly = 2) { calculateSunriseSunsetChangeUseCase(any()) }
     }
   }
 
