@@ -4,14 +4,19 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.trm.daylighter.core.common.navigation.DayNightCycleDeepLinkParams
 import com.trm.daylighter.core.common.navigation.GoldenBlueHourDeepLinkParams
+import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
+import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.CalculateSunPositionTimestampUseCase
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.CalculateSunriseSunsetUseCase
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetNonDefaultLocationOffsetByIdUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
+import com.trm.daylighter.core.ui.model.asStable
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -20,6 +25,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -123,6 +129,43 @@ class DayViewModelTests {
 
       coVerify(exactly = 1) { getNonDefaultLocationOffsetByIdUseCase(5L) }
     }
+
+  @Test
+  fun `GIVEN empty locations THEN sunriseSunsetChangeInLocationAt should emit Empty`() {
+    runTest {
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Empty)
+            }
+        )
+        .sunriseSunsetChangeInLocationAt(0)
+        .test {
+          runCurrent()
+          assertEquals(Empty.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+    }
+  }
+
+  @Test
+  fun `GIVEN ready locations with empty list THEN sunriseSunsetChangeInLocationAt should emit LoadingFirst and Empty`() {
+    runTest {
+      viewModel(
+          getAllLocationsFlowUseCase =
+            mockk<GetAllLocationsFlowUseCase>().apply {
+              every { this@apply() } returns flowOf(Ready(emptyList()))
+            }
+        )
+        .sunriseSunsetChangeInLocationAt(0)
+        .test {
+          runCurrent()
+          assertEquals(LoadingFirst.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          assertEquals(Empty.asStable<LocationSunriseSunsetChange>(), awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+    }
+  }
 
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),

@@ -7,4 +7,6 @@ import com.trm.daylighter.core.domain.model.Loadable
 
 fun <T> T.asStable(): StableValue<T> = StableValue(this)
 
+fun <T : Any> Loadable<T>.asStable(): StableValue<Loadable<T>> = StableValue(this)
+
 typealias StableLoadable<T> = StableValue<Loadable<T>>
