@@ -99,7 +99,7 @@ constructor(
     }
   }
 
-  private enum class SavedState {
+  internal enum class SavedState {
     SELECTED_LOCATION_ID
   }
 }
