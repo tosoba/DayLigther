@@ -1,16 +1,21 @@
 package com.trm.daylighter.feature.widget.location
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.trm.daylighter.core.common.navigation.WidgetLocationDeepLinkParams
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,6 +33,112 @@ class WidgetLocationViewModelTests {
       WidgetLocationMode.EDIT,
       viewModel(SavedStateHandle(mapOf(WidgetLocationDeepLinkParams.LOCATION_ID to "63"))).mode
     )
+  }
+
+  @Test
+  fun `WHEN selected location id is null THEN add day night cycle widget is not called`() {
+    val widgetManager = mockk<WidgetManager>()
+    viewModel(widgetManager = widgetManager).onAddDayNightCycleWidget()
+    coVerify(exactly = 0) { widgetManager.addDayNightCycleWidget(any()) }
+  }
+
+  @Test
+  fun `WHEN selected location id is null THEN add golden blue hour widget is not called`() {
+    val widgetManager = mockk<WidgetManager>()
+    viewModel(widgetManager = widgetManager).onAddGoldenBlueHourWidget()
+    coVerify(exactly = 0) { widgetManager.addGoldenBlueHourWidget(any()) }
+  }
+
+  @Test
+  fun `WHEN add day night cycle widget returns false THEN failed to add widget message is emitted`() =
+    runTest {
+      with(
+        viewModel(
+          savedStateHandle =
+            SavedStateHandle(
+              mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 67L)
+            ),
+          widgetManager =
+            mockk<WidgetManager>().apply {
+              coEvery { this@apply.addDayNightCycleWidget(any()) } returns false
+            }
+        )
+      ) {
+        toastMessageResId.test {
+          runCurrent()
+          onAddDayNightCycleWidget()
+          assertEquals(R.string.failed_to_add_widget, awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN add golden blue hour widget returns false THEN failed to add widget message is emitted`() =
+    runTest {
+      with(
+        viewModel(
+          savedStateHandle =
+            SavedStateHandle(
+              mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 67L)
+            ),
+          widgetManager =
+            mockk<WidgetManager>().apply {
+              coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns false
+            }
+        )
+      ) {
+        toastMessageResId.test {
+          runCurrent()
+          onAddGoldenBlueHourWidget()
+          assertEquals(R.string.failed_to_add_widget, awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN add day night cycle widget returns true THEN no message is emitted`() = runTest {
+    with(
+      viewModel(
+        savedStateHandle =
+          SavedStateHandle(
+            mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 64L)
+          ),
+        widgetManager =
+          mockk<WidgetManager>().apply {
+            coEvery { this@apply.addDayNightCycleWidget(any()) } returns true
+          }
+      )
+    ) {
+      toastMessageResId.test {
+        runCurrent()
+        onAddDayNightCycleWidget()
+        expectNoEvents()
+      }
+    }
+  }
+
+  @Test
+  fun `WHEN add golden blue hour widget returns true THEN no message is emitted`() = runTest {
+    with(
+      viewModel(
+        savedStateHandle =
+          SavedStateHandle(
+            mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 64L)
+          ),
+        widgetManager =
+          mockk<WidgetManager>().apply {
+            coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns true
+          }
+      )
+    ) {
+      toastMessageResId.test {
+        runCurrent()
+        onAddGoldenBlueHourWidget()
+        expectNoEvents()
+      }
+    }
   }
 
   private fun viewModel(
