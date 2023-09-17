@@ -145,7 +145,7 @@ class WidgetLocationViewModelTests {
     }
 
   @Test
-  fun `GIVEN null selected location id AND day night cycle widget type THEN edit day night cycle widget widget is not called`() {
+  fun `GIVEN null selected location id AND day night cycle widget type THEN edit day night cycle widget is not called`() {
     val widgetManager = mockk<WidgetManager>()
 
     viewModel(
@@ -161,7 +161,7 @@ class WidgetLocationViewModelTests {
   }
 
   @Test
-  fun `GIVEN null selected location id AND golden blue hour widget type THEN edit golden blue hour widget widget is not called`() {
+  fun `GIVEN null selected location id AND golden blue hour widget type THEN edit golden blue hour widget is not called`() {
     val widgetManager = mockk<WidgetManager>()
 
     viewModel(
@@ -175,6 +175,74 @@ class WidgetLocationViewModelTests {
 
     coVerify(exactly = 0) { widgetManager.editGoldenBlueHourWidget(any(), any()) }
   }
+
+  @Test
+  fun `GIVEN non null selected location id AND day night cycle widget type THEN edit day night cycle widget is called and widget updated message is received`() =
+    runTest {
+      val selectedLocationId = 59L
+      val widgetManager =
+        mockk<WidgetManager>().apply {
+          coEvery { this@apply.editDayNightCycleWidget(any(), any()) } returns Unit
+        }
+
+      with(
+        viewModel(
+          savedStateHandle =
+            SavedStateHandle(
+              mapOf(
+                WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.DAY_NIGHT_CYCLE.name,
+                WidgetLocationDeepLinkParams.GLANCE_ID to "72",
+                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId
+              )
+            ),
+          widgetManager = widgetManager
+        )
+      ) {
+        toastMessageResId.test {
+          runCurrent()
+          onEditWidgetLocationClick()
+          assertEquals(R.string.widget_location_updated, awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+      }
+
+      coVerify(exactly = 1) { widgetManager.editDayNightCycleWidget(any(), eq(selectedLocationId)) }
+    }
+
+  @Test
+  fun `GIVEN non null selected location id AND golden blue hour widget type THEN edit golden blue hour widget is called and widget updated message is received`() =
+    runTest {
+      val selectedLocationId = 59L
+      val widgetManager =
+        mockk<WidgetManager>().apply {
+          coEvery { this@apply.editGoldenBlueHourWidget(any(), any()) } returns Unit
+        }
+
+      with(
+        viewModel(
+          savedStateHandle =
+            SavedStateHandle(
+              mapOf(
+                WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.GOLDEN_BLUE_HOUR.name,
+                WidgetLocationDeepLinkParams.GLANCE_ID to "72",
+                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId
+              )
+            ),
+          widgetManager = widgetManager
+        )
+      ) {
+        toastMessageResId.test {
+          runCurrent()
+          onEditWidgetLocationClick()
+          assertEquals(R.string.widget_location_updated, awaitItem())
+          cancelAndIgnoreRemainingEvents()
+        }
+      }
+
+      coVerify(exactly = 1) {
+        widgetManager.editGoldenBlueHourWidget(any(), eq(selectedLocationId))
+      }
+    }
 
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
