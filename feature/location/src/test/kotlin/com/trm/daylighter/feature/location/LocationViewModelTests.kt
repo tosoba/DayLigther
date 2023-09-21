@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.location
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Event
 import app.cash.turbine.test
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Location
@@ -11,6 +12,7 @@ import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
 import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
+import com.trm.daylighter.feature.location.model.LocationPreparedToSave
 import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
 import io.mockk.coEvery
@@ -19,6 +21,7 @@ import io.mockk.mockk
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -52,7 +55,7 @@ class LocationViewModelTests {
       viewModel().mapPositionFlow.test {
         runCurrent()
         assertMapPositionEquals(MapPosition(), awaitItem())
-        cancelAndIgnoreRemainingEvents()
+        assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
       }
     }
 
@@ -68,7 +71,7 @@ class LocationViewModelTests {
         .test {
           runCurrent()
           assertMapPositionEquals(MapPosition(), awaitItem())
-          cancelAndIgnoreRemainingEvents()
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
         }
     }
 
@@ -104,7 +107,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          cancelAndIgnoreRemainingEvents()
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
         }
     }
 
@@ -113,7 +116,7 @@ class LocationViewModelTests {
     viewModel().loadingFlow.test {
       runCurrent()
       assertEquals(false, awaitItem())
-      cancelAndIgnoreRemainingEvents()
+      assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
     }
   }
 
@@ -124,6 +127,49 @@ class LocationViewModelTests {
       expectNoEvents()
     }
   }
+
+  @Test
+  fun `WHEN request save specified location is called THEN loading flow should emit only false items`() =
+    runTest {
+      with(viewModel()) {
+        loadingFlow.test {
+          runCurrent()
+          requestSaveSpecifiedLocation(0.0, 0.0)
+          assertTrue { cancelAndConsumeRemainingEvents().all { it is Event.Item && !it.value } }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request save specified location is called THEN save location flow should emit a location prepared to save`() =
+    runTest {
+      with(viewModel()) {
+        locationPreparedToSaveFlow.test {
+          runCurrent()
+          val latitude = 11.0
+          val longitude = 22.0
+          requestSaveSpecifiedLocation(latitude = latitude, longitude = longitude)
+          assertEquals(
+            LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false),
+            awaitItem()
+          )
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request save specified location is called THEN user location not found flow only emit false`() =
+    runTest {
+      with(viewModel()) {
+        userLocationNotFoundFlow.test {
+          runCurrent()
+          requestSaveSpecifiedLocation(0.0, 0.0)
+          assertEquals(false, awaitItem())
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        }
+      }
+    }
 
   @Test
   fun `GIVEN no initial location id WHEN save location is called THEN save location flow should emit Ready`() =
@@ -140,7 +186,7 @@ class LocationViewModelTests {
           runCurrent()
           saveLocation(0.0, 0.0, "")
           assertEquals(Ready(Unit), awaitItem())
-          cancelAndIgnoreRemainingEvents()
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
         }
       }
     }
@@ -162,7 +208,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          cancelAndIgnoreRemainingEvents()
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
         }
       }
     }
