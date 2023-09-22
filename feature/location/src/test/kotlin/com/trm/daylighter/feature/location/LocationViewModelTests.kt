@@ -121,8 +121,25 @@ class LocationViewModelTests {
   }
 
   @Test
-  fun `WHEN nothing is called THEN save location should emit false`() = runTest {
+  fun `WHEN nothing is called THEN save location should emit no events`() = runTest {
     viewModel().locationSavedFlow.test {
+      runCurrent()
+      expectNoEvents()
+    }
+  }
+
+  @Test
+  fun `WHEN nothing is called THEN location prepared to save flow should emit no events`() =
+    runTest {
+      viewModel().locationPreparedToSaveFlow.test {
+        runCurrent()
+        expectNoEvents()
+      }
+    }
+
+  @Test
+  fun `WHEN nothing is called THEN user location not found flow should emit no events`() = runTest {
+    viewModel().userLocationNotFoundFlow.test {
       runCurrent()
       expectNoEvents()
     }
@@ -141,7 +158,7 @@ class LocationViewModelTests {
     }
 
   @Test
-  fun `WHEN request save specified location is called THEN save location flow should emit a location prepared to save`() =
+  fun `WHEN request save specified location is called THEN location prepared to save flow should emit a location prepared to save`() =
     runTest {
       with(viewModel()) {
         locationPreparedToSaveFlow.test {
@@ -172,7 +189,7 @@ class LocationViewModelTests {
     }
 
   @Test
-  fun `GIVEN no initial location id WHEN save location is called THEN save location flow should emit Ready`() =
+  fun `GIVEN no initial location id WHEN save location is called THEN location saved flow should emit Ready`() =
     runTest {
       with(
         viewModel(
