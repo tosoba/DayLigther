@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Event
 import app.cash.turbine.test
 import com.trm.daylighter.core.common.model.MapDefaults
+import com.trm.daylighter.core.domain.model.LatLng
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
@@ -22,6 +23,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -182,6 +184,104 @@ class LocationViewModelTests {
         userLocationNotFoundFlow.test {
           runCurrent()
           requestSaveSpecifiedLocation(0.0, 0.0)
+          assertEquals(false, awaitItem())
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request get and save user location is called THEN loading flow emits false, true, false`() =
+    runTest {
+      with(
+        viewModel(
+          getCurrentUserLatLngUseCase =
+            mockk<GetCurrentUserLatLngUseCase>().apply {
+              coEvery { this@apply() } returns LatLng(0.0, 0.0)
+            }
+        )
+      ) {
+        loadingFlow.test {
+          runCurrent()
+          requestGetAndSaveUserLocation()
+          assertEquals(false, awaitItem())
+          assertEquals(true, awaitItem())
+          assertEquals(false, awaitItem())
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request get and save user location is called and location is found THEN location prepared to save flow first emits null and user location`() =
+    runTest {
+      val userLocation = LatLng(latitude = 10.0, longitude = 40.0)
+      with(
+        viewModel(
+          getCurrentUserLatLngUseCase =
+            mockk<GetCurrentUserLatLngUseCase>().apply {
+              coEvery { this@apply() } returns userLocation
+            }
+        )
+      ) {
+        locationPreparedToSaveFlow.test {
+          runCurrent()
+          requestGetAndSaveUserLocation()
+          assertEquals(null, awaitItem())
+          assertEquals(
+            LocationPreparedToSave(
+              latitude = userLocation.latitude,
+              longitude = userLocation.longitude,
+              isUser = true
+            ),
+            awaitItem()
+          )
+          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request get and save user location is called and location is found THEN map position is updated to found location`() =
+    runTest {
+      val userLocation = LatLng(latitude = 12.0, longitude = 48.0)
+      with(
+        viewModel(
+          getCurrentUserLatLngUseCase =
+            mockk<GetCurrentUserLatLngUseCase>().apply {
+              coEvery { this@apply() } returns userLocation
+            }
+        )
+      ) {
+        locationPreparedToSaveFlow.test {
+          runCurrent()
+          requestGetAndSaveUserLocation()
+          cancelAndIgnoreRemainingEvents()
+          assertTrue {
+            with(mapPositionFlow.value) {
+              latitude == userLocation.latitude &&
+                longitude == userLocation.longitude &&
+                zoom == MapDefaults.INITIAL_LOCATION_ZOOM
+            }
+          }
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN request get and save user location is called and location is not found THEN user location not found flow first emits false, true, false`() =
+    runTest {
+      with(
+        viewModel(
+          getCurrentUserLatLngUseCase =
+            mockk<GetCurrentUserLatLngUseCase>().apply { coEvery { this@apply() } returns null }
+        )
+      ) {
+        userLocationNotFoundFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          requestGetAndSaveUserLocation()
+          assertEquals(false, awaitItem())
+          assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
           assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
         }
