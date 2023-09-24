@@ -57,7 +57,7 @@ class LocationViewModelTests {
       viewModel().mapPositionFlow.test {
         runCurrent()
         assertMapPositionEquals(MapPosition(), awaitItem())
-        assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+        assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
       }
     }
 
@@ -73,7 +73,7 @@ class LocationViewModelTests {
         .test {
           runCurrent()
           assertMapPositionEquals(MapPosition(), awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
     }
 
@@ -109,7 +109,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
     }
 
@@ -118,7 +118,7 @@ class LocationViewModelTests {
     viewModel().loadingFlow.test {
       runCurrent()
       assertEquals(false, awaitItem())
-      assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+      assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
     }
   }
 
@@ -172,7 +172,7 @@ class LocationViewModelTests {
             LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false),
             awaitItem()
           )
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -185,7 +185,7 @@ class LocationViewModelTests {
           runCurrent()
           requestSaveSpecifiedLocation(0.0, 0.0)
           assertEquals(false, awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -207,7 +207,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -236,7 +236,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -283,7 +283,47 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN cancel current location request is called THEN loading flow emits false twice`() =
+    runTest {
+      with(viewModel()) {
+        loadingFlow.test {
+          runCurrent()
+          cancelCurrentSaveLocationRequest()
+          val events = cancelAndConsumeRemainingEvents()
+          assertEquals(2, events.size)
+          assertTrue(events.all { it is Event.Item && !it.value })
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN cancel current location request is called THEN location prepared to save flow emits null`() =
+    runTest {
+      with(viewModel()) {
+        locationPreparedToSaveFlow.test {
+          runCurrent()
+          cancelCurrentSaveLocationRequest()
+          assertEquals(null, awaitItem())
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN cancel current location request is called THEN user location not found flow emits false`() =
+    runTest {
+      with(viewModel()) {
+        userLocationNotFoundFlow.test {
+          runCurrent()
+          cancelCurrentSaveLocationRequest()
+          assertEquals(false, awaitItem())
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -303,7 +343,7 @@ class LocationViewModelTests {
           runCurrent()
           saveLocation(0.0, 0.0, "")
           assertEquals(Ready(Unit), awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
@@ -325,7 +365,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue { cancelAndConsumeRemainingEvents().isEmpty() }
+          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
         }
       }
     }
