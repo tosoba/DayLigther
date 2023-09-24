@@ -24,6 +24,7 @@ import java.time.ZoneId
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -324,6 +325,34 @@ class LocationViewModelTests {
           cancelCurrentSaveLocationRequest()
           assertEquals(false, awaitItem())
           assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+        }
+      }
+    }
+
+  @Test
+  fun `GIVEN a request get and save user location in progress WHEN cancel current location request is called before user location is found THEN location prepared to save flow emits null twice`() =
+    runTest {
+      with(
+        viewModel(
+          getCurrentUserLatLngUseCase =
+            mockk<GetCurrentUserLatLngUseCase>().apply {
+              coEvery { this@apply() } coAnswers
+                {
+                  delay(5_000L)
+                  LatLng(0.0, 0.0)
+                }
+            }
+        )
+      ) {
+        locationPreparedToSaveFlow.test {
+          runCurrent()
+          requestGetAndSaveUserLocation()
+          delay(2_000L)
+          cancelCurrentSaveLocationRequest()
+          assertTrue {
+            val events = cancelAndConsumeRemainingEvents()
+            events.size == 2 && events.all { it is Event.Item && it.value == null }
+          }
         }
       }
     }
