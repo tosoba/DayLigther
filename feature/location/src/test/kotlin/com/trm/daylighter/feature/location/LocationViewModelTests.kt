@@ -14,13 +14,14 @@ import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
 import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
-import com.trm.daylighter.core.testing.util.ext.assertNoFurtherEvents
 import com.trm.daylighter.feature.location.model.LocationPreparedToSave
 import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
+import io.mockk.MockKStubScope
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import java.io.IOException
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.test.assertEquals
@@ -60,7 +61,7 @@ class LocationViewModelTests {
       viewModel().mapPositionFlow.test {
         runCurrent()
         assertMapPositionEquals(MapPosition(), awaitItem())
-        assertNoFurtherEvents()
+        ensureAllEventsConsumed()
       }
     }
 
@@ -76,7 +77,7 @@ class LocationViewModelTests {
         .test {
           runCurrent()
           assertMapPositionEquals(MapPosition(), awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
     }
 
@@ -112,7 +113,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
     }
 
@@ -121,7 +122,7 @@ class LocationViewModelTests {
     viewModel().loadingFlow.test {
       runCurrent()
       assertEquals(false, awaitItem())
-      assertNoFurtherEvents()
+      ensureAllEventsConsumed()
     }
   }
 
@@ -175,7 +176,7 @@ class LocationViewModelTests {
             LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false),
             awaitItem()
           )
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -188,7 +189,7 @@ class LocationViewModelTests {
           runCurrent()
           requestSaveSpecifiedLocation(0.0, 0.0)
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -210,7 +211,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -239,7 +240,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -286,7 +287,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -313,7 +314,7 @@ class LocationViewModelTests {
           runCurrent()
           cancelCurrentSaveLocationRequest()
           assertEquals(null, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -326,7 +327,7 @@ class LocationViewModelTests {
           runCurrent()
           cancelCurrentSaveLocationRequest()
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -374,7 +375,7 @@ class LocationViewModelTests {
           runCurrent()
           saveLocation(0.0, 0.0, "")
           assertEquals(Ready(Unit), awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -396,7 +397,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -409,7 +410,7 @@ class LocationViewModelTests {
       mapPositionFlow.test {
         runCurrent()
         assertEquals(mapPosition, awaitItem())
-        assertNoFurtherEvents()
+        ensureAllEventsConsumed()
       }
     }
   }
@@ -423,7 +424,7 @@ class LocationViewModelTests {
           runCurrent()
           inputLocationName(locationName)
           assertEquals(locationName, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -435,7 +436,7 @@ class LocationViewModelTests {
         runCurrent()
         inputLocationName("test name")
         assertEquals(false, awaitItem())
-        assertNoFurtherEvents()
+        ensureAllEventsConsumed()
       }
     }
   }
@@ -448,7 +449,7 @@ class LocationViewModelTests {
           runCurrent()
           inputLocationName("test name")
           assertEquals(null, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -461,7 +462,7 @@ class LocationViewModelTests {
           runCurrent()
           clearLocationName()
           assertEquals("", awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -473,7 +474,7 @@ class LocationViewModelTests {
         runCurrent()
         clearLocationName()
         assertEquals(false, awaitItem())
-        assertNoFurtherEvents()
+        ensureAllEventsConsumed()
       }
     }
   }
@@ -486,7 +487,7 @@ class LocationViewModelTests {
           runCurrent()
           clearLocationName()
           assertEquals(null, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -495,21 +496,44 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and location name is returned successfully THEN location name loading flow emits true, false`() =
     runTest {
       with(
-        viewModel(
-          getLocationDisplayName =
-            GetLocationDisplayName(
-              mockk<GeocodingRepo>().apply {
-                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns "geocoded name"
-              }
-            )
-        )
+        viewModel(getLocationDisplayName = getLocationDisplayName { returns("geocoded name") })
       ) {
         locationNameLoadingFlow.test {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and location name is null THEN location name loading flow emits true, false`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+        locationNameLoadingFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals(true, awaitItem())
+          assertEquals(false, awaitItem())
+          assertEquals(false, awaitItem())
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and exception is thrown THEN location name loading flow emits true, false, false`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+        locationNameLoadingFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals(true, awaitItem())
+          assertEquals(false, awaitItem())
+          assertEquals(false, awaitItem())
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -518,22 +542,39 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and location name is returned successfully THEN location name ready flow emits empty string and returned name`() =
     runTest {
       val locationName = "geocoded name"
-      with(
-        viewModel(
-          getLocationDisplayName =
-            GetLocationDisplayName(
-              mockk<GeocodingRepo>().apply {
-                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns locationName
-              }
-            )
-        )
-      ) {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(locationName) })) {
         locationNameReadyFlow.test {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
           assertEquals("", awaitItem())
           assertEquals(locationName, awaitItem())
-          assertNoFurtherEvents()
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and location name is null THEN location name ready flow emits empty string 3 times`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+        locationNameReadyFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          repeat(3) { assertEquals("", awaitItem()) }
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and exception is thrown THEN location name ready flow emits empty string 3 times`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+        locationNameReadyFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          repeat(3) { assertEquals("", awaitItem()) }
+          ensureAllEventsConsumed()
         }
       }
     }
@@ -541,16 +582,8 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and location name is returned successfully THEN location name failure message flow emits null twice`() =
     runTest {
-      val locationName = "geocoded name"
       with(
-        viewModel(
-          getLocationDisplayName =
-            GetLocationDisplayName(
-              mockk<GeocodingRepo>().apply {
-                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns locationName
-              }
-            )
-        )
+        viewModel(getLocationDisplayName = getLocationDisplayName { returns("geocoded name") })
       ) {
         locationNameFailureMessageFlow.test {
           runCurrent()
@@ -561,6 +594,43 @@ class LocationViewModelTests {
         }
       }
     }
+
+  @Test
+  fun `WHEN get location display name is called and location name is null THEN location name failure message flow emits null, location name not found, null`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+        locationNameFailureMessageFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals(null, awaitItem())
+          assertEquals(R.string.location_name_not_found, awaitItem())
+          assertEquals(null, awaitItem())
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and exception is thrown THEN location name failure message flow emits null, geocoding error, null`() =
+    runTest {
+      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+        locationNameFailureMessageFlow.test(timeout = 5_000.milliseconds) {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals(null, awaitItem())
+          assertEquals(R.string.geocoding_error, awaitItem())
+          assertEquals(null, awaitItem())
+          ensureAllEventsConsumed()
+        }
+      }
+    }
+
+  private fun getLocationDisplayName(repoResponse: MockKStubScope<String?, String?>.() -> Unit) =
+    GetLocationDisplayName(
+      mockk<GeocodingRepo>().apply {
+        coEvery { this@apply.getLocationDisplayName(any(), any()) }.repoResponse()
+      }
+    )
 
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
