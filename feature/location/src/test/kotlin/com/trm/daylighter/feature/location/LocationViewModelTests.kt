@@ -7,6 +7,7 @@ import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.LatLng
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.repo.GeocodingRepo
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationById
 import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
@@ -486,6 +487,77 @@ class LocationViewModelTests {
           clearLocationName()
           assertEquals(null, awaitItem())
           assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and location name is returned successfully THEN location name loading flow emits true, false`() =
+    runTest {
+      with(
+        viewModel(
+          getLocationDisplayName =
+            GetLocationDisplayName(
+              mockk<GeocodingRepo>().apply {
+                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns "geocoded name"
+              }
+            )
+        )
+      ) {
+        locationNameLoadingFlow.test {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals(true, awaitItem())
+          assertEquals(false, awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and location name is returned successfully THEN location name ready flow emits empty string and returned name`() =
+    runTest {
+      val locationName = "geocoded name"
+      with(
+        viewModel(
+          getLocationDisplayName =
+            GetLocationDisplayName(
+              mockk<GeocodingRepo>().apply {
+                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns locationName
+              }
+            )
+        )
+      ) {
+        locationNameReadyFlow.test {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          assertEquals("", awaitItem())
+          assertEquals(locationName, awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN get location display name is called and location name is returned successfully THEN location name failure message flow emits null twice`() =
+    runTest {
+      val locationName = "geocoded name"
+      with(
+        viewModel(
+          getLocationDisplayName =
+            GetLocationDisplayName(
+              mockk<GeocodingRepo>().apply {
+                coEvery { this@apply.getLocationDisplayName(any(), any()) } returns locationName
+              }
+            )
+        )
+      ) {
+        locationNameFailureMessageFlow.test {
+          runCurrent()
+          getLocationDisplayName(5.0, 16.0)
+          val events = cancelAndConsumeRemainingEvents()
+          assertEquals(2, events.size)
+          assertTrue(events.all { it is Event.Item && it.value == null })
         }
       }
     }
