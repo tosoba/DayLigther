@@ -399,6 +399,19 @@ class LocationViewModelTests {
       }
     }
 
+  @Test
+  fun `WHEN on map view pause is called THEN map position is saved`() = runTest {
+    with(viewModel()) {
+      val mapPosition = MapPosition(latitude = 15.0, longitude = 34.0, zoom = 7.0)
+      onMapViewPause(mapPosition)
+      mapPositionFlow.test {
+        runCurrent()
+        assertEquals(mapPosition, awaitItem())
+        assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+      }
+    }
+  }
+
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
     getLocationById: GetLocationById = mockk(),
