@@ -89,8 +89,13 @@ fun DayLighterTheme(
     if (!view.isInEditMode) {
       SideEffect {
         val activity = view.context as Activity
+
         activity.window.statusBarColor = colorScheme.background.toArgb()
         WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars =
+          !darkTheme
+
+        activity.window.navigationBarColor = colorScheme.background.toArgb()
+        WindowCompat.getInsetsController(activity.window, view).isAppearanceLightNavigationBars =
           !darkTheme
       }
     }
