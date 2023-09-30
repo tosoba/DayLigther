@@ -13,6 +13,7 @@ import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
 import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
+import com.trm.daylighter.core.testing.util.ext.assertNoFurtherEvents
 import com.trm.daylighter.feature.location.model.LocationPreparedToSave
 import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
@@ -58,7 +59,7 @@ class LocationViewModelTests {
       viewModel().mapPositionFlow.test {
         runCurrent()
         assertMapPositionEquals(MapPosition(), awaitItem())
-        assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+        assertNoFurtherEvents()
       }
     }
 
@@ -74,7 +75,7 @@ class LocationViewModelTests {
         .test {
           runCurrent()
           assertMapPositionEquals(MapPosition(), awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
     }
 
@@ -110,7 +111,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
     }
 
@@ -119,7 +120,7 @@ class LocationViewModelTests {
     viewModel().loadingFlow.test {
       runCurrent()
       assertEquals(false, awaitItem())
-      assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+      assertNoFurtherEvents()
     }
   }
 
@@ -173,7 +174,7 @@ class LocationViewModelTests {
             LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false),
             awaitItem()
           )
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -186,7 +187,7 @@ class LocationViewModelTests {
           runCurrent()
           requestSaveSpecifiedLocation(0.0, 0.0)
           assertEquals(false, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -208,7 +209,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -237,7 +238,7 @@ class LocationViewModelTests {
             ),
             awaitItem()
           )
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -284,7 +285,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -311,7 +312,7 @@ class LocationViewModelTests {
           runCurrent()
           cancelCurrentSaveLocationRequest()
           assertEquals(null, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -324,7 +325,7 @@ class LocationViewModelTests {
           runCurrent()
           cancelCurrentSaveLocationRequest()
           assertEquals(false, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -372,7 +373,7 @@ class LocationViewModelTests {
           runCurrent()
           saveLocation(0.0, 0.0, "")
           assertEquals(Ready(Unit), awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -394,7 +395,7 @@ class LocationViewModelTests {
           assertEquals(false, awaitItem())
           assertEquals(true, awaitItem())
           assertEquals(false, awaitItem())
-          assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+          assertNoFurtherEvents()
         }
       }
     }
@@ -407,10 +408,87 @@ class LocationViewModelTests {
       mapPositionFlow.test {
         runCurrent()
         assertEquals(mapPosition, awaitItem())
-        assertTrue(cancelAndConsumeRemainingEvents().isEmpty())
+        assertNoFurtherEvents()
       }
     }
   }
+
+  @Test
+  fun `WHEN input location name is called THEN location name ready flow emits that name`() =
+    runTest {
+      with(viewModel()) {
+        val locationName = "test name"
+        locationNameReadyFlow.test {
+          runCurrent()
+          inputLocationName(locationName)
+          assertEquals(locationName, awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN input location name is called THEN location name loading flow emits false`() = runTest {
+    with(viewModel()) {
+      locationNameLoadingFlow.test {
+        runCurrent()
+        inputLocationName("test name")
+        assertEquals(false, awaitItem())
+        assertNoFurtherEvents()
+      }
+    }
+  }
+
+  @Test
+  fun `WHEN input location name is called THEN location name failure message flow emits null`() =
+    runTest {
+      with(viewModel()) {
+        locationNameFailureMessageFlow.test {
+          runCurrent()
+          inputLocationName("test name")
+          assertEquals(null, awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN clear location name is called THEN location name ready flow emits empty string`() =
+    runTest {
+      with(viewModel()) {
+        locationNameReadyFlow.test {
+          runCurrent()
+          clearLocationName()
+          assertEquals("", awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
+
+  @Test
+  fun `WHEN clear location name is called THEN location name loading flow emits false`() = runTest {
+    with(viewModel()) {
+      locationNameLoadingFlow.test {
+        runCurrent()
+        clearLocationName()
+        assertEquals(false, awaitItem())
+        assertNoFurtherEvents()
+      }
+    }
+  }
+
+  @Test
+  fun `WHEN clear location name is called THEN location name failure message flow emits null`() =
+    runTest {
+      with(viewModel()) {
+        locationNameFailureMessageFlow.test {
+          runCurrent()
+          clearLocationName()
+          assertEquals(null, awaitItem())
+          assertNoFurtherEvents()
+        }
+      }
+    }
 
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
