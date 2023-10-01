@@ -9,7 +9,7 @@ android {
 
   buildFeatures { buildConfig = true }
 
-  packagingOptions { resources { excludes += "META-INF/DEPENDENCIES" } }
+  packaging { resources { excludes += "META-INF/DEPENDENCIES" } }
 }
 
 dependencies {

@@ -10,5 +10,5 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface WidgetModule {
-  @Binds fun WidgetManagerImpl.bind(): WidgetManager
+  @Binds fun bind(manager: WidgetManagerImpl): WidgetManager
 }

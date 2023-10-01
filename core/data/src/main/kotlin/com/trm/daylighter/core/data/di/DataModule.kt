@@ -12,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface DataModule {
-  @Binds fun LocationRepoImpl.locationRepo(): LocationRepo
+  @Binds fun locationRepo(repo: LocationRepoImpl): LocationRepo
 
-  @Binds fun GeocodingRepoImpl.geocodingRepo(): GeocodingRepo
+  @Binds fun geocodingRepo(repo: GeocodingRepoImpl): GeocodingRepo
 }

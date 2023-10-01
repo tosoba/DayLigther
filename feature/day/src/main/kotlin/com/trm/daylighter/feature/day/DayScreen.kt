@@ -122,9 +122,15 @@ internal fun DayScreen(
 ) {
   ConstraintLayout(modifier = modifier) {
     val (topAppBar, mainContent, navigation, dayTimeCard, editLocationButton) = createRefs()
-    var appBarHeightPx by remember { mutableStateOf(0f) }
+    var appBarHeightPx by remember { mutableFloatStateOf(0f) }
 
-    val pagerState = rememberPagerState(initialPage = initialLocationIndex)
+    val pagerState =
+      rememberPagerState(initialPage = initialLocationIndex) {
+        when (locations) {
+          is WithData -> locations.data.size
+          is WithoutData -> 0
+        }
+      }
     var pageChanged by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(pagerState.currentPage) { if (pagerState.currentPage > 0) pageChanged = true }
     LaunchedEffect(initialLocationIndex) {
@@ -185,11 +191,6 @@ internal fun DayScreen(
           HorizontalPager(
             state = pagerState,
             beyondBoundsPageCount = 2,
-            pageCount =
-              when (locations) {
-                is WithData -> locations.data.size
-                is WithoutData -> 0
-              },
             modifier = Modifier.fillMaxSize()
           ) { locationIndex ->
             val pageChange =

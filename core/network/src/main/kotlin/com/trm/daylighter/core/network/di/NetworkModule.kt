@@ -1,7 +1,7 @@
 package com.trm.daylighter.core.network.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.trm.daylighter.core.common.BuildConfig
+import com.trm.daylighter.core.network.BuildConfig
 import com.trm.daylighter.core.network.SunriseSunsetNetworkDataSource
 import com.trm.daylighter.core.network.retrofit.NominatimEndpoint
 import com.trm.daylighter.core.network.retrofit.SunriseSunsetEndpoint
@@ -11,18 +11,21 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NetworkModule {
-  @Binds abstract fun SunriseSunsetRetrofitDataSource.binds(): SunriseSunsetNetworkDataSource
+  @Binds
+  abstract fun bindsSunriseSunsetRetrofitDataSource(
+    source: SunriseSunsetRetrofitDataSource
+  ): SunriseSunsetNetworkDataSource
 
   companion object {
     @Provides

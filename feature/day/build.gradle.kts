@@ -5,11 +5,10 @@ plugins {
 
 android {
   namespace = "com.trm.daylighter.feature.day"
-  packagingOptions { resources { excludes += "META-INF/*" } }
+  packaging { resources { excludes += "META-INF/*" } }
 }
 
 dependencies {
-  implementation(libs.accompanist.pager)
   implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
 
