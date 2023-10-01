@@ -78,25 +78,19 @@ val DarkColorScheme =
   )
 
 @Composable
-fun DayLighterTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  tweakStatusBarAppearance: Boolean = true,
-  content: @Composable () -> Unit
-) {
+fun DayLighterTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
   val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-  if (tweakStatusBarAppearance) {
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-      SideEffect {
-        val activity = view.context as Activity
+  val view = LocalView.current
+  if (!view.isInEditMode) {
+    SideEffect {
+      val activity = view.context as Activity
 
-        activity.window.statusBarColor = colorScheme.background.toArgb()
-        WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars =
-          !darkTheme
+      activity.window.statusBarColor = colorScheme.background.toArgb()
+      activity.window.navigationBarColor = colorScheme.background.toArgb()
 
-        activity.window.navigationBarColor = colorScheme.background.toArgb()
-        WindowCompat.getInsetsController(activity.window, view).isAppearanceLightNavigationBars =
-          !darkTheme
+      WindowCompat.getInsetsController(activity.window, view).apply {
+        isAppearanceLightStatusBars = !darkTheme
+        isAppearanceLightNavigationBars = !darkTheme
       }
     }
   }
