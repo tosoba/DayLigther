@@ -8,11 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
-import androidx.glance.AndroidResourceImageProvider
-import androidx.glance.BitmapImageProvider
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -129,7 +128,7 @@ private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceI
   ) {
     Image(
       provider =
-        BitmapImageProvider(
+        ImageProvider(
           dayPeriodChartBitmap(change = change, chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR)
         ),
       contentDescription = null,
@@ -147,7 +146,7 @@ private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceI
     }
 
     Image(
-      provider = AndroidResourceImageProvider(R.drawable.settings),
+      provider = ImageProvider(R.drawable.settings),
       contentDescription = stringResource(commonR.string.settings),
       modifier =
         GlanceModifier.padding(5.dp)

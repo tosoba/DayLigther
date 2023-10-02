@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
-import androidx.glance.IconImageProvider
 import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.layout.Alignment
@@ -18,6 +18,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.padding
 import androidx.glance.layout.wrapContentSize
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
 import com.trm.daylighter.core.common.util.ext.formatTimeMillis
@@ -95,24 +96,13 @@ private fun DayLengthIcon() {
   Box {
     Image(
       provider =
-        IconImageProvider(
-          Icon.createWithResource(
-            context,
-            com.trm.daylighter.core.common.R.drawable.day_length_shadow
-          )
-        ),
+        ImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_shadow)),
       contentDescription = stringResource(R.string.day_length),
       modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp)
     )
 
     Image(
-      provider =
-        IconImageProvider(
-          Icon.createWithResource(
-            context,
-            com.trm.daylighter.core.common.R.drawable.day_length_white
-          )
-        ),
+      provider = ImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
       contentDescription = stringResource(R.string.day_length)
     )
   }
