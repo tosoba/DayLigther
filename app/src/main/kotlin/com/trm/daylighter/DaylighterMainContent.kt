@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -126,8 +125,6 @@ private fun DayLighterDrawerContent(
   }
 
   ModalDrawerSheet {
-    Spacer(Modifier.height(12.dp))
-
     DrawerRouteItem(
       label = stringResource(commonR.string.day_night_cycle),
       route = dayNightCycleRoute
@@ -180,7 +177,6 @@ private fun DayLighterDrawerContent(
   }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuClick: () -> Unit) {
   Scaffold(
