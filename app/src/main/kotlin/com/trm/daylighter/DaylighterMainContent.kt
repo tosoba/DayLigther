@@ -67,7 +67,13 @@ fun DayLighterMainContent() {
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
           scope.launch { drawerState.close() }
-          if (destinationRoute != currentRoute) {
+          if (destinationRoute == currentRoute) {
+            return@DayLighterDrawerContent
+          }
+
+          if (destinationRoute == navController.previousBackStackEntry?.destination?.route) {
+            navController.popBackStack()
+          } else {
             navController.navigate(
               route = destinationRoute,
               navOptions =
@@ -319,7 +325,10 @@ private fun NavController.topLevelNavOptions(
   saveCurrentRouteState: Boolean,
   restoreDestinationState: Boolean
 ): NavOptions = navOptions {
-  popUpTo(graph.findStartDestination().id) { saveState = saveCurrentRouteState }
+  popUpTo(graph.findStartDestination().id) {
+    saveState = saveCurrentRouteState
+    inclusive = true
+  }
   launchSingleTop = true
   this.restoreState = restoreDestinationState
   fadeInAndOut()
