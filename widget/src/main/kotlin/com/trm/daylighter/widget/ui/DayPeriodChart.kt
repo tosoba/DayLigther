@@ -30,6 +30,9 @@ import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+private const val WIDGET_PREVIEW_WIDTH_PX = 730
+private const val WIDGET_PREVIEW_HEIGHT_PX = 245
+
 @Composable
 internal fun dayPeriodChartBitmap(
   change: LocationSunriseSunsetChange,
@@ -39,8 +42,8 @@ internal fun dayPeriodChartBitmap(
   val bitmap =
     with(LocalSize.current) {
       Bitmap.createBitmap(
-        width.value.toPx.toInt(),
-        height.value.toPx.toInt(),
+        width.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_WIDTH_PX,
+        height.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_HEIGHT_PX,
         Bitmap.Config.ARGB_8888
       )
     }
