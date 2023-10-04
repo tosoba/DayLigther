@@ -67,22 +67,21 @@ fun DayLighterMainContent() {
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
           scope.launch { drawerState.close() }
-          if (destinationRoute == currentRoute) {
-            return@DayLighterDrawerContent
-          }
+          if (destinationRoute == currentRoute) return@DayLighterDrawerContent
 
-          if (destinationRoute == navController.previousBackStackEntry?.destination?.route) {
-            navController.popBackStack()
-          } else {
-            navController.navigate(
-              route = destinationRoute,
-              navOptions =
-                navController.topLevelNavOptions(
-                  saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
-                  restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
-                )
-            )
-          }
+          navController.currentBackStack.value
+            .find { it.destination.route == destinationRoute }
+            ?.let { navController.popBackStack(it.destination.id, false) }
+            ?: run {
+              navController.navigate(
+                route = destinationRoute,
+                navOptions =
+                  navController.topLevelNavOptions(
+                    saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
+                    restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
+                  )
+              )
+            }
         }
       )
     }
