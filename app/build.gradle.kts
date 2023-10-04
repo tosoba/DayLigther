@@ -52,7 +52,6 @@ dependencies {
 
   implementation(project(":feature:about"))
   implementation(project(":feature:day"))
-  implementation(project(":feature:intro"))
   implementation(project(":feature:location"))
   implementation(project(":feature:locations"))
   implementation(project(":feature:settings"))

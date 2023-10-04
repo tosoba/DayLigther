@@ -86,7 +86,7 @@ import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import kotlinx.coroutines.flow.collectLatest
 
-const val newWidgetRoute = "widget_location_route"
+const val widgetLocationRoute = "widget_location_route"
 
 @Composable
 fun WidgetLocationRoute(

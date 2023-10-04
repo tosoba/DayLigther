@@ -20,10 +20,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.GOLDEN_BLUE_HOUR_PATH_SEGMENT
+import com.trm.daylighter.core.common.navigation.WIDGET_LOCATION_PATH_SEGMENT
 import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
+import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.feature.about.AboutScreen
@@ -38,7 +41,7 @@ import com.trm.daylighter.feature.settings.settingsComposable
 import com.trm.daylighter.feature.settings.settingsNavigationRoute
 import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
-import com.trm.daylighter.feature.widget.location.newWidgetRoute
+import com.trm.daylighter.feature.widget.location.widgetLocationRoute
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,8 +80,8 @@ fun DayLighterMainContent() {
                 route = destinationRoute,
                 navOptions =
                   navController.topLevelNavOptions(
-                    saveCurrentRouteState = !currentRoute.startsWith(newWidgetRoute),
-                    restoreDestinationState = !destinationRoute.startsWith(newWidgetRoute)
+                    saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
+                    restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
                   )
               )
             }
@@ -151,7 +154,10 @@ private fun DayLighterDrawerContent(
     }
 
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DrawerRouteItem(label = stringResource(commonR.string.new_widget), route = newWidgetRoute) {
+      DrawerRouteItem(
+        label = stringResource(commonR.string.new_widget),
+        route = widgetLocationRoute
+      ) {
         Icon(
           imageVector = Icons.Filled.Widgets,
           contentDescription = stringResource(commonR.string.new_widget)
@@ -228,7 +234,12 @@ private fun DayLighterNavHost(
 
   NavHost(
     navController = navController,
-    startDestination = dayNightCycleRoute,
+    startDestination =
+      when (context.getActivity()?.intent?.data?.pathSegments?.firstOrNull()) {
+        GOLDEN_BLUE_HOUR_PATH_SEGMENT -> goldenBlueHourRoute
+        WIDGET_LOCATION_PATH_SEGMENT -> widgetLocationRoute
+        else -> dayNightCycleRoute
+      },
     modifier = modifier
   ) {
     composable(
@@ -258,7 +269,7 @@ private fun DayLighterNavHost(
     }
 
     composable(
-      route = newWidgetRoute,
+      route = widgetLocationRoute,
       deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern })
     ) {
       WidgetLocationRoute(

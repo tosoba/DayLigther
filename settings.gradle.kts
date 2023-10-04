@@ -42,8 +42,6 @@ include(":feature:about")
 
 include(":feature:day")
 
-include(":feature:intro")
-
 include(":feature:location")
 
 include(":feature:locations")
