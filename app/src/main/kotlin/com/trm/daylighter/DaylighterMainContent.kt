@@ -37,7 +37,7 @@ import com.trm.daylighter.feature.day.goldenBlueHourRoute
 import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
-import com.trm.daylighter.feature.settings.settingsComposable
+import com.trm.daylighter.feature.settings.SettingsRoute
 import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.widgetLocationRoute
@@ -274,11 +274,9 @@ private fun DayLighterNavHost(
       )
     }
 
-    settingsComposable(
-      modifier = Modifier.fillMaxSize(),
-      onBackClick = navController::popBackStack,
-      onDrawerMenuClick = onDrawerMenuClick,
-    )
+    composable(route = settingsRoute) {
+      SettingsRoute(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = onDrawerMenuClick)
+    }
 
     composable(route = aboutRoute) {
       AboutScreen(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = onDrawerMenuClick)

@@ -36,10 +36,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScope
@@ -48,7 +44,6 @@ import com.jamal.composeprefs3.ui.prefs.*
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
-import com.trm.daylighter.core.ui.composable.BackIconButton
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
@@ -56,41 +51,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-private const val settingsAutoShowEmailDialogParam = "auto_show_email_dialog"
 const val settingsRoute = "settings_route"
-const val settingsAutoShowEmailDialogRoute =
-  "$settingsRoute?$settingsAutoShowEmailDialogParam={$settingsAutoShowEmailDialogParam}"
-
-fun NavGraphBuilder.settingsComposable(
-  modifier: Modifier = Modifier,
-  onBackClick: () -> Unit,
-  onDrawerMenuClick: () -> Unit,
-) {
-  composable(
-    route = settingsAutoShowEmailDialogRoute,
-    arguments =
-      listOf(
-        navArgument(settingsAutoShowEmailDialogParam) {
-          type = NavType.StringType
-          nullable = true
-        }
-      )
-  ) {
-    SettingsRoute(
-      autoShowEmailDialog = it.arguments?.getString(settingsAutoShowEmailDialogParam)?.toBoolean()
-          ?: false,
-      onBackClick = onBackClick,
-      onDrawerMenuClick = onDrawerMenuClick,
-      modifier = modifier
-    )
-  }
-}
 
 @Composable
-private fun SettingsRoute(
+fun SettingsRoute(
   modifier: Modifier = Modifier,
-  autoShowEmailDialog: Boolean = false,
-  onBackClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -102,8 +67,6 @@ private fun SettingsRoute(
 
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,
-    autoShowEmailDialog = autoShowEmailDialog,
-    onBackClick = onBackClick,
     onDrawerMenuClick = onDrawerMenuClick,
     onDisableGeocodingClick = {
       viewModel.clearGeocodingEmail()
@@ -121,8 +84,6 @@ private fun SettingsRoute(
 @Composable
 private fun SettingsScreen(
   isGeocodeEmailPreferenceSet: Boolean,
-  autoShowEmailDialog: Boolean,
-  onBackClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   onDisableGeocodingClick: () -> Unit,
   onClearLocationsClick: () -> Unit,
@@ -132,9 +93,7 @@ private fun SettingsScreen(
     DayLighterTopAppBar(
       title = stringResource(commonR.string.settings),
       navigationIcon = {
-        if (autoShowEmailDialog) {
-          BackIconButton(onClick = onBackClick)
-        } else if (!usingPermanentNavigationDrawer) {
+        if (!usingPermanentNavigationDrawer) {
           DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
       }
@@ -150,7 +109,7 @@ private fun SettingsScreen(
           color = MaterialTheme.colorScheme.secondary
         )
       }) {
-        editGeocodingEmailPreferenceItem(autoShowEmailDialog = autoShowEmailDialog)
+        editGeocodingEmailPreferenceItem()
 
         if (isGeocodeEmailPreferenceSet) {
           disableGeocodingPreferenceItem(onClick = onDisableGeocodingClick)
@@ -170,7 +129,7 @@ private fun SettingsScreen(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun PrefsScope.editGeocodingEmailPreferenceItem(autoShowEmailDialog: Boolean) {
+private fun PrefsScope.editGeocodingEmailPreferenceItem() {
   prefsItem {
     val emailEmptyError = stringResource(R.string.email_empty_error)
     val invalidEmailAddress = stringResource(R.string.invalid_email_error)
@@ -178,7 +137,6 @@ private fun PrefsScope.editGeocodingEmailPreferenceItem(autoShowEmailDialog: Boo
       key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
       title = stringResource(R.string.geocoding_email_pref_title),
       summary = stringResource(R.string.geocoding_email_pref_summary),
-      autoShowDialog = autoShowEmailDialog,
       dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
       dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
       validateValue = {
@@ -257,7 +215,6 @@ private fun EditTextPref(
   title: String,
   modifier: Modifier = Modifier,
   summary: String? = null,
-  autoShowDialog: Boolean = false,
   dialogTitle: String? = null,
   dialogMessage: String? = null,
   defaultValue: String = "",
@@ -268,7 +225,7 @@ private fun EditTextPref(
   textColor: Color = MaterialTheme.colorScheme.onBackground,
   enabled: Boolean = true,
 ) {
-  var showDialog by rememberSaveable { mutableStateOf(autoShowDialog) }
+  var showDialog by rememberSaveable { mutableStateOf(false) }
 
   TextPref(
     title = title,
@@ -287,11 +244,7 @@ private fun EditTextPref(
 
   val scope = rememberCoroutineScope()
 
-  var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
-  var textValueChanged by rememberSaveable { mutableStateOf(false) }
-  var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
-
-  fun edit() {
+  fun editPref(textValue: String) {
     scope.launch {
       try {
         datastore.edit { preferences -> preferences[prefKey] = textValue }
@@ -302,7 +255,36 @@ private fun EditTextPref(
     }
   }
 
-  if (showDialog) {
+  EditTextPrefAlertDialog(
+    isShowing = showDialog,
+    hide = { showDialog = false },
+    prefValue = prefValue,
+    editPref = ::editPref,
+    dialogTitle = dialogTitle,
+    dialogMessage = dialogMessage,
+    onValueChange = onValueChange,
+    validateValue = validateValue,
+    dialogBackgroundColor = dialogBackgroundColor
+  )
+}
+
+@Composable
+private fun EditTextPrefAlertDialog(
+  isShowing: Boolean,
+  hide: () -> Unit,
+  prefValue: String,
+  editPref: (String) -> Unit,
+  dialogTitle: String?,
+  dialogMessage: String?,
+  onValueChange: (String) -> Unit,
+  validateValue: (String) -> String?,
+  dialogBackgroundColor: Color
+) {
+  var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
+  var textValueChanged by rememberSaveable { mutableStateOf(false) }
+  var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
+
+  if (isShowing) {
     LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
 
     AlertDialog(
@@ -310,7 +292,7 @@ private fun EditTextPref(
       onDismissRequest = {
         textValueChanged = false
         textValue = prefValue
-        showDialog = false
+        hide()
       },
       title = { DialogHeader(dialogTitle = dialogTitle, dialogMessage = dialogMessage) },
       text = {
@@ -344,9 +326,9 @@ private fun EditTextPref(
           onClick = {
             validationMsg = validateValue(textValue)
             if (validationMsg == null) {
-              edit()
+              editPref(textValue)
               textValueChanged = false
-              showDialog = false
+              hide()
             }
           }
         ) {
@@ -362,7 +344,7 @@ private fun EditTextPref(
           onClick = {
             textValueChanged = false
             validationMsg = null
-            showDialog = false
+            hide()
           }
         ) {
           Text(
