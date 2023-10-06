@@ -61,9 +61,6 @@ const val settingsRoute = "settings_route"
 const val settingsAutoShowEmailDialogRoute =
   "$settingsRoute?$settingsAutoShowEmailDialogParam={$settingsAutoShowEmailDialogParam}"
 
-fun settingsNavigationRoute(autoShowEmailDialog: Boolean) =
-  "$settingsRoute?$settingsAutoShowEmailDialogParam=$autoShowEmailDialog"
-
 fun NavGraphBuilder.settingsComposable(
   modifier: Modifier = Modifier,
   onBackClick: () -> Unit,
@@ -271,13 +268,24 @@ private fun EditTextPref(
   textColor: Color = MaterialTheme.colorScheme.onBackground,
   enabled: Boolean = true,
 ) {
-  val scope = rememberCoroutineScope()
+  var showDialog by rememberSaveable { mutableStateOf(autoShowDialog) }
+
+  TextPref(
+    title = title,
+    modifier = modifier,
+    summary = summary,
+    textColor = textColor,
+    enabled = enabled,
+    onClick = { if (enabled) showDialog = !showDialog },
+  )
 
   val datastore = LocalPrefsDataStore.current
   val prefKey = stringPreferencesKey(key)
   val prefValue by
     remember { datastore.data.map { preferences -> preferences[prefKey] ?: defaultValue } }
       .collectAsStateWithLifecycle(initialValue = defaultValue)
+
+  val scope = rememberCoroutineScope()
 
   var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
   var textValueChanged by rememberSaveable { mutableStateOf(false) }
@@ -293,17 +301,6 @@ private fun EditTextPref(
       }
     }
   }
-
-  var showDialog by rememberSaveable { mutableStateOf(autoShowDialog) }
-
-  TextPref(
-    title = title,
-    modifier = modifier,
-    summary = summary,
-    textColor = textColor,
-    enabled = enabled,
-    onClick = { if (enabled) showDialog = !showDialog },
-  )
 
   if (showDialog) {
     LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }

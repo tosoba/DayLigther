@@ -38,7 +38,6 @@ import com.trm.daylighter.feature.location.*
 import com.trm.daylighter.feature.locations.LocationsRoute
 import com.trm.daylighter.feature.locations.locationsRoute
 import com.trm.daylighter.feature.settings.settingsComposable
-import com.trm.daylighter.feature.settings.settingsNavigationRoute
 import com.trm.daylighter.feature.settings.settingsRoute
 import com.trm.daylighter.feature.widget.location.WidgetLocationRoute
 import com.trm.daylighter.feature.widget.location.widgetLocationRoute
@@ -213,13 +212,6 @@ private fun DayLighterNavHost(
     navController.navigate(route = "$locationRoute/$locationId", navOptions = nextLevelNavOptions())
   }
 
-  fun navigateToSettingsOnEnableGeocodingClick() {
-    navController.navigate(
-      route = settingsNavigationRoute(autoShowEmailDialog = true),
-      navOptions = nextLevelNavOptions()
-    )
-  }
-
   val context = LocalContext.current
   val dayNightCycleDeepLinkUriPattern = context.dayNightCycleDeepLinkPattern()
   val goldenBlueHourDeepLinkUriPattern = context.goldenBlueHourDeepLinkPattern()
@@ -296,22 +288,14 @@ private fun DayLighterNavHost(
       route = locationRoute,
       deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUriPattern })
     ) {
-      LocationRoute(
-        modifier = Modifier.fillMaxSize(),
-        onBackClick = navController::popBackStack,
-        onEnableGeocodingClick = ::navigateToSettingsOnEnableGeocodingClick
-      )
+      LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }
 
     composable(
       route = editLocationRoute,
       arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
     ) {
-      LocationRoute(
-        modifier = Modifier.fillMaxSize(),
-        onBackClick = navController::popBackStack,
-        onEnableGeocodingClick = ::navigateToSettingsOnEnableGeocodingClick
-      )
+      LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }
   }
 }

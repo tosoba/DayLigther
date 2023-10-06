@@ -67,7 +67,6 @@ const val editLocationRoute = "$locationRoute/{$locationIdParam}"
 @Composable
 fun LocationRoute(
   onBackClick: () -> Unit,
-  onEnableGeocodingClick: () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: LocationViewModel = hiltViewModel()
 ) {
@@ -108,8 +107,13 @@ fun LocationRoute(
         id = if (isGeocodeEmailPreferenceSet.value) R.string.geocode else R.string.enable_geocoding
       ),
     onGeocodeClick =
-      if (isGeocodeEmailPreferenceSet.value) viewModel::getLocationDisplayName
-      else { _, _ -> onEnableGeocodingClick() },
+      if (isGeocodeEmailPreferenceSet.value) {
+        viewModel::getLocationDisplayName
+      } else {
+        { _, _ ->
+          // TODO:
+        }
+      },
     onBackClick = onBackClick,
     modifier = modifier
   )
