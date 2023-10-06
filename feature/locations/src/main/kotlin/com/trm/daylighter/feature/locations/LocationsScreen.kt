@@ -2,10 +2,9 @@ package com.trm.daylighter.feature.locations
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -33,11 +32,11 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.ui.composable.*
-import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 
 const val locationsRoute = "locations_route"
 
@@ -61,7 +60,7 @@ fun LocationsRoute(
   )
 }
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
@@ -74,10 +73,10 @@ private fun LocationsScreen(
 ) {
   Box(modifier = modifier) {
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
-    var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
+    var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
-    var bottomButtonsHeightPx by remember { mutableStateOf(0) }
+    var bottomButtonsHeightPx by remember { mutableIntStateOf(0) }
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
@@ -95,12 +94,13 @@ private fun LocationsScreen(
 
     AnimatedContent(
       targetState = locations,
-      transitionSpec = { fadeIn() with fadeOut() },
-      modifier = Modifier.fillMaxSize()
+      transitionSpec = { fadeIn() togetherWith fadeOut() },
+      modifier = Modifier.fillMaxSize(),
+      label = "locations-chart-animated-content"
     ) { locations ->
       when (locations) {
         is Ready -> {
-          var topAppBarHeightPx by remember { mutableStateOf(0) }
+          var topAppBarHeightPx by remember { mutableIntStateOf(0) }
 
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))

@@ -2,10 +2,9 @@ package com.trm.daylighter.feature.widget.location
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -45,6 +44,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -61,7 +62,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
@@ -79,12 +79,13 @@ import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
 import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
-import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
+import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.collectLatest
+import com.trm.daylighter.core.common.R as commonR
 
 const val widgetLocationRoute = "widget_location_route"
 
@@ -124,7 +125,7 @@ fun WidgetLocationRoute(
   }
 }
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WidgetLocationScreen(
   locations: Loadable<List<StableValue<Location>>>,
@@ -139,11 +140,11 @@ private fun WidgetLocationScreen(
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
-    var zoom by rememberSaveable { mutableStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
+    var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 20.dp
-    var addWidgetButtonsHeightPx by remember { mutableStateOf(0) }
-    var zoomButtonsRowHeightPx by remember { mutableStateOf(0) }
+    var addWidgetButtonsHeightPx by remember { mutableIntStateOf(0) }
+    var zoomButtonsRowHeightPx by remember { mutableIntStateOf(0) }
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
@@ -161,12 +162,13 @@ private fun WidgetLocationScreen(
 
     AnimatedContent(
       targetState = locations,
-      transitionSpec = { fadeIn() with fadeOut() },
-      modifier = Modifier.fillMaxSize()
+      transitionSpec = { fadeIn() togetherWith fadeOut() },
+      modifier = Modifier.fillMaxSize(),
+      label = "widget-location-chart-animated-content"
     ) { locations ->
       when (locations) {
         is Ready -> {
-          var topAppBarHeightPx by remember { mutableStateOf(0) }
+          var topAppBarHeightPx by remember { mutableIntStateOf(0) }
 
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
