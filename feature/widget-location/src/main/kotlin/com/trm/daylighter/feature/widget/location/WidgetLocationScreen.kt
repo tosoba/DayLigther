@@ -171,7 +171,7 @@ private fun WidgetLocationScreen(
           var topAppBarHeightPx by remember { mutableIntStateOf(0) }
 
           Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             LazyVerticalGrid(
               contentPadding = PaddingValues(10.dp),
@@ -256,7 +256,7 @@ private fun WidgetLocationScreen(
         }
         is Loading -> {
           Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             LinearProgressIndicator(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
@@ -267,7 +267,7 @@ private fun WidgetLocationScreen(
         }
         else -> {
           Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.25f))
+            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(20.dp),

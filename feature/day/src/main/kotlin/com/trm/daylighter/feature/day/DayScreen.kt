@@ -234,7 +234,7 @@ internal fun DayScreen(
               change = Empty.asStable(),
               modifier =
                 Modifier.fillMaxSize()
-                  .alpha(.25f)
+                  .alpha(.15f)
                   .enumTestTag(DayTestTags.WITHOUT_DATA_LOCATIONS_CHART),
               chartMode = chartMode,
               appBarHeightPx = appBarHeightPx
