@@ -71,7 +71,7 @@ fun EditTextPrefAlertDialog(
       text = {
         OutlinedTextField(
           value = textValue,
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
           placeholder = editTextPlaceholder?.let { { Text(text = it) } },
           singleLine = true,
           isError = validationMsg != null,
@@ -134,7 +134,7 @@ fun EditTextPrefAlertDialog(
 
 @Composable
 private fun DialogHeader(dialogTitle: String?, dialogMessage: String?) {
-  Column(modifier = Modifier.padding(16.dp)) {
+  Column(modifier = Modifier.padding(8.dp)) {
     if (dialogTitle != null) {
       Text(
         text = dialogTitle,
@@ -143,7 +143,7 @@ private fun DialogHeader(dialogTitle: String?, dialogMessage: String?) {
       )
     }
     if (dialogMessage != null) {
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(8.dp))
       Text(text = dialogMessage, style = MaterialTheme.typography.bodyMedium)
     }
   }
