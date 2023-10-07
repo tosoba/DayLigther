@@ -50,12 +50,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
+import com.trm.daylighter.core.ui.composable.AlertDialogHeader
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
-import com.trm.daylighter.core.ui.composable.editTextPrefAlertDialogWidthModifier
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
+import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 import com.trm.daylighter.feature.location.model.*
 import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
@@ -78,14 +79,22 @@ fun LocationRoute(
   var showGeocodingEmailDialog by rememberSaveable { mutableStateOf(false) }
   val geocodingEmail = viewModel.geocodingEmailFlow.collectAsStateWithLifecycle(initialValue = "")
 
+  val keyboardOpen = rememberKeyboardOpen()
+
   EditTextPrefAlertDialog(
-    modifier = Modifier.editTextPrefAlertDialogWidthModifier(),
     isShowing = showGeocodingEmailDialog,
     hide = { showGeocodingEmailDialog = false },
     prefValue = geocodingEmail.value.orEmpty(),
     editPref = viewModel::setGeocodingEmail,
-    dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
-    dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message),
+    title = {
+      AnimatedVisibility(visible = !keyboardOpen.value) {
+        AlertDialogHeader(
+          modifier = Modifier.padding(8.dp),
+          dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
+          dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message)
+        )
+      }
+    },
     editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
     validateValue = { value -> value.isValidEmail()?.let(context::getString) }
   )

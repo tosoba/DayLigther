@@ -1,6 +1,7 @@
 package com.trm.daylighter.feature.settings
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,10 +36,11 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.isValidEmail
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
+import com.trm.daylighter.core.ui.composable.AlertDialogHeader
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
-import com.trm.daylighter.core.ui.composable.editTextPrefAlertDialogWidthModifier
+import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -241,14 +243,22 @@ private fun EditTextPref(
     }
   }
 
+  val keyboardOpen = rememberKeyboardOpen()
+
   EditTextPrefAlertDialog(
-    modifier = Modifier.editTextPrefAlertDialogWidthModifier(),
     isShowing = showDialog,
     hide = { showDialog = false },
     prefValue = prefValue,
     editPref = ::editPref,
-    dialogTitle = dialogTitle,
-    dialogMessage = dialogMessage,
+    title = {
+      AnimatedVisibility(visible = !keyboardOpen.value) {
+        AlertDialogHeader(
+          modifier = Modifier.padding(8.dp),
+          dialogTitle = dialogTitle,
+          dialogMessage = dialogMessage
+        )
+      }
+    },
     editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
     onValueChange = onValueChange,
     validateValue = validateValue,
