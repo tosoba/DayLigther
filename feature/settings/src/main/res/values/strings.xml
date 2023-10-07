@@ -8,11 +8,6 @@
     <string name="geocoding_pref_group_title">Geocoding</string>
     <string name="geocoding_email_pref_title">Email</string>
     <string name="geocoding_email_pref_summary">Email used for authorizing geocoding (retrieving location address) API requests.</string>
-    <string name="geocoding_email_pref_dialog_title">Enter an email address</string>
-    <string name="geocoding_email_pref_dialog_message">Provided email address will be used to authorize geocoding API requests. There will be no need to login to it. Any valid email address will work.</string>
-    <string name="geocoding_email_value_placeholder">Email</string>
-    <string name="email_empty_error">Email address cannot be empty.</string>
-    <string name="invalid_email_error">Invalid email address.</string>
     <string name="disable_geocoding_email_pref_title">Disable geocoding</string>
     <string name="disable_geocoding_email_pref_summary">Disables geocoding by clearing saved email used to authorize requests.</string>
     <string name="geocoding_is_disabled">Geocoding is disabled.</string>

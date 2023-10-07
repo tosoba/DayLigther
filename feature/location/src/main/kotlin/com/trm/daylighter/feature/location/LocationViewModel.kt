@@ -7,10 +7,11 @@ import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.exception.LocationDisplayNameNotFound
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationById
-import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
-import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetGeocodingEmailFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationDisplayNameUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
+import com.trm.daylighter.core.domain.usecase.SetGeocodingEmailUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,11 +26,12 @@ class LocationViewModel
 @Inject
 constructor(
   private val savedStateHandle: SavedStateHandle,
-  private val getLocationById: GetLocationById,
+  private val getLocationByIdUseCase: GetLocationByIdUseCase,
   private val saveLocationUseCase: SaveLocationUseCase,
   private val getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase,
-  private val getLocationDisplayName: GetLocationDisplayName,
-  isGeocodingEmailPreferenceSetFlowUseCase: IsGeocodingEmailPreferenceSetFlowUseCase
+  private val getLocationDisplayNameUseCase: GetLocationDisplayNameUseCase,
+  private val setGeocodingEmailUseCase: SetGeocodingEmailUseCase,
+  getGeocodingEmailFlowUseCase: GetGeocodingEmailFlowUseCase,
 ) : ViewModel() {
   private val saveLocationRequestFlow = MutableSharedFlow<SaveLocationRequest>()
   private val prepareSaveLocationFlow: SharedFlow<Loadable<LocationPreparedToSave>> =
@@ -96,7 +98,7 @@ constructor(
   init {
     initialLocationId?.let {
       viewModelScope.launch {
-        val location = getLocationById(it) ?: return@launch
+        val location = getLocationByIdUseCase(it) ?: return@launch
         savedStateHandle[MAP_POSITION] =
           MapPosition(
             latitude = location.latitude,
@@ -116,7 +118,7 @@ constructor(
           is LocationNameRequest.Geocode -> {
             channelFlow {
               var failed = false
-              getLocationDisplayName(lat = request.lat, lng = request.lng).collectLatest {
+              getLocationDisplayNameUseCase(lat = request.lat, lng = request.lng).collectLatest {
                 failed = it is Failed
                 send(it)
               }
@@ -152,7 +154,12 @@ constructor(
     if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
   val isGeocodeEmailPreferenceSetFlow: SharedFlow<Boolean> =
-    isGeocodingEmailPreferenceSetFlowUseCase()
+    getGeocodingEmailFlowUseCase()
+      .map { it != null }
+      .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
+
+  val geocodingEmailFlow: SharedFlow<String?> =
+    getGeocodingEmailFlowUseCase()
       .shareIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), replay = 1)
 
   fun requestSaveSpecifiedLocation(latitude: Double, longitude: Double) {
@@ -204,6 +211,10 @@ constructor(
 
   fun clearLocationName() {
     viewModelScope.launch { locationNameRequestFlow.emit(LocationNameRequest.Clear) }
+  }
+
+  fun setGeocodingEmail(email: String) {
+    viewModelScope.launch { setGeocodingEmailUseCase(email) }
   }
 
   private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitSpecifiedLocation(

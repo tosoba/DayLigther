@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
+import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
@@ -71,6 +72,20 @@ fun LocationRoute(
   viewModel: LocationViewModel = hiltViewModel()
 ) {
   LaunchedEffect(Unit) { viewModel.locationSavedFlow.collect { onBackClick() } }
+
+  val context = LocalContext.current
+  var showGeocodingEmailDialog by rememberSaveable { mutableStateOf(false) }
+  val geocodingEmail = viewModel.geocodingEmailFlow.collectAsStateWithLifecycle(initialValue = "")
+  EditTextPrefAlertDialog(
+    isShowing = showGeocodingEmailDialog,
+    hide = { showGeocodingEmailDialog = false },
+    prefValue = geocodingEmail.value.orEmpty(),
+    editPref = viewModel::setGeocodingEmail,
+    dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
+    dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message),
+    editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
+    validateValue = { value -> value.isValidEmail()?.let(context::getString) }
+  )
 
   val mapPosition = viewModel.mapPositionFlow.collectAsStateWithLifecycle()
   val locationPreparedToSave =
@@ -107,13 +122,8 @@ fun LocationRoute(
         id = if (isGeocodeEmailPreferenceSet.value) R.string.geocode else R.string.enable_geocoding
       ),
     onGeocodeClick =
-      if (isGeocodeEmailPreferenceSet.value) {
-        viewModel::getLocationDisplayName
-      } else {
-        { _, _ ->
-          // TODO:
-        }
-      },
+      if (isGeocodeEmailPreferenceSet.value) viewModel::getLocationDisplayName
+      else { _, _ -> showGeocodingEmailDialog = true },
     onBackClick = onBackClick,
     modifier = modifier
   )

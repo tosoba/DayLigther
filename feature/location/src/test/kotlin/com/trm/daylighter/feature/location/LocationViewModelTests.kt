@@ -9,10 +9,11 @@ import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.repo.GeocodingRepo
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationById
-import com.trm.daylighter.core.domain.usecase.GetLocationDisplayName
-import com.trm.daylighter.core.domain.usecase.IsGeocodingEmailPreferenceSetFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetGeocodingEmailFlowUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationDisplayNameUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
+import com.trm.daylighter.core.domain.usecase.SetGeocodingEmailUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
 import com.trm.daylighter.feature.location.model.LocationPreparedToSave
 import com.trm.daylighter.feature.location.model.LocationScreenMode
@@ -48,8 +49,8 @@ class LocationViewModelTests {
       LocationScreenMode.EDIT,
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 41L)),
-          getLocationById =
-            mockk<GetLocationById>().apply { coEvery { this@apply(any()) } returns null }
+          getLocationByIdUseCase =
+            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null }
         )
         .screenMode
     )
@@ -70,8 +71,8 @@ class LocationViewModelTests {
     runTest {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 33L)),
-          getLocationById =
-            mockk<GetLocationById>().apply { coEvery { this@apply(any()) } returns null }
+          getLocationByIdUseCase =
+            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null }
         )
         .mapPositionFlow
         .test {
@@ -96,8 +97,8 @@ class LocationViewModelTests {
 
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 61L)),
-          getLocationById =
-            mockk<GetLocationById>().apply {
+          getLocationByIdUseCase =
+            mockk<GetLocationByIdUseCase>().apply {
               coEvery { this@apply(any()) } returns expectedLocation
             }
         )
@@ -496,7 +497,9 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and location name is returned successfully THEN location name loading flow emits true, false`() =
     runTest {
       with(
-        viewModel(getLocationDisplayName = getLocationDisplayName { returns("geocoded name") })
+        viewModel(
+          getLocationDisplayNameUseCase = getLocationDisplayName { returns("geocoded name") }
+        )
       ) {
         locationNameLoadingFlow.test {
           runCurrent()
@@ -511,7 +514,7 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and location name is null THEN location name loading flow emits true, false`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+      with(viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { returns(null) })) {
         locationNameLoadingFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -526,7 +529,9 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and exception is thrown THEN location name loading flow emits true, false, false`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+      with(
+        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { throws(IOException()) })
+      ) {
         locationNameLoadingFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -542,7 +547,9 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and location name is returned successfully THEN location name ready flow emits empty string and returned name`() =
     runTest {
       val locationName = "geocoded name"
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(locationName) })) {
+      with(
+        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { returns(locationName) })
+      ) {
         locationNameReadyFlow.test {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -556,7 +563,7 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and location name is null THEN location name ready flow emits empty string 3 times`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+      with(viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { returns(null) })) {
         locationNameReadyFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -569,7 +576,9 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and exception is thrown THEN location name ready flow emits empty string 3 times`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+      with(
+        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { throws(IOException()) })
+      ) {
         locationNameReadyFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -583,7 +592,9 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and location name is returned successfully THEN location name failure message flow emits null twice`() =
     runTest {
       with(
-        viewModel(getLocationDisplayName = getLocationDisplayName { returns("geocoded name") })
+        viewModel(
+          getLocationDisplayNameUseCase = getLocationDisplayName { returns("geocoded name") }
+        )
       ) {
         locationNameFailureMessageFlow.test {
           runCurrent()
@@ -598,7 +609,7 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and location name is null THEN location name failure message flow emits null, location name not found, null`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { returns(null) })) {
+      with(viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { returns(null) })) {
         locationNameFailureMessageFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -613,7 +624,9 @@ class LocationViewModelTests {
   @Test
   fun `WHEN get location display name is called and exception is thrown THEN location name failure message flow emits null, geocoding error, null`() =
     runTest {
-      with(viewModel(getLocationDisplayName = getLocationDisplayName { throws(IOException()) })) {
+      with(
+        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { throws(IOException()) })
+      ) {
         locationNameFailureMessageFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
           getLocationDisplayName(5.0, 16.0)
@@ -626,7 +639,7 @@ class LocationViewModelTests {
     }
 
   private fun getLocationDisplayName(repoResponse: MockKStubScope<String?, String?>.() -> Unit) =
-    GetLocationDisplayName(
+    GetLocationDisplayNameUseCase(
       mockk<GeocodingRepo>().apply {
         coEvery { this@apply.getLocationDisplayName(any(), any()) }.repoResponse()
       }
@@ -634,22 +647,22 @@ class LocationViewModelTests {
 
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    getLocationById: GetLocationById = mockk(),
+    getLocationByIdUseCase: GetLocationByIdUseCase = mockk(),
     saveLocationUseCase: SaveLocationUseCase = mockk(),
     getCurrentUserLatLngUseCase: GetCurrentUserLatLngUseCase = mockk(),
-    getLocationDisplayName: GetLocationDisplayName = mockk(),
-    isGeocodingEmailPreferenceSetFlowUseCase: IsGeocodingEmailPreferenceSetFlowUseCase =
-      mockk<IsGeocodingEmailPreferenceSetFlowUseCase>().apply {
-        every { this@apply() } returns flowOf(false)
-      }
+    getLocationDisplayNameUseCase: GetLocationDisplayNameUseCase = mockk(),
+    setGeocodingEmailUseCase: SetGeocodingEmailUseCase = mockk(),
+    getGeocodingEmailFlowUseCase: GetGeocodingEmailFlowUseCase =
+      mockk<GetGeocodingEmailFlowUseCase>().apply { every { this@apply() } returns flowOf(null) },
   ): LocationViewModel =
     LocationViewModel(
       savedStateHandle,
-      getLocationById,
+      getLocationByIdUseCase,
       saveLocationUseCase,
       getCurrentUserLatLngUseCase,
-      getLocationDisplayName,
-      isGeocodingEmailPreferenceSetFlowUseCase
+      getLocationDisplayNameUseCase,
+      setGeocodingEmailUseCase,
+      getGeocodingEmailFlowUseCase,
     )
 
   private fun assertMapPositionEquals(

@@ -8,4 +8,8 @@ interface PreferenceDataSource {
   suspend fun clearGeocodingEmailPreference()
 
   suspend fun getGeocodingEmail(): String?
+
+  fun getGeocodingEmailFlow(): Flow<String?>
+
+  suspend fun setGeocodingEmail(email: String)
 }

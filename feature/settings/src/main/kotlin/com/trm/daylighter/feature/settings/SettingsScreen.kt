@@ -1,23 +1,15 @@
 package com.trm.daylighter.feature.settings
 
-import android.util.Patterns
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,9 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,10 +32,12 @@ import com.jamal.composeprefs3.ui.PrefsScope
 import com.jamal.composeprefs3.ui.PrefsScreen
 import com.jamal.composeprefs3.ui.prefs.*
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.isValidEmail
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
+import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -131,21 +123,14 @@ private fun SettingsScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 private fun PrefsScope.editGeocodingEmailPreferenceItem() {
   prefsItem {
-    val emailEmptyError = stringResource(R.string.email_empty_error)
-    val invalidEmailAddress = stringResource(R.string.invalid_email_error)
+    val context = LocalContext.current
     EditTextPref(
       key = PreferencesDataStoreKeys.GEOCODING_EMAIL,
       title = stringResource(R.string.geocoding_email_pref_title),
       summary = stringResource(R.string.geocoding_email_pref_summary),
-      dialogTitle = stringResource(R.string.geocoding_email_pref_dialog_title),
-      dialogMessage = stringResource(R.string.geocoding_email_pref_dialog_message),
-      validateValue = {
-        when {
-          it.isBlank() -> emailEmptyError
-          !Patterns.EMAIL_ADDRESS.matcher(it).matches() -> invalidEmailAddress
-          else -> null
-        }
-      },
+      dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
+      dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message),
+      validateValue = { value -> value.isValidEmail()?.let(context::getString) },
     )
   }
 }
@@ -262,116 +247,9 @@ private fun EditTextPref(
     editPref = ::editPref,
     dialogTitle = dialogTitle,
     dialogMessage = dialogMessage,
+    editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
     onValueChange = onValueChange,
     validateValue = validateValue,
     dialogBackgroundColor = dialogBackgroundColor
   )
-}
-
-@Composable
-private fun EditTextPrefAlertDialog(
-  isShowing: Boolean,
-  hide: () -> Unit,
-  prefValue: String,
-  editPref: (String) -> Unit,
-  dialogTitle: String?,
-  dialogMessage: String?,
-  onValueChange: (String) -> Unit,
-  validateValue: (String) -> String?,
-  dialogBackgroundColor: Color
-) {
-  var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
-  var textValueChanged by rememberSaveable { mutableStateOf(false) }
-  var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
-
-  if (isShowing) {
-    LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
-
-    AlertDialog(
-      modifier = Modifier.fillMaxWidth(0.9f),
-      onDismissRequest = {
-        textValueChanged = false
-        textValue = prefValue
-        hide()
-      },
-      title = { DialogHeader(dialogTitle = dialogTitle, dialogMessage = dialogMessage) },
-      text = {
-        OutlinedTextField(
-          value = textValue,
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-          placeholder = { Text(text = stringResource(R.string.geocoding_email_value_placeholder)) },
-          singleLine = true,
-          isError = validationMsg != null,
-          supportingText = {
-            AnimatedVisibility(
-              visible = validationMsg != null,
-              enter = fadeIn(),
-              exit = fadeOut()
-            ) {
-              Text(text = validationMsg ?: "")
-            }
-          },
-          onValueChange = {
-            val trimmed = it.trim()
-            textValue = trimmed
-            validationMsg = null
-            textValueChanged = true
-            onValueChange(trimmed)
-          }
-        )
-      },
-      confirmButton = {
-        TextButton(
-          modifier = Modifier.padding(end = 16.dp),
-          onClick = {
-            validationMsg = validateValue(textValue)
-            if (validationMsg == null) {
-              editPref(textValue)
-              textValueChanged = false
-              hide()
-            }
-          }
-        ) {
-          Text(
-            text = stringResource(android.R.string.ok),
-            style = MaterialTheme.typography.bodyLarge
-          )
-        }
-      },
-      dismissButton = {
-        TextButton(
-          modifier = Modifier.padding(end = 16.dp),
-          onClick = {
-            textValueChanged = false
-            validationMsg = null
-            hide()
-          }
-        ) {
-          Text(
-            text = stringResource(android.R.string.cancel),
-            style = MaterialTheme.typography.bodyLarge
-          )
-        }
-      },
-      properties = DialogProperties(usePlatformDefaultWidth = false),
-      containerColor = dialogBackgroundColor,
-    )
-  }
-}
-
-@Composable
-private fun DialogHeader(dialogTitle: String?, dialogMessage: String?) {
-  Column(modifier = Modifier.padding(16.dp)) {
-    if (dialogTitle != null) {
-      Text(
-        text = dialogTitle,
-        style = MaterialTheme.typography.titleLarge,
-        textAlign = TextAlign.Center
-      )
-    }
-    if (dialogMessage != null) {
-      Spacer(modifier = Modifier.height(16.dp))
-      Text(text = dialogMessage, style = MaterialTheme.typography.bodyMedium)
-    }
-  }
 }

@@ -28,4 +28,11 @@ constructor(
 
   override suspend fun getGeocodingEmail(): String? =
     context.preferencesDataStore.data.map { preferences -> preferences[geocodingEmailKey] }.first()
+
+  override fun getGeocodingEmailFlow(): Flow<String?> =
+    context.preferencesDataStore.data.map { preferences -> preferences[geocodingEmailKey] }
+
+  override suspend fun setGeocodingEmail(email: String) {
+    context.preferencesDataStore.edit { preferences -> preferences[geocodingEmailKey] = email }
+  }
 }
