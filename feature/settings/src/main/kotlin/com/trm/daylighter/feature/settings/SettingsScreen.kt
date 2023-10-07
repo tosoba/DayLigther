@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import com.trm.daylighter.core.ui.composable.AlertDialogHeader
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
+import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
@@ -251,7 +253,10 @@ private fun EditTextPref(
     prefValue = prefValue,
     editPref = ::editPref,
     title = {
-      AnimatedVisibility(visible = !keyboardOpen.value) {
+      AnimatedVisibility(
+        visible =
+          !keyboardOpen.value || LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
+      ) {
         AlertDialogHeader(
           modifier = Modifier.padding(8.dp),
           dialogTitle = dialogTitle,

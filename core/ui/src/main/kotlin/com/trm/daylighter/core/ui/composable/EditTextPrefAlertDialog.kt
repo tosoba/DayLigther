@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
+import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 
 @Composable
 fun EditTextPrefAlertDialog(
@@ -41,6 +44,8 @@ fun EditTextPrefAlertDialog(
   var textValue by rememberSaveable(prefValue) { mutableStateOf(prefValue) }
   var textValueChanged by rememberSaveable { mutableStateOf(false) }
   var validationMsg: String? by rememberSaveable { mutableStateOf(null) }
+
+  val keyboardOpen = rememberKeyboardOpen()
 
   if (isShowing) {
     LaunchedEffect(Unit) { if (!textValueChanged) textValue = prefValue }
@@ -79,36 +84,46 @@ fun EditTextPrefAlertDialog(
         )
       },
       confirmButton = {
-        TextButton(
-          modifier = Modifier.padding(end = 16.dp),
-          onClick = {
-            validationMsg = validateValue(textValue)
-            if (validationMsg == null) {
-              editPref(textValue)
-              textValueChanged = false
-              hide()
-            }
-          }
+        AnimatedVisibility(
+          visible =
+            !keyboardOpen.value || LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
         ) {
-          Text(
-            text = stringResource(android.R.string.ok),
-            style = MaterialTheme.typography.bodyLarge
-          )
+          TextButton(
+            modifier = Modifier.padding(end = 16.dp),
+            onClick = {
+              validationMsg = validateValue(textValue)
+              if (validationMsg == null) {
+                editPref(textValue)
+                textValueChanged = false
+                hide()
+              }
+            }
+          ) {
+            Text(
+              text = stringResource(android.R.string.ok),
+              style = MaterialTheme.typography.bodyLarge
+            )
+          }
         }
       },
       dismissButton = {
-        TextButton(
-          modifier = Modifier.padding(end = 16.dp),
-          onClick = {
-            textValueChanged = false
-            validationMsg = null
-            hide()
-          }
+        AnimatedVisibility(
+          visible =
+            !keyboardOpen.value || LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
         ) {
-          Text(
-            text = stringResource(android.R.string.cancel),
-            style = MaterialTheme.typography.bodyLarge
-          )
+          TextButton(
+            modifier = Modifier.padding(end = 16.dp),
+            onClick = {
+              textValueChanged = false
+              validationMsg = null
+              hide()
+            }
+          ) {
+            Text(
+              text = stringResource(android.R.string.cancel),
+              style = MaterialTheme.typography.bodyLarge
+            )
+          }
         }
       },
       containerColor = dialogBackgroundColor,

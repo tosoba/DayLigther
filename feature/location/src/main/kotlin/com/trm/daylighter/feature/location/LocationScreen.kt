@@ -28,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,6 +55,7 @@ import com.trm.daylighter.core.ui.composable.AlertDialogHeader
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
+import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
@@ -87,7 +89,10 @@ fun LocationRoute(
     prefValue = geocodingEmail.value.orEmpty(),
     editPref = viewModel::setGeocodingEmail,
     title = {
-      AnimatedVisibility(visible = !keyboardOpen.value) {
+      AnimatedVisibility(
+        visible =
+          !keyboardOpen.value || LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
+      ) {
         AlertDialogHeader(
           modifier = Modifier.padding(8.dp),
           dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
