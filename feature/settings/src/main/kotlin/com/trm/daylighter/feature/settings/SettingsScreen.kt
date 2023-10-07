@@ -38,6 +38,7 @@ import com.trm.daylighter.core.datastore.preferencesDataStore
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
+import com.trm.daylighter.core.ui.composable.editTextPrefAlertDialogWidthModifier
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -241,6 +242,7 @@ private fun EditTextPref(
   }
 
   EditTextPrefAlertDialog(
+    modifier = Modifier.editTextPrefAlertDialogWidthModifier(),
     isShowing = showDialog,
     hide = { showDialog = false },
     prefValue = prefValue,

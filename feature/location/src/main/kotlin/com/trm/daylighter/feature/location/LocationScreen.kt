@@ -52,6 +52,7 @@ import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.composable.appBarTextStyle
+import com.trm.daylighter.core.ui.composable.editTextPrefAlertDialogWidthModifier
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
@@ -76,7 +77,9 @@ fun LocationRoute(
   val context = LocalContext.current
   var showGeocodingEmailDialog by rememberSaveable { mutableStateOf(false) }
   val geocodingEmail = viewModel.geocodingEmailFlow.collectAsStateWithLifecycle(initialValue = "")
+
   EditTextPrefAlertDialog(
+    modifier = Modifier.editTextPrefAlertDialogWidthModifier(),
     isShowing = showGeocodingEmailDialog,
     hide = { showGeocodingEmailDialog = false },
     prefValue = geocodingEmail.value.orEmpty(),
