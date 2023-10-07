@@ -24,6 +24,7 @@ constructor(
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
     context.sendBroadcast(context.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>())
+    context.sendBroadcast(context.updateAllWidgetsIntent<GoldenBlueHourWidgetReceiver>())
   }
 
   override suspend fun addDayNightCycleWidget(locationId: Long): Boolean =
