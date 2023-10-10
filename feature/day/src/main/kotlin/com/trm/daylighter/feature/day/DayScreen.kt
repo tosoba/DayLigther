@@ -14,6 +14,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -24,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.*
@@ -45,7 +47,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
 import com.trm.daylighter.core.common.model.DayPeriod
@@ -218,16 +219,27 @@ internal fun DayScreen(
             )
           }
 
-          HorizontalPagerIndicator(
-            pagerState = pagerState,
-            pageCount =
+          Row(
+            modifier = Modifier.padding(16.dp).align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.Center
+          ) {
+            repeat(
               when (locations) {
                 is WithData -> locations.data.size
                 is WithoutData -> 0
-              },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-            activeColor = MaterialTheme.colorScheme.onBackground,
-          )
+              }
+            ) {
+              Box(
+                modifier =
+                  Modifier.padding(2.dp)
+                    .clip(CircleShape)
+                    .background(
+                      if (pagerState.currentPage == it) Color.DarkGray else Color.LightGray
+                    )
+                    .size(10.dp)
+              )
+            }
+          }
         } else {
           Box(modifier = Modifier.fillMaxSize()) {
             DayPeriodChart(
