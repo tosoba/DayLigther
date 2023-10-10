@@ -9,7 +9,6 @@ android {
 }
 
 dependencies {
-  implementation(libs.accompanist.pagerindicators)
   implementation(libs.androidx.constraintlayout)
 
   debugImplementation(project(":ui-test-hilt-manifest"))
