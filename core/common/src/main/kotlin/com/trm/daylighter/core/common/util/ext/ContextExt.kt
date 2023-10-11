@@ -71,13 +71,13 @@ suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult {
 }
 
 sealed interface CheckLocationSettingsResult {
-  object Enabled : CheckLocationSettingsResult
+  data object Enabled : CheckLocationSettingsResult
 
   data class DisabledResolvable(
     val intentSenderRequest: IntentSenderRequest,
   ) : CheckLocationSettingsResult
 
-  object DisabledNonResolvable : CheckLocationSettingsResult
+  data object DisabledNonResolvable : CheckLocationSettingsResult
 }
 
 @SuppressLint("MissingPermission")

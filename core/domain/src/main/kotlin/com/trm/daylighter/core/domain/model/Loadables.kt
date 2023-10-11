@@ -30,13 +30,13 @@ sealed interface WithData<T : Any> : Loadable<T> {
 
 sealed interface WithoutData : Loadable<Nothing>
 
-object Empty : WithoutData {
+data object Empty : WithoutData {
   override fun <R : Any> map(block: (Nothing) -> R): Loadable<R> = this
 }
 
 sealed interface Loading
 
-object LoadingFirst : WithoutData, Loading {
+data object LoadingFirst : WithoutData, Loading {
   override fun <R : Any> map(block: (Nothing) -> R): Loadable<R> = this
 }
 

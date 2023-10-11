@@ -20,8 +20,8 @@ internal class SaveLocationState(
   latitude: Double = MapDefaults.LATITUDE,
   longitude: Double = MapDefaults.LONGITUDE,
 ) {
-  var latitude by mutableStateOf(latitude)
-  var longitude by mutableStateOf(longitude)
+  var latitude by mutableDoubleStateOf(latitude)
+  var longitude by mutableDoubleStateOf(longitude)
 
   companion object {
     val Saver: Saver<SaveLocationState, *> =
