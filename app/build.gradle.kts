@@ -59,8 +59,6 @@ dependencies {
   implementation(project(":widget"))
   implementation(project(":work"))
 
-  implementation(libs.accompanist.pagerindicators)
-
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.core.ktx)
