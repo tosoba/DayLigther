@@ -10,6 +10,7 @@ android {
 
 dependencies {
   implementation(libs.androidx.constraintlayout)
+  implementation(libs.androidx.compose.material)
 
   debugImplementation(project(":ui-test-hilt-manifest"))
   debugImplementation(libs.androidx.compose.ui.testManifest)
