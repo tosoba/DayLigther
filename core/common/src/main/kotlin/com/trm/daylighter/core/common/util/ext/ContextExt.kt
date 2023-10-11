@@ -32,24 +32,29 @@ fun Context.checkPermissions(
   onNotGranted: () -> Unit,
   onGranted: () -> Unit
 ) {
-  val allGranted =
+  if (
     permissions.all { permission ->
       ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
-  if (allGranted) onGranted() else onNotGranted()
+  ) {
+    onGranted()
+  } else {
+    onNotGranted()
+  }
 }
 
-suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult {
-  val locationRequest =
-    LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 0L)
-      .setMinUpdateIntervalMillis(0L)
-      .setMaxUpdates(1)
-      .build()
-
-  return suspendCoroutine { continuation ->
+suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult =
+  suspendCoroutine { continuation ->
     LocationServices.getSettingsClient(this)
       .checkLocationSettings(
-        LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
+        LocationSettingsRequest.Builder()
+          .addLocationRequest(
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 0L)
+              .setMinUpdateIntervalMillis(0L)
+              .setMaxUpdates(1)
+              .build()
+          )
+          .build()
       )
       .addOnSuccessListener { continuation.resume(CheckLocationSettingsResult.Enabled) }
       .addOnFailureListener { exception ->
@@ -60,7 +65,7 @@ suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult {
                 IntentSenderRequest.Builder(exception.resolution).build()
               )
             )
-          } catch (sendEx: IntentSender.SendIntentException) {
+          } catch (ex: IntentSender.SendIntentException) {
             continuation.resume(CheckLocationSettingsResult.DisabledNonResolvable)
           }
         } else {
@@ -68,7 +73,6 @@ suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult {
         }
       }
   }
-}
 
 sealed interface CheckLocationSettingsResult {
   data object Enabled : CheckLocationSettingsResult
