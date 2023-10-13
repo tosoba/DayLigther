@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -96,7 +95,6 @@ private val horizonLineExtraLengthPx: Float
 private val segmentEndingEdgeDashPathEffect: PathEffect
   get() = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun DayPeriodChart(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -263,7 +261,6 @@ private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>) {
   chartSegments.forEach(::drawChartSegment)
 }
 
-@OptIn(ExperimentalTextApi::class)
 private fun DrawScope.drawPeriodLabels(
   chartSegments: List<DayChartSegment>,
   textMeasurer: TextMeasurer,
@@ -667,7 +664,6 @@ private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
   }
 }
 
-@OptIn(ExperimentalTextApi::class)
 private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
   edgeLabels: DayChartSegmentEdgeLabels,
   textMeasurer: TextMeasurer,
@@ -769,7 +765,6 @@ private fun buildTimeAndDiffLabel(
   }
 }
 
-@OptIn(ExperimentalTextApi::class)
 private fun DrawScope.drawHorizonLabel(
   textStyle: TextStyle,
   textMeasurer: TextMeasurer,
@@ -949,8 +944,7 @@ private fun SunriseSunset.dayPeriodStartAngleRadians(
           when (chartMode) {
             DayPeriodChartMode.DAY_NIGHT_CYCLE -> sunset?.let { 0f.radians }
             DayPeriodChartMode.GOLDEN_BLUE_HOUR -> morning6Above?.let { (-6f).radians }
-          }
-            ?: nightStart
+          } ?: nightStart
         }
         DayMode.SUNSET -> {
           dayStart
@@ -1016,8 +1010,7 @@ private fun SunriseSunset.dayPeriodEndAngleRadians(
           when (chartMode) {
             DayPeriodChartMode.DAY_NIGHT_CYCLE -> sunset?.let { 0f.radians }
             DayPeriodChartMode.GOLDEN_BLUE_HOUR -> evening6Above?.let { (-6f).radians }
-          }
-            ?: nightEnd
+          } ?: nightEnd
         }
       }
     }
