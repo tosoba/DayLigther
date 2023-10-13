@@ -396,9 +396,10 @@ internal fun DayScreen(
         },
         modifier =
           Modifier.constrainAs(navigation) {
-            start.linkTo(parent.start)
-            linkTo(parent.top, parent.bottom)
-          },
+              start.linkTo(parent.start)
+              linkTo(parent.top, parent.bottom)
+            }
+            .enumTestTag(DayTestTags.NAVIGATION_RAIL),
       )
     }
 
