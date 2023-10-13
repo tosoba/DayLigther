@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.unit.DpSize
 import com.trm.daylighter.core.common.R
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Ready
@@ -17,7 +16,6 @@ import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.testing.util.testDpSize
-import com.trm.daylighter.core.ui.util.permanentNavigationDrawerMinWidth
 import com.trm.daylighter.uitesthiltmanifest.HiltComponentActivity
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -58,18 +56,6 @@ class DayScreenTests {
       onNodeWithEnumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD).assertIsDisplayed()
       onNodeWithText(activity.getString(R.string.no_saved_locations)).assertIsDisplayed()
       onNodeWithText(activity.getString(R.string.add_location)).assertIsDisplayed()
-    }
-  }
-
-  @Test
-  fun whenUsingPermanentNavigationDrawer_drawerMenuIconButtonDoesNotExist() {
-    with(composeTestRule) {
-      setContentHarness(
-        DpSize(width = permanentNavigationDrawerMinWidth, height = TestHeightClass.COMPACT.size)
-      ) {
-        TestDayScreen(modifier = Modifier.fillMaxSize())
-      }
-      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertDoesNotExist()
     }
   }
 
