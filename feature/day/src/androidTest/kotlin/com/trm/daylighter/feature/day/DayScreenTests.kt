@@ -17,6 +17,7 @@ import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.testing.util.testDpSize
+import com.trm.daylighter.feature.day.composable.TestDayScreen
 import io.mockk.mockk
 import org.junit.Rule
 import org.junit.Test

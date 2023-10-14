@@ -10,6 +10,7 @@ import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.ui.util.permanentNavigationDrawerMinWidth
+import com.trm.daylighter.feature.day.composable.TestDayScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
