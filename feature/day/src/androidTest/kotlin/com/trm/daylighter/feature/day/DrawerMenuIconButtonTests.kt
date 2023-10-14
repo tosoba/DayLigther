@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.DpSize
 import com.trm.daylighter.core.testing.util.TestHeightClass
 import com.trm.daylighter.core.testing.util.TestWidthClass
+import com.trm.daylighter.core.testing.util.testScreenDpSizeCombinations
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.ui.util.permanentNavigationDrawerMinWidth
@@ -58,8 +59,8 @@ class DrawerMenuIconButtonIsDisplayedTests(
     @JvmStatic
     @Parameterized.Parameters
     fun parameters(): List<Array<Any>> =
-      TestWidthClass.entries
-        .filter { it.size < permanentNavigationDrawerMinWidth }
-        .flatMap { width -> TestHeightClass.entries.map { height -> arrayOf(width, height) } }
+      testScreenDpSizeCombinations().filter { (width) ->
+        (width as TestWidthClass).size < permanentNavigationDrawerMinWidth
+      }
   }
 }

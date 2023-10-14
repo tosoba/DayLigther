@@ -9,6 +9,7 @@ import com.trm.daylighter.core.testing.util.TestHeightClass
 import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
+import com.trm.daylighter.core.testing.util.testScreenDpSizeCombinations
 import com.trm.daylighter.feature.day.composable.TestDayScreen
 import org.junit.Rule
 import org.junit.Test
@@ -35,10 +36,9 @@ class NavigationBarIsDisplayedTests(
   companion object {
     @JvmStatic
     @Parameterized.Parameters
-    fun parameters(): List<Array<out Any>> =
-      TestHeightClass.entries
-        .map<TestHeightClass, Array<Any>> { height -> arrayOf(TestWidthClass.COMPACT, height) }
-        .plus(TestWidthClass.entries.map { width -> arrayOf(width, TestHeightClass.EXPANDED) })
-        .distinct()
+    fun parameters(): List<Array<Any>> =
+      testScreenDpSizeCombinations().filter { (width, height) ->
+        width == TestWidthClass.COMPACT || height == TestHeightClass.EXPANDED
+      }
   }
 }
