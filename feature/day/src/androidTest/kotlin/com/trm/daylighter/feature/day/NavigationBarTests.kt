@@ -42,3 +42,30 @@ class NavigationBarIsDisplayedTests(
       }
   }
 }
+
+@RunWith(Parameterized::class)
+class NavigationBarIsDoesNotExistTests(
+  private val width: TestWidthClass,
+  private val height: TestHeightClass
+) {
+  @get:Rule val composeTestRule = createComposeRule()
+
+  @Test
+  fun whenNotUsingNavigationBar_navigationBarIsNotDisplayed() {
+    with(composeTestRule) {
+      setContentHarness(DpSize(width = width.size, height = height.size)) {
+        TestDayScreen(modifier = Modifier.fillMaxSize())
+      }
+      onNodeWithEnumTestTag(DayTestTags.NAVIGATION_BAR).assertDoesNotExist()
+    }
+  }
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters
+    fun parameters(): List<Array<Any>> =
+      testScreenDpSizeCombinations().filter { (width, height) ->
+        width != TestWidthClass.COMPACT && height != TestHeightClass.EXPANDED
+      }
+  }
+}
