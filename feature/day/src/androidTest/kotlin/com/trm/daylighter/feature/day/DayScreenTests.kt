@@ -1,5 +1,6 @@
 package com.trm.daylighter.feature.day
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
@@ -16,20 +17,12 @@ import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
 import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.testing.util.testDpSize
-import com.trm.daylighter.uitesthiltmanifest.HiltComponentActivity
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.mockk
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@HiltAndroidTest
 class DayScreenTests {
-  @get:Rule(order = 0) val hiltRule = HiltAndroidRule(this)
-  @get:Rule(order = 1) val composeTestRule = createAndroidComposeRule<HiltComponentActivity>()
-
-  @Before fun setup() = hiltRule.inject()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
   fun givenWithoutDataLocations_emptyChartIsDisplayed() {
