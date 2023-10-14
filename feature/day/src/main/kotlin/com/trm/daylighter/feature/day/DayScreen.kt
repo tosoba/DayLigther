@@ -374,7 +374,10 @@ internal fun DayScreen(
       NavigationRail(
         header = {
           if (!usingPermanentNavigationDrawer) {
-            DrawerMenuIconButton(onClick = onDrawerMenuClick)
+            DrawerMenuIconButton(
+              onClick = onDrawerMenuClick,
+              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+            )
           }
         },
         content = {

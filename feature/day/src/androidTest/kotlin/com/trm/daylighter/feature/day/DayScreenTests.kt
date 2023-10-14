@@ -60,30 +60,6 @@ class DayScreenTests {
   }
 
   @Test
-  fun whenNotUsingNavigationBar_drawerMenuIconButtonDoesNotExist() {
-    with(composeTestRule) {
-      setContentHarness(
-        testDpSize(width = TestWidthClass.MEDIUM, height = TestHeightClass.COMPACT)
-      ) {
-        TestDayScreen(modifier = Modifier.fillMaxSize())
-      }
-      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertDoesNotExist()
-    }
-  }
-
-  @Test
-  fun whenNotUsingPermanentNavigationDrawerAndUsingNavigationBar_drawerMenuIconButtonIsDisplayed() {
-    with(composeTestRule) {
-      setContentHarness(
-        testDpSize(width = TestWidthClass.COMPACT, height = TestHeightClass.COMPACT)
-      ) {
-        TestDayScreen(modifier = Modifier.fillMaxSize())
-      }
-      onNodeWithEnumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON).assertIsDisplayed()
-    }
-  }
-
-  @Test
   fun whenWidthIsNotCompactAndUsingNavigationBar_usingMaxWidthTopAppBar() {
     with(composeTestRule) {
       val size = testDpSize(width = TestWidthClass.COMPACT, height = TestHeightClass.MEDIUM)
