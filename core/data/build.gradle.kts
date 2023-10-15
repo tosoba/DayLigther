@@ -5,11 +5,7 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-android {
-  android { namespace = "com.trm.daylighter.core.data" }
-
-  testOptions { unitTests { isIncludeAndroidResources = true } }
-}
+android { namespace = "com.trm.daylighter.core.data" }
 
 dependencies {
   implementation(project(":core:common"))
