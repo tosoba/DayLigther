@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -14,6 +15,7 @@ import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.testing.model.testLocation
+import com.trm.daylighter.core.testing.model.testSunriseSunset
 import com.trm.daylighter.core.testing.util.TestHeightClass
 import com.trm.daylighter.core.testing.util.TestWidthClass
 import com.trm.daylighter.core.testing.util.onNodeWithEnumTestTag
@@ -116,5 +118,38 @@ class NavigationBarItemsDisabledTests(
         flowOf(LoadingFirst.asStable<LocationSunriseSunsetChange>()),
         flowOf(FailedFirst(Throwable()).asStable<LocationSunriseSunsetChange>()),
       )
+  }
+}
+
+class NavigationBarItemsEnabledTests {
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+  @Test
+  fun whenCurrentLocationSunriseSunsetChangeIsReady_navigationBarItemsAreEnabled() {
+    with(composeTestRule) {
+      setContentHarness(
+        DpSize(width = TestWidthClass.COMPACT.size, height = TestHeightClass.EXPANDED.size)
+      ) {
+        TestDayScreen(
+          modifier = Modifier.fillMaxSize(),
+          locations = Ready(listOf(testLocation())),
+          sunriseSunsetChangeInLocationAt = {
+            flowOf(
+              Ready(
+                  LocationSunriseSunsetChange(
+                    location = testLocation(),
+                    today = testSunriseSunset(),
+                    yesterday = testSunriseSunset()
+                  )
+                )
+                .asStable()
+            )
+          }
+        )
+      }
+
+      onNodeWithEnumTestTag(DayTestTags.NAVIGATION_BAR_SUNRISE_ITEM).assertIsEnabled()
+      onNodeWithEnumTestTag(DayTestTags.NAVIGATION_BAR_SUNSET_ITEM).assertIsEnabled()
+    }
   }
 }
