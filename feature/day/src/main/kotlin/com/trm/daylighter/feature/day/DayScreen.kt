@@ -1000,6 +1000,7 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
   onDayModeChange: (DayMode) -> Unit
 ) {
   NavigationBarItem(
+    modifier = Modifier.enumTestTag(DayTestTags.NAVIGATION_BAR_SUNRISE_ITEM),
     selected = itemsEnabled && dayMode == DayMode.SUNRISE,
     enabled = itemsEnabled,
     onClick = { onDayModeChange(DayMode.SUNRISE) },
@@ -1018,6 +1019,7 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
     }
   )
   NavigationBarItem(
+    modifier = Modifier.enumTestTag(DayTestTags.NAVIGATION_BAR_SUNSET_ITEM),
     selected = itemsEnabled && dayMode == DayMode.SUNSET,
     enabled = itemsEnabled,
     onClick = { onDayModeChange(DayMode.SUNSET) },
