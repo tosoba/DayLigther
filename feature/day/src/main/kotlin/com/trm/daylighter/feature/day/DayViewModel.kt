@@ -65,8 +65,7 @@ constructor(
   private suspend fun getNonDefaultLocationOffset(locationIdParam: String): Int =
     getNonDefaultLocationOffsetByIdUseCase(
       id = requireNotNull(savedStateHandle.get<String>(locationIdParam)).toLong()
-    )
-      ?: 0
+    ) ?: 0
 
   val locationsFlow: SharedFlow<Loadable<List<Location>>> =
     getAllLocationsFlowUseCase()
@@ -125,7 +124,8 @@ constructor(
         is WithData -> {
           delay(System.currentTimeMillis() % 1_000L)
           while (currentCoroutineContext().isActive) {
-            emit(LocalTime.now(locations.data[index].zoneId))
+            val now = LocalTime.now(locations.data[index].zoneId)
+            if (now.second == 0) emit(now)
             delay(1_000L)
           }
         }
