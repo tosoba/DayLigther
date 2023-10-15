@@ -1008,13 +1008,13 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
       Icon(
         painter = painterResource(R.drawable.sunrise),
         contentDescription = stringResource(commonR.string.sunrise),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunrise),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     }
   )
@@ -1027,13 +1027,13 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
       Icon(
         painter = painterResource(R.drawable.sunset),
         contentDescription = stringResource(commonR.string.sunset),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunset),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     }
   )
@@ -1056,13 +1056,13 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
       Icon(
         painter = painterResource(R.drawable.sunrise),
         contentDescription = stringResource(commonR.string.sunrise),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunrise),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     }
   )
@@ -1075,13 +1075,13 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
       Icon(
         painter = painterResource(R.drawable.sunset),
         contentDescription = stringResource(commonR.string.sunset),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunset),
-        modifier = Modifier.alpha(if (!itemsEnabled) .5f else 1f)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
       )
     }
   )
@@ -1090,3 +1090,6 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
 
   footer()
 }
+
+private fun Modifier.navigationItemEnabledAlpha(itemsEnabled: Boolean) =
+  this then alpha(if (!itemsEnabled) .5f else 1f)
