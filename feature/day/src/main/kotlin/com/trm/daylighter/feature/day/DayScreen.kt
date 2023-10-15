@@ -166,8 +166,20 @@ internal fun DayScreen(
     var currentChange by remember {
       mutableStateOf(StableLoadable<LocationSunriseSunsetChange>(Empty))
     }
+    var now by remember {
+      mutableStateOf(
+        LocalTime.now(
+          if (locations is WithData) locations.data[pagerState.currentPage].zoneId
+          else ZoneId.systemDefault()
+        )
+      )
+    }
+
     LaunchedEffect(pagerState.currentPage) {
       sunriseSunsetChangeInLocationAt(pagerState.currentPage).collectLatest { currentChange = it }
+    }
+    LaunchedEffect(pagerState.currentPage) {
+      currentTimeInLocationAt(pagerState.currentPage).collectLatest { now = it }
     }
 
     val usingNavigationBar = usingNavigationBar
@@ -195,28 +207,13 @@ internal fun DayScreen(
             state = pagerState,
             beyondBoundsPageCount = 2,
             modifier = Modifier.fillMaxSize()
-          ) { locationIndex ->
-            val pageChange =
-              sunriseSunsetChangeInLocationAt(locationIndex)
-                .collectAsStateWithLifecycle(
-                  initialValue = StableLoadable<LocationSunriseSunsetChange>(Empty)
-                )
-            val now =
-              currentTimeInLocationAt(locationIndex)
-                .collectAsStateWithLifecycle(
-                  initialValue =
-                    LocalTime.now(
-                      if (locations is WithData) locations.data[locationIndex].zoneId
-                      else ZoneId.systemDefault()
-                    )
-                )
-
+          ) {
             DayPeriodChart(
-              change = pageChange.value,
+              change = currentChange,
               modifier = Modifier.fillMaxSize(),
               chartMode = chartMode,
               dayMode = dayMode,
-              now = now.value,
+              now = now,
               appBarHeightPx = appBarHeightPx
             )
           }
