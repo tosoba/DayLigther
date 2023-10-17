@@ -3,7 +3,6 @@ package com.trm.daylighter.feature.location
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -36,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -283,10 +281,7 @@ private fun LocationScreen(
       cancelCurrentSaveLocation = cancelCurrentSaveLocation,
       onBackClick = onBackClick,
       modalSheet = {
-        if (
-          sheetVisible &&
-            LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
-        ) {
+        if (sheetVisible && LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
           ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
             ModalSheetContent(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth())
           }
@@ -315,7 +310,7 @@ private fun LocationScreen(
     }
   }
 
-  if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+  if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
     LocationScaffold()
   } else {
     val drawerState = remember {
@@ -431,7 +426,8 @@ private fun LocationAppBar(
     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
     title = {
       Text(
-        text = mapPosition.label.takeIf(String::isNotEmpty)
+        text =
+          mapPosition.label.takeIf(String::isNotEmpty)
             ?: stringResource(commonR.string.new_location),
         style = appBarTextStyle(),
         maxLines = 1,
