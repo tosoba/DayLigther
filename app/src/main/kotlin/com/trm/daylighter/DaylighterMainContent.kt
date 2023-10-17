@@ -148,12 +148,12 @@ private fun DayLighterDrawerContent(
 
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
       DrawerRouteItem(
-        label = stringResource(commonR.string.new_widget),
+        label = stringResource(commonR.string.widgets),
         route = widgetLocationRoute
       ) {
         Icon(
           imageVector = Icons.Filled.Widgets,
-          contentDescription = stringResource(commonR.string.new_widget)
+          contentDescription = stringResource(commonR.string.widgets)
         )
       }
     }
