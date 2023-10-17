@@ -578,14 +578,17 @@ private fun ModalSheetContent(
       )
     }
 
-    if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
-      ModalSheetButtonsRow(
+    if (
+      LocalHeightSizeClass.current == WindowHeightSizeClass.Compact ||
+        LocalWidthSizeClass.current == WindowWidthSizeClass.Compact
+    ) {
+      ModalSheetButtons(
         geocodeButtonText = geocodeButtonText,
         onGeocodeClick = onGeocodeClick,
         onSaveClick = onSaveClick
       )
     } else {
-      ModalSheetButtons(
+      ModalSheetButtonsRow(
         geocodeButtonText = geocodeButtonText,
         onGeocodeClick = onGeocodeClick,
         onSaveClick = onSaveClick
