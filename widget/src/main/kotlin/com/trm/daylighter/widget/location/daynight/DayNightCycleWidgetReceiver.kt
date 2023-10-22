@@ -2,7 +2,6 @@ package com.trm.daylighter.widget.location.daynight
 
 import android.content.Context
 import android.content.Intent
-import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
@@ -25,7 +24,7 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   internal lateinit var getLocationSunriseSunsetChangeFlowByIdUseCase:
     GetLocationSunriseSunsetChangeFlowByIdUseCase
 
-  override val glanceAppWidget: GlanceAppWidget
+  override val glanceAppWidget: DayNightCycleWidget
     get() =
       DayNightCycleWidget(
         getDefaultLocationSunriseSunsetChangeFlowUseCase,

@@ -2,7 +2,10 @@ package com.trm.daylighter.work.worker
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkerParameters
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -23,7 +26,9 @@ constructor(
 
   internal companion object {
     fun workRequest(): PeriodicWorkRequest =
-      PeriodicWorkRequestBuilder<DelegatingWorker>(Duration.ofMinutes(1L))
+      PeriodicWorkRequestBuilder<DelegatingWorker>(
+          Duration.ofMillis(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS)
+        )
         .setInputData(WidgetUpdateWorker::class.delegatedData())
         .build()
 
