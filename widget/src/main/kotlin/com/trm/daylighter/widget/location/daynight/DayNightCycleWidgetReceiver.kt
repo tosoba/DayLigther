@@ -44,7 +44,11 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
           widgetId = extras.getInt(LocationWidgetExtras.WIDGET_ID),
           context = context,
           updateState =
-            WidgetLocationIdUpdate(locationId = extras.getLong(LocationWidgetExtras.LOCATION_ID))
+            if (extras.containsKey(LocationWidgetExtras.LOCATION_ID)) {
+              WidgetLocationIdUpdate(locationId = extras.getLong(LocationWidgetExtras.LOCATION_ID))
+            } else {
+              ::updateUuid
+            }
         )
       }
     }

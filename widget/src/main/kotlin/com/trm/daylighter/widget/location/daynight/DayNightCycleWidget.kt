@@ -53,7 +53,7 @@ import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.dayPeriodChartBitmap
 import com.trm.daylighter.widget.ui.deepLinkAction
 import com.trm.daylighter.widget.ui.stringResource
-import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
+import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 
 class DayNightCycleWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -97,15 +97,21 @@ private fun DayNightCycleContent(change: Loadable<LocationSunriseSunsetChange>, 
       Empty -> AddLocationButton()
       is Loading -> ProgressIndicator()
       is Ready -> DayNightCycleChart(change = change.data, id = id)
-      is Failed ->
-        RetryButton(
-          onClick =
-            actionSendBroadcast(
-              LocalContext.current.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>()
-            )
-        )
+      is Failed -> RetryButton(id)
     }
   }
+}
+
+@Composable
+private fun RetryButton(id: GlanceId) {
+  val context = LocalContext.current
+  val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
+  RetryButton(
+    onClick =
+      actionSendBroadcast(
+        context.updateWidgetIntent<DayNightCycleWidgetReceiver>(widgetManager.getAppWidgetId(id))
+      )
+  )
 }
 
 @Composable

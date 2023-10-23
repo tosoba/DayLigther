@@ -30,11 +30,13 @@ internal fun Context.showWidgetPinnedToast() {
 
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.updateWidgetIntent(
   widgetId: Int,
-  locationId: Long
+  locationId: Long? = null
 ): Intent =
   actionIntent<T>(LocationWidgetActions.UPDATE_WIDGET)
     .putExtra(LocationWidgetExtras.WIDGET_ID, widgetId)
-    .putExtra(LocationWidgetExtras.LOCATION_ID, locationId)
+    .run {
+      if (locationId != null) putExtra(LocationWidgetExtras.LOCATION_ID, locationId) else this
+    }
 
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.updateAllWidgetsIntent(): Intent =
   actionIntent<T>(LocationWidgetActions.UPDATE_ALL_WIDGETS)
