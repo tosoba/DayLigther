@@ -52,7 +52,7 @@ import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
 import com.trm.daylighter.widget.ui.dayPeriodChartBitmap
 import com.trm.daylighter.widget.ui.deepLinkAction
 import com.trm.daylighter.widget.ui.stringResource
-import com.trm.daylighter.widget.util.ext.updateAllWidgetsIntent
+import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 
 class GoldenBlueHourWidget(
   private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
@@ -96,15 +96,21 @@ private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>,
       Empty -> AddLocationButton()
       is Loading -> ProgressIndicator()
       is Ready -> GoldenBlueHourChart(change = change.data, id = id)
-      is Failed ->
-        RetryButton(
-          onClick =
-            actionSendBroadcast(
-              LocalContext.current.updateAllWidgetsIntent<GoldenBlueHourWidgetReceiver>()
-            )
-        )
+      is Failed -> RetryButton(id)
     }
   }
+}
+
+@Composable
+private fun RetryButton(id: GlanceId) {
+  val context = LocalContext.current
+  val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
+  RetryButton(
+    onClick =
+      actionSendBroadcast(
+        context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(widgetManager.getAppWidgetId(id))
+      )
+  )
 }
 
 @Composable
