@@ -24,8 +24,11 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
+import androidx.glance.layout.wrapContentWidth
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.WidgetTypeParam
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
@@ -151,20 +154,42 @@ private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceI
       Clock(zoneId = change.location.zoneId)
     }
 
-    Image(
-      provider = ImageProvider(R.drawable.settings),
-      contentDescription = stringResource(commonR.string.settings),
-      modifier =
-        GlanceModifier.padding(5.dp)
-          .clickable(
-            deepLinkAction(
-              context.widgetLocationDeepLinkUri(
-                type = WidgetTypeParam.GOLDEN_BLUE_HOUR,
-                glanceId = widgetManager.getAppWidgetId(id),
-                locationId = change.location.id
+    Column(
+      verticalAlignment = Alignment.Vertical.Top,
+      horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+      modifier = GlanceModifier.wrapContentWidth().fillMaxHeight().appWidgetBackgroundCornerRadius()
+    ) {
+      Image(
+        provider = ImageProvider(R.drawable.settings),
+        contentDescription = stringResource(commonR.string.settings),
+        modifier =
+          GlanceModifier.padding(5.dp)
+            .clickable(
+              deepLinkAction(
+                context.widgetLocationDeepLinkUri(
+                  type = WidgetTypeParam.GOLDEN_BLUE_HOUR,
+                  glanceId = widgetManager.getAppWidgetId(id),
+                  locationId = change.location.id
+                )
               )
             )
-          )
-    )
+      )
+
+      Spacer(GlanceModifier.defaultWeight())
+
+      Image(
+        provider = ImageProvider(R.drawable.refresh),
+        contentDescription = stringResource(commonR.string.refresh),
+        modifier =
+          GlanceModifier.padding(5.dp)
+            .clickable(
+              actionSendBroadcast(
+                context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(
+                  widgetManager.getAppWidgetId(id)
+                )
+              )
+            )
+      )
+    }
   }
 }
