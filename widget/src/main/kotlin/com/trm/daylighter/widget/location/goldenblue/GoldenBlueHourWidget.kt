@@ -47,6 +47,7 @@ import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.locationIdKey
 import com.trm.daylighter.widget.ui.AddLocationButton
 import com.trm.daylighter.widget.ui.Clock
+import com.trm.daylighter.widget.ui.DayLengthInfo
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.LocationName
 import com.trm.daylighter.widget.ui.ProgressIndicator
@@ -152,6 +153,7 @@ private fun GoldenBlueHourChart(change: LocationSunriseSunsetChange, id: GlanceI
     ) {
       LocationName(location = change.location)
       Clock(zoneId = change.location.zoneId)
+      DayLengthInfo(change = change)
     }
 
     Column(
