@@ -10,4 +10,5 @@
     android:shadowDy="1"
     android:shadowRadius="1"
     android:textAlignment="center"
-    android:textSize="24sp" />
+    android:textSize="24sp"
+    android:textStyle="bold" />
