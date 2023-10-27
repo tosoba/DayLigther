@@ -23,7 +23,7 @@ class DayScreenNavigationItemsEnabledTests(
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun givenReadyChange_navigationBarItemsAreEnabled() {
+  fun givenReadyChange_thenNavigationBarItemsAreEnabled() {
     with(composeTestRule) {
       setContentHarness(DpSize(width = width.size, height = height.size)) {
         ReadyChangeTestDayScreen()

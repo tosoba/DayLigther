@@ -25,7 +25,7 @@ class DayScreenNavigationBarTests(
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun whenUsingNavigationBar_navigationBarIsDisplayed() {
+  fun givenScreenSizeUsingNavigationBar_thenNavigationBarIsDisplayed() {
     with(composeTestRule) {
       setContentHarness(DpSize(width = width.size, height = height.size)) {
         TestDayScreen(modifier = Modifier.fillMaxSize())

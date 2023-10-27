@@ -26,7 +26,7 @@ class DayScreenTests {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun givenWithoutDataLocations_emptyChartIsDisplayed() {
+  fun givenWithoutDataLocations_thenEmptyChartIsDisplayed() {
     with(composeTestRule) {
       setContent {
         TestDayScreen(modifier = Modifier.fillMaxSize(), locations = mockk<WithoutData>())
@@ -36,7 +36,7 @@ class DayScreenTests {
   }
 
   @Test
-  fun givenLoadingLocations_progressIndicatorIsDisplayed() {
+  fun givenLoadingLocations_thenProgressIndicatorIsDisplayed() {
     with(composeTestRule) {
       setContent { TestDayScreen(modifier = Modifier.fillMaxSize(), locations = LoadingFirst) }
       onNodeWithEnumTestTag(DayTestTags.LOADING_LOCATIONS_PROGRESS_INDICATOR).assertIsDisplayed()
@@ -44,7 +44,7 @@ class DayScreenTests {
   }
 
   @Test
-  fun givenEmptyLocations_noSavedLocationsInfoButtonCardIsDisplayed() {
+  fun givenEmptyLocations_thenNoSavedLocationsInfoButtonCardIsDisplayed() {
     with(composeTestRule) {
       setContent { TestDayScreen(modifier = Modifier.fillMaxSize()) }
       onNodeWithEnumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD).assertIsDisplayed()
@@ -54,7 +54,7 @@ class DayScreenTests {
   }
 
   @Test
-  fun whenWidthIsNotCompactAndUsingNavigationBar_usingMaxWidthTopAppBar() {
+  fun givenNonCompactWidthAndUsingNavigationBar_thenUsingMaxWidthTopAppBar() {
     with(composeTestRule) {
       val size = testDpSize(width = TestWidthClass.COMPACT, height = TestHeightClass.MEDIUM)
       setContentHarness(size) {

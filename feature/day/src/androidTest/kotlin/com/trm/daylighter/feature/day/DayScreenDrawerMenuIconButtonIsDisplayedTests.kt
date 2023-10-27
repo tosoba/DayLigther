@@ -25,7 +25,7 @@ class DayScreenDrawerMenuIconButtonIsDisplayedTests(
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun whenNotUsingPermanentNavigationDrawer_drawerMenuIconButtonIsDisplayed() {
+  fun givenScreenSizeNotUsingPermanentNavigationDrawer_thenDrawerMenuIconButtonIsDisplayed() {
     with(composeTestRule) {
       setContentHarness(DpSize(width = width.size, height = height.size)) {
         TestDayScreen(modifier = Modifier.fillMaxSize())

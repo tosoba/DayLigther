@@ -19,7 +19,7 @@ class DrawerMenuIconButtonDoesNotExistTests(private val height: TestHeightClass)
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun whenUsingPermanentNavigationDrawer_drawerMenuIconButtonDoesNotExist() {
+  fun givenScreenSizeUsingPermanentNavigationDrawer_thenDrawerMenuIconButtonDoesNotExist() {
     with(composeTestRule) {
       setContentHarness(DpSize(width = permanentNavigationDrawerMinWidth, height = height.size)) {
         TestDayScreen(modifier = Modifier.fillMaxSize())

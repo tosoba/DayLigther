@@ -36,7 +36,7 @@ class DayScreenNavigationItemsDisabledTests(
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun whenCurrentLocationSunriseSunsetChangeIsNotReady_navigationBarItemsAreDisabled() {
+  fun givenNonReadyChange_thenNavigationBarItemsAreDisabled() {
     with(composeTestRule) {
       setContentHarness(DpSize(width = width.size, height = height.size)) {
         TestDayScreen(
