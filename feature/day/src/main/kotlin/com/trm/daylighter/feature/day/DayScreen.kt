@@ -389,7 +389,10 @@ internal fun DayScreen(
                 exit = fadeOut(),
                 modifier = Modifier.padding(bottom = 8.dp)
               ) {
-                EditLocationButton(onClick = ::onEditLocationClick)
+                EditLocationButton(
+                  onClick = ::onEditLocationClick,
+                  modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
+                )
               }
             }
           )
@@ -434,7 +437,10 @@ internal fun DayScreen(
             end.linkTo(parent.end, 16.dp)
           }
       ) {
-        EditLocationButton(onClick = ::onEditLocationClick)
+        EditLocationButton(
+          onClick = ::onEditLocationClick,
+          modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
+        )
       }
     }
   }
