@@ -1,14 +1,17 @@
 package com.trm.daylighter.feature.about
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
@@ -28,8 +31,20 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
         }
       }
     )
-    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-      Text(text = stringResource(commonR.string.about), modifier = Modifier.align(Alignment.Center))
+
+    Column(
+      modifier =
+        Modifier.fillMaxWidth()
+          .weight(1f)
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 20.dp, vertical = 10.dp)
+    ) {
+      Text(text = stringResource(R.string.credits), style = MaterialTheme.typography.headlineSmall)
+
+      Text(
+        text = stringResource(R.string.support_me),
+        style = MaterialTheme.typography.headlineSmall
+      )
     }
   }
 }
