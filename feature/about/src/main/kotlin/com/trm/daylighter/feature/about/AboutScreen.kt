@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,7 +33,7 @@ import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 
 const val aboutRoute = "about_route"
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
   Column(modifier = modifier) {
@@ -59,32 +60,67 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
       )
 
       val context = LocalContext.current
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
+
+      ImageTextRow(
+        imagePainter = painterResource(R.drawable.open_street_map_creditor),
+        text = stringResource(R.string.open_street_map),
+        contentDescription = stringResource(R.string.open_street_map),
         modifier =
           Modifier.clickable { context.goToUrlInBrowser("https://www.openstreetmap.org/") }
             .padding(horizontal = 20.dp, vertical = 10.dp)
-      ) {
-        Image(
-          painter = painterResource(R.drawable.open_street_map_creditor),
-          contentDescription = stringResource(R.string.open_street_map),
-          modifier = Modifier.size(30.dp)
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Text(
-          text = stringResource(R.string.open_street_map),
-          style = MaterialTheme.typography.bodyLarge,
-          modifier = Modifier.weight(1f).basicMarquee()
-        )
-      }
+      )
 
       Text(
         text = stringResource(R.string.support_me),
         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
       )
+
+      ImageTextRow(
+        imagePainter = painterResource(R.drawable.bitcoin),
+        text = stringResource(R.string.bitcoin_address),
+        contentDescription = stringResource(R.string.bitcoin),
+        modifier = Modifier.clickable {}.padding(horizontal = 20.dp, vertical = 10.dp)
+      )
+
+      ImageTextRow(
+        imagePainter = painterResource(R.drawable.ethereum),
+        text = stringResource(R.string.ethereum_address),
+        contentDescription = stringResource(R.string.ethereum),
+        modifier = Modifier.clickable {}.padding(horizontal = 20.dp, vertical = 10.dp)
+      )
+
+      ImageTextRow(
+        imagePainter = painterResource(R.drawable.xrp),
+        text = stringResource(R.string.xrp_address),
+        contentDescription = stringResource(R.string.xrp),
+        modifier = Modifier.clickable {}.padding(horizontal = 20.dp, vertical = 10.dp)
+      )
     }
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ImageTextRow(
+  modifier: Modifier = Modifier,
+  text: String,
+  contentDescription: String? = null,
+  imagePainter: Painter
+) {
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+    Image(
+      painter = imagePainter,
+      contentDescription = contentDescription,
+      modifier = Modifier.size(30.dp)
+    )
+
+    Spacer(modifier = Modifier.width(10.dp))
+
+    Text(
+      text = text,
+      style = MaterialTheme.typography.bodyLarge,
+      modifier = Modifier.weight(1f).basicMarquee()
+    )
   }
 }
