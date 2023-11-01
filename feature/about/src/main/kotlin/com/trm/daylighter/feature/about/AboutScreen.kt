@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -57,7 +58,7 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
     ) {
       Text(
         text = stringResource(R.string.credits),
-        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
       )
 
@@ -72,11 +73,23 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 10.dp)
       )
 
+      Spacer(modifier = Modifier.height(10.dp))
+
       Text(
         text = stringResource(R.string.support_me),
-        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+        modifier = Modifier.padding(horizontal = 20.dp)
       )
+
+      Spacer(modifier = Modifier.height(5.dp))
+
+      Text(
+        text = stringResource(R.string.support_me_info),
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(horizontal = 20.dp)
+      )
+
+      Spacer(modifier = Modifier.height(10.dp))
 
       var currentToast: Toast? = null
       val addressCopied = stringResource(R.string.address_copied)
