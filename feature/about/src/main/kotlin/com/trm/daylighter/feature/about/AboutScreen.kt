@@ -19,11 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.util.ext.goToUrlInBrowser
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
@@ -56,9 +58,12 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
       )
 
+      val context = LocalContext.current
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable {}.padding(horizontal = 20.dp, vertical = 10.dp)
+        modifier =
+          Modifier.clickable { context.goToUrlInBrowser("https://www.openstreetmap.org/") }
+            .padding(horizontal = 20.dp, vertical = 10.dp)
       ) {
         Image(
           painter = painterResource(R.drawable.open_street_map_creditor),

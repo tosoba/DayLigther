@@ -22,6 +22,7 @@
     <string name="no_saved_locations">No saved locations.</string>
     <string name="time_format_12_h">hh:mm:ss aa</string>
     <string name="time_format_24_h">HH:mm:ss</string>
+    <string name="browser_app_was_not_found">Browser app was not found.</string>
 
     <string name="same_timezone_as_you">Same timezone as you</string>
     <string name="timezone_ahead_of_you">You\'re %1$02d:%2$02d ahead</string>

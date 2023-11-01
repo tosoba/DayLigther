@@ -2,20 +2,25 @@ package com.trm.daylighter.core.common.util.ext
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Point
 import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.trm.daylighter.core.common.R as commonR
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.tasks.await
@@ -26,6 +31,15 @@ fun Context.getActivity(): Activity? =
     is ContextWrapper -> baseContext.getActivity()
     else -> null
   }
+
+fun Context.goToUrlInBrowser(url: String) {
+  try {
+    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+  } catch (ex: ActivityNotFoundException) {
+    Toast.makeText(this, getString(commonR.string.browser_app_was_not_found), Toast.LENGTH_SHORT)
+      .show()
+  }
+}
 
 fun Context.checkPermissions(
   permissions: Array<String>,
