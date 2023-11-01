@@ -2,4 +2,5 @@
 <resources>
     <string name="credits">Credits</string>
     <string name="support_me">Support me</string>
+    <string name="open_street_map">OpenStreetMap</string>
 </resources>
