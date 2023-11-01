@@ -3,6 +3,8 @@ package com.trm.daylighter.core.common.util.ext
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -39,6 +41,16 @@ fun Context.goToUrlInBrowser(url: String) {
     Toast.makeText(this, getString(commonR.string.browser_app_was_not_found), Toast.LENGTH_SHORT)
       .show()
   }
+}
+
+fun Context.copyToClipboard(text: String, label: String? = null, showMessage: (() -> Unit)?) {
+  ContextCompat.getSystemService(this, ClipboardManager::class.java)
+    ?.setPrimaryClip(ClipData.newPlainText(label, text))
+    ?.also {
+      if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2 && showMessage != null) {
+        showMessage()
+      }
+    }
 }
 
 fun Context.checkPermissions(
