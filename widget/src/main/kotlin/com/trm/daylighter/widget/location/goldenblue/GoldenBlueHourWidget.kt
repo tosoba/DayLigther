@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
@@ -64,7 +63,7 @@ class GoldenBlueHourWidget(
   private val getLocationSunriseSunsetChangeFlowByIdUseCase:
     GetLocationSunriseSunsetChangeFlowByIdUseCase
 ) : GlanceAppWidget() {
-  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
+  override val sizeMode: SizeMode = SizeMode.Exact
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent {
@@ -84,14 +83,12 @@ class GoldenBlueHourWidget(
 class GoldenBlueHourWidgetPreview(
   private val change: Loadable<LocationSunriseSunsetChange>,
 ) : GlanceAppWidget() {
-  override val sizeMode: SizeMode = SizeMode.Responsive(setOf(goldenBlueHourWidgetSize()))
+  override val sizeMode: SizeMode = SizeMode.Exact
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
     provideContent { GoldenBlueHourContent(change = change, id = id) }
   }
 }
-
-private fun goldenBlueHourWidgetSize() = DpSize(200.dp, 100.dp)
 
 @Composable
 private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>, id: GlanceId) {
