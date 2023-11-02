@@ -43,7 +43,11 @@ fun Context.goToUrlInBrowser(url: String) {
   }
 }
 
-fun Context.copyToClipboard(text: String, label: String? = null, showMessage: (() -> Unit)?) {
+fun Context.copyToClipboard(
+  text: String,
+  label: String? = null,
+  showMessage: (() -> Unit)? = null
+) {
   ContextCompat.getSystemService(this, ClipboardManager::class.java)
     ?.setPrimaryClip(ClipData.newPlainText(label, text))
     ?.also {
