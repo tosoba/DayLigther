@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlin.coroutines.cancellation.CancellationException
 import timber.log.Timber
 
 @Module
@@ -20,6 +21,8 @@ object UserLocationModule {
       context.getCurrentUserLocation()?.let { location ->
         LatLng(latitude = location.latitude, longitude = location.longitude)
       }
+    } catch (ex: CancellationException) {
+      throw ex
     } catch (ex: Exception) {
       Timber.tag("USER_LOCATION_GET").e(ex)
       null

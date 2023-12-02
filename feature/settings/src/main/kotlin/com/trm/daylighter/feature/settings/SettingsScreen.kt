@@ -44,6 +44,7 @@ import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
 import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -239,6 +240,8 @@ private fun EditTextPref(
       try {
         datastore.edit { preferences -> preferences[prefKey] = textValue }
         onValueSaved(textValue)
+      } catch (ex: CancellationException) {
+        throw ex
       } catch (ex: Exception) {
         Timber.tag("EditTextPref").e(ex, "Could not write pref $key to database.")
       }
