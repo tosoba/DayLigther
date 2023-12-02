@@ -286,8 +286,36 @@ internal fun DayScreen(
       }
     }
 
-    val usingMaxWidthTopAppBar = LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
-    if (!usingMaxWidthTopAppBar) {
+    val constraintTopAppBarEndToMainContent =
+      LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
+    if (constraintTopAppBarEndToMainContent) {
+      DayTopAppBar(
+        change = currentChange,
+        chartMode = chartMode,
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+        navigationIcon = {
+          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
+            DrawerMenuIconButton(
+              onClick = onDrawerMenuClick,
+              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+            )
+          }
+        },
+        modifier =
+          Modifier.constrainAs(topAppBar) {
+              linkTo(
+                start = if (usingNavigationBar) mainContent.start else navigation.end,
+                end = mainContent.end
+              )
+              top.linkTo(parent.top)
+            }
+            .background(backgroundToTransparentVerticalGradient)
+            .onGloballyPositioned { coordinates ->
+              appBarHeightPx = coordinates.size.height.toFloat()
+            }
+            .enumTestTag(DayTestTags.TOP_APP_BAR)
+      )
+    } else {
       DayRowTopAppBar(
         change = currentChange,
         chartMode = chartMode,
@@ -314,33 +342,6 @@ internal fun DayScreen(
               appBarHeightPx = coordinates.size.height.toFloat()
             }
             .padding(10.dp)
-            .enumTestTag(DayTestTags.TOP_APP_BAR)
-      )
-    } else {
-      DayTopAppBar(
-        change = currentChange,
-        chartMode = chartMode,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        navigationIcon = {
-          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuIconButton(
-              onClick = onDrawerMenuClick,
-              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
-            )
-          }
-        },
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(
-                start = if (usingNavigationBar) mainContent.start else navigation.end,
-                end = mainContent.end
-              )
-              top.linkTo(parent.top)
-            }
-            .background(backgroundToTransparentVerticalGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
             .enumTestTag(DayTestTags.TOP_APP_BAR)
       )
     }
@@ -413,7 +414,7 @@ internal fun DayScreen(
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.run {
-            if (usingMaxWidthTopAppBar) linkTo(topAppBar.bottom, 5.dp)
+            if (constraintTopAppBarEndToMainContent) linkTo(topAppBar.bottom, 5.dp)
             else linkTo(parent.top, 16.dp)
           }
           end.linkTo(parent.end, 16.dp)

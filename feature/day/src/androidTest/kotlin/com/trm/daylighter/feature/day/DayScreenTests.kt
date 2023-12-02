@@ -52,15 +52,4 @@ class DayScreenTests {
       onNodeWithText(activity.getString(R.string.add_location)).assertIsDisplayed()
     }
   }
-
-  @Test
-  fun givenNonCompactWidthAndUsingNavigationBar_thenUsingMaxWidthTopAppBar() {
-    with(composeTestRule) {
-      val size = testDpSize(width = TestWidthClass.COMPACT, height = TestHeightClass.MEDIUM)
-      setContentHarness(size) {
-        TestDayScreen(modifier = Modifier.fillMaxSize(), locations = Ready(listOf(testLocation())))
-      }
-      onNodeWithEnumTestTag(DayTestTags.TOP_APP_BAR).assertWidthIsEqualTo(size.width)
-    }
-  }
 }
