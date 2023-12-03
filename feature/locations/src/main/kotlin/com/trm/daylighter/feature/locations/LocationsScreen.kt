@@ -270,32 +270,33 @@ private fun MapCard(
 
       MarkerIcon(modifier = Modifier.align(Alignment.Center).size(36.dp))
 
-      Row(
-        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        LocationNameLabel(
-          name = location.value.name,
-          modifier = Modifier.weight(1f).basicMarquee().padding(5.dp)
-        )
-        LocationDropDrownMenu(
-          location = location,
-          onSetDefaultLocationClick = onSetDefaultLocationClick,
-          onEditLocationClick = onEditLocationClick,
-          onDeleteLocationClick = onDeleteLocationClick,
-        )
-      }
+      LocationNameLabel(
+        name = location.value.name,
+        modifier =
+          Modifier.fillMaxWidth()
+            .align(Alignment.BottomCenter)
+            .basicMarquee()
+            .padding(vertical = 10.dp, horizontal = 5.dp)
+      )
+
+      LocationDropDrownMenu(
+        modifier = Modifier.align(Alignment.TopEnd),
+        location = location,
+        onSetDefaultLocationClick = onSetDefaultLocationClick,
+        onEditLocationClick = onEditLocationClick,
+        onDeleteLocationClick = onDeleteLocationClick,
+      )
     }
   }
 }
 
 @Composable
 private fun LocationDropDrownMenu(
+  modifier: Modifier = Modifier,
   location: StableValue<Location>,
   onSetDefaultLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
-  onEditLocationClick: (Long) -> Unit,
-  modifier: Modifier = Modifier
+  onEditLocationClick: (Long) -> Unit
 ) {
   Box(modifier = modifier) {
     var expanded by remember { mutableStateOf(false) }
