@@ -122,10 +122,13 @@ constructor(
     locationsFlow.transformLatest { locations ->
       when (locations) {
         is WithData -> {
+          fun now(): LocalTime = LocalTime.now(locations.data[index].zoneId)
+
+          emit(now())
           delay(System.currentTimeMillis() % 1_000L)
+
           while (currentCoroutineContext().isActive) {
-            val now = LocalTime.now(locations.data[index].zoneId)
-            if (now.second == 0) emit(now)
+            now().takeIf { it.second == 0 }?.let { emit(it) }
             delay(1_000L)
           }
         }
