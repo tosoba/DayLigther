@@ -945,7 +945,7 @@ private fun DayLengthInfo(
 @Composable
 private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
   Text(
-    text = stringResource(R.string.day_length) + ":",
+    text = "${stringResource(R.string.day_length)}:",
     textAlign = TextAlign.Center,
     overflow = TextOverflow.Ellipsis,
     color = dayPeriod.textColor(),

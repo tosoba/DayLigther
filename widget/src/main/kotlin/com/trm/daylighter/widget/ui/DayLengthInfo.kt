@@ -55,9 +55,19 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
         modifier = GlanceModifier.wrapContentSize(),
         remoteViews =
           RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+            setTextViewText(R.id.shadow_text_view, "${stringResource(R.string.day_length)}:")
+            setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+          }
+      )
+
+      AndroidRemoteViews(
+        modifier = GlanceModifier.wrapContentSize(),
+        remoteViews =
+          RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
             setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
             setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
           }
       )
 
@@ -83,7 +93,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                 else -> light_onDayColor
               }.toArgb()
             )
-            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
           }
       )
     }

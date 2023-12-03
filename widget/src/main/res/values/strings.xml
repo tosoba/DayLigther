@@ -4,7 +4,7 @@
     <string name="day_night_cycle_widget_label">Day/night cycle</string>
     <string name="golden_blue_hour_widget_description">Location golden/blue hour chart.</string>
     <string name="golden_blue_hour_widget_label">Golden/blue hour</string>
-    <string name="day_length">Day length: %1$s</string>
+    <string name="day_length">Day length</string>
     <string name="diff">%1$s%2$02d:%3$02d</string>
     <string name="widget_pinned_to_home_screen">Widget pinned to home screen.</string>
 </resources>
