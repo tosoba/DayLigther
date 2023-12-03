@@ -97,7 +97,7 @@ private fun DayLengthIcon() {
     Image(
       provider =
         ImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_shadow)),
-      contentDescription = stringResource(R.string.day_length),
+      contentDescription = null,
       modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp)
     )
 

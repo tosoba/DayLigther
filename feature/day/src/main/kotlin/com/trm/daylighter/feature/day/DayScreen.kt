@@ -554,10 +554,13 @@ private fun ClockAndDayLengthCard(
 
         NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
-        if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Spacer(modifier = Modifier.height(2.dp))
-          DayLengthInfo(change = it.data, dayPeriod = dayPeriod.value)
-        }
+        Spacer(modifier = Modifier.height(2.dp))
+
+        DayLengthInfo(
+          change = it.data,
+          dayPeriod = dayPeriod.value,
+          modifier = Modifier.wrapContentSize()
+        )
 
         Spacer(modifier = Modifier.height(2.dp))
 
@@ -823,7 +826,11 @@ private fun NowTimezoneDiffText(
 }
 
 @Composable
-private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPeriod) {
+private fun DayLengthInfo(
+  change: LocationSunriseSunsetChange,
+  dayPeriod: DayPeriod,
+  modifier: Modifier = Modifier
+) {
   val (location, today, yesterday) = change
   val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
   val yesterdayLengthSeconds = yesterday.dayLengthSecondsAtLocation(location)
@@ -834,16 +841,25 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
       yesterdayLengthSeconds = yesterdayLengthSeconds
     )
 
-  ConstraintLayout {
-    val (icon, lengthText, diffText) = createRefs()
+  ConstraintLayout(modifier = modifier) {
+    val (dayLengthLabelText, icon, lengthText, diffText) = createRefs()
     if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
+      DayLengthLabelText(
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(dayLengthLabelText) {
+            top.linkTo(parent.top)
+            bottom.linkTo(lengthText.top)
+            start.linkTo(lengthText.start)
+            end.linkTo(lengthText.end)
+          }
+      )
+
       DayLengthIcon(
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(icon) {
-            height = Dimension.fillToConstraints
-            width = Dimension.ratio("1:1")
-            top.linkTo(lengthText.top)
+            top.linkTo(dayLengthLabelText.top)
             bottom.linkTo(diffText.bottom)
             start.linkTo(parent.start)
           }
@@ -854,7 +870,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(lengthText) {
-            top.linkTo(parent.top)
+            top.linkTo(dayLengthLabelText.bottom)
             bottom.linkTo(diffText.top)
             start.linkTo(icon.end, 5.dp)
             end.linkTo(parent.end)
@@ -874,14 +890,25 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
           }
       )
     } else {
+      DayLengthLabelText(
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(dayLengthLabelText) {
+            top.linkTo(parent.top)
+            bottom.linkTo(lengthText.top)
+            start.linkTo(lengthText.start)
+            end.linkTo(diffText.end)
+          }
+      )
+
       DayLengthIcon(
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(icon) {
             height = Dimension.fillToConstraints
             width = Dimension.ratio("1:1")
-            top.linkTo(lengthText.top, (-5).dp)
-            bottom.linkTo(lengthText.bottom, (-5).dp)
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
             start.linkTo(parent.start)
             end.linkTo(lengthText.start)
           }
@@ -892,7 +919,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(lengthText) {
-            top.linkTo(parent.top)
+            top.linkTo(dayLengthLabelText.bottom)
             bottom.linkTo(parent.bottom)
             start.linkTo(icon.end, 5.dp)
             end.linkTo(diffText.end)
@@ -905,7 +932,7 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(diffText) {
-            top.linkTo(parent.top)
+            top.linkTo(dayLengthLabelText.bottom)
             bottom.linkTo(parent.bottom)
             start.linkTo(lengthText.end, 5.dp)
             end.linkTo(parent.end)
@@ -913,6 +940,22 @@ private fun DayLengthInfo(change: LocationSunriseSunsetChange, dayPeriod: DayPer
       )
     }
   }
+}
+
+@Composable
+private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
+  Text(
+    text = stringResource(R.string.day_length) + ":",
+    textAlign = TextAlign.Center,
+    overflow = TextOverflow.Ellipsis,
+    color = dayPeriod.textColor(),
+    style =
+      MaterialTheme.typography.bodySmall.copy(
+        shadow =
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+      ),
+    modifier = modifier
+  )
 }
 
 @Composable
@@ -952,7 +995,7 @@ private fun DayLengthText(
       MaterialTheme.typography.bodyLarge.copy(
         fontSize =
           when {
-            height < 650 -> 16
+            height < 650 -> 15
             height > 1_000 -> 20
             else -> 18
           }.sp,
@@ -983,7 +1026,7 @@ private fun DayLengthDiffText(
       MaterialTheme.typography.bodyLarge.copy(
         fontSize =
           when {
-            height < 650 -> 16
+            height < 650 -> 15
             height > 1_000 -> 20
             else -> 18
           }.sp,
