@@ -30,10 +30,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -286,65 +286,44 @@ internal fun DayScreen(
       }
     }
 
-    val constraintTopAppBarEndToMainContent =
-      LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
-    if (constraintTopAppBarEndToMainContent) {
-      DayTopAppBar(
-        change = currentChange,
-        chartMode = chartMode,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        navigationIcon = {
-          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuIconButton(
-              onClick = onDrawerMenuClick,
-              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+    var trailingSpacerWidthPx: Int? by remember { mutableStateOf(0) }
+    val showNavigationIcon = !usingPermanentNavigationDrawer && usingNavigationBar
+    DayTopAppBar(
+      change = currentChange,
+      chartMode = chartMode,
+      colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+      navigationIcon = {
+        if (showNavigationIcon) {
+          DrawerMenuIconButton(
+            onClick = onDrawerMenuClick,
+            modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+          )
+        }
+      },
+      leading = { Spacer(modifier = Modifier.width(if (showNavigationIcon) 15.dp else 5.dp)) },
+      trailing = {
+        Spacer(
+          modifier =
+            Modifier.width(
+              trailingSpacerWidthPx?.let { with(LocalDensity.current) { it.toDp() } } ?: 15.dp
             )
-          }
-        },
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(
-                start = if (usingNavigationBar) mainContent.start else navigation.end,
-                end = mainContent.end
-              )
-              top.linkTo(parent.top)
-            }
-            .background(backgroundToTransparentVerticalGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .enumTestTag(DayTestTags.TOP_APP_BAR)
-      )
-    } else {
-      DayRowTopAppBar(
-        change = currentChange,
-        chartMode = chartMode,
-        navigationIcon = {
-          if (!usingPermanentNavigationDrawer && usingNavigationBar) {
-            DrawerMenuIconButton(
-              onClick = onDrawerMenuClick,
-              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+        )
+      },
+      modifier =
+        Modifier.constrainAs(topAppBar) {
+            linkTo(
+              start = if (usingNavigationBar) mainContent.start else navigation.end,
+              end = mainContent.end
             )
+            top.linkTo(parent.top)
+            width = Dimension.fillToConstraints
           }
-        },
-        modifier =
-          Modifier.constrainAs(topAppBar) {
-              linkTo(
-                start = if (usingNavigationBar) mainContent.start else navigation.end,
-                end = dayTimeCard.start
-              )
-              top.linkTo(parent.top)
-              width = Dimension.fillToConstraints
-              height = Dimension.wrapContent
-            }
-            .background(backgroundToTransparentVerticalGradient)
-            .onGloballyPositioned { coordinates ->
-              appBarHeightPx = coordinates.size.height.toFloat()
-            }
-            .padding(10.dp)
-            .enumTestTag(DayTestTags.TOP_APP_BAR)
-      )
-    }
+          .background(backgroundToTransparentVerticalGradient)
+          .onGloballyPositioned { coordinates ->
+            appBarHeightPx = coordinates.size.height.toFloat()
+          }
+          .enumTestTag(DayTestTags.TOP_APP_BAR)
+    )
 
     fun onEditLocationClick() {
       currentChange.value.takeIfInstance<Ready<LocationSunriseSunsetChange>>()?.let { (data) ->
@@ -407,6 +386,8 @@ internal fun DayScreen(
       )
     }
 
+    val constrainClockAndDayLengthCardToAppBarBottom =
+      LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
     AnimatedVisibility(
       visible = locations is Ready,
       enter = fadeIn(),
@@ -414,7 +395,7 @@ internal fun DayScreen(
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.run {
-            if (constraintTopAppBarEndToMainContent) linkTo(topAppBar.bottom, 5.dp)
+            if (constrainClockAndDayLengthCardToAppBarBottom) linkTo(topAppBar.bottom, 5.dp)
             else linkTo(parent.top, 16.dp)
           }
           end.linkTo(parent.end, 16.dp)
@@ -423,7 +404,14 @@ internal fun DayScreen(
       ClockAndDayLengthCard(
         change = currentChange,
         chartMode = chartMode,
-        modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f)
+        modifier =
+          Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f).run {
+            if (!constrainClockAndDayLengthCardToAppBarBottom) {
+              onGloballyPositioned { trailingSpacerWidthPx = it.size.width }
+            } else {
+              this
+            }
+          }
       )
     }
 
@@ -457,24 +445,6 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun DayRowTopAppBar(
-  change: StableLoadable<LocationSunriseSunsetChange>,
-  chartMode: DayPeriodChartMode,
-  modifier: Modifier = Modifier,
-  navigationIcon: @Composable () -> Unit = {}
-) {
-  Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-    navigationIcon()
-    DayTopAppBarTitle(
-      change = change,
-      chartMode = chartMode,
-      modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
-    )
-  }
-}
-
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun DayTopAppBar(
@@ -482,23 +452,27 @@ private fun DayTopAppBar(
   chartMode: DayPeriodChartMode,
   modifier: Modifier = Modifier,
   colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
-  navigationIcon: @Composable () -> Unit = {}
+  navigationIcon: @Composable () -> Unit = {},
+  leading: @Composable () -> Unit = {},
+  trailing: @Composable () -> Unit = {}
 ) {
   CenterAlignedTopAppBar(
     modifier = modifier,
     colors = colors,
-    navigationIcon = { navigationIcon() },
+    navigationIcon = navigationIcon,
     title = {
-      Row {
-        Spacer(modifier = Modifier.width(15.dp))
-        DayTopAppBarTitle(
-          change = change,
-          chartMode = chartMode,
-          modifier = Modifier.fillMaxWidth().basicMarquee()
-        )
-        Spacer(modifier = Modifier.width(15.dp))
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        leading()
+        Box(modifier = Modifier.weight(1f)) {
+          DayTopAppBarTitle(
+            change = change,
+            chartMode = chartMode,
+            modifier = Modifier.basicMarquee().align(Alignment.Center)
+          )
+        }
+        trailing()
       }
-    }
+    },
   )
 }
 
@@ -522,7 +496,6 @@ private fun DayTopAppBarTitle(
         ),
     style = appBarTextStyle(),
     maxLines = 1,
-    overflow = TextOverflow.Ellipsis,
     textAlign = TextAlign.Center,
     modifier = modifier
   )

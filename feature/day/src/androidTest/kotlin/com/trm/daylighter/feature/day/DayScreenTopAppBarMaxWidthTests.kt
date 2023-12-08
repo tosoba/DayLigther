@@ -13,20 +13,21 @@ import com.trm.daylighter.core.testing.util.setContentHarness
 import com.trm.daylighter.core.testing.util.testDpSize
 import com.trm.daylighter.core.testing.util.testScreenDpSizeCombinations
 import com.trm.daylighter.feature.day.composable.TestDayScreen
+import com.trm.daylighter.feature.day.composable.isUsingNavigationBar
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class DayScreenTopAppBarTests(
+class DayScreenTopAppBarMaxWidthTests(
   private val width: TestWidthClass,
   private val height: TestHeightClass
 ) {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun givenNonCompactWidthScreenSizeUsingNavigationBar_thenUsingMaxWidthTopAppBar() {
+  fun givenScreenSizeUsingNavigationBar_thenUsingMaxWidthTopAppBar() {
     with(composeTestRule) {
       val size = testDpSize(width = width, height = height)
       setContentHarness(size) {
@@ -40,6 +41,6 @@ class DayScreenTopAppBarTests(
     @JvmStatic
     @Parameterized.Parameters
     fun parameters(): List<Array<Any>> =
-      testScreenDpSizeCombinations().filter { it[1] == TestHeightClass.EXPANDED }
+      testScreenDpSizeCombinations().filter(::isUsingNavigationBar)
   }
 }
