@@ -545,13 +545,15 @@ private fun ClockAndDayLengthCard(
 
         NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
-        Spacer(modifier = Modifier.height(2.dp))
+        if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
+          Spacer(modifier = Modifier.height(2.dp))
 
-        DayLengthInfo(
-          change = it.data,
-          dayPeriod = dayPeriod.value,
-          modifier = Modifier.wrapContentSize()
-        )
+          DayLengthInfo(
+            change = it.data,
+            dayPeriod = dayPeriod.value,
+            modifier = Modifier.wrapContentSize()
+          )
+        }
 
         Spacer(modifier = Modifier.height(2.dp))
 
