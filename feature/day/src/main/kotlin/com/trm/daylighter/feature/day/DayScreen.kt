@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -305,7 +306,7 @@ internal fun DayScreen(
         Spacer(
           modifier =
             Modifier.width(
-              trailingSpacerWidthPx?.let { with(LocalDensity.current) { it.toDp() } } ?: 15.dp
+              trailingSpacerWidthPx?.let { with(LocalDensity.current) { it.toDp() } } ?: 0.dp
             )
         )
       },
@@ -463,11 +464,28 @@ private fun DayTopAppBar(
     title = {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         leading()
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+          modifier =
+            Modifier.weight(1f)
+              .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+              .drawWithContent {
+                drawContent()
+                drawRect(
+                  brush =
+                    Brush.horizontalGradient(
+                      0f to Color.Transparent,
+                      0.05f to Color.Black,
+                      0.95f to Color.Black,
+                      1f to Color.Transparent
+                    ),
+                  blendMode = BlendMode.DstIn
+                )
+              }
+        ) {
           DayTopAppBarTitle(
             change = change,
             chartMode = chartMode,
-            modifier = Modifier.basicMarquee().align(Alignment.Center)
+            modifier = Modifier.basicMarquee().align(Alignment.Center).padding(10.dp)
           )
         }
         trailing()
