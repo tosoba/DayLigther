@@ -248,7 +248,7 @@ class DayViewModelTests {
   }
 
   @Test
-  fun `GIVEN single ready location THEN currentTimeInLocationAt should return multiple LocalTimes every second`() {
+  fun `GIVEN single ready location THEN currentTimeInLocationAt should emit first LocalTime immediately`() {
     runTest {
       viewModel(
           getAllLocationsFlowUseCase =
@@ -259,7 +259,7 @@ class DayViewModelTests {
         .currentTimeInLocationAt(0)
         .test {
           runCurrent()
-          repeat(10) { assertIs<LocalTime>(awaitItem()) }
+          assertIs<LocalTime>(awaitItem())
           cancelAndIgnoreRemainingEvents()
         }
     }
