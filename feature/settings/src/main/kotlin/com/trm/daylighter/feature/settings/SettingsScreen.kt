@@ -156,8 +156,9 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
       AlertDialog(
         onDismissRequest = { showDialog = false },
         title = {
-          DialogHeader(
-            dialogTitle = stringResource(R.string.clear_locations_data_pref_title),
+          AlertDialogHeader(
+            modifier = Modifier.padding(8.dp),
+            dialogTitle = stringResource(R.string.clear_locations_data_pref_dialog_title),
             dialogMessage = stringResource(R.string.clear_locations_data_pref_dialog_message)
           )
         },
