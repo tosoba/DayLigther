@@ -25,3 +25,7 @@ dependencies {
   androidTestImplementation(libs.androidx.compose.ui.test)
   androidTestImplementation(libs.hilt.android.testing)
 }
+
+tasks.withType<Test>().configureEach {
+  jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
+}

@@ -25,8 +25,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -248,20 +250,30 @@ class DayViewModelTests {
   }
 
   @Test
-  fun `GIVEN single ready location THEN currentTimeInLocationAt should emit first LocalTime immediately`() {
-    runTest {
-      viewModel(
-          getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+  fun `GIVEN single ready location THEN currentTimeInLocationAt should emit only LocalTimes with 0 second`() {
+    mockkStatic(LocalTime::class) {
+      every { LocalTime.now(any<ZoneId>()) } returnsMany
+        List(20) { LocalTime.now().withSecond(if (it % 2 == 0) 0 else Random.nextInt(1, 60)) }
+
+      runTest {
+        viewModel(
+            getAllLocationsFlowUseCase =
+              mockk<GetAllLocationsFlowUseCase>().apply {
+                every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+              }
+          )
+          .currentTimeInLocationAt(0)
+          .test {
+            runCurrent()
+            repeat(10) {
+              val time = awaitItem()
+              assertIs<LocalTime>(time)
+              assertEquals(0, time.second)
             }
-        )
-        .currentTimeInLocationAt(0)
-        .test {
-          runCurrent()
-          assertIs<LocalTime>(awaitItem())
-          cancelAndIgnoreRemainingEvents()
-        }
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+          }
+      }
     }
   }
 
