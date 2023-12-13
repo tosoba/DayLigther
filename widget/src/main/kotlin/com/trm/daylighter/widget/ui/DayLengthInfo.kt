@@ -16,7 +16,9 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentSize
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
@@ -47,10 +49,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
   ) {
     DayLengthIcon()
 
-    Column(
-      verticalAlignment = Alignment.Vertical.CenterVertically,
-      horizontalAlignment = Alignment.Horizontal.End
-    ) {
+    Column(verticalAlignment = Alignment.Vertical.CenterVertically) {
       AndroidRemoteViews(
         modifier = GlanceModifier.wrapContentSize(),
         remoteViews =
@@ -61,41 +60,45 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
           }
       )
 
-      AndroidRemoteViews(
-        modifier = GlanceModifier.wrapContentSize(),
-        remoteViews =
-          RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-            setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
-            setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
-          }
-      )
+      Row {
+        AndroidRemoteViews(
+          modifier = GlanceModifier.wrapContentSize(),
+          remoteViews =
+            RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+              setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
+              setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+            }
+        )
 
-      AndroidRemoteViews(
-        modifier = GlanceModifier.wrapContentSize(),
-        remoteViews =
-          RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-            setTextViewText(
-              R.id.shadow_text_view,
-              context.getString(
-                R.string.diff,
-                diffPrefix,
-                dayLengthDiffTime.minute,
-                dayLengthDiffTime.second
-              ),
-            )
-            setInt(
-              R.id.shadow_text_view,
-              "setTextColor",
-              when (diffPrefix) {
-                "+" -> Color.Green
-                "-" -> Color.Red
-                else -> light_onDayColor
-              }.toArgb()
-            )
-            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
-          }
-      )
+        Spacer(modifier = GlanceModifier.width(5.dp))
+
+        AndroidRemoteViews(
+          modifier = GlanceModifier.wrapContentSize(),
+          remoteViews =
+            RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+              setTextViewText(
+                R.id.shadow_text_view,
+                context.getString(
+                  R.string.diff,
+                  diffPrefix,
+                  dayLengthDiffTime.minute,
+                  dayLengthDiffTime.second
+                ),
+              )
+              setInt(
+                R.id.shadow_text_view,
+                "setTextColor",
+                when (diffPrefix) {
+                  "+" -> Color.Green
+                  "-" -> Color.Red
+                  else -> light_onDayColor
+                }.toArgb()
+              )
+              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+            }
+        )
+      }
     }
   }
 }
