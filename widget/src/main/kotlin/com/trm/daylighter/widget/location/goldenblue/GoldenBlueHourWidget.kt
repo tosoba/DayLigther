@@ -97,7 +97,7 @@ private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>,
       Empty -> AddLocationButton()
       is Loading -> ProgressIndicator()
       is Ready -> GoldenBlueHourChart(change = change.data, id = id)
-      is Failed -> RetryButton(id)
+      is Failed -> RetryButton(id = id)
     }
   }
 }

@@ -97,7 +97,7 @@ private fun DayNightCycleContent(change: Loadable<LocationSunriseSunsetChange>, 
       Empty -> AddLocationButton()
       is Loading -> ProgressIndicator()
       is Ready -> DayNightCycleChart(change = change.data, id = id)
-      is Failed -> RetryButton(id)
+      is Failed -> RetryButton(id = id)
     }
   }
 }

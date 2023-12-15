@@ -195,7 +195,7 @@ private fun Canvas.drawTimeLine(
   paint: Paint,
   topPx: Float = 0f,
   bottomPx: Float = height.toFloat(),
-  lineWidthDp: Dp = 2.dp
+  lineWidthDp: Dp = 3.dp
 ) {
   val linePosition = timeXFor(dateTime)
   val lineWidthPx = lineWidthDp.value.toPx
