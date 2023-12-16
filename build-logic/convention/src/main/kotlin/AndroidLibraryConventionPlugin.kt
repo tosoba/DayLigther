@@ -1,6 +1,7 @@
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.gradle.LibraryExtension
 import com.trm.daylighter.configureFlavors
+import com.trm.daylighter.configureGradleManagedDevices
 import com.trm.daylighter.configureKotlinAndroid
 import com.trm.daylighter.configurePrintApksTask
 import org.gradle.api.Plugin
@@ -23,6 +24,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         configureKotlinAndroid(this)
         defaultConfig.targetSdk = 34
         configureFlavors(this)
+        configureGradleManagedDevices(this)
       }
       extensions.configure<LibraryAndroidComponentsExtension> { configurePrintApksTask(this) }
       val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")

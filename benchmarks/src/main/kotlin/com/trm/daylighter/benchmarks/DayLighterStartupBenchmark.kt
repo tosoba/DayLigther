@@ -28,7 +28,7 @@ class DayLighterStartupBenchmark {
   @Test
   fun startup() =
     benchmarkRule.measureRepeated(
-      packageName = "com.trm.daylighter",
+      packageName = "com.trm.daylighter.prod.benchmark",
       metrics = listOf(StartupTimingMetric()),
       iterations = 5,
       startupMode = StartupMode.COLD
