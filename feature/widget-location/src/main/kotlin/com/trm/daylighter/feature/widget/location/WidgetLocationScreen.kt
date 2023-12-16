@@ -1,10 +1,9 @@
 package com.trm.daylighter.feature.widget.location
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -62,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
@@ -85,7 +85,6 @@ import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.collectLatest
-import com.trm.daylighter.core.common.R as commonR
 
 const val widgetLocationRoute = "widget_location_route"
 
@@ -160,11 +159,10 @@ private fun WidgetLocationScreen(
       )
     }
 
-    AnimatedContent(
+    Crossfade(
       targetState = locations,
-      transitionSpec = { fadeIn() togetherWith fadeOut() },
       modifier = Modifier.fillMaxSize(),
-      label = "widget-location-chart-animated-content"
+      label = "widget-location-chart-crossfade"
     ) { locations ->
       when (locations) {
         is Ready -> {

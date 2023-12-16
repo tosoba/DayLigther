@@ -1,10 +1,9 @@
 package com.trm.daylighter.feature.locations
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -92,11 +91,10 @@ private fun LocationsScreen(
       )
     }
 
-    AnimatedContent(
+    Crossfade(
       targetState = locations,
-      transitionSpec = { fadeIn() togetherWith fadeOut() },
       modifier = Modifier.fillMaxSize(),
-      label = "locations-chart-animated-content"
+      label = "locations-chart-crossfade"
     ) { locations ->
       when (locations) {
         is Ready -> {

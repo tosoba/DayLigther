@@ -201,7 +201,7 @@ internal fun DayScreen(
       Crossfade(
         targetState = locations is WithData,
         modifier = Modifier.fillMaxSize(),
-        label = "chart-crossfade"
+        label = "day-chart-crossfade"
       ) { pagerVisible ->
         if (pagerVisible) {
           HorizontalPager(
