@@ -1,7 +1,10 @@
+import com.trm.daylighter.DayLighterBuildType
+
 plugins {
   id("daylighter.android.application")
   id("daylighter.android.application.compose")
   id("daylighter.android.hilt")
+  alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -18,15 +21,30 @@ android {
   }
 
   buildTypes {
-    named("release") {
+    debug { applicationIdSuffix = DayLighterBuildType.DEBUG.applicationIdSuffix }
+    val release =
+      getByName("release") {
+        isMinifyEnabled = true
+        applicationIdSuffix = DayLighterBuildType.RELEASE.applicationIdSuffix
+        proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+
+        // To publish on the Play store a private signing key is required, but to allow anyone
+        // who clones the code to sign and run the release variant, use the debug signing key.
+        // TODO: Abstract the signing configuration to a separate file to avoid hardcoding this.
+        signingConfig = signingConfigs.getByName("debug")
+        // Ensure Baseline Profile is fresh for release builds.
+        baselineProfile.automaticGenerationDuringBuild = true
+      }
+    create("benchmark") {
+      // Enable all the optimizations from release build through initWith(release).
+      initWith(release)
+      matchingFallbacks.add("release")
+      // Debug key signing is available to everyone.
+      signingConfig = signingConfigs.getByName("debug")
+      // Only use benchmark proguard rules
+      proguardFiles("benchmark-rules.pro")
       isMinifyEnabled = true
-      isShrinkResources = true
-      isDebuggable = false
-      isJniDebuggable = false
-      isProfileable = false
-      setProguardFiles(
-        listOf(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      )
+      applicationIdSuffix = DayLighterBuildType.BENCHMARK.applicationIdSuffix
     }
   }
 
@@ -48,6 +66,8 @@ android {
 }
 
 dependencies {
+//  baselineProfile(project(":benchmarks"))
+
   implementation(project(":core:common"))
   implementation(project(":core:data"))
   implementation(project(":core:datastore"))

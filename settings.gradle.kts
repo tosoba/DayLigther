@@ -22,6 +22,8 @@ rootProject.name = "DayLighter"
 
 include(":app")
 
+include(":benchmarks")
+
 include(":core:common")
 
 include(":core:network")
@@ -55,4 +57,3 @@ include(":work")
 include(":ui-test-hilt-manifest")
 
 include(":widget")
-
