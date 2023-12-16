@@ -66,8 +66,6 @@ android {
 }
 
 dependencies {
-//  baselineProfile(project(":benchmarks"))
-
   implementation(project(":core:common"))
   implementation(project(":core:data"))
   implementation(project(":core:datastore"))
@@ -97,4 +95,13 @@ dependencies {
 
   implementation(libs.osmdroid)
   implementation(libs.timber)
+
+  baselineProfile(project(":benchmarks"))
 }
+
+baselineProfile {
+  // Don't build on every iteration of a full assemble.
+  // Instead enable generation directly for the release build variant.
+  automaticGenerationDuringBuild = false
+}
+
