@@ -22,7 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.GOLDEN_BLUE_HOUR_PATH_SEGMENT
 import com.trm.daylighter.core.common.navigation.WIDGET_LOCATION_PATH_SEGMENT
-import com.trm.daylighter.core.common.navigation.addLocationDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
@@ -205,7 +205,7 @@ private fun DayLighterNavHost(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  fun navigateToAddLocation() {
+  fun navigateToNewLocation() {
     navController.navigate(route = locationRoute, navOptions = nextLevelNavOptions())
   }
 
@@ -216,7 +216,7 @@ private fun DayLighterNavHost(
   val context = LocalContext.current
   val dayNightCycleDeepLinkUriPattern = context.dayNightCycleDeepLinkPattern()
   val goldenBlueHourDeepLinkUriPattern = context.goldenBlueHourDeepLinkPattern()
-  val addLocationDeepLinkUriPattern = context.addLocationDeepLinkPattern()
+  val newLocationDeepLinkUriPattern = context.newLocationDeepLinkPattern()
   val widgetLocationDeepLinkUriPattern = context.widgetLocationDeepLinkPattern()
 
   NavHost(
@@ -237,7 +237,7 @@ private fun DayLighterNavHost(
         modifier = Modifier.fillMaxSize(),
         chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
         onDrawerMenuClick = onDrawerMenuClick,
-        onAddLocationClick = ::navigateToAddLocation,
+        onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
       )
     }
@@ -250,7 +250,7 @@ private fun DayLighterNavHost(
         modifier = Modifier.fillMaxSize(),
         chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR,
         onDrawerMenuClick = onDrawerMenuClick,
-        onAddLocationClick = ::navigateToAddLocation,
+        onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
       )
     }
@@ -261,7 +261,7 @@ private fun DayLighterNavHost(
     ) {
       WidgetLocationRoute(
         modifier = Modifier.fillMaxSize(),
-        onAddLocationClick = ::navigateToAddLocation,
+        onNewLocationClick = ::navigateToNewLocation,
         onDrawerMenuClick = onDrawerMenuClick,
       )
     }
@@ -269,7 +269,7 @@ private fun DayLighterNavHost(
     composable(route = locationsRoute) {
       LocationsRoute(
         modifier = Modifier.fillMaxSize(),
-        onAddLocationClick = ::navigateToAddLocation,
+        onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
         onDrawerMenuClick = onDrawerMenuClick,
       )
@@ -285,7 +285,7 @@ private fun DayLighterNavHost(
 
     composable(
       route = locationRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = addLocationDeepLinkUriPattern })
+      deepLinks = listOf(navDeepLink { uriPattern = newLocationDeepLinkUriPattern })
     ) {
       LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }

@@ -226,7 +226,7 @@ private fun LocationScreen(
     stringResource(
       id =
         when (screenMode) {
-          LocationScreenMode.ADD -> commonR.string.add_location
+          LocationScreenMode.ADD -> commonR.string.new_location
           LocationScreenMode.EDIT -> R.string.edit_location
         }
     )

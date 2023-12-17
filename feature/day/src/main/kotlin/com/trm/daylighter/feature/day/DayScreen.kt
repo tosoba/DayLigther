@@ -83,7 +83,7 @@ const val goldenBlueHourRoute = "golden_blue_hour_route"
 fun DayRoute(
   chartMode: DayPeriodChartMode,
   onDrawerMenuClick: () -> Unit,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
@@ -99,7 +99,7 @@ fun DayRoute(
     sunriseSunsetChangeInLocationAt = viewModel::sunriseSunsetChangeInLocationAt,
     currentTimeInLocationAt = viewModel::currentTimeInLocationAt,
     onDrawerMenuClick = onDrawerMenuClick,
-    onAddLocationClick = onAddLocationClick,
+    onNewLocationClick = onNewLocationClick,
     onEditLocationClick = onEditLocationClick,
     modifier = modifier
   )
@@ -120,7 +120,7 @@ internal fun DayScreen(
   sunriseSunsetChangeInLocationAt: (Int) -> Flow<StableLoadable<LocationSunriseSunsetChange>>,
   currentTimeInLocationAt: (Int) -> Flow<LocalTime>,
   onDrawerMenuClick: () -> Unit,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -277,8 +277,8 @@ internal fun DayScreen(
             ) {
               InfoButtonCard(
                 infoText = stringResource(commonR.string.no_saved_locations),
-                actionText = stringResource(commonR.string.add_location),
-                onButtonClick = onAddLocationClick,
+                actionText = stringResource(commonR.string.new_location),
+                onButtonClick = onNewLocationClick,
                 modifier = Modifier.enumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD)
               )
             }

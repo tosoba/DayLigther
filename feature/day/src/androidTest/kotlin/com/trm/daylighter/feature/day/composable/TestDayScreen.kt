@@ -34,7 +34,7 @@ internal fun TestDayScreen(
   },
   currentTimeInLocationAt: (Int) -> Flow<LocalTime> = { emptyFlow() },
   onDrawerMenuClick: () -> Unit = {},
-  onAddLocationClick: () -> Unit = {},
+  onNewLocationClick: () -> Unit = {},
   onEditLocationClick: (Long) -> Unit = {},
 ) {
   DayScreen(
@@ -44,7 +44,7 @@ internal fun TestDayScreen(
     sunriseSunsetChangeInLocationAt = sunriseSunsetChangeInLocationAt,
     currentTimeInLocationAt = currentTimeInLocationAt,
     onDrawerMenuClick = onDrawerMenuClick,
-    onAddLocationClick = onAddLocationClick,
+    onNewLocationClick = onNewLocationClick,
     onEditLocationClick = onEditLocationClick,
     modifier = modifier
   )

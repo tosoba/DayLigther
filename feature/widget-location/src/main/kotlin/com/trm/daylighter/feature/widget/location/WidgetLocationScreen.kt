@@ -91,7 +91,7 @@ const val widgetLocationRoute = "widget_location_route"
 @Composable
 fun WidgetLocationRoute(
   modifier: Modifier = Modifier,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   viewModel: WidgetLocationViewModel = hiltViewModel()
 ) {
@@ -106,7 +106,7 @@ fun WidgetLocationRoute(
     onAddDayNightCycleWidget = viewModel::onAddDayNightCycleWidget,
     onAddGoldenBlueHourWidget = viewModel::onAddGoldenBlueHourWidget,
     onEditWidgetLocationClick = viewModel::onEditWidgetLocationClick,
-    onAddLocationClick = onAddLocationClick,
+    onNewLocationClick = onNewLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
     modifier = modifier
   )
@@ -134,7 +134,7 @@ private fun WidgetLocationScreen(
   onAddDayNightCycleWidget: () -> Unit,
   onAddGoldenBlueHourWidget: () -> Unit,
   onEditWidgetLocationClick: () -> Unit,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -269,7 +269,7 @@ private fun WidgetLocationScreen(
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(20.dp),
-              onAddLocationClick = onAddLocationClick
+              onNewLocationClick = onNewLocationClick
             )
 
             TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
@@ -438,11 +438,11 @@ private fun MapCard(
 }
 
 @Composable
-private fun NoLocationsCard(modifier: Modifier = Modifier, onAddLocationClick: () -> Unit) {
+private fun NoLocationsCard(modifier: Modifier = Modifier, onNewLocationClick: () -> Unit) {
   InfoButtonCard(
     infoText = stringResource(commonR.string.no_saved_locations),
-    actionText = stringResource(commonR.string.add_location),
-    onButtonClick = onAddLocationClick,
+    actionText = stringResource(commonR.string.new_location),
+    onButtonClick = onNewLocationClick,
     modifier = modifier
   )
 }

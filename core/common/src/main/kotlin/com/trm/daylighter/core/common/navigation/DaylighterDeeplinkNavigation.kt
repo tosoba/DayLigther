@@ -5,10 +5,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.trm.daylighter.core.common.R
 
-fun Context.addLocationDeepLinkPattern(): String =
+fun Context.newLocationDeepLinkPattern(): String =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/location"
 
-fun Context.addLocationDeeplinkUri(): Uri = addLocationDeepLinkPattern().toUri()
+fun Context.newLocationDeeplinkUri(): Uri = newLocationDeepLinkPattern().toUri()
 
 const val DAY_NIGHT_CYCLE_PATH_SEGMENT = "day_night_cycle"
 const val GOLDEN_BLUE_HOUR_PATH_SEGMENT = "golden_blue_hour"

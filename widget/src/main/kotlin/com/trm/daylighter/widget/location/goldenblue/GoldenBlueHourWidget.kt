@@ -44,7 +44,7 @@ import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlow
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.locationIdKey
-import com.trm.daylighter.widget.ui.AddLocationButton
+import com.trm.daylighter.widget.ui.NewLocationButton
 import com.trm.daylighter.widget.ui.Clock
 import com.trm.daylighter.widget.ui.DayLengthInfo
 import com.trm.daylighter.widget.ui.GlanceTheme
@@ -94,7 +94,7 @@ class GoldenBlueHourWidgetPreview(
 private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>, id: GlanceId) {
   GlanceTheme {
     when (change) {
-      Empty -> AddLocationButton()
+      Empty -> NewLocationButton()
       is Loading -> ProgressIndicator()
       is Ready -> GoldenBlueHourChart(change = change.data, id = id)
       is Failed -> RetryButton(id = id)

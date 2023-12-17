@@ -49,7 +49,7 @@ class DayScreenTests {
       setContent { TestDayScreen(modifier = Modifier.fillMaxSize()) }
       onNodeWithEnumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD).assertIsDisplayed()
       onNodeWithText(activity.getString(R.string.no_saved_locations)).assertIsDisplayed()
-      onNodeWithText(activity.getString(R.string.add_location)).assertIsDisplayed()
+      onNodeWithText(activity.getString(R.string.new_location)).assertIsDisplayed()
     }
   }
 }

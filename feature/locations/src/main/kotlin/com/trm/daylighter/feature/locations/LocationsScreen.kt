@@ -42,7 +42,7 @@ const val locationsRoute = "locations_route"
 @Composable
 fun LocationsRoute(
   modifier: Modifier = Modifier,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDrawerMenuClick: () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
@@ -54,7 +54,7 @@ fun LocationsRoute(
     onSetDefaultLocationClick = viewModel::setDefaultLocation,
     onEditLocationClick = onEditLocationClick,
     onDeleteLocationClick = viewModel::deleteLocation,
-    onAddLocationClick = onAddLocationClick,
+    onNewLocationClick = onNewLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
   )
 }
@@ -63,7 +63,7 @@ fun LocationsRoute(
 @Composable
 private fun LocationsScreen(
   locations: Loadable<List<StableValue<Location>>>,
-  onAddLocationClick: () -> Unit,
+  onNewLocationClick: () -> Unit,
   onSetDefaultLocationClick: (Long) -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
@@ -151,7 +151,7 @@ private fun LocationsScreen(
             )
 
             FloatingActionButton(
-              onClick = onAddLocationClick,
+              onClick = onNewLocationClick,
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
@@ -159,7 +159,7 @@ private fun LocationsScreen(
             ) {
               Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.add_a_location)
+                contentDescription = stringResource(commonR.string.new_location)
               )
             }
           }
@@ -181,7 +181,7 @@ private fun LocationsScreen(
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).padding(20.dp),
-              onAddLocationClick = onAddLocationClick
+              onNewLocationClick = onNewLocationClick
             )
 
             TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
@@ -203,11 +203,11 @@ private fun LocationsScreen(
 }
 
 @Composable
-private fun NoLocationsCard(modifier: Modifier = Modifier, onAddLocationClick: () -> Unit) {
+private fun NoLocationsCard(modifier: Modifier = Modifier, onNewLocationClick: () -> Unit) {
   InfoButtonCard(
     infoText = stringResource(commonR.string.no_saved_locations),
-    actionText = stringResource(commonR.string.add_location),
-    onButtonClick = onAddLocationClick,
+    actionText = stringResource(commonR.string.new_location),
+    onButtonClick = onNewLocationClick,
     modifier = modifier
   )
 }
