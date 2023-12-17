@@ -20,6 +20,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel
 class LocationViewModel
@@ -120,6 +121,7 @@ constructor(
               var failed = false
               getLocationDisplayNameUseCase(lat = request.lat, lng = request.lng).collectLatest {
                 failed = it is Failed
+                if (it is Failed) Timber.e(it.throwable)
                 send(it)
               }
               if (failed) {
