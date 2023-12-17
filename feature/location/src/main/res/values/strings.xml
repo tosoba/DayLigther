@@ -19,5 +19,6 @@
     <string name="location_name_cannot_be_blank">Location name cannot be blank.</string>
 
     <string name="location_name_not_found">Failed to geocode location.</string>
+    <string name="no_internet_connection">No internet connection.</string>
     <string name="geocoding_error">Error occurred when trying to geocode location.</string>
 </resources>

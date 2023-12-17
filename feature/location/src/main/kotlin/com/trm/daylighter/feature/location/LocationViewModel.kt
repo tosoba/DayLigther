@@ -15,6 +15,7 @@ import com.trm.daylighter.core.domain.usecase.SetGeocodingEmailUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
 import com.trm.daylighter.feature.location.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -144,6 +145,7 @@ constructor(
     locationNameFlow.map {
       when {
         it.isFailedWith<LocationDisplayNameNotFound>() -> R.string.location_name_not_found
+        it.isFailedWith<IOException>() -> R.string.no_internet_connection
         it is Failed -> R.string.geocoding_error
         else -> null
       }
