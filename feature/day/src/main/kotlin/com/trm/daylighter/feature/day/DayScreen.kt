@@ -187,12 +187,19 @@ internal fun DayScreen(
     Box(
       modifier =
         Modifier.constrainAs(mainContent) {
-          if (usingNavigationBar) {
-            linkTo(parent.start, parent.end)
-            linkTo(parent.top, navigation.top)
-          } else {
-            linkTo(navigation.end, parent.end)
-            linkTo(parent.top, parent.bottom)
+          when {
+            locations is Empty -> {
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, parent.bottom)
+            }
+            usingNavigationBar -> {
+              linkTo(parent.start, parent.end)
+              linkTo(parent.top, navigation.top)
+            }
+            else -> {
+              linkTo(navigation.end, parent.end)
+              linkTo(parent.top, parent.bottom)
+            }
           }
           height = Dimension.fillToConstraints
           width = Dimension.fillToConstraints
@@ -332,59 +339,61 @@ internal fun DayScreen(
       }
     }
 
-    if (usingNavigationBar) {
-      NavigationBar(
-        content = {
-          SunriseSunsetNavigationBarContent(
-            dayMode = dayMode,
-            itemsEnabled = currentChange.value is Ready,
-            onDayModeChange = { dayMode = it }
-          )
-        },
-        modifier =
-          Modifier.constrainAs(navigation) {
-              linkTo(mainContent.bottom, parent.bottom)
-              linkTo(parent.start, parent.end)
-            }
-            .enumTestTag(DayTestTags.NAVIGATION_BAR)
-      )
-    } else {
-      NavigationRail(
-        header = {
-          if (!usingPermanentNavigationDrawer) {
-            DrawerMenuIconButton(
-              onClick = onDrawerMenuClick,
-              modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+    if (locations !is Empty) {
+      if (usingNavigationBar) {
+        NavigationBar(
+          content = {
+            SunriseSunsetNavigationBarContent(
+              dayMode = dayMode,
+              itemsEnabled = currentChange.value is Ready,
+              onDayModeChange = { dayMode = it }
             )
-          }
-        },
-        content = {
-          SunriseSunsetNavigationRailContent(
-            dayMode = dayMode,
-            itemsEnabled = currentChange.value is Ready,
-            onDayModeChange = { dayMode = it },
-            footer = {
-              AnimatedVisibility(
-                visible = currentChange.value is Ready,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier.padding(bottom = 8.dp)
-              ) {
-                EditLocationButton(
-                  onClick = ::onEditLocationClick,
-                  modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
-                )
+          },
+          modifier =
+            Modifier.constrainAs(navigation) {
+                linkTo(mainContent.bottom, parent.bottom)
+                linkTo(parent.start, parent.end)
               }
+              .enumTestTag(DayTestTags.NAVIGATION_BAR)
+        )
+      } else {
+        NavigationRail(
+          header = {
+            if (!usingPermanentNavigationDrawer) {
+              DrawerMenuIconButton(
+                onClick = onDrawerMenuClick,
+                modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+              )
             }
-          )
-        },
-        modifier =
-          Modifier.constrainAs(navigation) {
-              start.linkTo(parent.start)
-              linkTo(parent.top, parent.bottom)
-            }
-            .enumTestTag(DayTestTags.NAVIGATION_RAIL),
-      )
+          },
+          content = {
+            SunriseSunsetNavigationRailContent(
+              dayMode = dayMode,
+              itemsEnabled = currentChange.value is Ready,
+              onDayModeChange = { dayMode = it },
+              footer = {
+                AnimatedVisibility(
+                  visible = currentChange.value is Ready,
+                  enter = fadeIn(),
+                  exit = fadeOut(),
+                  modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                  EditLocationButton(
+                    onClick = ::onEditLocationClick,
+                    modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
+                  )
+                }
+              }
+            )
+          },
+          modifier =
+            Modifier.constrainAs(navigation) {
+                start.linkTo(parent.start)
+                linkTo(parent.top, parent.bottom)
+              }
+              .enumTestTag(DayTestTags.NAVIGATION_RAIL),
+        )
+      }
     }
 
     val constrainClockAndDayLengthCardToAppBarBottom =
