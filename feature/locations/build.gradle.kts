@@ -5,8 +5,4 @@ plugins {
 
 android { namespace = "com.trm.daylighter.feature.locations" }
 
-dependencies {
-  implementation(libs.androidx.constraintlayout)
-
-  implementation(libs.osmdroid)
-}
+dependencies { implementation(libs.osmdroid) }
