@@ -312,10 +312,7 @@ private fun NavController.topLevelNavOptions(
   saveCurrentRouteState: Boolean,
   restoreDestinationState: Boolean
 ): NavOptions = navOptions {
-  popUpTo(graph.findStartDestination().id) {
-    saveState = saveCurrentRouteState
-    inclusive = true
-  }
+  popUpTo(graph.findStartDestination().id) { saveState = saveCurrentRouteState }
   launchSingleTop = true
   this.restoreState = restoreDestinationState
   fadeInAndOut()
