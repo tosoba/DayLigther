@@ -22,9 +22,9 @@ import androidx.navigation.compose.rememberNavController
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.navigation.GOLDEN_BLUE_HOUR_PATH_SEGMENT
 import com.trm.daylighter.core.common.navigation.WIDGET_LOCATION_PATH_SEGMENT
-import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
@@ -68,16 +68,19 @@ fun DayLighterMainContent() {
       DayLighterDrawerContent(
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
-          scope.launch { drawerState.close() }
-          if (destinationRoute == currentRoute) return@DayLighterDrawerContent
-          navController.navigate(
-            route = destinationRoute,
-            navOptions =
-              navController.topLevelNavOptions(
-                saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
-                restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
+          scope.launch {
+            drawerState.close()
+            if (destinationRoute != currentRoute) {
+              navController.navigate(
+                route = destinationRoute,
+                navOptions =
+                  navController.topLevelNavOptions(
+                    saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
+                    restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
+                  )
               )
-          )
+            }
+          }
         }
       )
     }
@@ -99,7 +102,7 @@ fun DayLighterNavigationDrawer(
   } else {
     ModalNavigationDrawer(
       modifier = modifier,
-      gesturesEnabled = visible,
+      gesturesEnabled = false,
       drawerState = drawerState,
       drawerContent = drawerContent,
       content = content
@@ -147,10 +150,7 @@ private fun DayLighterDrawerContent(
     }
 
     if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DrawerRouteItem(
-        label = stringResource(commonR.string.widgets),
-        route = widgetLocationRoute
-      ) {
+      DrawerRouteItem(label = stringResource(commonR.string.widgets), route = widgetLocationRoute) {
         Icon(
           imageVector = Icons.Filled.Widgets,
           contentDescription = stringResource(commonR.string.widgets)
