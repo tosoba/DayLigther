@@ -25,6 +25,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.trm.daylighter.core.common.R as commonR
@@ -70,7 +72,7 @@ private fun LocationsScreen(
   onDrawerMenuClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier) {
+  ConstraintLayout(modifier = modifier) {
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
     var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
@@ -91,29 +93,44 @@ private fun LocationsScreen(
       )
     }
 
+    DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
+
+    val (appBar, content, deleteDialog) = createRefs()
+
+    TopAppBar(
+      modifier =
+        Modifier.constrainAs(appBar) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+            width = Dimension.fillToConstraints
+            height = Dimension.wrapContent
+          }
+          .background(backgroundToTransparentVerticalGradient)
+    )
+
     Crossfade(
       targetState = locations,
-      modifier = Modifier.fillMaxSize(),
+      modifier =
+        Modifier.constrainAs(content) {
+          start.linkTo(parent.start)
+          end.linkTo(parent.end)
+          top.linkTo(appBar.bottom)
+          bottom.linkTo(parent.bottom)
+
+          height = Dimension.fillToConstraints
+          width = Dimension.fillToConstraints
+        },
       label = "locations-chart-crossfade"
     ) { locations ->
-      when (locations) {
-        is Ready -> {
-          var topAppBarHeightPx by remember { mutableIntStateOf(0) }
-
-          Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
-
+      Box(modifier = Modifier.fillMaxSize()) {
+        when (locations) {
+          is Ready -> {
             LazyVerticalGrid(
+              modifier = Modifier.fillMaxSize(),
               contentPadding = PaddingValues(10.dp),
               columns = GridCells.Adaptive(175.dp)
             ) {
-              item(span = LazyGridItemSpanScope::fullWidthSpan) {
-                Spacer(
-                  modifier =
-                    Modifier.height(with(LocalDensity.current) { topAppBarHeightPx.toDp() })
-                )
-              }
-
               items(locations.data, key = { it.value.id }) { location ->
                 MapCard(
                   modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
@@ -136,13 +153,6 @@ private fun LocationsScreen(
               }
             }
 
-            TopAppBar(
-              modifier =
-                Modifier.background(backgroundToTransparentVerticalGradient).onGloballyPositioned {
-                  topAppBarHeightPx = it.size.height
-                }
-            )
-
             ZoomButtonsRow(
               zoom = zoom,
               incrementZoom = { ++zoom },
@@ -163,42 +173,36 @@ private fun LocationsScreen(
               )
             }
           }
-        }
-        is Loading -> {
-          Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
-
+          is Loading -> {
             LinearProgressIndicator(
               modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
             )
-
-            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
-        }
-        else -> {
-          Box(modifier = Modifier.fillMaxSize()) {
-            DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
-
+          else -> {
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).padding(20.dp),
               onNewLocationClick = onNewLocationClick
             )
-
-            TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
           }
         }
       }
-
-      DeleteLocationConfirmationDialog(
-        locationBeingDeleted = locationBeingDeleted,
-        onConfirmClick = {
-          onDeleteLocationClick(requireNotNull(locationBeingDeleted))
-          locationBeingDeleted = null
-        },
-        onDismissRequest = { locationBeingDeleted = null },
-        modifier = Modifier.align(Alignment.Center).wrapContentHeight()
-      )
     }
+
+    DeleteLocationConfirmationDialog(
+      locationBeingDeleted = locationBeingDeleted,
+      onConfirmClick = {
+        onDeleteLocationClick(requireNotNull(locationBeingDeleted))
+        locationBeingDeleted = null
+      },
+      onDismissRequest = { locationBeingDeleted = null },
+      modifier =
+        Modifier.constrainAs(deleteDialog) {
+          top.linkTo(parent.top)
+          bottom.linkTo(parent.bottom)
+          start.linkTo(parent.start)
+          end.linkTo(parent.end)
+        }
+    )
   }
 }
 
