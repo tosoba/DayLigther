@@ -81,7 +81,7 @@ private val DrawScope.chartCenter: Offset
   get() = Offset(x = chartTopLeftOffset.x + chartRadius, y = size.height / 2f)
 
 private val DrawScope.chartTextPaddingPx: Float
-  get() = 10.dp.toPx()
+  get() = 8.dp.toPx()
 
 private val segmentEndingEdgeLabelPaddingPx: Float
   @Composable get() = with(LocalDensity.current) { 20.dp.toPx() }
@@ -142,9 +142,11 @@ fun DayPeriodChart(
   val textMeasurer = rememberTextMeasurer()
   val labelTextStyle =
     when {
-      LocalHeightSizeClass.current == WindowHeightSizeClass.Compact ||
-        LocalWidthSizeClass.current == WindowWidthSizeClass.Compact -> {
+      LocalHeightSizeClass.current == WindowHeightSizeClass.Compact -> {
         MaterialTheme.typography.labelSmall
+      }
+      LocalWidthSizeClass.current == WindowWidthSizeClass.Compact -> {
+        MaterialTheme.typography.labelMedium
       }
       LocalHeightSizeClass.current == WindowHeightSizeClass.Expanded ||
         LocalWidthSizeClass.current == WindowWidthSizeClass.Expanded -> {
