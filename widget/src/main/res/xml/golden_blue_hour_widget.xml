@@ -4,5 +4,6 @@
     android:initialLayout="@layout/widget_loading"
     android:minWidth="200dp"
     android:minHeight="50dp"
+    android:previewImage="@drawable/golden_hour_widget_preview"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />
