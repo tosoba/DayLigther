@@ -2,8 +2,8 @@ package com.trm.daylighter.widget.location.goldenblue
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
@@ -39,16 +39,16 @@ import com.trm.daylighter.core.domain.model.Loading
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.locationIdKey
-import com.trm.daylighter.widget.ui.NewLocationButton
 import com.trm.daylighter.widget.ui.Clock
 import com.trm.daylighter.widget.ui.DayLengthInfo
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.LocationName
+import com.trm.daylighter.widget.ui.NewLocationButton
 import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
 import com.trm.daylighter.widget.ui.appWidgetBackgroundCornerRadius
@@ -58,10 +58,9 @@ import com.trm.daylighter.widget.ui.stringResource
 import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 
 class GoldenBlueHourWidget(
-  private val getDefaultLocationSunriseSunsetChangeFlowUseCase:
-    GetDefaultLocationSunriseSunsetChangeFlowUseCase,
-  private val getLocationSunriseSunsetChangeFlowByIdUseCase:
-    GetLocationSunriseSunsetChangeFlowByIdUseCase
+  private val getDefaultLocationSunriseSunsetChangeUseCase:
+    GetDefaultLocationSunriseSunsetChangeUseCase,
+  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase
 ) : GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
@@ -69,12 +68,12 @@ class GoldenBlueHourWidget(
     provideContent {
       val state = currentState<Preferences>()
       val change by
-        remember(state) {
-            val locationId = state[locationIdKey]
-            if (locationId == null) getDefaultLocationSunriseSunsetChangeFlowUseCase()
-            else getLocationSunriseSunsetChangeFlowByIdUseCase(locationId)
-          }
-          .collectAsState(initial = LoadingFirst)
+        produceState<Loadable<LocationSunriseSunsetChange>>(LoadingFirst, state) {
+          val locationId = state[locationIdKey]
+          value =
+            if (locationId == null) getDefaultLocationSunriseSunsetChangeUseCase()
+            else getLocationSunriseSunsetChangeByIdUseCase(locationId)
+        }
       GoldenBlueHourContent(change = change, id = id)
     }
   }

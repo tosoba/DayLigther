@@ -3,8 +3,8 @@ package com.trm.daylighter.widget.location.goldenblue
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.widget.location.LocationWidgetActions
 import com.trm.daylighter.widget.location.LocationWidgetExtras
 import com.trm.daylighter.widget.location.WidgetLocationIdUpdate
@@ -17,19 +17,19 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class GoldenBlueHourWidgetReceiver : GlanceAppWidgetReceiver() {
   @Inject
-  internal lateinit var getDefaultLocationSunriseSunsetChangeFlowUseCase:
-    GetDefaultLocationSunriseSunsetChangeFlowUseCase
+  internal lateinit var getDefaultLocationSunriseSunsetChangeUseCase:
+    GetDefaultLocationSunriseSunsetChangeUseCase
 
   @Inject
-  internal lateinit var getLocationSunriseSunsetChangeFlowByIdUseCase:
-    GetLocationSunriseSunsetChangeFlowByIdUseCase
+  internal lateinit var getLocationSunriseSunsetChangeByIdUseCase:
+    GetLocationSunriseSunsetChangeByIdUseCase
 
-  override val glanceAppWidget: GoldenBlueHourWidget
-    get() =
-      GoldenBlueHourWidget(
-        getDefaultLocationSunriseSunsetChangeFlowUseCase,
-        getLocationSunriseSunsetChangeFlowByIdUseCase
-      )
+  override val glanceAppWidget: GoldenBlueHourWidget by lazy {
+    GoldenBlueHourWidget(
+      getDefaultLocationSunriseSunsetChangeUseCase,
+      getLocationSunriseSunsetChangeByIdUseCase
+    )
+  }
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)

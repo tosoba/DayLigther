@@ -3,8 +3,8 @@ package com.trm.daylighter.widget.location.daynight
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeFlowUseCase
-import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeFlowByIdUseCase
+import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
+import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.widget.location.LocationWidgetActions
 import com.trm.daylighter.widget.location.LocationWidgetExtras
 import com.trm.daylighter.widget.location.WidgetLocationIdUpdate
@@ -17,19 +17,19 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   @Inject
-  internal lateinit var getDefaultLocationSunriseSunsetChangeFlowUseCase:
-    GetDefaultLocationSunriseSunsetChangeFlowUseCase
+  internal lateinit var getDefaultLocationSunriseSunsetChangeUseCase:
+    GetDefaultLocationSunriseSunsetChangeUseCase
 
   @Inject
-  internal lateinit var getLocationSunriseSunsetChangeFlowByIdUseCase:
-    GetLocationSunriseSunsetChangeFlowByIdUseCase
+  internal lateinit var getLocationSunriseSunsetChangeByIdUseCase:
+    GetLocationSunriseSunsetChangeByIdUseCase
 
-  override val glanceAppWidget: DayNightCycleWidget
-    get() =
-      DayNightCycleWidget(
-        getDefaultLocationSunriseSunsetChangeFlowUseCase,
-        getLocationSunriseSunsetChangeFlowByIdUseCase
-      )
+  override val glanceAppWidget: DayNightCycleWidget by lazy {
+    DayNightCycleWidget(
+      getDefaultLocationSunriseSunsetChangeUseCase,
+      getLocationSunriseSunsetChangeByIdUseCase
+    )
+  }
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
