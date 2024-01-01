@@ -5,13 +5,35 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import com.trm.daylighter.core.common.R
+import androidx.glance.action.Action
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.action.actionSendBroadcast
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.layout.wrapContentWidth
+import com.trm.daylighter.core.common.R as commonR
+import com.trm.daylighter.core.common.navigation.WidgetTypeParam
+import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
+import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
+import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
 import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.SunriseSunset
@@ -25,7 +47,11 @@ import com.trm.daylighter.core.ui.theme.dayColor
 import com.trm.daylighter.core.ui.theme.goldenHourColor
 import com.trm.daylighter.core.ui.theme.nauticalTwilightColor
 import com.trm.daylighter.core.ui.theme.nightColor
+import com.trm.daylighter.widget.R
+import com.trm.daylighter.widget.location.daynight.DayNightCycleWidgetReceiver
+import com.trm.daylighter.widget.location.goldenblue.GoldenBlueHourWidgetReceiver
 import com.trm.daylighter.widget.util.ext.antiAliasPaint
+import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -34,7 +60,139 @@ private const val WIDGET_PREVIEW_WIDTH_PX = 730
 private const val WIDGET_PREVIEW_HEIGHT_PX = 245
 
 @Composable
-internal fun dayPeriodChartBitmap(
+internal fun DayPeriodChart(
+  change: LocationSunriseSunsetChange,
+  chartMode: DayPeriodChartMode,
+  id: GlanceId
+) {
+  Box(
+    contentAlignment = Alignment.TopEnd,
+    modifier =
+      GlanceModifier.fillMaxSize()
+        .appWidgetBackgroundCornerRadius()
+        .clickable(widgetDayScreenDeepLinkAction(change.location, chartMode))
+  ) {
+    Image(
+      provider = ImageProvider(dayPeriodChartBitmap(change = change, chartMode = chartMode)),
+      contentDescription = null,
+      contentScale = ContentScale.FillBounds,
+      modifier = GlanceModifier.fillMaxSize()
+    )
+
+    Column(
+      verticalAlignment = Alignment.Vertical.CenterVertically,
+      horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+    ) {
+      LocationName(location = change.location)
+      Clock(zoneId = change.location.zoneId)
+      DayLengthInfo(change = change)
+    }
+
+    Column(
+      verticalAlignment = Alignment.Vertical.Top,
+      horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+      modifier = GlanceModifier.wrapContentWidth().fillMaxHeight().appWidgetBackgroundCornerRadius()
+    ) {
+      Image(
+        provider = ImageProvider(R.drawable.settings),
+        contentDescription = stringResource(commonR.string.settings),
+        modifier =
+          GlanceModifier.padding(5.dp)
+            .clickable(
+              widgetLocationDeepLinkAction(
+                location = change.location,
+                chartMode = chartMode,
+                id = id
+              )
+            )
+      )
+
+      Spacer(GlanceModifier.defaultWeight())
+
+      Image(
+        provider = ImageProvider(R.drawable.refresh),
+        contentDescription = stringResource(commonR.string.refresh),
+        modifier =
+          GlanceModifier.padding(5.dp)
+            .clickable(widgetRefreshBroadcastAction(chartMode = chartMode, id = id))
+      )
+    }
+  }
+}
+
+@Composable
+private fun widgetDayScreenDeepLinkAction(
+  location: Location,
+  chartMode: DayPeriodChartMode
+): Action {
+  val context = LocalContext.current
+  return deepLinkAction(
+    uri =
+      when (chartMode) {
+        DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+          context.dayNightCycleDeepLinkUri(
+            locationId = location.id,
+            isDefault = location.isDefault,
+          )
+        }
+        DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+          context.goldenBlueHourDeepLinkUri(
+            locationId = location.id,
+            isDefault = location.isDefault
+          )
+        }
+      }
+  )
+}
+
+@Composable
+private fun widgetLocationDeepLinkAction(
+  location: Location,
+  chartMode: DayPeriodChartMode,
+  id: GlanceId
+): Action {
+  val context = LocalContext.current
+  val widgetManager = remember { GlanceAppWidgetManager(context) }
+  return deepLinkAction(
+    uri =
+      when (chartMode) {
+        DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+          context.widgetLocationDeepLinkUri(
+            type = WidgetTypeParam.DAY_NIGHT_CYCLE,
+            glanceId = widgetManager.getAppWidgetId(id),
+            locationId = location.id
+          )
+        }
+        DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+          context.widgetLocationDeepLinkUri(
+            type = WidgetTypeParam.GOLDEN_BLUE_HOUR,
+            glanceId = widgetManager.getAppWidgetId(id),
+            locationId = location.id
+          )
+        }
+      }
+  )
+}
+
+@Composable
+private fun widgetRefreshBroadcastAction(chartMode: DayPeriodChartMode, id: GlanceId): Action {
+  val context = LocalContext.current
+  val widgetManager = remember { GlanceAppWidgetManager(context) }
+  return actionSendBroadcast(
+    when (chartMode) {
+      DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+        context.updateWidgetIntent<DayNightCycleWidgetReceiver>(widgetManager.getAppWidgetId(id))
+      }
+      DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+        context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(widgetManager.getAppWidgetId(id))
+      }
+    }
+  )
+}
+
+@Composable
+private fun dayPeriodChartBitmap(
   change: LocationSunriseSunsetChange,
   chartMode: DayPeriodChartMode
 ): Bitmap {
@@ -210,4 +368,4 @@ private fun Canvas.timeXFor(dateTime: ZonedDateTime): Float {
 }
 
 private fun nowLinePaint(context: Context): Paint =
-  antiAliasPaint(Color(context.resources.getColor(R.color.now_line, context.theme)).toArgb())
+  antiAliasPaint(Color(context.resources.getColor(commonR.color.now_line, context.theme)).toArgb())
