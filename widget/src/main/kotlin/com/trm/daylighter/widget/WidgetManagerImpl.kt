@@ -54,7 +54,7 @@ constructor(
       .requestPinGlanceAppWidget(
         receiver = GoldenBlueHourWidgetReceiver::class.java,
         preview =
-          GoldenBlueHourWidgetPreview(getLocationSunriseSunsetChangeByIdUseCase(id = locationId)),
+          GoldenBlueHourWidgetPreview(getLocationSunriseSunsetChangeByIdUseCase(locationId)),
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId)

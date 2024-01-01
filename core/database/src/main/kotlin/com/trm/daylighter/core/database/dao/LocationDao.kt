@@ -34,10 +34,10 @@ interface LocationDao {
     if (isDefault) setDefaultToMostRecentlyAddedLocation()
   }
 
-  @Query("SELECT * FROM location WHERE is_default = TRUE")
+  @Query("SELECT * FROM location WHERE is_default = 1")
   fun selectDefaultFlow(): Flow<LocationEntity?>
 
-  @Query("SELECT * FROM location WHERE is_default = TRUE") fun selectDefault(): LocationEntity?
+  @Query("SELECT * FROM location WHERE is_default = 1") fun selectDefault(): LocationEntity?
 
   @Query("SELECT EXISTS(SELECT * FROM location)") suspend fun selectAnyExists(): Boolean
 
@@ -46,9 +46,9 @@ interface LocationDao {
 
   @Query("SELECT * FROM location WHERE id = :id") suspend fun selectById(id: Long): LocationEntity?
 
-  @Query("UPDATE location SET is_default = FALSE") suspend fun setIsDefaultToFalse()
+  @Query("UPDATE location SET is_default = 0") suspend fun setIsDefaultToFalse()
 
-  @Query("UPDATE location SET is_default = TRUE WHERE id = :id")
+  @Query("UPDATE location SET is_default = 1 WHERE id = :id")
   suspend fun setIsDefaultToTrueById(id: Long)
 
   @Transaction
@@ -58,7 +58,7 @@ interface LocationDao {
   }
 
   @Query(
-    "UPDATE location SET is_default = TRUE WHERE updated_at = (SELECT MAX(updated_at) FROM location)"
+    "UPDATE location SET is_default = 1 WHERE updated_at = (SELECT MAX(updated_at) FROM location)"
   )
   suspend fun setDefaultToMostRecentlyAddedLocation()
 
@@ -75,8 +75,8 @@ interface LocationDao {
 
   @Query(
     "SELECT position " +
-      "FROM (SELECT id, (SELECT COUNT(*) FROM location WHERE updated_at > l.updated_at AND is_default = FALSE) + 1 AS position " +
-      "FROM location l WHERE is_default = FALSE ORDER BY updated_at DESC) WHERE id = :id"
+      "FROM (SELECT id, (SELECT COUNT(*) FROM location WHERE updated_at > l.updated_at AND is_default = 0) + 1 AS position " +
+      "FROM location l WHERE is_default = 0 ORDER BY updated_at DESC) WHERE id = :id"
   )
   fun selectNonDefaultLocationIndexById(id: Long): Int?
 }
