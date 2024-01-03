@@ -7,11 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.appwidget.AndroidRemoteViews
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -20,6 +23,8 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentSize
+import androidx.glance.text.Text
+import androidx.glance.text.TextDefaults
 import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
 import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
@@ -62,7 +67,9 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
 
       Row {
         AndroidRemoteViews(
-          modifier = GlanceModifier.wrapContentSize(),
+          modifier =
+            GlanceModifier.wrapContentSize()
+              .padding(vertical = if (diffPrefix == "+" || diffPrefix == "-") 1.dp else 0.dp),
           remoteViews =
             RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
               setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
@@ -73,31 +80,50 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
 
         Spacer(modifier = GlanceModifier.width(5.dp))
 
-        AndroidRemoteViews(
-          modifier = GlanceModifier.wrapContentSize(),
-          remoteViews =
-            RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
-              setTextViewText(
-                R.id.shadow_text_view,
+        if (diffPrefix == "+" || diffPrefix == "-") {
+          Box(
+            modifier =
+              GlanceModifier.wrapContentSize()
+                .cornerRadius(2.dp)
+                .background(
+                  when (diffPrefix) {
+                    "+" -> Color.Green
+                    "-" -> Color.Red
+                    else -> throw IllegalArgumentException()
+                  }
+                ),
+          ) {
+            Text(
+              modifier = GlanceModifier.padding(vertical = 1.dp, horizontal = 2.dp),
+              text =
                 context.getString(
                   R.string.diff,
                   diffPrefix,
                   dayLengthDiffTime.minute,
                   dayLengthDiffTime.second
                 ),
-              )
-              setInt(
-                R.id.shadow_text_view,
-                "setTextColor",
-                when (diffPrefix) {
-                  "+" -> Color.Green
-                  "-" -> Color.Red
-                  else -> light_onDayColor
-                }.toArgb()
-              )
-              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
-            }
-        )
+              style = TextDefaults.defaultTextStyle.copy(fontSize = 12.sp)
+            )
+          }
+        } else {
+          AndroidRemoteViews(
+            modifier = GlanceModifier.wrapContentSize(),
+            remoteViews =
+              RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+                setTextViewText(
+                  R.id.shadow_text_view,
+                  context.getString(
+                    R.string.diff,
+                    diffPrefix,
+                    dayLengthDiffTime.minute,
+                    dayLengthDiffTime.second
+                  ),
+                )
+                setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
+                setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+              }
+          )
+        }
       }
     }
   }
