@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
@@ -1016,33 +1017,45 @@ private fun DayLengthDiffText(
   modifier: Modifier = Modifier
 ) {
   val height = LocalConfiguration.current.screenHeightDp
-  Text(
-    text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
-    color =
-      when (diffPrefix) {
-        "+" -> Color.Green
-        "-" -> Color.Red
-        else -> dayPeriod.textColor()
-      },
-    style =
-      MaterialTheme.typography.bodyLarge.copy(
-        fontSize =
-          when {
-            height < 650 -> 15
-            height > 1_000 -> 20
-            else -> 18
-          }.sp,
-        shadow =
-          Shadow(
-            color =
-              if (diffPrefix == "+" || diffPrefix == "-") Color.Black
-              else dayPeriod.textShadowColor(),
-            offset = Offset(1f, 1f),
-            blurRadius = 1f
-          )
-      ),
-    modifier = modifier
-  )
+  val fontSize =
+    when {
+      height < 650 -> 15
+      height > 1_000 -> 20
+      else -> 18
+    }.sp
+
+  if (diffPrefix == "+" || diffPrefix == "-") {
+    Surface(
+      shape = RoundedCornerShape(3.dp),
+      color =
+        when (diffPrefix) {
+          "+" -> Color.Green
+          "-" -> Color.Red
+          else -> throw IllegalArgumentException()
+        },
+      shadowElevation = 3.dp,
+      modifier = modifier
+    ) {
+      Text(
+        text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
+        color = Color.Black,
+        style = MaterialTheme.typography.bodyLarge.copy(fontSize = fontSize),
+        modifier = Modifier.padding(horizontal = 1.dp)
+      )
+    }
+  } else {
+    Text(
+      text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
+      color = dayPeriod.textColor(),
+      style =
+        MaterialTheme.typography.bodyLarge.copy(
+          fontSize = fontSize,
+          shadow =
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+        ),
+      modifier = modifier
+    )
+  }
 }
 
 @Composable
