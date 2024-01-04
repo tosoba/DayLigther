@@ -5,7 +5,10 @@ plugins {
   id("kotlinx-serialization")
 }
 
-android { namespace = "com.trm.daylighter.widget" }
+android {
+  namespace = "com.trm.daylighter.widget"
+  buildFeatures { buildConfig = true }
+}
 
 dependencies {
   implementation(project(":core:common"))

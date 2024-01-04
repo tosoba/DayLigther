@@ -11,6 +11,7 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import com.trm.daylighter.widget.BuildConfig
 import com.trm.daylighter.widget.R
 import com.trm.daylighter.widget.location.LocationWidgetActions
 import com.trm.daylighter.widget.location.LocationWidgetExtras
@@ -41,8 +42,11 @@ internal inline fun <reified T : GlanceAppWidgetReceiver> Context.updateWidgetIn
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.updateAllWidgetsIntent(): Intent =
   actionIntent<T>(LocationWidgetActions.UPDATE_ALL_WIDGETS)
 
-internal inline fun <reified T : GlanceAppWidgetReceiver> Context.widgetReceiverComponentName():
-  ComponentName = ComponentName(applicationContext.packageName, T::class.java.name)
+internal inline fun <reified T : GlanceAppWidgetReceiver> Context.widgetReceiverComponentName() =
+  ComponentName(
+    applicationContext.packageName.replace(".${BuildConfig.BUILD_TYPE}", ""),
+    T::class.java.name,
+  )
 
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.getLastWidgetId(): Int? =
   AppWidgetManager.getInstance(this).getAppWidgetIds(widgetReceiverComponentName<T>()).lastOrNull()
