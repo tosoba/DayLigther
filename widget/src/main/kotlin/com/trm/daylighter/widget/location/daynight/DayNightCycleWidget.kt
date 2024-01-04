@@ -69,10 +69,10 @@ private fun DayNightCycleContent(change: Loadable<LocationSunriseSunsetChange>, 
   GlanceTheme {
     when (change) {
       Empty -> {
-        NewLocationButton()
+        NewLocationButton(DayPeriodChartMode.DAY_NIGHT_CYCLE)
       }
       is Loading -> {
-        ProgressIndicator()
+        ProgressIndicator(DayPeriodChartMode.DAY_NIGHT_CYCLE)
       }
       is Ready -> {
         DayPeriodChart(
@@ -93,6 +93,7 @@ private fun RetryButton(id: GlanceId) {
   val context = LocalContext.current
   val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
   RetryButton(
+    chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
     onClick =
       actionSendBroadcast(
         context.updateWidgetIntent<DayNightCycleWidgetReceiver>(widgetManager.getAppWidgetId(id))

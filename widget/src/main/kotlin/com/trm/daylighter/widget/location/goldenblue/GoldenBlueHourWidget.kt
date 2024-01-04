@@ -69,10 +69,10 @@ private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>,
   GlanceTheme {
     when (change) {
       Empty -> {
-        NewLocationButton()
+        NewLocationButton(DayPeriodChartMode.GOLDEN_BLUE_HOUR)
       }
       is Loading -> {
-        ProgressIndicator()
+        ProgressIndicator(DayPeriodChartMode.GOLDEN_BLUE_HOUR)
       }
       is Ready -> {
         DayPeriodChart(
@@ -93,6 +93,7 @@ private fun RetryButton(id: GlanceId) {
   val context = LocalContext.current
   val widgetManager = remember(id) { GlanceAppWidgetManager(context) }
   RetryButton(
+    chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR,
     onClick =
       actionSendBroadcast(
         context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(widgetManager.getAppWidgetId(id))
