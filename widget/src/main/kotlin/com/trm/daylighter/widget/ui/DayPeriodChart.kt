@@ -57,7 +57,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 private const val WIDGET_PREVIEW_WIDTH_PX = 730
-private const val WIDGET_PREVIEW_HEIGHT_PX = 245
+private const val WIDGET_PREVIEW_HEIGHT_PX = 190
 
 @Composable
 internal fun DayPeriodChart(
