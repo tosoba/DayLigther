@@ -55,6 +55,7 @@ const val settingsRoute = "settings_route"
 fun SettingsRoute(
   modifier: Modifier = Modifier,
   onDrawerMenuClick: () -> Unit,
+  backHandler: @Composable () -> Unit,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
   val context = LocalContext.current
@@ -62,6 +63,8 @@ fun SettingsRoute(
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsStateWithLifecycle(initialValue = false)
   val geocodingDisabledMessage = stringResource(R.string.geocoding_is_disabled)
   val locationsDeletedMessage = stringResource(R.string.locations_deleted)
+
+  backHandler()
 
   SettingsScreen(
     isGeocodeEmailPreferenceSet = isGeocodeEmailPreferenceSet.value,

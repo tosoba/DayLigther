@@ -49,22 +49,16 @@ private fun NavController.currentRoute(): String =
 
 @Composable
 fun DayLighterMainContent() {
-  val scope = rememberCoroutineScope()
   val navController = rememberNavController()
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val currentRoute = navController.currentRoute()
-
-  BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
-
-  fun onDrawerMenuClick() {
-    scope.launch { with(drawerState) { if (isOpen) close() else open() } }
-  }
 
   DayLighterNavigationDrawer(
     modifier = Modifier.statusBarsPadding(),
     drawerState = drawerState,
     visible = !currentRoute.startsWith(locationRoute),
     drawerContent = {
+      val scope = rememberCoroutineScope()
       DayLighterDrawerContent(
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
@@ -83,7 +77,7 @@ fun DayLighterMainContent() {
       )
     }
   ) {
-    DayLighterScaffold(navController = navController, onDrawerMenuClick = ::onDrawerMenuClick)
+    DayLighterScaffold(navController = navController, drawerState = drawerState)
   }
 }
 
@@ -181,7 +175,7 @@ private fun DayLighterDrawerContent(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuClick: () -> Unit) {
+private fun DayLighterScaffold(navController: NavHostController, drawerState: DrawerState) {
   Scaffold(
     modifier = Modifier.statusBarsPadding(),
     containerColor = MaterialTheme.colorScheme.background,
@@ -190,7 +184,7 @@ private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuCli
   ) {
     DayLighterNavHost(
       navController = navController,
-      onDrawerMenuClick = onDrawerMenuClick,
+      drawerState = drawerState,
       modifier =
         Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
     )
@@ -200,7 +194,7 @@ private fun DayLighterScaffold(navController: NavHostController, onDrawerMenuCli
 @Composable
 private fun DayLighterNavHost(
   navController: NavHostController,
-  onDrawerMenuClick: () -> Unit,
+  drawerState: DrawerState,
   modifier: Modifier = Modifier
 ) {
   fun navigateToNewLocation() {
@@ -209,6 +203,19 @@ private fun DayLighterNavHost(
 
   fun navigateToEditLocation(locationId: Long) {
     navController.navigate(route = "$locationRoute/$locationId", navOptions = nextLevelNavOptions())
+  }
+
+  val scope = rememberCoroutineScope()
+  val onDrawerMenuClick =
+    remember(drawerState) {
+      fun() {
+        scope.launch { with(drawerState) { if (isOpen) close() else open() } }
+      }
+    }
+
+  @Composable
+  fun backHandler() {
+    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
   }
 
   val context = LocalContext.current
@@ -237,6 +244,7 @@ private fun DayLighterNavHost(
         onDrawerMenuClick = onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
+        backHandler = { backHandler() }
       )
     }
 
@@ -250,6 +258,7 @@ private fun DayLighterNavHost(
         onDrawerMenuClick = onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
+        backHandler = { backHandler() }
       )
     }
 
@@ -261,6 +270,7 @@ private fun DayLighterNavHost(
         modifier = Modifier.fillMaxSize(),
         onNewLocationClick = ::navigateToNewLocation,
         onDrawerMenuClick = onDrawerMenuClick,
+        backHandler = { backHandler() }
       )
     }
 
@@ -270,15 +280,24 @@ private fun DayLighterNavHost(
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
         onDrawerMenuClick = onDrawerMenuClick,
+        backHandler = { backHandler() }
       )
     }
 
     composable(route = settingsRoute) {
-      SettingsRoute(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = onDrawerMenuClick)
+      SettingsRoute(
+        modifier = Modifier.fillMaxSize(),
+        onDrawerMenuClick = onDrawerMenuClick,
+        backHandler = { backHandler() }
+      )
     }
 
     composable(route = aboutRoute) {
-      AboutScreen(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = onDrawerMenuClick)
+      AboutScreen(
+        modifier = Modifier.fillMaxSize(),
+        onDrawerMenuClick = onDrawerMenuClick,
+        backHandler = { backHandler() }
+      )
     }
 
     composable(

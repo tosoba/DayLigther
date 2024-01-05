@@ -45,9 +45,13 @@ fun LocationsRoute(
   onNewLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDrawerMenuClick: () -> Unit,
+  backHandler: @Composable () -> Unit,
   viewModel: LocationsViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
+
+  backHandler()
+
   LocationsScreen(
     modifier = modifier,
     locations = locations.value,
