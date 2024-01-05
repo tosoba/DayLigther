@@ -125,26 +125,23 @@ internal fun DayPeriodChart(
 private fun widgetDayScreenDeepLinkAction(
   location: Location,
   chartMode: DayPeriodChartMode
-): Action {
-  val context = LocalContext.current
-  return deepLinkAction(
-    uri =
-      when (chartMode) {
-        DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
-          context.dayNightCycleDeepLinkUri(
-            locationId = location.id,
-            isDefault = location.isDefault,
-          )
+): Action =
+  with(LocalContext.current) {
+    deepLinkAction(
+      uri =
+        when (chartMode) {
+          DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
+            dayNightCycleDeepLinkUri(
+              locationId = location.id,
+              isDefault = location.isDefault,
+            )
+          }
+          DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
+            goldenBlueHourDeepLinkUri(locationId = location.id, isDefault = location.isDefault)
+          }
         }
-        DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
-          context.goldenBlueHourDeepLinkUri(
-            locationId = location.id,
-            isDefault = location.isDefault
-          )
-        }
-      }
-  )
-}
+    )
+  }
 
 @Composable
 private fun widgetLocationDeepLinkAction(
@@ -156,22 +153,15 @@ private fun widgetLocationDeepLinkAction(
   val widgetManager = remember { GlanceAppWidgetManager(context) }
   return deepLinkAction(
     uri =
-      when (chartMode) {
-        DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
-          context.widgetLocationDeepLinkUri(
-            type = WidgetTypeParam.DAY_NIGHT_CYCLE,
-            glanceId = widgetManager.getAppWidgetId(id),
-            locationId = location.id
-          )
-        }
-        DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
-          context.widgetLocationDeepLinkUri(
-            type = WidgetTypeParam.GOLDEN_BLUE_HOUR,
-            glanceId = widgetManager.getAppWidgetId(id),
-            locationId = location.id
-          )
-        }
-      }
+      context.widgetLocationDeepLinkUri(
+        type =
+          when (chartMode) {
+            DayPeriodChartMode.DAY_NIGHT_CYCLE -> WidgetTypeParam.DAY_NIGHT_CYCLE
+            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> WidgetTypeParam.GOLDEN_BLUE_HOUR
+          },
+        glanceId = widgetManager.getAppWidgetId(id),
+        locationId = location.id
+      )
   )
 }
 
