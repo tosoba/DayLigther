@@ -1,6 +1,7 @@
 package com.trm.daylighter.widget
 
 import android.content.Context
+import android.os.Build
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.core.domain.widget.WidgetManager
@@ -32,9 +33,13 @@ constructor(
       .requestPinGlanceAppWidget(
         receiver = DayNightCycleWidgetReceiver::class.java,
         preview =
-          DayNightCycleWidgetPreview(
-            change = getLocationSunriseSunsetChangeByIdUseCase(locationId)
-          ),
+          if (Build.VERSION.SDK_INT >= 31) {
+            DayNightCycleWidgetPreview(
+              change = getLocationSunriseSunsetChangeByIdUseCase(locationId)
+            )
+          } else {
+            null
+          },
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId)
@@ -54,7 +59,13 @@ constructor(
       .requestPinGlanceAppWidget(
         receiver = GoldenBlueHourWidgetReceiver::class.java,
         preview =
-          GoldenBlueHourWidgetPreview(getLocationSunriseSunsetChangeByIdUseCase(locationId)),
+          if (Build.VERSION.SDK_INT >= 31) {
+            GoldenBlueHourWidgetPreview(
+              change = getLocationSunriseSunsetChangeByIdUseCase(locationId)
+            )
+          } else {
+            null
+          },
         previewState = null,
         successCallback =
           context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId)
