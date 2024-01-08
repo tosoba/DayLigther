@@ -817,6 +817,8 @@ private fun NowTimezoneDiffText(
   modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
+  val height = LocalConfiguration.current.screenHeightDp
+
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
     textAlign = TextAlign.Center,
@@ -825,7 +827,13 @@ private fun NowTimezoneDiffText(
     style =
       MaterialTheme.typography.bodySmall.copy(
         shadow =
-          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+        fontSize =
+          when {
+            height < 650 -> 12
+            height > 1_000 -> 16
+            else -> 14
+          }.sp
       ),
     modifier = modifier
   )
@@ -950,6 +958,8 @@ private fun DayLengthInfo(
 
 @Composable
 private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
+  val height = LocalConfiguration.current.screenHeightDp
+
   Text(
     text = "${stringResource(R.string.day_length)}:",
     textAlign = TextAlign.Center,
@@ -958,7 +968,13 @@ private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifi
     style =
       MaterialTheme.typography.bodySmall.copy(
         shadow =
-          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+        fontSize =
+          when {
+            height < 650 -> 12
+            height > 1_000 -> 16
+            else -> 14
+          }.sp
       ),
     modifier = modifier
   )
