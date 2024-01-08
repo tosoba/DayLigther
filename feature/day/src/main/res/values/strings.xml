@@ -5,4 +5,6 @@
     <string name="error_occurred">Error occurred.</string>
     <string name="day_length">Day length</string>
     <string name="till">till</string>
+    <string name="longer_than_yesterday">longer than yesterday.</string>
+    <string name="shorter_than_yesterday">shorter than yesterday.</string>
 </resources>

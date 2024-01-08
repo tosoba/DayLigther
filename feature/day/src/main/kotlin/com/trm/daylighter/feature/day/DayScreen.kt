@@ -39,11 +39,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -559,7 +561,9 @@ private fun ClockAndDayLengthCard(
         NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Spacer(modifier = Modifier.height(2.dp))
+          if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
+            Spacer(modifier = Modifier.height(2.dp))
+          }
 
           DayLengthInfo(
             change = it.data,
@@ -822,7 +826,7 @@ private fun NowTimezoneDiffText(
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
     textAlign = TextAlign.Center,
-    overflow = TextOverflow.Ellipsis,
+    maxLines = 1,
     color = dayPeriod.textColor(),
     style =
       MaterialTheme.typography.bodySmall.copy(
@@ -856,7 +860,8 @@ private fun DayLengthInfo(
     )
 
   ConstraintLayout(modifier = modifier) {
-    val (dayLengthLabelText, icon, lengthText, diffText) = createRefs()
+    val (dayLengthLabelText, icon, lengthText, diffText, longerShorterText) = createRefs()
+
     if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
       DayLengthLabelText(
         dayPeriod = dayPeriod,
@@ -871,58 +876,12 @@ private fun DayLengthInfo(
 
       DayLengthIcon(
         dayPeriod = dayPeriod,
+        iconSize =
+          if (LocalHeightSizeClass.current == WindowHeightSizeClass.Expanded) 72.dp else 60.dp,
         modifier =
           Modifier.constrainAs(icon) {
             top.linkTo(dayLengthLabelText.top)
             bottom.linkTo(diffText.bottom)
-            start.linkTo(parent.start)
-          }
-      )
-
-      DayLengthText(
-        todayLengthSeconds = todayLengthSeconds,
-        dayPeriod = dayPeriod,
-        modifier =
-          Modifier.constrainAs(lengthText) {
-            top.linkTo(dayLengthLabelText.bottom)
-            bottom.linkTo(diffText.top)
-            start.linkTo(icon.end, 5.dp)
-            end.linkTo(parent.end)
-          }
-      )
-
-      DayLengthDiffText(
-        diffPrefix = diffPrefix,
-        dayLengthDiffTime = dayLengthDiffTime,
-        dayPeriod = dayPeriod,
-        modifier =
-          Modifier.constrainAs(diffText) {
-            width = Dimension.wrapContent
-            top.linkTo(lengthText.bottom)
-            bottom.linkTo(parent.bottom)
-            end.linkTo(parent.end)
-          }
-      )
-    } else {
-      DayLengthLabelText(
-        dayPeriod = dayPeriod,
-        modifier =
-          Modifier.constrainAs(dayLengthLabelText) {
-            top.linkTo(parent.top)
-            bottom.linkTo(lengthText.top)
-            start.linkTo(lengthText.start)
-            end.linkTo(diffText.end)
-          }
-      )
-
-      DayLengthIcon(
-        dayPeriod = dayPeriod,
-        modifier =
-          Modifier.constrainAs(icon) {
-            height = Dimension.fillToConstraints
-            width = Dimension.ratio("1:1")
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
             start.linkTo(parent.start)
             end.linkTo(lengthText.start)
           }
@@ -934,9 +893,65 @@ private fun DayLengthInfo(
         modifier =
           Modifier.constrainAs(lengthText) {
             top.linkTo(dayLengthLabelText.bottom)
+            bottom.linkTo(diffText.top)
+            end.linkTo(parent.end, 5.dp)
+          }
+      )
+
+      DayLengthDiffText(
+        diffPrefix = diffPrefix,
+        dayLengthDiffTime = dayLengthDiffTime,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(diffText) {
+            top.linkTo(lengthText.bottom)
+            bottom.linkTo(longerShorterText.top)
+            end.linkTo(parent.end, 5.dp)
+          }
+      )
+
+      LongerShorterText(
+        modifier =
+          Modifier.constrainAs(longerShorterText) {
+            top.linkTo(diffText.bottom, 5.dp)
+            start.linkTo(parent.start, 5.dp)
+            end.linkTo(parent.end, 5.dp)
             bottom.linkTo(parent.bottom)
+          },
+        diffPrefix = diffPrefix,
+        dayPeriod = dayPeriod
+      )
+    } else {
+      DayLengthLabelText(
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(dayLengthLabelText) {
+            top.linkTo(icon.top)
+            start.linkTo(icon.end)
+            end.linkTo(parent.end, 5.dp)
+            bottom.linkTo(lengthText.top)
+          }
+      )
+
+      DayLengthIcon(
+        dayPeriod = dayPeriod,
+        iconSize = 48.dp,
+        modifier =
+          Modifier.constrainAs(icon) {
+            width = Dimension.ratio("1:1")
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+            bottom.linkTo(parent.bottom)
+          }
+      )
+
+      DayLengthText(
+        todayLengthSeconds = todayLengthSeconds,
+        dayPeriod = dayPeriod,
+        modifier =
+          Modifier.constrainAs(lengthText) {
+            top.linkTo(dayLengthLabelText.bottom)
             start.linkTo(icon.end, 5.dp)
-            end.linkTo(diffText.end)
           }
       )
 
@@ -947,10 +962,21 @@ private fun DayLengthInfo(
         modifier =
           Modifier.constrainAs(diffText) {
             top.linkTo(dayLengthLabelText.bottom)
-            bottom.linkTo(parent.bottom)
             start.linkTo(lengthText.end, 5.dp)
-            end.linkTo(parent.end)
+            end.linkTo(parent.end, 5.dp)
           }
+      )
+
+      LongerShorterText(
+        modifier =
+          Modifier.constrainAs(longerShorterText) {
+            width = Dimension.fillToConstraints
+            top.linkTo(lengthText.bottom)
+            end.linkTo(parent.end, 5.dp)
+            start.linkTo(icon.end, 5.dp)
+          },
+        diffPrefix = diffPrefix,
+        dayPeriod = dayPeriod
       )
     }
   }
@@ -981,16 +1007,17 @@ private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun DayLengthIcon(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
+private fun DayLengthIcon(dayPeriod: DayPeriod, iconSize: Dp, modifier: Modifier = Modifier) {
   Box(modifier = modifier) {
     Icon(
+      modifier = Modifier.size(iconSize).offset(x = 1.dp, y = 1.dp),
       painter = painterResource(commonR.drawable.day_length_shadow),
       tint = Color.Unspecified,
-      contentDescription = null,
-      modifier = Modifier.offset(x = 1.dp, y = 1.dp)
+      contentDescription = null
     )
 
     Icon(
+      modifier = Modifier.size(iconSize),
       painter =
         painterResource(
           id =
@@ -1073,6 +1100,40 @@ private fun DayLengthDiffText(
             Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
         ),
       modifier = modifier
+    )
+  }
+}
+
+@Composable
+private fun LongerShorterText(
+  modifier: Modifier = Modifier,
+  diffPrefix: String,
+  dayPeriod: DayPeriod
+) {
+  val height = LocalConfiguration.current.screenHeightDp
+  AnimatedVisibility(modifier = modifier, visible = diffPrefix == "+" || diffPrefix == "-") {
+    SingleLineAutoSizeText(
+      text =
+        AnnotatedString(
+          when (diffPrefix) {
+            "+" -> stringResource(R.string.longer_than_yesterday)
+            "-" -> stringResource(R.string.shorter_than_yesterday)
+            else -> ""
+          }
+        ),
+      textAlign = TextAlign.Center,
+      color = dayPeriod.textColor(),
+      style =
+        MaterialTheme.typography.bodySmall.copy(
+          shadow =
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+          fontSize =
+            when {
+              height < 650 -> 12
+              height > 1_000 -> 16
+              else -> 14
+            }.sp
+        ),
     )
   }
 }

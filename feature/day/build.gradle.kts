@@ -9,6 +9,8 @@ android {
 }
 
 dependencies {
+  implementation(project(":core:ui"))
+
   implementation(libs.androidx.constraintlayout)
   implementation(libs.androidx.compose.material)
 
