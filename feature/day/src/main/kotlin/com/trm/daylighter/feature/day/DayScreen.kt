@@ -411,7 +411,7 @@ internal fun DayScreen(
       modifier =
         Modifier.constrainAs(dayTimeCard) {
           top.run {
-            if (constrainClockAndDayLengthCardToAppBarBottom) linkTo(topAppBar.bottom, 5.dp)
+            if (constrainClockAndDayLengthCardToAppBarBottom) linkTo(topAppBar.bottom)
             else linkTo(parent.top, 16.dp)
           }
           end.linkTo(parent.end, 16.dp)
