@@ -40,6 +40,8 @@ import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
@@ -616,18 +618,41 @@ private fun NextDayPeriodTimer(
     enter = fadeIn(),
     exit = fadeOut()
   ) {
-    var timerText by rememberSaveable {
-      mutableStateOf(
-        "${nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: ""} $till ${nextPeriod?.label ?: ""}"
-      )
-    }
+    var timerText by
+      remember(nextPeriod) {
+        mutableStateOf(
+          buildAnnotatedString {
+            pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+            append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: "")
+            pop()
+            append(" ")
+            append(till)
+            append(" ")
+            pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+            append(nextPeriod?.label ?: "")
+            pop()
+          }
+        )
+      }
 
     nextPeriod?.let {
       LaunchedEffect(dayPeriod, today) {
         flow {
             delay(System.currentTimeMillis() % 1_000L)
             while (currentCoroutineContext().isActive) {
-              emit("${it.timestamp.formatTimeUntilNow(zoneId)} $till ${nextPeriod.label}")
+              emit(
+                buildAnnotatedString {
+                  pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+                  append(it.timestamp.formatTimeUntilNow(zoneId))
+                  pop()
+                  append(" ")
+                  append(till)
+                  append(" ")
+                  pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+                  append(nextPeriod.label)
+                  pop()
+                }
+              )
               delay(1_000L)
             }
           }
@@ -794,7 +819,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
         resolver
           .resolve(
             fontFamily = textStyle.fontFamily,
-            fontWeight = textStyle.fontWeight ?: FontWeight.Normal,
+            fontWeight = FontWeight.Bold,
             fontStyle = textStyle.fontStyle ?: FontStyle.Normal,
             fontSynthesis = textStyle.fontSynthesis ?: FontSynthesis.All,
           )
@@ -1052,6 +1077,7 @@ private fun DayLengthText(
     color = dayPeriod.textColor(),
     style =
       MaterialTheme.typography.bodyLarge.copy(
+        fontWeight = FontWeight.Medium,
         fontSize =
           when {
             height < 650 -> 15
@@ -1095,7 +1121,11 @@ private fun DayLengthDiffText(
       Text(
         text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
         color = Color.Black,
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = fontSize),
+        style =
+          MaterialTheme.typography.bodyLarge.copy(
+            fontSize = fontSize,
+            fontWeight = FontWeight.Medium,
+          ),
         modifier = Modifier.padding(horizontal = 1.dp)
       )
     }
@@ -1106,6 +1136,7 @@ private fun DayLengthDiffText(
       style =
         MaterialTheme.typography.bodyLarge.copy(
           fontSize = fontSize,
+          fontWeight = FontWeight.Medium,
           shadow =
             Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
         ),
