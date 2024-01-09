@@ -45,7 +45,6 @@ import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -874,22 +873,23 @@ private fun DayLengthInfo(
           Modifier.constrainAs(dayLengthLabelText) {
             top.linkTo(parent.top)
             bottom.linkTo(lengthText.top)
-            start.linkTo(lengthText.start)
-            end.linkTo(lengthText.end)
+            start.linkTo(parent.start, 5.dp)
+            end.linkTo(parent.end, 5.dp)
           }
       )
 
       DayLengthIcon(
-        dayPeriod = dayPeriod,
-        iconSize =
-          if (LocalHeightSizeClass.current == WindowHeightSizeClass.Expanded) 72.dp else 60.dp,
         modifier =
           Modifier.constrainAs(icon) {
-            top.linkTo(dayLengthLabelText.top)
+            height = Dimension.fillToConstraints
+            width = Dimension.ratio("1:1")
+
+            top.linkTo(lengthText.top)
             bottom.linkTo(diffText.bottom)
             start.linkTo(parent.start)
             end.linkTo(lengthText.start)
-          }
+          },
+        dayPeriod = dayPeriod,
       )
 
       DayLengthText(
@@ -899,6 +899,7 @@ private fun DayLengthInfo(
           Modifier.constrainAs(lengthText) {
             top.linkTo(dayLengthLabelText.bottom)
             bottom.linkTo(diffText.top)
+            start.linkTo(icon.end, 5.dp)
             end.linkTo(parent.end, 5.dp)
           }
       )
@@ -911,7 +912,7 @@ private fun DayLengthInfo(
           Modifier.constrainAs(diffText) {
             top.linkTo(lengthText.bottom)
             bottom.linkTo(longerShorterText.top)
-            end.linkTo(parent.end, 5.dp)
+            end.linkTo(lengthText.end)
           }
       )
 
@@ -931,7 +932,7 @@ private fun DayLengthInfo(
         dayPeriod = dayPeriod,
         modifier =
           Modifier.constrainAs(dayLengthLabelText) {
-            top.linkTo(icon.top)
+            top.linkTo(parent.top)
             start.linkTo(icon.end)
             end.linkTo(parent.end, 5.dp)
             bottom.linkTo(lengthText.top)
@@ -939,15 +940,16 @@ private fun DayLengthInfo(
       )
 
       DayLengthIcon(
-        dayPeriod = dayPeriod,
-        iconSize = 48.dp,
         modifier =
           Modifier.constrainAs(icon) {
+            height = Dimension.fillToConstraints
             width = Dimension.ratio("1:1")
+
             top.linkTo(parent.top)
             start.linkTo(parent.start)
             bottom.linkTo(parent.bottom)
-          }
+          },
+        dayPeriod = dayPeriod,
       )
 
       DayLengthText(
@@ -976,6 +978,7 @@ private fun DayLengthInfo(
         modifier =
           Modifier.constrainAs(longerShorterText) {
             width = Dimension.fillToConstraints
+
             top.linkTo(lengthText.bottom)
             end.linkTo(parent.end, 5.dp)
             start.linkTo(icon.end, 5.dp)
@@ -1012,17 +1015,19 @@ private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun DayLengthIcon(dayPeriod: DayPeriod, iconSize: Dp, modifier: Modifier = Modifier) {
+private fun DayLengthIcon(
+  modifier: Modifier = Modifier,
+  dayPeriod: DayPeriod,
+) {
   Box(modifier = modifier) {
     Icon(
-      modifier = Modifier.size(iconSize).offset(x = 1.dp, y = 1.dp),
+      modifier = Modifier.offset(x = 1.dp, y = 1.dp),
       painter = painterResource(commonR.drawable.day_length_shadow),
       tint = Color.Unspecified,
       contentDescription = null
     )
 
     Icon(
-      modifier = Modifier.size(iconSize),
       painter =
         painterResource(
           id =
