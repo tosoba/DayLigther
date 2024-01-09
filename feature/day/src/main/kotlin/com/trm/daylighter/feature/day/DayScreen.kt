@@ -625,7 +625,7 @@ private fun NextDayPeriodTimer(
     )
   val timerPositive =
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
-  val till = stringResource(R.string.till)
+  val `in` = stringResource(R.string.`in`)
 
   AnimatedVisibility(
     visible = nextPeriod != null && timerPositive,
@@ -637,13 +637,18 @@ private fun NextDayPeriodTimer(
         mutableStateOf(
           buildAnnotatedString {
             pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-            append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId) ?: "")
+            append(
+              nextPeriod
+                ?.label
+                ?.replaceFirstChar { if (it.isLowerCase()) it.titlecaseChar() else it }
+                .orEmpty()
+            )
             pop()
             append(" ")
-            append(till)
-            append(" ")
+            append(`in`)
+            append(": ")
             pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-            append(nextPeriod?.label ?: "")
+            append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId).orEmpty())
             pop()
           }
         )
@@ -657,13 +662,17 @@ private fun NextDayPeriodTimer(
               emit(
                 buildAnnotatedString {
                   pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-                  append(it.timestamp.formatTimeUntilNow(zoneId))
+                  append(
+                    nextPeriod.label.replaceFirstChar {
+                      if (it.isLowerCase()) it.titlecaseChar() else it
+                    }
+                  )
                   pop()
                   append(" ")
-                  append(till)
-                  append(" ")
+                  append(`in`)
+                  append(": ")
                   pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-                  append(nextPeriod.label)
+                  append(it.timestamp.formatTimeUntilNow(zoneId))
                   pop()
                 }
               )
