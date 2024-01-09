@@ -627,55 +627,36 @@ private fun NextDayPeriodTimer(
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
   val `in` = stringResource(R.string.`in`)
 
+  fun buildNextPeriodInText(nextPeriod: NextDayPeriod?): AnnotatedString = buildAnnotatedString {
+    pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+    append(
+      nextPeriod
+        ?.label
+        ?.replaceFirstChar { if (it.isLowerCase()) it.titlecaseChar() else it }
+        .orEmpty()
+    )
+    pop()
+    append(" ")
+    append(`in`)
+    append(": ")
+    pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
+    append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId).orEmpty())
+    pop()
+  }
+
   AnimatedVisibility(
     visible = nextPeriod != null && timerPositive,
     enter = fadeIn(),
     exit = fadeOut()
   ) {
-    var timerText by
-      remember(nextPeriod) {
-        mutableStateOf(
-          buildAnnotatedString {
-            pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-            append(
-              nextPeriod
-                ?.label
-                ?.replaceFirstChar { if (it.isLowerCase()) it.titlecaseChar() else it }
-                .orEmpty()
-            )
-            pop()
-            append(" ")
-            append(`in`)
-            append(": ")
-            pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-            append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId).orEmpty())
-            pop()
-          }
-        )
-      }
+    var timerText by remember(nextPeriod) { mutableStateOf(buildNextPeriodInText(nextPeriod)) }
 
     nextPeriod?.let {
       LaunchedEffect(dayPeriod, today) {
         flow {
             delay(System.currentTimeMillis() % 1_000L)
             while (currentCoroutineContext().isActive) {
-              emit(
-                buildAnnotatedString {
-                  pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-                  append(
-                    nextPeriod.label.replaceFirstChar {
-                      if (it.isLowerCase()) it.titlecaseChar() else it
-                    }
-                  )
-                  pop()
-                  append(" ")
-                  append(`in`)
-                  append(": ")
-                  pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-                  append(it.timestamp.formatTimeUntilNow(zoneId))
-                  pop()
-                }
-              )
+              emit(buildNextPeriodInText(it))
               delay(1_000L)
             }
           }
