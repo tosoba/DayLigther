@@ -28,8 +28,8 @@
     <string name="timezone_behind_of_you">Jesteś %1$02d:%2$02d za</string>
 
     <string name="horizon">Horyzont</string>
-    <string name="sunrise">Wschód słońca</string>
-    <string name="sunset">Zachód słońca</string>
+    <string name="sunrise">Wschód</string>
+    <string name="sunset">Zachód</string>
     <string name="day">Dzień</string>
     <string name="civil_twilight">Zmierzch cywilny</string>
     <string name="nautical_twilight">Zmierzch żeglarski</string>
