@@ -561,7 +561,7 @@ private fun ClockAndDayLengthCard(
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
         NowTimezoneDiffText(
-          modifier = Modifier.basicMarquee(),
+          modifier = Modifier.padding(horizontal = 5.dp).basicMarquee(),
           zoneId = location.zoneId,
           dayPeriod = dayPeriod.value
         )
@@ -577,6 +577,7 @@ private fun ClockAndDayLengthCard(
         )
 
         NextDayPeriodTimer(
+          modifier = Modifier.padding(horizontal = 5.dp),
           dayPeriod = dayPeriod.value,
           dayMode = location.zoneId.currentDayMode(),
           chartMode = chartMode,
@@ -610,6 +611,7 @@ private data class NextDayPeriod(val timestamp: LocalTime, val label: String)
 
 @Composable
 private fun NextDayPeriodTimer(
+  modifier: Modifier = Modifier,
   dayPeriod: DayPeriod,
   dayMode: DayMode,
   chartMode: DayPeriodChartMode,
@@ -645,6 +647,7 @@ private fun NextDayPeriodTimer(
   }
 
   AnimatedVisibility(
+    modifier = modifier,
     visible = nextPeriod != null && timerPositive,
     enter = fadeIn(),
     exit = fadeOut()
