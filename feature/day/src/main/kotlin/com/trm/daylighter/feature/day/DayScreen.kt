@@ -559,7 +559,7 @@ private fun ClockAndDayLengthCard(
       val (location, today, _) = it.data
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(IntrinsicSize.Max).padding(8.dp)
+        modifier = Modifier.padding(8.dp)
       ) {
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
@@ -579,15 +579,7 @@ private fun ClockAndDayLengthCard(
         )
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Divider(
-            modifier =
-              Modifier.padding(
-                horizontal = 5.dp,
-                vertical =
-                  if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
-              ),
-            color = dayPeriod.value.textColor()
-          )
+          Spacer(modifier = Modifier.height(5.dp))
 
           DayLengthInfo(
             change = it.data,
@@ -660,37 +652,25 @@ private fun NextDayPeriodTimer(
       }
     }
 
-    Column {
-      Divider(
-        modifier =
-          Modifier.padding(
-            horizontal = 5.dp,
-            vertical =
-              if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
-          ),
-        color = dayPeriod.textColor()
-      )
-
-      val height = LocalConfiguration.current.screenHeightDp
-      Text(
-        text = timerText,
-        style =
-          MaterialTheme.typography.bodySmall.copy(
-            color = dayPeriod.textColor(),
-            shadow =
-              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
-            fontSize =
-              when {
-                height < 650 -> 12
-                height > 1_000 -> 16
-                else -> 14
-              }.sp,
-          ),
-        textAlign = TextAlign.Center,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis
-      )
-    }
+    val height = LocalConfiguration.current.screenHeightDp
+    Text(
+      text = timerText,
+      style =
+        MaterialTheme.typography.bodySmall.copy(
+          color = dayPeriod.textColor(),
+          shadow =
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+          fontSize =
+            when {
+              height < 650 -> 12
+              height > 1_000 -> 16
+              else -> 14
+            }.sp,
+        ),
+      textAlign = TextAlign.Center,
+      maxLines = 3,
+      overflow = TextOverflow.Ellipsis
+    )
   }
 }
 
