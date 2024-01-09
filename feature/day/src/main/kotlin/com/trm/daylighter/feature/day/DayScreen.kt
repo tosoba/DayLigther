@@ -569,16 +569,6 @@ private fun ClockAndDayLengthCard(
           dayPeriod = dayPeriod.value
         )
 
-        Divider(
-          modifier =
-            Modifier.padding(
-              horizontal = 5.dp,
-              vertical =
-                if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
-            ),
-          color = dayPeriod.value.textColor()
-        )
-
         NextDayPeriodTimer(
           modifier = Modifier.padding(horizontal = 5.dp),
           dayPeriod = dayPeriod.value,
@@ -670,25 +660,37 @@ private fun NextDayPeriodTimer(
       }
     }
 
-    val height = LocalConfiguration.current.screenHeightDp
-    Text(
-      text = timerText,
-      style =
-        MaterialTheme.typography.bodySmall.copy(
-          color = dayPeriod.textColor(),
-          shadow =
-            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
-          fontSize =
-            when {
-              height < 650 -> 12
-              height > 1_000 -> 16
-              else -> 14
-            }.sp,
-        ),
-      textAlign = TextAlign.Center,
-      maxLines = 3,
-      overflow = TextOverflow.Ellipsis
-    )
+    Column {
+      Divider(
+        modifier =
+          Modifier.padding(
+            horizontal = 5.dp,
+            vertical =
+              if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
+          ),
+        color = dayPeriod.textColor()
+      )
+
+      val height = LocalConfiguration.current.screenHeightDp
+      Text(
+        text = timerText,
+        style =
+          MaterialTheme.typography.bodySmall.copy(
+            color = dayPeriod.textColor(),
+            shadow =
+              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+            fontSize =
+              when {
+                height < 650 -> 12
+                height > 1_000 -> 16
+                else -> 14
+              }.sp,
+          ),
+        textAlign = TextAlign.Center,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
   }
 }
 
