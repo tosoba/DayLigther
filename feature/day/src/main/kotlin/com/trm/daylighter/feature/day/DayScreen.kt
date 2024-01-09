@@ -534,6 +534,7 @@ private fun DayTopAppBarTitle(
   )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ClockAndDayLengthCard(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -558,7 +559,11 @@ private fun ClockAndDayLengthCard(
       ) {
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
-        NowTimezoneDiffText(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+        NowTimezoneDiffText(
+          modifier = Modifier.basicMarquee(),
+          zoneId = location.zoneId,
+          dayPeriod = dayPeriod.value
+        )
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
           if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
