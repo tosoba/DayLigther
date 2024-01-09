@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="horizon">Horyzont</string>
+    <string name="edit_location">Edytuj lokalizację</string>
+    <string name="error_occurred">Wystąpił błąd.</string>
+    <string name="day_length">Długość dnia</string>
+    <string name="till">do</string>
+    <string name="longer_than_yesterday">dłuższy niż wczoraj.</string>
+    <string name="shorter_than_yesterday">krótszy niż wczoraj.</string>
+</resources>

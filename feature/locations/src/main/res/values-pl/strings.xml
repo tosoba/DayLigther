@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete_location">Usuń lokalizację</string>
+    <string name="delete_location_prompt">Czy chcesz usunąć zapisaną lokalizację?</string>
+    <string name="delete">Usuń</string>
+    <string name="edit">Edytuj</string>
+    <string name="set_as_default">Ustaw jako domyślną</string>
+    <string name="location_is_default">Lokalizacja jest domyślna</string>
+    <string name="location_actions">Akcje lokalizacji</string>
+</resources>

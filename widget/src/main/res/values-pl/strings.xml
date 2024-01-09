@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="day_night_cycle_widget_description">Wykres cyklu dnia/nocy dla lokalizacji.</string>
+    <string name="day_night_cycle_widget_label">Cykl dnia/nocy</string>
+    <string name="golden_blue_hour_widget_description">Wykres złotej/niebieskiej godziny dla lokalizacji.</string>
+    <string name="golden_blue_hour_widget_label">Złota/niebieska godzina</string>
+    <string name="day_length">Długość dnia</string>
+    <string name="diff">%1$s%2$02d:%3$02d</string>
+    <string name="widget_pinned_to_home_screen">Widget przypięty do ekranu głównego.</string>
+</resources>

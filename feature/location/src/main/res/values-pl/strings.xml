@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="location_info_dialog_title">Określ lokalizację</string>
+    <string name="location_info_dialog_text">Wyśrodkuj mapę na wybranej lokalizacji. Użyj przycisku w prawym dolnym rogu, aby potwierdzić swój wybór.</string>
+    <string name="my_location">Moja lokalizacja</string>
+    <string name="save_location">Zapisz lokalizację</string>
+
+    <string name="location_permissions_dialog_title">Uprawnienia lokalizacji</string>
+    <string name="location_permissions_dialog_rationale_text">Ta funkcja wymaga uprawnień do lokalizacji. Włącz je korzystając z dialoga uprawnień.</string>
+    <string name="location_permissions_dialog_settings_text">Ta funkcja wymaga uprawnień do lokalizacji, które zostały trwale odrzucone. Użyj ustawień aplikacji, aby je włączyć.</string>
+
+    <string name="location_disabled_non_resolvable_message">Lokalizacja jest wyłączona. Musisz włączyć ją ręcznie w ustawieniach lokalizacji.</string>
+    <string name="location_not_found">Nie udało się pobrać Twojej lokalizacji. Spróbuj ponownie.</string>
+    <string name="edit_location">Edytuj lokalizację</string>
+    <string name="name">Nazwa</string>
+    <string name="geocode">Geokodowanie</string>
+    <string name="enable_geocoding">Włącz geokodowanie</string>
+    <string name="save">Zapisz</string>
+    <string name="location_name_cannot_be_blank">Nazwa lokalizacji nie może być pusta.</string>
+
+    <string name="location_name_not_found">Nie znaleziono nazwy lokalizacji.</string>
+    <string name="no_internet_connection">Brak połączenia z internetem.</string>
+    <string name="geocoding_error">Wystąpił błąd podczas próby geokodowania lokalizacji.</string>
+</resources>

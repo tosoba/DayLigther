@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="locations_pref_group_title">Lokalizacje</string>
+    <string name="clear_locations_data_pref_title">Usuń lokalizacje</string>
+    <string name="clear_locations_data_summary">Usuwa wszystkie zapisane lokalizacje. Dodane widżety na ekranie głównym muszą być usunięte ręcznie.</string>
+    <string name="clear_locations_data_pref_dialog_title">Usuń lokalizacje</string>
+    <string name="clear_locations_data_pref_dialog_message">Spowoduje to usunięcie wszystkich zapisanych lokalizacji. Czy chcesz kontynuować?</string>
+    <string name="geocoding_pref_group_title">Geokodowanie</string>
+    <string name="geocoding_email_pref_title">E-mail</string>
+    <string name="geocoding_email_pref_summary">E-mail używany do autoryzacji żądań API geokodowania (pobieranie adresu lokalizacji).</string>
+    <string name="disable_geocoding_email_pref_title">Wyłącz geokodowanie</string>
+    <string name="disable_geocoding_email_pref_summary">Wyłącza geokodowanie przez usunięcie zapisanego adresu e-mail używanego do autoryzacji żądań.</string>
+    <string name="geocoding_is_disabled">Geokodowanie jest wyłączone.</string>
+    <string name="locations_deleted">Wszystkie lokalizacje zostały usunięte.</string>
+</resources>

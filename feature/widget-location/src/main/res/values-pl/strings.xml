@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_a_widget">Dodaj widget</string>
+    <string name="update_a_widget">Aktualizuj widget</string>
+    <string name="failed_to_add_widget">Nie udało się dodać widgetu. Spróbuj dodać go bezpośrednio z ekranu głównego.</string>
+    <string name="widget_location_updated">Lokalizacja widgetu została zaktualizowana.</string>
+    <string name="add_day_night_cycle_widget">Dodaj widget cyklu dnia/nocy</string>
+    <string name="add_golden_blue_hour_widget">Dodaj widget złotej/niebieskiej godziny</string>
+</resources>

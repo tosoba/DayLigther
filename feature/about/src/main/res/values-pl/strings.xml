@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="credits">Twórcy</string>
+    <string name="support_me">Wesprzyj mnie</string>
+    <string name="open_street_map">OpenStreetMap</string>
+    <string name="support_me_info">Aplikacja nie wyświetla reklam, ponieważ są one irytujące i nie znoszę ich. Wsparcie w kryptowalutach jest mile widziane 😎</string>
+    <string name="bitcoin">Bitcoin</string>
+    <string name="ethereum">Ethereum</string>
+    <string name="xrp">XRP</string>
+    <string name="bitcoin_address">bc1qvhxxjfywzzca86sgwu4fn3m5f7quvwl0xdm8su</string>
+    <string name="ethereum_address">0x5524a565299Ad977598952304a76027Bd6C63CBB</string>
+    <string name="xrp_address">rhCbapPbr1cAwVYqFR9VZJe1rzTPYe8BNJ</string>
+    <string name="address_copied">Adres skopiowany do schowka</string>
+</resources>
