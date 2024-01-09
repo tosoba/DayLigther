@@ -501,7 +501,10 @@ private fun DayTopAppBar(
           DayTopAppBarTitle(
             change = change,
             chartMode = chartMode,
-            modifier = Modifier.basicMarquee().align(Alignment.Center).padding(10.dp)
+            modifier =
+              Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+                .align(Alignment.Center)
+                .padding(10.dp)
           )
         }
         trailing()
@@ -561,7 +564,7 @@ private fun ClockAndDayLengthCard(
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
         NowTimezoneDiffText(
-          modifier = Modifier.padding(horizontal = 5.dp).basicMarquee(),
+          modifier = Modifier.padding(horizontal = 5.dp).basicMarquee(iterations = Int.MAX_VALUE),
           zoneId = location.zoneId,
           dayPeriod = dayPeriod.value
         )

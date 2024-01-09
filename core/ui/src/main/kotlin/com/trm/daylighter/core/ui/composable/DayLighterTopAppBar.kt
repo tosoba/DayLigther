@@ -41,7 +41,10 @@ fun DayLighterTopAppBar(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().basicMarquee().padding(horizontal = 10.dp)
+        modifier =
+          Modifier.fillMaxWidth()
+            .basicMarquee(iterations = Int.MAX_VALUE)
+            .padding(horizontal = 10.dp)
       )
     },
     actions = actions

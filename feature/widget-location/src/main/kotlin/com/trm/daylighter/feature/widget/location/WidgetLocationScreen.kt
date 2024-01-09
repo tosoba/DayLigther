@@ -379,7 +379,7 @@ private fun ConfirmSelectionButton(
     modifier = modifier,
     text = {
       Text(
-        modifier = Modifier.fillMaxWidth().basicMarquee(),
+        modifier = Modifier.fillMaxWidth().basicMarquee(iterations = Int.MAX_VALUE),
         text = text,
         style = MaterialTheme.typography.bodyLarge,
         maxLines = 1
@@ -427,7 +427,7 @@ private fun MapCard(
         modifier =
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
-            .basicMarquee()
+            .basicMarquee(iterations = Int.MAX_VALUE)
             .padding(vertical = 10.dp, horizontal = 5.dp)
       )
 

@@ -433,7 +433,7 @@ private fun LocationAppBar(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
-        modifier = Modifier.basicMarquee().padding(horizontal = 10.dp)
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 10.dp)
       )
     },
     navigationIcon = {
@@ -615,13 +615,21 @@ private fun ModalSheetButtonsRow(
 ) {
   Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
     OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
-      Text(text = geocodeButtonText, maxLines = 1, modifier = Modifier.basicMarquee())
+      Text(
+        text = geocodeButtonText,
+        maxLines = 1,
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+      )
     }
 
     Spacer(modifier = Modifier.width(5.dp))
 
     OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
-      Text(text = stringResource(R.string.save), maxLines = 1, modifier = Modifier.basicMarquee())
+      Text(
+        text = stringResource(R.string.save),
+        maxLines = 1,
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+      )
     }
   }
 }
@@ -637,7 +645,11 @@ private fun ModalSheetButtons(
     onClick = onGeocodeClick,
     modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp)
   ) {
-    Text(text = geocodeButtonText, maxLines = 1, modifier = Modifier.basicMarquee())
+    Text(
+      text = geocodeButtonText,
+      maxLines = 1,
+      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+    )
   }
 
   Spacer(modifier = Modifier.height(5.dp))
@@ -646,7 +658,11 @@ private fun ModalSheetButtons(
     onClick = onSaveClick,
     modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
   ) {
-    Text(text = stringResource(R.string.save), maxLines = 1, modifier = Modifier.basicMarquee())
+    Text(
+      text = stringResource(R.string.save),
+      maxLines = 1,
+      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+    )
   }
 }
 

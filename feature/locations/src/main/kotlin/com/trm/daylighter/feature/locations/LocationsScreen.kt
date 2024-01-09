@@ -277,7 +277,7 @@ private fun MapCard(
         modifier =
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
-            .basicMarquee()
+            .basicMarquee(iterations = Int.MAX_VALUE)
             .padding(vertical = 10.dp, horizontal = 5.dp)
       )
 

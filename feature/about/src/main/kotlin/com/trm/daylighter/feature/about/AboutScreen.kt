@@ -163,7 +163,7 @@ private fun ImageTextRow(
     Text(
       text = text,
       style = MaterialTheme.typography.bodyLarge,
-      modifier = Modifier.weight(1f).basicMarquee()
+      modifier = Modifier.weight(1f).basicMarquee(iterations = Int.MAX_VALUE)
     )
   }
 }
