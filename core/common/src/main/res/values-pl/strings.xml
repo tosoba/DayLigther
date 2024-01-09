@@ -24,8 +24,8 @@
     <string name="browser_app_was_not_found">Nie znaleziono aplikacji przeglądarki.</string>
 
     <string name="same_timezone_as_you">Taka sama strefa czasowa jak Twoja.</string>
-    <string name="timezone_ahead_of_you">Jesteś %1$02d:%2$02d przed</string>
-    <string name="timezone_behind_of_you">Jesteś %1$02d:%2$02d za</string>
+    <string name="timezone_ahead_of_you">Jesteś %1$02d:%2$02d do przodu</string>
+    <string name="timezone_behind_of_you">Jesteś %1$02d:%2$02d do tyłu</string>
 
     <string name="horizon">Horyzont</string>
     <string name="sunrise">Wschód</string>
