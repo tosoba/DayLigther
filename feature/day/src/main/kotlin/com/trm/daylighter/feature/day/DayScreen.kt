@@ -556,7 +556,7 @@ private fun ClockAndDayLengthCard(
       val (location, today, _) = it.data
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.width(IntrinsicSize.Max).padding(8.dp)
       ) {
         Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
 
@@ -566,19 +566,15 @@ private fun ClockAndDayLengthCard(
           dayPeriod = dayPeriod.value
         )
 
-        if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-            Spacer(modifier = Modifier.height(2.dp))
-          }
-
-          DayLengthInfo(
-            change = it.data,
-            dayPeriod = dayPeriod.value,
-            modifier = Modifier.wrapContentSize()
-          )
-        }
-
-        Spacer(modifier = Modifier.height(2.dp))
+        Divider(
+          modifier =
+            Modifier.padding(
+              horizontal = 5.dp,
+              vertical =
+                if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
+            ),
+          color = dayPeriod.value.textColor()
+        )
 
         NextDayPeriodTimer(
           dayPeriod = dayPeriod.value,
@@ -587,6 +583,24 @@ private fun ClockAndDayLengthCard(
           today = today,
           zoneId = location.zoneId
         )
+
+        if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
+          Divider(
+            modifier =
+              Modifier.padding(
+                horizontal = 5.dp,
+                vertical =
+                  if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) 2.dp else 0.dp
+              ),
+            color = dayPeriod.value.textColor()
+          )
+
+          DayLengthInfo(
+            change = it.data,
+            dayPeriod = dayPeriod.value,
+            modifier = Modifier.wrapContentSize()
+          )
+        }
       }
     }
   }
