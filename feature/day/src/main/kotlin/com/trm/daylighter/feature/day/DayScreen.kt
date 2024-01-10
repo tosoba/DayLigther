@@ -557,20 +557,39 @@ private fun ClockAndDayLengthCard(
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
-      Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
-      ) {
-        Clock(zoneId = location.zoneId, dayPeriod = dayPeriod.value)
+      ConstraintLayout(modifier = Modifier.padding(8.dp)) {
+        val (clock, timezoneDiff, nextPeriodTimer, divider, lengthInfo) = createRefs()
+
+        Clock(
+          modifier =
+            Modifier.constrainAs(clock) {
+              top.linkTo(parent.top)
+              start.linkTo(parent.start)
+              end.linkTo(parent.end)
+            },
+          zoneId = location.zoneId,
+          dayPeriod = dayPeriod.value
+        )
 
         NowTimezoneDiffText(
-          modifier = Modifier.padding(horizontal = 5.dp).basicMarquee(iterations = Int.MAX_VALUE),
+          modifier =
+            Modifier.constrainAs(timezoneDiff) {
+                top.linkTo(clock.bottom)
+                start.linkTo(parent.start, 5.dp)
+                end.linkTo(parent.end, 5.dp)
+              }
+              .basicMarquee(iterations = Int.MAX_VALUE),
           zoneId = location.zoneId,
           dayPeriod = dayPeriod.value
         )
 
         NextDayPeriodTimer(
-          modifier = Modifier.padding(horizontal = 5.dp),
+          modifier =
+            Modifier.constrainAs(nextPeriodTimer) {
+              top.linkTo(timezoneDiff.bottom)
+              start.linkTo(parent.start, 5.dp)
+              end.linkTo(parent.end, 5.dp)
+            },
           dayPeriod = dayPeriod.value,
           dayMode = location.zoneId.currentDayMode(),
           chartMode = chartMode,
@@ -579,12 +598,26 @@ private fun ClockAndDayLengthCard(
         )
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Spacer(modifier = Modifier.height(5.dp))
+          Divider(
+            modifier =
+              Modifier.constrainAs(divider) {
+                width = Dimension.fillToConstraints
+
+                top.linkTo(nextPeriodTimer.bottom)
+                start.linkTo(parent.start, 5.dp)
+                end.linkTo(parent.end, 5.dp)
+              }
+          )
 
           DayLengthInfo(
+            modifier =
+              Modifier.constrainAs(lengthInfo) {
+                top.linkTo(divider.bottom)
+                start.linkTo(parent.start, 5.dp)
+                end.linkTo(parent.end, 5.dp)
+              },
             change = it.data,
             dayPeriod = dayPeriod.value,
-            modifier = Modifier.wrapContentSize()
           )
         }
       }
