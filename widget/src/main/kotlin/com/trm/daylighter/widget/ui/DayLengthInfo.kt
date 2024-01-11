@@ -1,5 +1,6 @@
 package com.trm.daylighter.widget.ui
 
+import android.R.attr.text
 import android.graphics.drawable.Icon
 import android.util.TypedValue
 import android.widget.RemoteViews
@@ -23,6 +24,7 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentSize
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextDefaults
 import com.trm.daylighter.core.common.R as commonR
@@ -71,10 +73,10 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
             GlanceModifier.wrapContentSize()
               .padding(vertical = if (diffPrefix == "+" || diffPrefix == "-") 1.dp else 0.dp),
           remoteViews =
-            RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+            RemoteViews(context.packageName, R.layout.bold_shadow_text_remote_view).apply {
               setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
               setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
             }
         )
 
@@ -102,14 +104,15 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                   dayLengthDiffTime.minute,
                   dayLengthDiffTime.second
                 ),
-              style = TextDefaults.defaultTextStyle.copy(fontSize = 12.sp)
+              style =
+                TextDefaults.defaultTextStyle.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold)
             )
           }
         } else {
           AndroidRemoteViews(
             modifier = GlanceModifier.wrapContentSize(),
             remoteViews =
-              RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
+              RemoteViews(context.packageName, R.layout.bold_shadow_text_remote_view).apply {
                 setTextViewText(
                   R.id.shadow_text_view,
                   context.getString(
@@ -120,7 +123,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                   ),
                 )
                 setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-                setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+                setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
               }
           )
         }
