@@ -62,7 +62,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
           RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
             setTextViewText(R.id.shadow_text_view, "${stringResource(R.string.day_length)}:")
             setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+            setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, smallFontSize)
           }
       )
 
@@ -75,7 +75,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
             RemoteViews(context.packageName, R.layout.bold_shadow_text_remote_view).apply {
               setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
               setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+              setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, mediumFontSize)
             }
         )
 
@@ -104,7 +104,10 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                   dayLengthDiffTime.second
                 ),
               style =
-                TextDefaults.defaultTextStyle.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                TextDefaults.defaultTextStyle.copy(
+                  fontSize = mediumFontSize.sp,
+                  fontWeight = FontWeight.Bold
+                )
             )
           }
         } else {
@@ -122,7 +125,11 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                   ),
                 )
                 setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-                setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 14f)
+                setTextViewTextSize(
+                  R.id.shadow_text_view,
+                  TypedValue.COMPLEX_UNIT_SP,
+                  mediumFontSize
+                )
               }
           )
         }

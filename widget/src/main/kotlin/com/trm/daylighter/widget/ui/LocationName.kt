@@ -25,7 +25,7 @@ internal fun LocationName(location: Location) {
         RemoteViews(context.packageName, R.layout.shadow_text_remote_view).apply {
           setCharSequence(R.id.shadow_text_view, "setText", location.name)
           setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
-          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, 12f)
+          setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, smallFontSize)
         }
     )
   }

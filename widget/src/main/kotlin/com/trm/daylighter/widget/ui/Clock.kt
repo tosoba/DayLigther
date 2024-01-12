@@ -1,5 +1,6 @@
 package com.trm.daylighter.widget.ui
 
+import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
@@ -19,6 +20,7 @@ internal fun Clock(zoneId: ZoneId) {
           .apply {
             setString(R.id.location_clock, "setTimeZone", zoneId.id)
             setInt(R.id.location_clock, "setTextColor", light_onDayColor.toArgb())
+            setTextViewTextSize(R.id.location_clock, TypedValue.COMPLEX_UNIT_SP, largeFontSize)
           }
     )
   }
