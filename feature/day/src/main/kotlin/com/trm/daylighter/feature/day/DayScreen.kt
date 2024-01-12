@@ -613,7 +613,8 @@ private fun ClockAndDayLengthCard(
                 top.linkTo(nextPeriodTimer.bottom)
                 start.linkTo(parent.start, 5.dp)
                 end.linkTo(parent.end, 5.dp)
-              }
+              },
+            color = dayPeriod.value.textColor()
           )
 
           DayLengthInfo(
