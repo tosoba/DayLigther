@@ -25,6 +25,7 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -60,19 +61,25 @@ import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.common.util.ext.*
 import com.trm.daylighter.core.domain.model.*
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
-import com.trm.daylighter.core.ui.composable.*
+import com.trm.daylighter.core.ui.composable.DayPeriodChart
+import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
+import com.trm.daylighter.core.ui.composable.InfoButtonCard
+import com.trm.daylighter.core.ui.composable.SingleLineAutoSizeText
+import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.model.StableLoadable
 import com.trm.daylighter.core.ui.model.asStable
-import com.trm.daylighter.core.ui.theme.*
+import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.enumTestTag
 import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
-import java.time.*
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -664,46 +671,48 @@ private fun NextDayPeriodTimer(
     pop()
   }
 
-  AnimatedVisibility(
-    modifier = modifier,
-    visible = nextPeriod != null && timerPositive,
-    enter = fadeIn(),
-    exit = fadeOut()
-  ) {
-    var timerText by remember(nextPeriod) { mutableStateOf(buildNextPeriodInText(nextPeriod)) }
+  Box(modifier = modifier) {
+    AnimatedVisibility(
+      modifier = Modifier.matchParentSize(),
+      visible = nextPeriod != null && timerPositive,
+      enter = fadeIn(),
+      exit = fadeOut()
+    ) {
+      var timerText by remember(nextPeriod) { mutableStateOf(buildNextPeriodInText(nextPeriod)) }
 
-    nextPeriod?.let {
-      LaunchedEffect(dayPeriod, today) {
-        flow {
-            delay(System.currentTimeMillis() % 1_000L)
-            while (currentCoroutineContext().isActive) {
-              emit(buildNextPeriodInText(it))
-              delay(1_000L)
+      nextPeriod?.let {
+        LaunchedEffect(dayPeriod, today) {
+          flow {
+              delay(System.currentTimeMillis() % 1_000L)
+              while (currentCoroutineContext().isActive) {
+                emit(buildNextPeriodInText(it))
+                delay(1_000L)
+              }
             }
-          }
-          .collect { timerText = it }
+            .collect { timerText = it }
+        }
       }
-    }
 
-    val height = LocalConfiguration.current.screenHeightDp
-    Text(
-      text = timerText,
-      style =
-        MaterialTheme.typography.bodySmall.copy(
-          color = dayPeriod.textColor(),
-          shadow =
-            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
-          fontSize =
-            when {
-              height < 650 -> 12
-              height > 1_000 -> 16
-              else -> 14
-            }.sp,
-        ),
-      textAlign = TextAlign.Center,
-      maxLines = 3,
-      overflow = TextOverflow.Ellipsis
-    )
+      val height = LocalConfiguration.current.screenHeightDp
+      Text(
+        text = timerText,
+        style =
+          MaterialTheme.typography.bodySmall.copy(
+            color = dayPeriod.textColor(),
+            shadow =
+              Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
+            fontSize =
+              when {
+                height < 650 -> 12
+                height > 1_000 -> 16
+                else -> 14
+              }.sp,
+          ),
+        textAlign = TextAlign.Center,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
   }
 }
 
