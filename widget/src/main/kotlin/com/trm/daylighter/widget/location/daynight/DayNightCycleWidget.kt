@@ -2,6 +2,7 @@ package com.trm.daylighter.widget.location.daynight
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.provideContent
 import androidx.glance.currentState
+import com.trm.daylighter.core.common.di.provider.ClassProvider
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Failed
 import com.trm.daylighter.core.domain.model.Loadable
@@ -27,6 +29,7 @@ import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.widget.location.locationIdKey
 import com.trm.daylighter.widget.ui.DayPeriodChart
 import com.trm.daylighter.widget.ui.GlanceTheme
+import com.trm.daylighter.widget.ui.LocalClassProvider
 import com.trm.daylighter.widget.ui.NewLocationButton
 import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
@@ -35,7 +38,8 @@ import com.trm.daylighter.widget.util.ext.updateWidgetIntent
 class DayNightCycleWidget(
   private val getDefaultLocationSunriseSunsetChangeUseCase:
     GetDefaultLocationSunriseSunsetChangeUseCase,
-  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase
+  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
+  private val mainActivityClassProvider: ClassProvider
 ) : GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
@@ -49,7 +53,9 @@ class DayNightCycleWidget(
             if (locationId == null) getDefaultLocationSunriseSunsetChangeUseCase()
             else getLocationSunriseSunsetChangeByIdUseCase(locationId)
         }
-      DayNightCycleContent(change = change, id = id)
+      CompositionLocalProvider(LocalClassProvider provides mainActivityClassProvider) {
+        DayNightCycleContent(change = change, id = id)
+      }
     }
   }
 }

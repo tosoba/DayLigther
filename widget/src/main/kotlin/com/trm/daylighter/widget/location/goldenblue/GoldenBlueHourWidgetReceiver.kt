@@ -3,6 +3,8 @@ package com.trm.daylighter.widget.location.goldenblue
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import com.trm.daylighter.core.common.di.provider.ClassProvider
+import com.trm.daylighter.core.common.di.provider.MainActivityClassProvider
 import com.trm.daylighter.core.domain.usecase.GetDefaultLocationSunriseSunsetChangeUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationSunriseSunsetChangeByIdUseCase
 import com.trm.daylighter.widget.location.LocationWidgetActions
@@ -24,10 +26,13 @@ class GoldenBlueHourWidgetReceiver : GlanceAppWidgetReceiver() {
   internal lateinit var getLocationSunriseSunsetChangeByIdUseCase:
     GetLocationSunriseSunsetChangeByIdUseCase
 
+  @Inject @MainActivityClassProvider internal lateinit var mainActivityClassProvider: ClassProvider
+
   override val glanceAppWidget: GoldenBlueHourWidget by lazy {
     GoldenBlueHourWidget(
       getDefaultLocationSunriseSunsetChangeUseCase,
-      getLocationSunriseSunsetChangeByIdUseCase
+      getLocationSunriseSunsetChangeByIdUseCase,
+      mainActivityClassProvider
     )
   }
 
