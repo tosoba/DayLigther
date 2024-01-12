@@ -1,6 +1,5 @@
 package com.trm.daylighter.widget.ui
 
-import android.R.attr.text
 import android.graphics.drawable.Icon
 import android.util.TypedValue
 import android.widget.RemoteViews
