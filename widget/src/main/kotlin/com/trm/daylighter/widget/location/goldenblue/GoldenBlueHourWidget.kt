@@ -30,6 +30,7 @@ import com.trm.daylighter.widget.location.locationIdKey
 import com.trm.daylighter.widget.ui.DayPeriodChart
 import com.trm.daylighter.widget.ui.GlanceTheme
 import com.trm.daylighter.widget.ui.LocalClassProvider
+import com.trm.daylighter.widget.ui.LocalIsPreviewProvider
 import com.trm.daylighter.widget.ui.NewLocationButton
 import com.trm.daylighter.widget.ui.ProgressIndicator
 import com.trm.daylighter.widget.ui.RetryButton
@@ -53,7 +54,10 @@ class GoldenBlueHourWidget(
             if (locationId == null) getDefaultLocationSunriseSunsetChangeUseCase()
             else getLocationSunriseSunsetChangeByIdUseCase(locationId)
         }
-      CompositionLocalProvider(LocalClassProvider provides mainActivityClassProvider) {
+      CompositionLocalProvider(
+        LocalClassProvider provides mainActivityClassProvider,
+        LocalIsPreviewProvider provides false
+      ) {
         GoldenBlueHourContent(change = change, id = id)
       }
     }
@@ -66,7 +70,11 @@ class GoldenBlueHourWidgetPreview(
   override val sizeMode: SizeMode = SizeMode.Exact
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
-    provideContent { GoldenBlueHourContent(change = change, id = id) }
+    provideContent {
+      CompositionLocalProvider(LocalIsPreviewProvider provides true) {
+        GoldenBlueHourContent(change = change, id = id)
+      }
+    }
   }
 }
 

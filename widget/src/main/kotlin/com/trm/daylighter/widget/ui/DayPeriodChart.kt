@@ -68,9 +68,13 @@ internal fun DayPeriodChart(
   Box(
     contentAlignment = Alignment.TopEnd,
     modifier =
-      GlanceModifier.fillMaxSize()
-        .appWidgetBackgroundCornerRadius()
-        .clickable(widgetDayScreenDeepLinkAction(change.location, chartMode))
+      GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius().run {
+        if (LocalIsPreviewProvider.current) {
+          this
+        } else {
+          clickable(widgetDayScreenDeepLinkAction(change.location, chartMode))
+        }
+      }
   ) {
     Image(
       provider = ImageProvider(dayPeriodChartBitmap(change = change, chartMode = chartMode)),
@@ -98,14 +102,18 @@ internal fun DayPeriodChart(
         provider = ImageProvider(R.drawable.settings),
         contentDescription = stringResource(commonR.string.settings),
         modifier =
-          GlanceModifier.padding(5.dp)
-            .clickable(
-              widgetLocationDeepLinkAction(
-                location = change.location,
-                chartMode = chartMode,
-                id = id
+          GlanceModifier.padding(5.dp).run {
+            if (LocalIsPreviewProvider.current) {
+              this
+            } else
+              clickable(
+                widgetLocationDeepLinkAction(
+                  location = change.location,
+                  chartMode = chartMode,
+                  id = id
+                )
               )
-            )
+          }
       )
 
       Spacer(GlanceModifier.defaultWeight())
@@ -114,8 +122,13 @@ internal fun DayPeriodChart(
         provider = ImageProvider(R.drawable.refresh),
         contentDescription = stringResource(commonR.string.refresh),
         modifier =
-          GlanceModifier.padding(5.dp)
-            .clickable(widgetRefreshBroadcastAction(chartMode = chartMode, id = id))
+          GlanceModifier.padding(5.dp).run {
+            if (LocalIsPreviewProvider.current) {
+              this
+            } else {
+              clickable(widgetRefreshBroadcastAction(chartMode = chartMode, id = id))
+            }
+          }
       )
     }
   }

@@ -116,6 +116,8 @@ internal val LocalClassProvider =
     throw IllegalStateException("No default class provider.")
   }
 
+internal val LocalIsPreviewProvider = staticCompositionLocalOf { false }
+
 val smallFontSize: Float
   @Composable
   get() {
