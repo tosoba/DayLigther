@@ -10,7 +10,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
-import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
@@ -117,36 +116,3 @@ internal val LocalClassProvider =
   }
 
 internal val LocalIsPreviewProvider = staticCompositionLocalOf { false }
-
-val smallFontSize: Float
-  @Composable
-  get() {
-    val size = LocalSize.current
-    return when {
-      size.width > 250.dp && size.height > 250.dp -> 16f
-      size.width > 200.dp && size.height > 200.dp -> 14f
-      else -> 12f
-    }
-  }
-
-val mediumFontSize: Float
-  @Composable
-  get() {
-    val size = LocalSize.current
-    return when {
-      size.width > 250.dp && size.height > 250.dp -> 18f
-      size.width > 200.dp && size.height > 200.dp -> 16f
-      else -> 14f
-    }
-  }
-
-val largeFontSize: Float
-  @Composable
-  get() {
-    val size = LocalSize.current
-    return when {
-      size.width > 250.dp && size.height > 250.dp -> 30f
-      size.width > 200.dp && size.height > 200.dp -> 26f
-      else -> 22f
-    }
-  }
