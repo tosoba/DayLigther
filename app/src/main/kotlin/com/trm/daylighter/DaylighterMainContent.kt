@@ -2,6 +2,7 @@ package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -62,17 +63,20 @@ fun DayLighterMainContent() {
       DayLighterDrawerContent(
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
-          if (destinationRoute != currentRoute) {
-            navController.navigate(
-              route = destinationRoute,
-              navOptions =
-                navController.topLevelNavOptions(
-                  saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
-                  restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
+          scope
+            .launch { drawerState.animateTo(DrawerValue.Closed, TweenSpec(durationMillis = 150)) }
+            .invokeOnCompletion {
+              if (destinationRoute != currentRoute) {
+                navController.navigate(
+                  route = destinationRoute,
+                  navOptions =
+                    navController.topLevelNavOptions(
+                      saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
+                      restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
+                    )
                 )
-            )
-          }
-          scope.launch { drawerState.close() }
+              }
+            }
         }
       )
     }
@@ -215,7 +219,9 @@ private fun DayLighterNavHost(
 
   @Composable
   fun backHandler() {
-    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
+    BackHandler(enabled = drawerState.isOpen) {
+      scope.launch { drawerState.animateTo(DrawerValue.Closed, TweenSpec(durationMillis = 150)) }
+    }
   }
 
   val context = LocalContext.current
