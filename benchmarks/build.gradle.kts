@@ -11,7 +11,7 @@ android {
 
   defaultConfig {
     minSdk = 28
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner = "com.trm.daylighter.core.testing.runner.DayLighterTestRunner"
 
     buildConfigField("String", "APP_BUILD_TYPE_SUFFIX", "\"\"")
   }
@@ -64,6 +64,8 @@ baselineProfile {
 }
 
 dependencies {
+  implementation(project(":core:testing"))
+
   implementation(libs.androidx.benchmark.macro)
   implementation(libs.androidx.test.core)
   implementation(libs.androidx.test.espresso.core)
