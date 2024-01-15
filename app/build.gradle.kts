@@ -13,8 +13,8 @@ android {
 
   defaultConfig {
     applicationId = "com.trm.daylighter"
-    versionCode = 1
-    versionName = "1.0"
+    versionCode = 1000000
+    versionName = "1.0.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables { useSupportLibrary = true }
