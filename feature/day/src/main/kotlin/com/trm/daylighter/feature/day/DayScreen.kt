@@ -675,7 +675,6 @@ private fun NextDayPeriodTimer(
 
   Box(modifier = modifier) {
     AnimatedVisibility(
-      modifier = Modifier.matchParentSize(),
       visible = nextPeriod != null && timerPositive,
       enter = fadeIn(),
       exit = fadeOut()
