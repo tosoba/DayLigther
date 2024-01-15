@@ -233,7 +233,7 @@ internal fun DayScreen(
           ) {
             DayPeriodChart(
               change = currentChange,
-              modifier = Modifier.fillMaxSize(),
+              modifier = Modifier.fillMaxSize().testTag("${DayTestTags.LOCATIONS_CHART.name}-$it"),
               chartMode = chartMode,
               dayMode = dayMode,
               now = now,
