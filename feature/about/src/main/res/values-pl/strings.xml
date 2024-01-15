@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="credits">Twórcy</string>
+    <string name="credits">Wykorzystane rozwiązania</string>
     <string name="support_me">Wesprzyj mnie</string>
     <string name="open_street_map">OpenStreetMap</string>
     <string name="support_me_info">Aplikacja nie wyświetla reklam, ponieważ są one irytujące i nie znoszę ich. Wsparcie w kryptowalutach jest mile widziane 😎</string>
