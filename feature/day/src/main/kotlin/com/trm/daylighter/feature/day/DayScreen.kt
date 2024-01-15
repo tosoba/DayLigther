@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -228,7 +229,7 @@ internal fun DayScreen(
           HorizontalPager(
             state = pagerState,
             beyondBoundsPageCount = 2,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().testTag(DayTestTags.LOCATIONS_CHART_PAGER.name)
           ) {
             DayPeriodChart(
               change = currentChange,
