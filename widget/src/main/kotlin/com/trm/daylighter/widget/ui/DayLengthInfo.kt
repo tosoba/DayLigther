@@ -106,7 +106,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
               style =
                 TextDefaults.defaultTextStyle.copy(
                   fontSize = mediumFontSize.sp,
-                  fontWeight = FontWeight.Bold
+                  fontWeight = FontWeight.Medium
                 )
             )
           }
