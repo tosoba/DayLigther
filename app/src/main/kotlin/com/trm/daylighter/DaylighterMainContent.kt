@@ -98,7 +98,7 @@ fun DayLighterNavigationDrawer(
   } else {
     ModalNavigationDrawer(
       modifier = modifier,
-      gesturesEnabled = false,
+      gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = drawerContent,
       content = content
