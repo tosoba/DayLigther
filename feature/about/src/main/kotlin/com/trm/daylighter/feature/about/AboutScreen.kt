@@ -62,13 +62,28 @@ fun AboutScreen(
           .verticalScroll(rememberScrollState())
           .padding(vertical = 10.dp)
     ) {
+      val context = LocalContext.current
+
+      Text(
+        text = stringResource(R.string.repository),
+        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+      )
+
+      ImageTextRow(
+        imagePainter = painterResource(R.drawable.github),
+        text = stringResource(R.string.github),
+        contentDescription = stringResource(R.string.github),
+        modifier =
+          Modifier.clickable { context.goToUrlInBrowser("https://github.com/tosoba/DayLigther") }
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+      )
+
       Text(
         text = stringResource(R.string.credits),
         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
       )
-
-      val context = LocalContext.current
 
       ImageTextRow(
         imagePainter = painterResource(R.drawable.open_street_map_creditor),
