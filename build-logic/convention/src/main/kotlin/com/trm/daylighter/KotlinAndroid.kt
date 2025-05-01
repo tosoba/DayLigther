@@ -11,11 +11,9 @@ import org.gradle.kotlin.dsl.provideDelegate
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 /** Configure base Kotlin with Android options */
-internal fun Project.configureKotlinAndroid(
-  commonExtension: CommonExtension<*, *, *, *, *>,
-) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *>) {
   commonExtension.apply {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig { minSdk = 26 }
 
@@ -41,7 +39,6 @@ internal fun Project.configureKotlinAndroid(
             "-opt-in=kotlin.Experimental",
           )
 
-      // Set JVM target to 1.8
       jvmTarget = JavaVersion.VERSION_17.toString()
     }
   }
