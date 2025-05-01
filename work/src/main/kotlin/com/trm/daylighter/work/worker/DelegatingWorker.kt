@@ -24,10 +24,8 @@ fun KClass<out CoroutineWorker>.delegatedData(
   putArgs: Data.Builder.() -> Data.Builder = { this }
 ): Data = Data.Builder().putString(WORKER_CLASS_NAME, qualifiedName).putArgs().build()
 
-class DelegatingWorker(
-  appContext: Context,
-  workerParams: WorkerParameters,
-) : CoroutineWorker(appContext, workerParams) {
+class DelegatingWorker(appContext: Context, workerParams: WorkerParameters) :
+  CoroutineWorker(appContext, workerParams) {
   private val workerClassName = workerParams.inputData.getString(WORKER_CLASS_NAME) ?: ""
 
   private val delegateWorker =

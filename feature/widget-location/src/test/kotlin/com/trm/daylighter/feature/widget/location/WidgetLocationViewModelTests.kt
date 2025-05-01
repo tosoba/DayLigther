@@ -32,7 +32,7 @@ class WidgetLocationViewModelTests {
   fun `GIVEN SavedStateHandle with location id THEN mode should be EDIT`() {
     assertEquals(
       WidgetLocationMode.EDIT,
-      viewModel(SavedStateHandle(mapOf(WidgetLocationDeepLinkParams.LOCATION_ID to "63"))).mode
+      viewModel(SavedStateHandle(mapOf(WidgetLocationDeepLinkParams.LOCATION_ID to "63"))).mode,
     )
   }
 
@@ -62,7 +62,7 @@ class WidgetLocationViewModelTests {
           widgetManager =
             mockk<WidgetManager>().apply {
               coEvery { this@apply.addDayNightCycleWidget(any()) } returns false
-            }
+            },
         )
       ) {
         toastMessageResId.test {
@@ -86,7 +86,7 @@ class WidgetLocationViewModelTests {
           widgetManager =
             mockk<WidgetManager>().apply {
               coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns false
-            }
+            },
         )
       ) {
         toastMessageResId.test {
@@ -110,7 +110,7 @@ class WidgetLocationViewModelTests {
           widgetManager =
             mockk<WidgetManager>().apply {
               coEvery { this@apply.addDayNightCycleWidget(any()) } returns true
-            }
+            },
         )
       ) {
         toastMessageResId.test {
@@ -133,7 +133,7 @@ class WidgetLocationViewModelTests {
           widgetManager =
             mockk<WidgetManager>().apply {
               coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns true
-            }
+            },
         )
       ) {
         toastMessageResId.test {
@@ -153,7 +153,7 @@ class WidgetLocationViewModelTests {
           SavedStateHandle(
             mapOf(WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.DAY_NIGHT_CYCLE.name)
           ),
-        widgetManager = widgetManager
+        widgetManager = widgetManager,
       )
       .onEditWidgetLocationClick()
 
@@ -169,7 +169,7 @@ class WidgetLocationViewModelTests {
           SavedStateHandle(
             mapOf(WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.GOLDEN_BLUE_HOUR.name)
           ),
-        widgetManager = widgetManager
+        widgetManager = widgetManager,
       )
       .onEditWidgetLocationClick()
 
@@ -192,10 +192,10 @@ class WidgetLocationViewModelTests {
               mapOf(
                 WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.DAY_NIGHT_CYCLE.name,
                 WidgetLocationDeepLinkParams.GLANCE_ID to "72",
-                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId
+                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId,
               )
             ),
-          widgetManager = widgetManager
+          widgetManager = widgetManager,
         )
       ) {
         toastMessageResId.test {
@@ -225,10 +225,10 @@ class WidgetLocationViewModelTests {
               mapOf(
                 WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.GOLDEN_BLUE_HOUR.name,
                 WidgetLocationDeepLinkParams.GLANCE_ID to "72",
-                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId
+                WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId,
               )
             ),
-          widgetManager = widgetManager
+          widgetManager = widgetManager,
         )
       ) {
         toastMessageResId.test {
@@ -247,7 +247,7 @@ class WidgetLocationViewModelTests {
   private fun viewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
     getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase = emptyLocationsFlowUseCase(),
-    widgetManager: WidgetManager = mockk()
+    widgetManager: WidgetManager = mockk(),
   ): WidgetLocationViewModel =
     WidgetLocationViewModel(savedStateHandle, getAllLocationsFlowUseCase, widgetManager)
 

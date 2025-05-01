@@ -18,7 +18,7 @@ class SettingsViewModel
 constructor(
   isGeocodingEmailPreferenceSetFlowUseCase: IsGeocodingEmailPreferenceSetFlowUseCase,
   private val clearGeocodingEmailPreferenceUseCase: ClearGeocodingEmailPreferenceUseCase,
-  private val deleteAllLocations: DeleteAllLocationsUseCase
+  private val deleteAllLocations: DeleteAllLocationsUseCase,
 ) : ViewModel() {
   val isGeocodeEmailPreferenceSetFlow: SharedFlow<Boolean> =
     isGeocodingEmailPreferenceSetFlowUseCase()

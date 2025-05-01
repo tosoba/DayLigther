@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
       val windowSizeClass = calculateWindowSizeClass(this)
       CompositionLocalProvider(
         LocalWidthSizeClass provides windowSizeClass.widthSizeClass,
-        LocalHeightSizeClass provides windowSizeClass.heightSizeClass
+        LocalHeightSizeClass provides windowSizeClass.heightSizeClass,
       ) {
         DayLighterTheme { DayLighterMainContent() }
       }

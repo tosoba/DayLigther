@@ -13,7 +13,7 @@ import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 internal fun RetryButton(chartMode: DayPeriodChartMode, onClick: Action) {
   AppWidgetBox(
     modifier = GlanceModifier.fillMaxSize().chartBackground(chartMode),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Button(text = stringResource(R.string.retry), onClick = onClick)
   }

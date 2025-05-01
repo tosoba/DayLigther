@@ -18,11 +18,11 @@ private val coverageExclusions =
     "**/R.class",
     "**/R\$*.class",
     "**/BuildConfig.*",
-    "**/Manifest*.*"
+    "**/Manifest*.*",
   )
 
 internal fun Project.configureJacoco(
-  androidComponentsExtension: AndroidComponentsExtension<*, *, *>,
+  androidComponentsExtension: AndroidComponentsExtension<*, *, *>
 ) {
   val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 

@@ -18,7 +18,8 @@ fun Context.dayNightCycleDeepLinkPattern(): String =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$DAY_NIGHT_CYCLE_PATH_SEGMENT/{${DayNightCycleDeepLinkParams.LOCATION_ID}}?default={${DayNightCycleDeepLinkParams.DEFAULT}}"
 
 fun Context.dayNightCycleDeepLinkUri(locationId: Long, isDefault: Boolean): Uri =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$DAY_NIGHT_CYCLE_PATH_SEGMENT/${locationId}?default=${isDefault}".toUri()
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$DAY_NIGHT_CYCLE_PATH_SEGMENT/${locationId}?default=${isDefault}"
+    .toUri()
 
 object DayNightCycleDeepLinkParams {
   const val LOCATION_ID = "day_night_cycle_location_id"
@@ -29,7 +30,8 @@ fun Context.goldenBlueHourDeepLinkPattern(): String =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$GOLDEN_BLUE_HOUR_PATH_SEGMENT/{${GoldenBlueHourDeepLinkParams.LOCATION_ID}}?default={${GoldenBlueHourDeepLinkParams.DEFAULT}}"
 
 fun Context.goldenBlueHourDeepLinkUri(locationId: Long, isDefault: Boolean): Uri =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$GOLDEN_BLUE_HOUR_PATH_SEGMENT/${locationId}?default=${isDefault}".toUri()
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$GOLDEN_BLUE_HOUR_PATH_SEGMENT/${locationId}?default=${isDefault}"
+    .toUri()
 
 object GoldenBlueHourDeepLinkParams {
   const val LOCATION_ID = "golden_blue_hour_location_id"
@@ -40,7 +42,8 @@ fun Context.widgetLocationDeepLinkPattern(): String =
   "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$WIDGET_LOCATION_PATH_SEGMENT/{${WidgetLocationDeepLinkParams.WIDGET_TYPE}}/{${WidgetLocationDeepLinkParams.GLANCE_ID}}/location/{${WidgetLocationDeepLinkParams.LOCATION_ID}}"
 
 fun Context.widgetLocationDeepLinkUri(type: WidgetTypeParam, glanceId: Int, locationId: Long): Uri =
-  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$WIDGET_LOCATION_PATH_SEGMENT/${type.name.lowercase()}/${glanceId}/location/${locationId}".toUri()
+  "${getString(R.string.deep_link_scheme)}://${getString(R.string.deep_link_host)}/$WIDGET_LOCATION_PATH_SEGMENT/${type.name.lowercase()}/${glanceId}/location/${locationId}"
+    .toUri()
 
 object WidgetLocationDeepLinkParams {
   const val WIDGET_TYPE = "widget_type"

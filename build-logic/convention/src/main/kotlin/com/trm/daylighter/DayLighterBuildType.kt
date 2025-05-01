@@ -4,5 +4,5 @@ package com.trm.daylighter
 enum class DayLighterBuildType(val applicationIdSuffix: String? = null) {
   DEBUG(".debug"),
   RELEASE,
-  BENCHMARK(".benchmark")
+  BENCHMARK(".benchmark"),
 }

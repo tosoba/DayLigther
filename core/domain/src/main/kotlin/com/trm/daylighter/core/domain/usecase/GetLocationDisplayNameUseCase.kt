@@ -6,10 +6,10 @@ import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.repo.GeocodingRepo
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class GetLocationDisplayNameUseCase @Inject constructor(private val geocodingRepo: GeocodingRepo) {
   operator fun invoke(lat: Double, lng: Double): Flow<Loadable<String>> = flow {

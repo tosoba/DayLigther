@@ -40,7 +40,7 @@ class DayNightCycleWidget(
   private val getDefaultLocationSunriseSunsetChangeUseCase:
     GetDefaultLocationSunriseSunsetChangeUseCase,
   private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
-  private val mainActivityClassProvider: ClassProvider
+  private val mainActivityClassProvider: ClassProvider,
 ) : GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
@@ -56,7 +56,7 @@ class DayNightCycleWidget(
         }
       CompositionLocalProvider(
         LocalClassProvider provides mainActivityClassProvider,
-        LocalIsPreviewProvider provides false
+        LocalIsPreviewProvider provides false,
       ) {
         DayNightCycleContent(change = change, id = id)
       }
@@ -64,9 +64,8 @@ class DayNightCycleWidget(
   }
 }
 
-class DayNightCycleWidgetPreview(
-  private val change: Loadable<LocationSunriseSunsetChange>,
-) : GlanceAppWidget() {
+class DayNightCycleWidgetPreview(private val change: Loadable<LocationSunriseSunsetChange>) :
+  GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -92,7 +91,7 @@ private fun DayNightCycleContent(change: Loadable<LocationSunriseSunsetChange>, 
         DayPeriodChart(
           change = change.data,
           chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
-          id = id
+          id = id,
         )
       }
       is Failed -> {
@@ -111,6 +110,6 @@ private fun RetryButton(id: GlanceId) {
     onClick =
       actionSendBroadcast(
         context.updateWidgetIntent<DayNightCycleWidgetReceiver>(widgetManager.getAppWidgetId(id))
-      )
+      ),
   )
 }

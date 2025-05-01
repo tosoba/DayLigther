@@ -8,5 +8,5 @@ annotation class Dispatcher(val dispatcher: DayLighterDispatchers)
 
 enum class DayLighterDispatchers {
   IO,
-  DEFAULT
+  DEFAULT,
 }

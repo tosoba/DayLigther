@@ -46,7 +46,7 @@ internal fun TestDayScreen(
     onDrawerMenuClick = onDrawerMenuClick,
     onNewLocationClick = onNewLocationClick,
     onEditLocationClick = onEditLocationClick,
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -54,7 +54,7 @@ internal fun TestDayScreen(
 @Composable
 internal fun ReadyChangeTestDayScreen(
   location: Location = testLocation(),
-  sunriseSunset: SunriseSunset = testSunriseSunset()
+  sunriseSunset: SunriseSunset = testSunriseSunset(),
 ) {
   TestDayScreen(
     modifier = Modifier.fillMaxSize(),
@@ -65,12 +65,12 @@ internal fun ReadyChangeTestDayScreen(
             LocationSunriseSunsetChange(
               location = location,
               today = sunriseSunset,
-              yesterday = sunriseSunset
+              yesterday = sunriseSunset,
             )
           )
           .asStable()
       )
-    }
+    },
   )
 }
 

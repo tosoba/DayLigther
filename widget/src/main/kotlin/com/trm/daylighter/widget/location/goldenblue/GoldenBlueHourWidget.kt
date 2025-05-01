@@ -40,7 +40,7 @@ class GoldenBlueHourWidget(
   private val getDefaultLocationSunriseSunsetChangeUseCase:
     GetDefaultLocationSunriseSunsetChangeUseCase,
   private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
-  private val mainActivityClassProvider: ClassProvider
+  private val mainActivityClassProvider: ClassProvider,
 ) : GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
@@ -56,7 +56,7 @@ class GoldenBlueHourWidget(
         }
       CompositionLocalProvider(
         LocalClassProvider provides mainActivityClassProvider,
-        LocalIsPreviewProvider provides false
+        LocalIsPreviewProvider provides false,
       ) {
         GoldenBlueHourContent(change = change, id = id)
       }
@@ -64,9 +64,8 @@ class GoldenBlueHourWidget(
   }
 }
 
-class GoldenBlueHourWidgetPreview(
-  private val change: Loadable<LocationSunriseSunsetChange>,
-) : GlanceAppWidget() {
+class GoldenBlueHourWidgetPreview(private val change: Loadable<LocationSunriseSunsetChange>) :
+  GlanceAppWidget() {
   override val sizeMode: SizeMode = SizeMode.Exact
 
   override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -92,7 +91,7 @@ private fun GoldenBlueHourContent(change: Loadable<LocationSunriseSunsetChange>,
         DayPeriodChart(
           change = change.data,
           chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR,
-          id = id
+          id = id,
         )
       }
       is Failed -> {
@@ -111,6 +110,6 @@ private fun RetryButton(id: GlanceId) {
     onClick =
       actionSendBroadcast(
         context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(widgetManager.getAppWidgetId(id))
-      )
+      ),
   )
 }

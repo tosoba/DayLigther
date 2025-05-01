@@ -50,9 +50,9 @@ class LocationViewModelTests {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 41L)),
           getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null }
+            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null },
         )
-        .screenMode
+        .screenMode,
     )
   }
 
@@ -72,7 +72,7 @@ class LocationViewModelTests {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 33L)),
           getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null }
+            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null },
         )
         .mapPositionFlow
         .test {
@@ -92,7 +92,7 @@ class LocationViewModelTests {
           name = "",
           isDefault = false,
           updatedAt = LocalDateTime.now(),
-          zoneId = ZoneId.systemDefault()
+          zoneId = ZoneId.systemDefault(),
         )
 
       viewModel(
@@ -100,7 +100,7 @@ class LocationViewModelTests {
           getLocationByIdUseCase =
             mockk<GetLocationByIdUseCase>().apply {
               coEvery { this@apply(any()) } returns expectedLocation
-            }
+            },
         )
         .mapPositionFlow
         .test {
@@ -110,9 +110,9 @@ class LocationViewModelTests {
               latitude = expectedLocation.latitude,
               longitude = expectedLocation.longitude,
               zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
-              label = expectedLocation.name
+              label = expectedLocation.name,
             ),
-            awaitItem()
+            awaitItem(),
           )
           ensureAllEventsConsumed()
         }
@@ -175,7 +175,7 @@ class LocationViewModelTests {
           requestSaveSpecifiedLocation(latitude = latitude, longitude = longitude)
           assertEquals(
             LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false),
-            awaitItem()
+            awaitItem(),
           )
           ensureAllEventsConsumed()
         }
@@ -237,9 +237,9 @@ class LocationViewModelTests {
             LocationPreparedToSave(
               latitude = userLocation.latitude,
               longitude = userLocation.longitude,
-              isUser = true
+              isUser = true,
             ),
-            awaitItem()
+            awaitItem(),
           )
           ensureAllEventsConsumed()
         }
@@ -667,7 +667,7 @@ class LocationViewModelTests {
 
   private fun assertMapPositionEquals(
     defaultMapPosition: MapPosition,
-    emittedPosition: MapPosition
+    emittedPosition: MapPosition,
   ) {
     assertEquals(defaultMapPosition.latitude, emittedPosition.latitude)
     assertEquals(defaultMapPosition.longitude, emittedPosition.longitude)

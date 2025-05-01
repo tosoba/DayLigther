@@ -12,7 +12,7 @@ class WidgetUpdateInitializer : Initializer<WidgetUpdateInitializer.Companion> {
       enqueueUniquePeriodicWork(
         WidgetUpdateWorker.WORK_NAME,
         ExistingPeriodicWorkPolicy.KEEP,
-        WidgetUpdateWorker.workRequest()
+        WidgetUpdateWorker.workRequest(),
       )
     }
 

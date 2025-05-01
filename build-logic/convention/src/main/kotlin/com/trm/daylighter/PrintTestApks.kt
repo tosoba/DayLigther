@@ -58,8 +58,7 @@ internal abstract class PrintApkLocationTask : DefaultTask() {
         directory.asFileTree.files.any {
           it.isFile && it.parentFile.path.contains("build${File.separator}generated").not()
         }
-      }
-        ?: throw RuntimeException("Cannot check androidTest sources")
+      } ?: throw RuntimeException("Cannot check androidTest sources")
 
     // Don't print APK location if there are no androidTest source files
     if (!hasFiles) {

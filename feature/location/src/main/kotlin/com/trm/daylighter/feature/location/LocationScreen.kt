@@ -71,7 +71,7 @@ const val editLocationRoute = "$locationRoute/{$locationIdParam}"
 fun LocationRoute(
   onBackClick: () -> Unit,
   modifier: Modifier = Modifier,
-  viewModel: LocationViewModel = hiltViewModel()
+  viewModel: LocationViewModel = hiltViewModel(),
 ) {
   LaunchedEffect(Unit) { viewModel.locationSavedFlow.collect { onBackClick() } }
 
@@ -94,12 +94,12 @@ fun LocationRoute(
         AlertDialogHeader(
           modifier = Modifier.padding(8.dp),
           dialogTitle = stringResource(commonR.string.geocoding_email_pref_dialog_title),
-          dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message)
+          dialogMessage = stringResource(commonR.string.geocoding_email_pref_dialog_message),
         )
       }
     },
     editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
-    validateValue = { value -> value.isValidEmail()?.let(context::getString) }
+    validateValue = { value -> value.isValidEmail()?.let(context::getString) },
   )
 
   val mapPosition = viewModel.mapPositionFlow.collectAsStateWithLifecycle()
@@ -140,7 +140,7 @@ fun LocationRoute(
       if (isGeocodeEmailPreferenceSet.value) viewModel::getLocationDisplayName
       else { _, _ -> showGeocodingEmailDialog = true },
     onBackClick = onBackClick,
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -165,7 +165,7 @@ private fun LocationScreen(
   geocodeButtonText: String,
   onGeocodeClick: (lat: Double, lng: Double) -> Unit,
   onBackClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
   val userLocationRequestState = rememberUserLocationRequestState()
@@ -188,7 +188,7 @@ private fun LocationScreen(
           }
         }
       },
-      onGranted = { userLocationRequestState.shouldCheckIfLocationEnabled = true }
+      onGranted = { userLocationRequestState.shouldCheckIfLocationEnabled = true },
     )
   }
 
@@ -201,7 +201,7 @@ private fun LocationScreen(
             longitude = it.mapCenter.longitude,
             zoom = it.zoomLevelDouble,
             orientation = it.mapOrientation,
-            label = mapPosition.label
+            label = mapPosition.label,
           )
         )
       }
@@ -209,7 +209,7 @@ private fun LocationScreen(
 
   CheckLocationSettingsEffect(
     userLocationRequestState = userLocationRequestState,
-    onLocationEnabled = requestGetAndSaveUserLocation
+    onLocationEnabled = requestGetAndSaveUserLocation,
   )
 
   UserLocationNotFoundToastEffect(userLocationNotFound = userLocationNotFound)
@@ -258,7 +258,7 @@ private fun LocationScreen(
           onSaveLocationClick(saveLocationState.latitude, saveLocationState.longitude, locationName)
         }
       },
-      modifier = modifier
+      modifier = modifier,
     )
   }
 
@@ -296,7 +296,7 @@ private fun LocationScreen(
             context.checkLocationPermissions()
           },
           onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
-          modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+          modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
         )
       },
       modifier = modifier,
@@ -331,7 +331,7 @@ private fun LocationScreen(
             modifier = Modifier.padding(20.dp).fillMaxHeight().verticalScroll(rememberScrollState())
           )
         }
-      }
+      },
     ) {
       LocationScaffold()
     }
@@ -352,12 +352,9 @@ private fun LocationScaffold(
   onBackClick: () -> Unit,
   modalSheet: @Composable () -> Unit,
   locationPermissionDialog: @Composable BoxScope.() -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
-  Scaffold(
-    modifier = modifier,
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-  ) { padding ->
+  Scaffold(modifier = modifier, contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       MapView(mapView, mapPosition, modifier = Modifier.fillMaxSize())
       MarkerIcon(modifier = Modifier.align(Alignment.Center))
@@ -382,7 +379,7 @@ private fun LocationScaffold(
       LocationAppBar(
         mapPosition = mapPosition,
         onBackClick = onBackClick,
-        onInfoClick = onInfoClick
+        onInfoClick = onInfoClick,
       )
 
       if (isInfoDialogShown) {
@@ -410,7 +407,7 @@ private fun LocationInfoDialog(onDismissRequest: () -> Unit) {
       TextButton(onClick = onDismissRequest) {
         Text(text = stringResource(android.R.string.ok), style = MaterialTheme.typography.bodyLarge)
       }
-    }
+    },
   )
 }
 
@@ -419,7 +416,7 @@ private fun LocationInfoDialog(onDismissRequest: () -> Unit) {
 private fun LocationAppBar(
   mapPosition: MapPosition,
   onBackClick: () -> Unit,
-  onInfoClick: () -> Unit
+  onInfoClick: () -> Unit,
 ) {
   CenterAlignedTopAppBar(
     modifier = Modifier.background(surfaceToTransparentVerticalGradient),
@@ -433,33 +430,33 @@ private fun LocationAppBar(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
-        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 10.dp)
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 10.dp),
       )
     },
     navigationIcon = {
       SmallFloatingActionButton(
         onClick = onBackClick,
-        modifier = Modifier.padding(start = 5.dp, top = 5.dp)
+        modifier = Modifier.padding(start = 5.dp, top = 5.dp),
       ) {
         Icon(
           imageVector = Icons.Filled.ArrowBack,
           contentDescription = stringResource(commonR.string.back),
-          tint = MaterialTheme.colorScheme.onSurface
+          tint = MaterialTheme.colorScheme.onSurface,
         )
       }
     },
     actions = {
       SmallFloatingActionButton(
         onClick = onInfoClick,
-        modifier = Modifier.padding(end = 5.dp, top = 5.dp)
+        modifier = Modifier.padding(end = 5.dp, top = 5.dp),
       ) {
         Icon(
           imageVector = Icons.Filled.Info,
           contentDescription = stringResource(R.string.location_info_dialog_text),
-          tint = MaterialTheme.colorScheme.onSurface
+          tint = MaterialTheme.colorScheme.onSurface,
         )
       }
-    }
+    },
   )
 }
 
@@ -507,7 +504,7 @@ private fun MarkerIcon(modifier: Modifier = Modifier) {
   Icon(
     painter = painterResource(commonR.drawable.marker),
     contentDescription = stringResource(commonR.string.location_marker),
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -522,20 +519,20 @@ private fun ModalSheetContent(
   geocodeButtonText: String,
   onSaveClick: () -> Unit,
   onGeocodeClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
 
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
-    modifier = modifier
+    modifier = modifier,
   ) {
     Text(
       text = headerLabel,
       style = MaterialTheme.typography.headlineMedium,
       maxLines = 2,
-      modifier = Modifier.padding(10.dp).fillMaxWidth()
+      modifier = Modifier.padding(10.dp).fillMaxWidth(),
     )
 
     TextField(
@@ -549,22 +546,22 @@ private fun ModalSheetContent(
           Icon(
             imageVector = Icons.Filled.Clear,
             contentDescription = stringResource(commonR.string.clear),
-            modifier = Modifier.clickable { onNameValueChange("") }
+            modifier = Modifier.clickable { onNameValueChange("") },
           )
         }
       },
-      modifier = Modifier.padding(10.dp).fillMaxWidth()
+      modifier = Modifier.padding(10.dp).fillMaxWidth(),
     )
 
     LoadingProgressIndicator(
       visible = isNameLoading,
-      modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
+      modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
     )
 
     AnimatedVisibility(
       visible = nameError != LocationNameError.NO_ERROR,
       enter = fadeIn(),
-      exit = fadeOut()
+      exit = fadeOut(),
     ) {
       Text(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -574,7 +571,7 @@ private fun ModalSheetContent(
             LocationNameError.NO_ERROR -> ""
           },
         fontSize = 14.sp,
-        color = Color.Red
+        color = Color.Red,
       )
     }
 
@@ -585,13 +582,13 @@ private fun ModalSheetContent(
       ModalSheetButtons(
         geocodeButtonText = geocodeButtonText,
         onGeocodeClick = onGeocodeClick,
-        onSaveClick = onSaveClick
+        onSaveClick = onSaveClick,
       )
     } else {
       ModalSheetButtonsRow(
         geocodeButtonText = geocodeButtonText,
         onGeocodeClick = onGeocodeClick,
-        onSaveClick = onSaveClick
+        onSaveClick = onSaveClick,
       )
     }
 
@@ -611,14 +608,14 @@ private fun ModalSheetContent(
 private fun ModalSheetButtonsRow(
   geocodeButtonText: String,
   onGeocodeClick: () -> Unit,
-  onSaveClick: () -> Unit
+  onSaveClick: () -> Unit,
 ) {
   Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
     OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
       Text(
         text = geocodeButtonText,
         maxLines = 1,
-        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
       )
     }
 
@@ -628,7 +625,7 @@ private fun ModalSheetButtonsRow(
       Text(
         text = stringResource(R.string.save),
         maxLines = 1,
-        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
       )
     }
   }
@@ -639,16 +636,16 @@ private fun ModalSheetButtonsRow(
 private fun ModalSheetButtons(
   geocodeButtonText: String,
   onGeocodeClick: () -> Unit,
-  onSaveClick: () -> Unit
+  onSaveClick: () -> Unit,
 ) {
   OutlinedButton(
     onClick = onGeocodeClick,
-    modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp)
+    modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp),
   ) {
     Text(
       text = geocodeButtonText,
       maxLines = 1,
-      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
     )
   }
 
@@ -656,12 +653,12 @@ private fun ModalSheetButtons(
 
   OutlinedButton(
     onClick = onSaveClick,
-    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
   ) {
     Text(
       text = stringResource(R.string.save),
       maxLines = 1,
-      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+      modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
     )
   }
 }
@@ -684,7 +681,7 @@ private fun ToastMessageEffect(@StringRes message: Int?) {
 
 @Composable
 private fun rememberLocationPermissionsResultLauncher(
-  userLocationRequestState: UserLocationRequestState,
+  userLocationRequestState: UserLocationRequestState
 ): ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>> {
   val context = LocalContext.current
   return rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -698,7 +695,7 @@ private fun rememberLocationPermissionsResultLauncher(
         userLocationRequestState.locationPermissions.any { permission ->
           ActivityCompat.shouldShowRequestPermissionRationale(
             requireNotNull(context.getActivity()),
-            permission
+            permission,
           )
         }
       userLocationRequestState.permissionRequestMode =
@@ -733,7 +730,7 @@ private fun CheckLocationSettingsEffect(
         Toast.makeText(
             context,
             R.string.location_disabled_non_resolvable_message,
-            Toast.LENGTH_LONG
+            Toast.LENGTH_LONG,
           )
           .show()
         Timber.tag("USER_LOCATION_CHECK").d("Location is disabled after check - NON resolvable.")
@@ -783,7 +780,7 @@ private fun LocationPermissionInfoDialog(
   permissionRequestMode: PermissionRequestMode,
   onOkClick: () -> Unit,
   onDismiss: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   AnimatedVisibility(visible = dialogVisible, enter = fadeIn(), exit = fadeOut()) {
     AlertDialog(
@@ -798,7 +795,7 @@ private fun LocationPermissionInfoDialog(
       title = {
         Text(
           text = stringResource(R.string.location_permissions_dialog_title),
-          textAlign = TextAlign.Center
+          textAlign = TextAlign.Center,
         )
       },
       text = {
@@ -813,7 +810,7 @@ private fun LocationPermissionInfoDialog(
               }
             }
         )
-      }
+      },
     )
   }
 }

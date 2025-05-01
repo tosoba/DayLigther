@@ -12,14 +12,16 @@ class GoldenBlueHourWidgetPinnedReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
     context.sendBroadcast(
       context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(
-        widgetId = context.getLastWidgetId<GoldenBlueHourWidgetReceiver>()
+        widgetId =
+          context.getLastWidgetId<GoldenBlueHourWidgetReceiver>()
             ?: throw IllegalArgumentException(
               "Did not find any widget ids for ${GoldenBlueHourWidget::class.java.simpleName}."
             ),
-        locationId = intent.extras?.getLong(LocationWidgetExtras.LOCATION_ID, -1L)
+        locationId =
+          intent.extras?.getLong(LocationWidgetExtras.LOCATION_ID, -1L)
             ?: throw IllegalArgumentException(
               "LOCATION_ID extra was not passed to ${GoldenBlueHourWidget::class.java.simpleName}."
-            )
+            ),
       )
     )
     context.showWidgetPinnedToast()

@@ -28,6 +28,4 @@ dependencies {
   androidTestImplementation(libs.hilt.android.testing)
 }
 
-tasks.withType<Test>().configureEach {
-  jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
-}
+tasks.withType<Test>().configureEach { jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED") }

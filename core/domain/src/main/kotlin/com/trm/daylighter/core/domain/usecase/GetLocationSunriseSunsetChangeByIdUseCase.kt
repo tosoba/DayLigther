@@ -16,7 +16,7 @@ constructor(
   private val calculateLocationSunriseSunsetChangeUseCase:
     CalculateLocationSunriseSunsetChangeUseCase,
   private val repo: LocationRepo,
-  @Dispatcher(DayLighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
+  @Dispatcher(DayLighterDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
 ) {
   suspend operator fun invoke(id: Long): Loadable<LocationSunriseSunsetChange> =
     withContext(ioDispatcher) { repo.getLocationById(id) ?: repo.getDefaultLocation() }

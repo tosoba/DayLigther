@@ -44,10 +44,10 @@ fun DayLighterTopAppBar(
         modifier =
           Modifier.fillMaxWidth()
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 10.dp),
       )
     },
-    actions = actions
+    actions = actions,
   )
 }
 
@@ -59,6 +59,6 @@ fun appBarTextStyle(): TextStyle =
       Shadow(
         color = MaterialTheme.colorScheme.inverseOnSurface,
         offset = Offset(1f, 1f),
-        blurRadius = 1f
+        blurRadius = 1f,
       ),
   )

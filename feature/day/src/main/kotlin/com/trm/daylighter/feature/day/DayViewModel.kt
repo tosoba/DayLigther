@@ -41,13 +41,13 @@ constructor(
         when {
           isStartedFromDeeplink(
             locationIdParam = DayNightCycleDeepLinkParams.LOCATION_ID,
-            defaultParam = DayNightCycleDeepLinkParams.DEFAULT
+            defaultParam = DayNightCycleDeepLinkParams.DEFAULT,
           ) -> {
             emit(getNonDefaultLocationOffset(DayNightCycleDeepLinkParams.LOCATION_ID))
           }
           isStartedFromDeeplink(
             locationIdParam = GoldenBlueHourDeepLinkParams.LOCATION_ID,
-            defaultParam = GoldenBlueHourDeepLinkParams.DEFAULT
+            defaultParam = GoldenBlueHourDeepLinkParams.DEFAULT,
           ) -> {
             emit(getNonDefaultLocationOffset(GoldenBlueHourDeepLinkParams.LOCATION_ID))
           }
@@ -90,7 +90,7 @@ constructor(
               LocationSunriseSunsetChange(
                   location = location,
                   today = change.today,
-                  yesterday = change.yesterday
+                  yesterday = change.yesterday,
                 )
                 .asLoadable()
             )
@@ -103,7 +103,7 @@ constructor(
                   LocationSunriseSunsetChange(
                       location = location,
                       today = change.today,
-                      yesterday = change.yesterday
+                      yesterday = change.yesterday,
                     )
                     .asLoadable()
                 )

@@ -63,10 +63,8 @@ data class FailedFirst(override val throwable: Throwable?) : WithoutData, Failed
   override fun <R : Any> map(block: (Nothing) -> R): Loadable<R> = this
 }
 
-data class FailedNext<T : Any>(
-  override val data: T,
-  override val throwable: Throwable?,
-) : WithData<T>, Failed {
+data class FailedNext<T : Any>(override val data: T, override val throwable: Throwable?) :
+  WithData<T>, Failed {
   override val copyWithClearedError: Ready<T>
     get() = Ready(data)
 

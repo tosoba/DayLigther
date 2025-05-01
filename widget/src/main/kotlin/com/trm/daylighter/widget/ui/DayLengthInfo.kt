@@ -46,12 +46,12 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
   val diffPrefix =
     dayLengthDiffPrefix(
       todayLengthSeconds = todayLengthSeconds,
-      yesterdayLengthSeconds = yesterdayLengthSeconds
+      yesterdayLengthSeconds = yesterdayLengthSeconds,
     )
 
   Row(
     horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-    verticalAlignment = Alignment.Vertical.CenterVertically
+    verticalAlignment = Alignment.Vertical.CenterVertically,
   ) {
     DayLengthIcon()
 
@@ -63,7 +63,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
             setTextViewText(R.id.shadow_text_view, "${stringResource(R.string.day_length)}:")
             setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
             setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, smallFontSize)
-          }
+          },
       )
 
       Row {
@@ -76,7 +76,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
               setTextViewText(R.id.shadow_text_view, formatTimeMillis(todayLengthSeconds * 1_000L))
               setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
               setTextViewTextSize(R.id.shadow_text_view, TypedValue.COMPLEX_UNIT_SP, mediumFontSize)
-            }
+            },
         )
 
         Spacer(modifier = GlanceModifier.width(5.dp))
@@ -92,7 +92,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                     "-" -> Color.Red
                     else -> throw IllegalArgumentException()
                   }
-                ),
+                )
           ) {
             Text(
               modifier = GlanceModifier.padding(vertical = 1.dp, horizontal = 2.dp),
@@ -101,13 +101,13 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                   R.string.diff,
                   diffPrefix,
                   dayLengthDiffTime.minute,
-                  dayLengthDiffTime.second
+                  dayLengthDiffTime.second,
                 ),
               style =
                 TextDefaults.defaultTextStyle.copy(
                   fontSize = mediumFontSize.sp,
-                  fontWeight = FontWeight.Medium
-                )
+                  fontWeight = FontWeight.Medium,
+                ),
             )
           }
         } else {
@@ -121,16 +121,16 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
                     R.string.diff,
                     diffPrefix,
                     dayLengthDiffTime.minute,
-                    dayLengthDiffTime.second
+                    dayLengthDiffTime.second,
                   ),
                 )
                 setInt(R.id.shadow_text_view, "setTextColor", light_onDayColor.toArgb())
                 setTextViewTextSize(
                   R.id.shadow_text_view,
                   TypedValue.COMPLEX_UNIT_SP,
-                  mediumFontSize
+                  mediumFontSize,
                 )
-              }
+              },
           )
         }
       }
@@ -146,12 +146,12 @@ private fun DayLengthIcon() {
       provider =
         ImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_shadow)),
       contentDescription = null,
-      modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp)
+      modifier = GlanceModifier.padding(start = 1.dp, top = 1.dp),
     )
 
     Image(
       provider = ImageProvider(Icon.createWithResource(context, commonR.drawable.day_length_white)),
-      contentDescription = stringResource(R.string.day_length)
+      contentDescription = stringResource(R.string.day_length),
     )
   }
 }

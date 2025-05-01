@@ -12,6 +12,6 @@ fun MarkerIcon(modifier: Modifier = Modifier) {
   Icon(
     painter = painterResource(R.drawable.marker),
     contentDescription = stringResource(R.string.location_marker),
-    modifier = modifier
+    modifier = modifier,
   )
 }

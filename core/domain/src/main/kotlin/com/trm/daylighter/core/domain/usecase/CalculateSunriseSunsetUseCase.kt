@@ -16,7 +16,7 @@ constructor(
     date: LocalDateTime,
     latitude: Double,
     longitude: Double,
-    timeZone: TimeZone
+    timeZone: TimeZone,
   ): SunriseSunset {
     fun calculateDawnOrTwilight(sunPosition: SunPosition, halfDay: HalfDay): LocalDateTime? =
       calculateSunPositionTimestampUseCase(
@@ -25,7 +25,7 @@ constructor(
         date = date,
         sunPosition = sunPosition,
         halfDay = halfDay,
-        timeZone = timeZone
+        timeZone = timeZone,
       )
 
     return SunriseSunset(
@@ -41,7 +41,7 @@ constructor(
       morning4Below = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.MORNING),
       evening6Above = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_ABOVE, HalfDay.EVENING),
       evening4Below = calculateDawnOrTwilight(SunPosition.GOLDEN_HOUR_BELOW, HalfDay.EVENING),
-      date = date.toLocalDate()
+      date = date.toLocalDate(),
     )
   }
 }

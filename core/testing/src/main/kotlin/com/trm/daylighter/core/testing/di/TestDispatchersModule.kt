@@ -11,10 +11,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 
 @Module
-@TestInstallIn(
-  components = [SingletonComponent::class],
-  replaces = [DispatchersModule::class],
-)
+@TestInstallIn(components = [SingletonComponent::class], replaces = [DispatchersModule::class])
 object TestDispatchersModule {
   @Provides
   @Dispatcher(DayLighterDispatchers.DEFAULT)

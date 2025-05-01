@@ -21,13 +21,13 @@ fun InfoButtonCard(
   infoText: String,
   actionText: String,
   onButtonClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Surface(shape = CardDefaults.shape, shadowElevation = 6.dp, modifier = modifier) {
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.padding(20.dp)
+      modifier = Modifier.padding(20.dp),
     ) {
       Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
       Spacer(modifier = Modifier.height(10.dp))

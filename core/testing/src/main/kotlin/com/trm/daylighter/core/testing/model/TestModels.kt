@@ -13,7 +13,7 @@ fun testLocation(
   name: String = "",
   isDefault: Boolean = true,
   updatedAt: LocalDateTime = LocalDateTime.now(),
-  zoneId: ZoneId = ZoneId.systemDefault()
+  zoneId: ZoneId = ZoneId.systemDefault(),
 ): Location =
   Location(
     id = id,
@@ -22,7 +22,7 @@ fun testLocation(
     name = name,
     isDefault = isDefault,
     updatedAt = updatedAt,
-    zoneId = zoneId
+    zoneId = zoneId,
   )
 
 fun testSunriseSunset(
@@ -53,5 +53,5 @@ fun testSunriseSunset(
     morning4Below = morning4Below,
     evening6Above = evening6Above,
     evening4Below = evening4Below,
-    date = date
+    date = date,
   )

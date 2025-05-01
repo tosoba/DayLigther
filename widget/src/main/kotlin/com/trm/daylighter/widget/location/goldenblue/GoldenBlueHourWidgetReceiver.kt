@@ -32,7 +32,7 @@ class GoldenBlueHourWidgetReceiver : GlanceAppWidgetReceiver() {
     GoldenBlueHourWidget(
       getDefaultLocationSunriseSunsetChangeUseCase,
       getLocationSunriseSunsetChangeByIdUseCase,
-      mainActivityClassProvider
+      mainActivityClassProvider,
     )
   }
 
@@ -53,7 +53,7 @@ class GoldenBlueHourWidgetReceiver : GlanceAppWidgetReceiver() {
               WidgetLocationIdUpdate(locationId = extras.getLong(LocationWidgetExtras.LOCATION_ID))
             } else {
               ::updateUuid
-            }
+            },
         )
       }
     }

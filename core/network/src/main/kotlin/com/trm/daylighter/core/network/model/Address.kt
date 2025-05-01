@@ -14,5 +14,5 @@ data class Address(
   @SerialName("quarter") val quarter: String?,
   @SerialName("road") val road: String?,
   @SerialName("state") val state: String?,
-  @SerialName("suburb") val suburb: String?
+  @SerialName("suburb") val suburb: String?,
 )

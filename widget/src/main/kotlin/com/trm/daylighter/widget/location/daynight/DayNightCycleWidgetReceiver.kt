@@ -26,14 +26,13 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
   internal lateinit var getLocationSunriseSunsetChangeByIdUseCase:
     GetLocationSunriseSunsetChangeByIdUseCase
 
-  @Inject @MainActivityClassProvider
-  internal lateinit var mainActivityClassProvider: ClassProvider
+  @Inject @MainActivityClassProvider internal lateinit var mainActivityClassProvider: ClassProvider
 
   override val glanceAppWidget: DayNightCycleWidget by lazy {
     DayNightCycleWidget(
       getDefaultLocationSunriseSunsetChangeUseCase,
       getLocationSunriseSunsetChangeByIdUseCase,
-      mainActivityClassProvider
+      mainActivityClassProvider,
     )
   }
 
@@ -54,7 +53,7 @@ class DayNightCycleWidgetReceiver : GlanceAppWidgetReceiver() {
               WidgetLocationIdUpdate(locationId = extras.getLong(LocationWidgetExtras.LOCATION_ID))
             } else {
               ::updateUuid
-            }
+            },
         )
       }
     }

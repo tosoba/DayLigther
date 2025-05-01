@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized
 class DayScreenNavigationItemsDisabledTests(
   private val changeFlow: Flow<StableLoadable<LocationSunriseSunsetChange>>,
   private val width: TestWidthClass,
-  private val height: TestHeightClass
+  private val height: TestHeightClass,
 ) {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -42,7 +42,7 @@ class DayScreenNavigationItemsDisabledTests(
         TestDayScreen(
           modifier = Modifier.fillMaxSize(),
           locations = Ready(listOf(testLocation())),
-          sunriseSunsetChangeInLocationAt = { changeFlow }
+          sunriseSunsetChangeInLocationAt = { changeFlow },
         )
       }
 

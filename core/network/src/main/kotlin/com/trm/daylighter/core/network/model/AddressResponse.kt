@@ -16,5 +16,5 @@ data class AddressResponse(
   @SerialName("name") val name: String?,
   @SerialName("place_id") val placeId: Int?,
   @SerialName("place_rank") val placeRank: Int?,
-  @SerialName("type") val type: String?
+  @SerialName("type") val type: String?,
 )

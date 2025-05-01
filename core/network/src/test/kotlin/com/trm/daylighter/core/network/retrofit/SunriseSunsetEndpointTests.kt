@@ -17,7 +17,7 @@ class SunriseSunsetEndpointTests {
       endpoint.getSunriseSunset(
         lat = WARSAW_LAT,
         lng = WARSAW_LNG,
-        date = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+        date = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
       )
     )
   }

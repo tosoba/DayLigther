@@ -18,15 +18,15 @@ constructor(private val calculateSunriseSunsetUseCase: CalculateSunriseSunsetUse
           today.atStartOfDay(),
           location.latitude,
           location.longitude,
-          timeZone
+          timeZone,
         ),
       yesterday =
         calculateSunriseSunsetUseCase(
           today.minusDays(1L).atStartOfDay(),
           location.latitude,
           location.longitude,
-          timeZone
-        )
+          timeZone,
+        ),
     )
   }
 }

@@ -25,7 +25,7 @@ fun SingleLineAutoSizeText(
   text: AnnotatedString = buildAnnotatedString {},
   color: Color = MaterialTheme.colorScheme.onBackground,
   textAlign: TextAlign = TextAlign.Start,
-  style: TextStyle = LocalTextStyle.current
+  style: TextStyle = LocalTextStyle.current,
 ) {
   var multiplier by remember { mutableStateOf(1f) }
   var textOverflows by remember { mutableStateOf(true) }
@@ -38,7 +38,7 @@ fun SingleLineAutoSizeText(
       textAlign = textAlign,
       overflow = TextOverflow.Visible,
       style = style.copy(fontSize = style.fontSize * multiplier),
-      onTextLayout = { if (it.hasVisualOverflow) multiplier *= 0.99f else textOverflows = false }
+      onTextLayout = { if (it.hasVisualOverflow) multiplier *= 0.99f else textOverflows = false },
     )
 
     AnimatedVisibility(visible = textOverflows) {

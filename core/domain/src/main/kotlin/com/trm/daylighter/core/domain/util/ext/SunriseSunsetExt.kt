@@ -19,7 +19,7 @@ fun SunriseSunset.allTimestamps(): List<LocalDateTime?> =
     morning12Below,
     evening12Below,
     sunrise,
-    sunset
+    sunset,
   )
 
 fun ZoneId.juneSolstice(): LocalDateTime =

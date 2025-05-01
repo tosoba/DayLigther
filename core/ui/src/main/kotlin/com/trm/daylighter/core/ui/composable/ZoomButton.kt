@@ -23,16 +23,16 @@ fun ZoomButtonsRow(
   zoom: Double,
   incrementZoom: () -> Unit,
   decrementZoom: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Row(modifier = modifier) {
     ZoomButton(
       enabled = zoom < MapDefaults.MAX_ZOOM,
-      onClick = { if (zoom < MapDefaults.MAX_ZOOM) incrementZoom() }
+      onClick = { if (zoom < MapDefaults.MAX_ZOOM) incrementZoom() },
     ) {
       Icon(
         imageVector = Icons.Filled.ZoomIn,
-        contentDescription = stringResource(commonR.string.zoom_in)
+        contentDescription = stringResource(commonR.string.zoom_in),
       )
     }
 
@@ -40,11 +40,11 @@ fun ZoomButtonsRow(
 
     ZoomButton(
       enabled = zoom > MapDefaults.MIN_ZOOM,
-      onClick = { if (zoom > MapDefaults.MIN_ZOOM) decrementZoom() }
+      onClick = { if (zoom > MapDefaults.MIN_ZOOM) decrementZoom() },
     ) {
       Icon(
         imageVector = Icons.Filled.ZoomOut,
-        contentDescription = stringResource(commonR.string.zoom_out)
+        contentDescription = stringResource(commonR.string.zoom_out),
       )
     }
   }
@@ -55,7 +55,7 @@ fun ZoomButton(
   modifier: Modifier = Modifier,
   enabled: Boolean,
   onClick: () -> Unit,
-  icon: @Composable () -> Unit
+  icon: @Composable () -> Unit,
 ) {
   FloatingActionButton(
     modifier = modifier,
@@ -64,7 +64,7 @@ fun ZoomButton(
       FloatingActionButtonDefaults.containerColor.run { if (enabled) this else copy(alpha = .95f) },
     elevation =
       FloatingActionButtonDefaults.run { if (enabled) elevation() else bottomAppBarFabElevation() },
-    interactionSource = if (enabled) MutableInteractionSource() else NoRippleInteractionSource()
+    interactionSource = if (enabled) MutableInteractionSource() else NoRippleInteractionSource(),
   ) {
     icon()
   }

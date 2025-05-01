@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 plugins {
-    id("daylighter.android.library")
-    id("daylighter.android.hilt")
+  id("daylighter.android.library")
+  id("daylighter.android.hilt")
 }
 
-android {
-    namespace = "com.trm.daylighter.uitesthiltmanifest"
-}
+android { namespace = "com.trm.daylighter.uitesthiltmanifest" }

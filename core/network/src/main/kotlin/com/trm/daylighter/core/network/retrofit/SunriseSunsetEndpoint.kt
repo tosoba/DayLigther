@@ -9,7 +9,7 @@ interface SunriseSunsetEndpoint {
   suspend fun getSunriseSunset(
     @Query("lat") lat: Double,
     @Query("lng") lng: Double,
-    @Query("date") date: String
+    @Query("date") date: String,
   ): SunriseSunsetResponse
 
   companion object {

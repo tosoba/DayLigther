@@ -21,7 +21,7 @@ internal val LocalColorProviders = staticCompositionLocalOf { dynamicThemeColorP
 @Composable
 internal fun GlanceTheme(
   colors: ColorProviders = GlanceTheme.colors,
-  content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
   CompositionLocalProvider(LocalColorProviders provides colors) { content() }
 }

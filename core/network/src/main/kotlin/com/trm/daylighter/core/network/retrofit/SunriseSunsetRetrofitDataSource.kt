@@ -6,15 +6,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class SunriseSunsetRetrofitDataSource
-@Inject
-constructor(
-  private val api: SunriseSunsetEndpoint,
-) : SunriseSunsetNetworkDataSource {
+class SunriseSunsetRetrofitDataSource @Inject constructor(private val api: SunriseSunsetEndpoint) :
+  SunriseSunsetNetworkDataSource {
   override suspend fun getSunriseSunset(
     lat: Double,
     lng: Double,
-    date: LocalDate
+    date: LocalDate,
   ): SunriseSunsetResult? =
     api.getSunriseSunset(lat, lng, DateTimeFormatter.ISO_DATE.format(date)).content
 }

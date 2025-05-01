@@ -56,7 +56,7 @@ fun SettingsRoute(
   modifier: Modifier = Modifier,
   onDrawerMenuClick: () -> Unit,
   backHandler: @Composable () -> Unit,
-  viewModel: SettingsViewModel = hiltViewModel()
+  viewModel: SettingsViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
   val isGeocodeEmailPreferenceSet =
@@ -77,7 +77,7 @@ fun SettingsRoute(
       viewModel.deleteLocations()
       Toast.makeText(context, locationsDeletedMessage, Toast.LENGTH_SHORT).show()
     },
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -88,7 +88,7 @@ private fun SettingsScreen(
   onDrawerMenuClick: () -> Unit,
   onDisableGeocodingClick: () -> Unit,
   onClearLocationsClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Column(modifier = modifier) {
     DayLighterTopAppBar(
@@ -97,17 +97,17 @@ private fun SettingsScreen(
         if (!usingPermanentNavigationDrawer) {
           DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
-      }
+      },
     )
 
     PrefsScreen(
       dataStore = LocalContext.current.preferencesDataStore,
-      modifier = Modifier.fillMaxWidth().weight(1f)
+      modifier = Modifier.fillMaxWidth().weight(1f),
     ) {
       prefsGroup({
         GroupHeader(
           title = stringResource(R.string.geocoding_pref_group_title),
-          color = MaterialTheme.colorScheme.secondary
+          color = MaterialTheme.colorScheme.secondary,
         )
       }) {
         editGeocodingEmailPreferenceItem()
@@ -120,7 +120,7 @@ private fun SettingsScreen(
       prefsGroup({
         GroupHeader(
           title = stringResource(R.string.locations_pref_group_title),
-          color = MaterialTheme.colorScheme.secondary
+          color = MaterialTheme.colorScheme.secondary,
         )
       }) {
         clearLocationsPreferenceItem(onClearLocationsClick = onClearLocationsClick)
@@ -152,7 +152,7 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
       title = stringResource(R.string.clear_locations_data_pref_title),
       summary = stringResource(R.string.clear_locations_data_summary),
       enabled = true,
-      onClick = { showDialog = true }
+      onClick = { showDialog = true },
     )
 
     if (showDialog) {
@@ -162,7 +162,7 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
           AlertDialogHeader(
             modifier = Modifier.padding(8.dp),
             dialogTitle = stringResource(R.string.clear_locations_data_pref_dialog_title),
-            dialogMessage = stringResource(R.string.clear_locations_data_pref_dialog_message)
+            dialogMessage = stringResource(R.string.clear_locations_data_pref_dialog_message),
           )
         },
         confirmButton = {
@@ -171,11 +171,11 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
             onClick = {
               onClearLocationsClick()
               showDialog = false
-            }
+            },
           ) {
             Text(
               text = stringResource(android.R.string.ok),
-              style = MaterialTheme.typography.bodyLarge
+              style = MaterialTheme.typography.bodyLarge,
             )
           }
         },
@@ -183,7 +183,7 @@ private fun PrefsScope.clearLocationsPreferenceItem(onClearLocationsClick: () ->
           TextButton(modifier = Modifier.padding(end = 16.dp), onClick = { showDialog = false }) {
             Text(
               text = stringResource(android.R.string.cancel),
-              style = MaterialTheme.typography.bodyLarge
+              style = MaterialTheme.typography.bodyLarge,
             )
           }
         },
@@ -198,7 +198,7 @@ private fun PrefsScope.disableGeocodingPreferenceItem(onClick: () -> Unit) {
       title = stringResource(R.string.disable_geocoding_email_pref_title),
       summary = stringResource(R.string.disable_geocoding_email_pref_summary),
       enabled = true,
-      onClick = onClick
+      onClick = onClick,
     )
   }
 }
@@ -267,13 +267,13 @@ private fun EditTextPref(
         AlertDialogHeader(
           modifier = Modifier.padding(8.dp),
           dialogTitle = dialogTitle,
-          dialogMessage = dialogMessage
+          dialogMessage = dialogMessage,
         )
       }
     },
     editTextPlaceholder = stringResource(commonR.string.geocoding_email_value_placeholder),
     onValueChange = onValueChange,
     validateValue = validateValue,
-    dialogBackgroundColor = dialogBackgroundColor
+    dialogBackgroundColor = dialogBackgroundColor,
   )
 }

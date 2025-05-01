@@ -14,5 +14,5 @@ data class MapPosition(
   val zoom: Double = MapDefaults.MIN_ZOOM,
   val orientation: Float = MapDefaults.ORIENTATION,
   val label: String = MapDefaults.LABEL,
-  private val uuid: UUID = UUID.randomUUID()
+  private val uuid: UUID = UUID.randomUUID(),
 ) : Parcelable

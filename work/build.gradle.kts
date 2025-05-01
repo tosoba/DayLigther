@@ -3,9 +3,7 @@ plugins {
   id("daylighter.android.hilt")
 }
 
-android {
-  namespace = "com.trm.daylighter.sync"
-}
+android { namespace = "com.trm.daylighter.sync" }
 
 dependencies {
   implementation(project(":core:common"))

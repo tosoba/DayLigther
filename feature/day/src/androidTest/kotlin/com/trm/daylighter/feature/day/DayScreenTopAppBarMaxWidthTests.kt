@@ -22,7 +22,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class DayScreenTopAppBarMaxWidthTests(
   private val width: TestWidthClass,
-  private val height: TestHeightClass
+  private val height: TestHeightClass,
 ) {
   @get:Rule val composeTestRule = createComposeRule()
 

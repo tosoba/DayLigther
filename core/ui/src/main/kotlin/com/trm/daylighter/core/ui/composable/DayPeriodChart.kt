@@ -102,7 +102,7 @@ fun DayPeriodChart(
   chartMode: DayPeriodChartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
   dayMode: DayMode = DayMode.SUNRISE,
   now: LocalTime = LocalTime.now(),
-  appBarHeightPx: Float = 0f
+  appBarHeightPx: Float = 0f,
 ) {
   val changeValue = change.value
   val chartSegments =
@@ -128,13 +128,13 @@ fun DayPeriodChart(
       DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
         dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
           change = changeValue.dataOrNull(),
-          dayMode = dayMode
+          dayMode = dayMode,
         )
       }
       DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
         goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
           change = changeValue.dataOrNull(),
-          dayMode = dayMode
+          dayMode = dayMode,
         )
       }
     }
@@ -178,7 +178,7 @@ fun DayPeriodChart(
       chartSegments = chartSegments,
       textMeasurer = textMeasurer,
       textStyle = labelTextStyle,
-      dayLabel = dayLabel
+      dayLabel = dayLabel,
     )
 
     segmentEdgeLabels.forEach { edgeLabels ->
@@ -196,7 +196,7 @@ fun DayPeriodChart(
       drawHorizonLabel(
         textStyle = labelTextStyle.copy(textAlign = TextAlign.Right, color = textColor),
         textMeasurer = textMeasurer,
-        horizonLabel = horizonLabel
+        horizonLabel = horizonLabel,
       )
     }
 
@@ -253,7 +253,7 @@ private fun DrawScope.drawChartSegments(chartSegments: List<DayChartSegment>) {
         sweepAngle = segment.sweepAngleDegrees,
         useCenter = true,
         topLeft = topLeftOffset,
-        size = chartSegmentSize
+        size = chartSegmentSize,
       )
 
       startAngle += segment.sweepAngleDegrees
@@ -275,14 +275,14 @@ private fun DrawScope.drawPeriodLabels(
       val periodLabelTextStyle =
         textStyle.copy(
           color = if (segment.periodLabel.startsWith(dayLabel)) Color.Black else Color.White,
-          textAlign = TextAlign.Right
+          textAlign = TextAlign.Right,
         )
       val periodLabelLayoutResult =
         textMeasurer.measure(
           text = periodLabel,
           style = periodLabelTextStyle,
           overflow = TextOverflow.Ellipsis,
-          maxLines = 1
+          maxLines = 1,
         )
       drawText(
         textMeasurer = textMeasurer,
@@ -296,11 +296,11 @@ private fun DrawScope.drawPeriodLabels(
                 chartCenter.y - periodLabelLayoutResult.size.height - chartTextPaddingPx
               } else {
                 chartCenter.y - periodLabelLayoutResult.size.height / 2f
-              }
+              },
           ),
         style = periodLabelTextStyle,
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
       )
     }
   }
@@ -369,7 +369,7 @@ private fun dayNightCycleChartSegmentEdges(
 
 @Composable
 private fun goldenBlueHourChartSegmentEdges(
-  change: LocationSunriseSunsetChange?,
+  change: LocationSunriseSunsetChange?
 ): List<DayChartSegmentEdge> {
   val dashPathEffect = segmentEndingEdgeDashPathEffect
   val horizonExtraLength = horizonLineExtraLengthPx
@@ -452,10 +452,10 @@ private fun DrawScope.drawSegmentEdge(edge: DayChartSegmentEdge) {
           y =
             chartCenter.y +
               (chartRadius + edge.radiusExtraLength) * sin(edge.angleDegrees.radians) +
-              edge.strokeWidth
+              edge.strokeWidth,
         ),
       strokeWidth = edge.strokeWidth,
-      pathEffect = edge.pathEffect
+      pathEffect = edge.pathEffect,
     )
   }
 }
@@ -473,7 +473,7 @@ private data class DayChartSegmentEdgeLabels(
 @Composable
 private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
   change: LocationSunriseSunsetChange?,
-  dayMode: DayMode
+  dayMode: DayMode,
 ): List<DayChartSegmentEdgeLabels> {
   val using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
 
@@ -499,13 +499,13 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.sunrise,
-                todayTimestamp = change.today.sunrise
+                todayTimestamp = change.today.sunrise,
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.sunset,
-                todayTimestamp = change.today.sunset
-              )
+                todayTimestamp = change.today.sunset,
+              ),
           )
         )
       }
@@ -520,13 +520,13 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.morning6Below,
-                todayTimestamp = change.today.morning6Below
+                todayTimestamp = change.today.morning6Below,
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.evening6Below,
-                todayTimestamp = change.today.evening6Below
-              )
+                todayTimestamp = change.today.evening6Below,
+              ),
           )
         )
       }
@@ -541,13 +541,13 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.morning12Below,
-                todayTimestamp = change.today.morning12Below
+                todayTimestamp = change.today.morning12Below,
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.evening12Below,
-                todayTimestamp = change.today.evening12Below
-              )
+                todayTimestamp = change.today.evening12Below,
+              ),
           )
         )
       }
@@ -562,13 +562,13 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
             sunriseDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.morning18Below,
-                todayTimestamp = change.today.morning18Below
+                todayTimestamp = change.today.morning18Below,
               ),
             sunsetDiffLabel =
               timestampDiffLabel(
                 yesterdayTimestamp = change.yesterday.evening18Below,
-                todayTimestamp = change.today.evening18Below
-              )
+                todayTimestamp = change.today.evening18Below,
+              ),
           )
         )
       }
@@ -579,7 +579,7 @@ private fun dayNightCycleChartSegmentEdgeAndTimeDiffLabels(
 @Composable
 private fun goldenBlueHourChartSegmentEdgeAndTimeDiffLabels(
   change: LocationSunriseSunsetChange?,
-  dayMode: DayMode
+  dayMode: DayMode,
 ): List<DayChartSegmentEdgeLabels> {
   val using24HFormat = DateFormat.is24HourFormat(LocalContext.current)
 
@@ -681,7 +681,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
       text = endingEdgeLabel,
       style = endingEdgeTextStyle,
       overflow = TextOverflow.Ellipsis,
-      maxLines = 1
+      maxLines = 1,
     )
   val endingEdgeLabelExtraOffset = edgeLabels.extraOffset(endingEdgeLabelLayoutResult)
   val endingEdgeLabelTopLeft =
@@ -694,7 +694,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
       y =
         chartCenter.y +
           (chartRadius + labelPaddingPx) * sin(edgeLabels.edgeAngleDegrees.radians) +
-          endingEdgeLabelExtraOffset.y
+          endingEdgeLabelExtraOffset.y,
     )
   drawText(
     textMeasurer = textMeasurer,
@@ -710,7 +710,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
       buildTimeAndDiffLabel(
         edgeLabels = edgeLabels,
         dayMode = dayMode,
-        heightSizeClass = heightSizeClass
+        heightSizeClass = heightSizeClass,
       )
     )
   if (timeAndDiffLabel.isBlank()) return
@@ -722,7 +722,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
       text = timeAndDiffLabel,
       style = timeAndDiffLabelTextStyle,
       overflow = TextOverflow.Ellipsis,
-      maxLines = timeAndDiffLabelMaxLines
+      maxLines = timeAndDiffLabelMaxLines,
     )
   val timeAndDiffLabelExtraOffset = edgeLabels.extraOffset(timeLayoutResult)
   val timeTopLeft =
@@ -732,12 +732,12 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
           endingEdgeLabelTopLeft.x +
             endingEdgeLabelLayoutResult.size.width.toFloat() +
             chartTextPaddingPx,
-          size.width - timeLayoutResult.size.width - chartTextPaddingPx
+          size.width - timeLayoutResult.size.width - chartTextPaddingPx,
         ),
       y =
         chartCenter.y +
           (chartRadius + labelPaddingPx) * sin(edgeLabels.edgeAngleDegrees.radians) +
-          timeAndDiffLabelExtraOffset.y
+          timeAndDiffLabelExtraOffset.y,
     )
   drawText(
     textMeasurer = textMeasurer,
@@ -752,7 +752,7 @@ private fun DrawScope.drawEndingEdgeAndTimeDiffLabels(
 private fun buildTimeAndDiffLabel(
   edgeLabels: DayChartSegmentEdgeLabels,
   dayMode: DayMode,
-  heightSizeClass: WindowHeightSizeClass
+  heightSizeClass: WindowHeightSizeClass,
 ): String {
   val timeLabel =
     edgeLabels.run { if (dayMode == DayMode.SUNRISE) sunriseTimeLabel else sunsetTimeLabel }
@@ -770,14 +770,14 @@ private fun buildTimeAndDiffLabel(
 private fun DrawScope.drawHorizonLabel(
   textStyle: TextStyle,
   textMeasurer: TextMeasurer,
-  horizonLabel: String
+  horizonLabel: String,
 ) {
   val horizonLayoutResult =
     textMeasurer.measure(
       text = AnnotatedString(horizonLabel),
       style = textStyle,
       overflow = TextOverflow.Ellipsis,
-      maxLines = 1
+      maxLines = 1,
     )
   drawText(
     textMeasurer = textMeasurer,
@@ -785,7 +785,7 @@ private fun DrawScope.drawHorizonLabel(
     topLeft =
       Offset(
         x = size.width - horizonLayoutResult.size.width - chartTextPaddingPx,
-        y = chartCenter.y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f
+        y = chartCenter.y - horizonLayoutResult.size.height - chartTextPaddingPx / 2f,
       ),
     style = textStyle,
     maxLines = 1,
@@ -813,7 +813,7 @@ private fun DrawScope.drawNowLine(
         chartMode = chartMode,
         canvasHeight = size.height,
         appBarHeight = appBarHeightPx,
-        chartRadius = chartRadius
+        chartRadius = chartRadius,
       )
     val nowLineEnd =
       Offset(
@@ -821,12 +821,12 @@ private fun DrawScope.drawNowLine(
           chartCenter.x +
             (chartRadius + endingEdgeLineExtraLengthPx) * cos(currentTimeAngleRadians),
         y =
-          chartCenter.y + (chartRadius + endingEdgeLineExtraLengthPx) * sin(currentTimeAngleRadians)
+          chartCenter.y + (chartRadius + endingEdgeLineExtraLengthPx) * sin(currentTimeAngleRadians),
       )
     val sunCenter =
       Offset(
         x = chartCenter.x + chartRadius * cos(currentTimeAngleRadians),
-        y = chartCenter.y + chartRadius * sin(currentTimeAngleRadians)
+        y = chartCenter.y + chartRadius * sin(currentTimeAngleRadians),
       )
 
     drawIntoCanvas {
@@ -861,7 +861,7 @@ private fun currentTimeLineAngleRadians(
   val dayPeriod =
     sunriseSunset.currentPeriodIn(
       location = location,
-      useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+      useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR,
     )
 
   val startAngle =
@@ -871,7 +871,7 @@ private fun currentTimeLineAngleRadians(
       chartMode = chartMode,
       canvasHeight = canvasHeight,
       appBarHeight = appBarHeight,
-      chartRadius = chartRadius
+      chartRadius = chartRadius,
     )
   val endAngle =
     sunriseSunset.dayPeriodEndAngleRadians(
@@ -880,7 +880,7 @@ private fun currentTimeLineAngleRadians(
       chartMode = chartMode,
       canvasHeight = canvasHeight,
       appBarHeight = appBarHeight,
-      chartRadius = chartRadius
+      chartRadius = chartRadius,
     )
 
   val startTimeSecond =
@@ -888,7 +888,7 @@ private fun currentTimeLineAngleRadians(
       .dayPeriodStartTime(
         dayPeriod = dayPeriod,
         dayMode = dayMode,
-        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR,
       )
       .toSecondOfDay()
   val endTimeSecond =
@@ -896,7 +896,7 @@ private fun currentTimeLineAngleRadians(
       .dayPeriodEndTime(
         dayPeriod = dayPeriod,
         dayMode = dayMode,
-        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+        useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR,
       )
       .toSecondOfDay()
   val nowSecond = now.toSecondOfDay()
@@ -1129,7 +1129,7 @@ private fun dayNightCycleChartSegments(
             sweepAngleDegrees = 72f + accumulatedSweepAngle,
             periodLabelAngle =
               if (change?.today?.isPolarNightAtLocation(change.location) == true) 0f else 21f,
-            periodLabel = nightLabel
+            periodLabel = nightLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1175,7 +1175,7 @@ private fun goldenBlueHourChartSegments(
             sweepAngleDegrees = 84f + accumulatedSweepAngle,
             periodLabelAngle =
               if (change?.today?.isPolarDayAtLocation(change.location) == true) 0f else -9f,
-            periodLabel = dayLabel
+            periodLabel = dayLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1207,7 +1207,7 @@ private fun goldenBlueHourChartSegments(
         add(
           blueHourChartSegment(
             sweepAngleDegrees = 2f + accumulatedSweepAngle,
-            periodLabel = blueHourLabel
+            periodLabel = blueHourLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1223,7 +1223,7 @@ private fun goldenBlueHourChartSegments(
         add(
           nauticalTwilightChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
-            periodLabel = nauticalTwilightLabel
+            periodLabel = nauticalTwilightLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1239,7 +1239,7 @@ private fun goldenBlueHourChartSegments(
         add(
           astronomicalTwilightChartSegment(
             sweepAngleDegrees = 6f + accumulatedSweepAngle,
-            periodLabel = astronomicalTwilightLabel
+            periodLabel = astronomicalTwilightLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1257,7 +1257,7 @@ private fun goldenBlueHourChartSegments(
             sweepAngleDegrees = 72f + accumulatedSweepAngle,
             periodLabelAngle =
               if (change?.today?.isPolarNightAtLocation(change.location) == true) 0f else 21f,
-            periodLabel = nightLabel
+            periodLabel = nightLabel,
           )
         )
         accumulatedSweepAngle = 0f
@@ -1324,13 +1324,13 @@ private fun astronomicalTwilightChartSegment(
 private fun nightChartSegment(
   sweepAngleDegrees: Float,
   periodLabelAngle: Float,
-  periodLabel: String
+  periodLabel: String,
 ): DayChartSegment =
   DayChartSegment(
     sweepAngleDegrees = sweepAngleDegrees,
     periodLabelAngleDegrees = periodLabelAngle,
     color = nightColor,
-    periodLabel = periodLabel
+    periodLabel = periodLabel,
   )
 
 private fun goldenHourChartSegment(sweepAngleDegrees: Float, periodLabel: String): DayChartSegment =
@@ -1351,7 +1351,7 @@ private fun blueHourChartSegment(sweepAngleDegrees: Float, periodLabel: String):
 
 private fun timestampDiffLabel(
   yesterdayTimestamp: LocalDateTime?,
-  todayTimestamp: LocalDateTime?
+  todayTimestamp: LocalDateTime?,
 ): String =
   if (yesterdayTimestamp != null && todayTimestamp != null) {
     timeDifferenceLabel(yesterdayTimestamp.toLocalTime(), todayTimestamp.toLocalTime())

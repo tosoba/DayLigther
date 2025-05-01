@@ -18,11 +18,11 @@ internal fun NewLocationButton(chartMode: DayPeriodChartMode) {
   val context = LocalContext.current
   AppWidgetBox(
     modifier = GlanceModifier.fillMaxSize().chartBackground(chartMode),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Button(
       text = stringResource(commonR.string.new_location),
-      onClick = deepLinkAction(context.newLocationDeeplinkUri())
+      onClick = deepLinkAction(context.newLocationDeeplinkUri()),
     )
   }
 }

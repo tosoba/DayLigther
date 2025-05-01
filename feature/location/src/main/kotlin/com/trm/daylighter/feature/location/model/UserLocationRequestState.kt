@@ -10,13 +10,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 internal fun rememberUserLocationRequestState(
   shouldCheckIfLocationEnabled: Boolean = false,
   permissionInfoDialogVisible: Boolean = false,
-  permissionRequestMode: PermissionRequestMode = PermissionRequestMode.PERMISSION_REQUEST_DIALOG
+  permissionRequestMode: PermissionRequestMode = PermissionRequestMode.PERMISSION_REQUEST_DIALOG,
 ): UserLocationRequestState =
   rememberSaveable(saver = UserLocationRequestState.Saver) {
     UserLocationRequestState(
       shouldCheckIfLocationEnabled = shouldCheckIfLocationEnabled,
       permissionInfoDialogVisible = permissionInfoDialogVisible,
-      permissionRequestMode = permissionRequestMode
+      permissionRequestMode = permissionRequestMode,
     )
   }
 
@@ -24,7 +24,7 @@ internal fun rememberUserLocationRequestState(
 internal class UserLocationRequestState(
   shouldCheckIfLocationEnabled: Boolean = false,
   permissionInfoDialogVisible: Boolean = false,
-  permissionRequestMode: PermissionRequestMode = PermissionRequestMode.PERMISSION_REQUEST_DIALOG
+  permissionRequestMode: PermissionRequestMode = PermissionRequestMode.PERMISSION_REQUEST_DIALOG,
 ) {
   var shouldCheckIfLocationEnabled by mutableStateOf(shouldCheckIfLocationEnabled)
   var permissionInfoDialogVisible by mutableStateOf(permissionInfoDialogVisible)
@@ -40,16 +40,16 @@ internal class UserLocationRequestState(
           listOf<Any>(
             it.shouldCheckIfLocationEnabled,
             it.permissionInfoDialogVisible,
-            it.permissionRequestMode
+            it.permissionRequestMode,
           )
         },
         restore = {
           UserLocationRequestState(
             shouldCheckIfLocationEnabled = it[0] as Boolean,
             permissionInfoDialogVisible = it[1] as Boolean,
-            permissionRequestMode = it[2] as PermissionRequestMode
+            permissionRequestMode = it[2] as PermissionRequestMode,
           )
-        }
+        },
       )
   }
 }

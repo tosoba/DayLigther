@@ -21,7 +21,7 @@ class WidgetManagerImpl
 @Inject
 constructor(
   @ApplicationContext private val context: Context,
-  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase
+  private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
     context.sendBroadcast(context.updateAllWidgetsIntent<DayNightCycleWidgetReceiver>())
@@ -42,14 +42,14 @@ constructor(
           },
         previewState = null,
         successCallback =
-          context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId)
+          context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId),
       )
 
   override suspend fun editDayNightCycleWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
       context.updateWidgetIntent<DayNightCycleWidgetReceiver>(
         widgetId = widgetId,
-        locationId = locationId
+        locationId = locationId,
       )
     )
   }
@@ -68,14 +68,14 @@ constructor(
           },
         previewState = null,
         successCallback =
-          context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId)
+          context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId),
       )
 
   override suspend fun editGoldenBlueHourWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
       context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(
         widgetId = widgetId,
-        locationId = locationId
+        locationId = locationId,
       )
     )
   }

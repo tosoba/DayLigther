@@ -14,7 +14,7 @@ fun DrawerMenuIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
   IconButton(onClick = onClick, modifier = modifier) {
     Icon(
       imageVector = Icons.Filled.Menu,
-      contentDescription = stringResource(R.string.application_menu)
+      contentDescription = stringResource(R.string.application_menu),
     )
   }
 }

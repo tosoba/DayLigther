@@ -17,7 +17,7 @@ class CalculateSunPositionTimestampUseCase @Inject constructor() {
     date: LocalDateTime,
     sunPosition: SunPosition,
     halfDay: HalfDay,
-    timeZone: TimeZone
+    timeZone: TimeZone,
   ): LocalDateTime? {
     require(latitude in -90.0..90.0)
     require(longitude in -180.0..180.0)
@@ -84,7 +84,7 @@ class CalculateSunPositionTimestampUseCase @Inject constructor() {
     val timezoneOffset =
       TimeUnit.HOURS.convert(
         timeZone.getOffset(date.atZone(ZoneId.of(timeZone.id)).toInstant().toEpochMilli()).toLong(),
-        TimeUnit.MILLISECONDS
+        TimeUnit.MILLISECONDS,
       )
     return setDate.withHour(hour).withMinute(minute).withSecond(second).plusHours(timezoneOffset)
   }
@@ -98,8 +98,8 @@ class CalculateSunPositionTimestampUseCase @Inject constructor() {
     get() = this * 180 / PI
 
   /**
-   * If [this] is negative, add [maximum] to [this] until [this] will be positive if [this] >
-   * [maximum], subtract [maximum] from [this] until [this] will be less than [maximum]
+   * If [this] is negative, add [maximum] to [this] until [this] will be positive if
+   * [this] > [maximum], subtract [maximum] from [this] until [this] will be less than [maximum]
    */
   private fun Double.normalise(maximum: Double): Double {
     var value = this

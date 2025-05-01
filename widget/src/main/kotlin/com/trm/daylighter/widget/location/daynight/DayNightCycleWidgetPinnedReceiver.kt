@@ -12,14 +12,16 @@ class DayNightCycleWidgetPinnedReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
     context.sendBroadcast(
       context.updateWidgetIntent<DayNightCycleWidgetReceiver>(
-        widgetId = context.getLastWidgetId<DayNightCycleWidgetReceiver>()
+        widgetId =
+          context.getLastWidgetId<DayNightCycleWidgetReceiver>()
             ?: throw IllegalArgumentException(
               "Did not find any widget ids for ${DayNightCycleWidget::class.java.simpleName}."
             ),
-        locationId = intent.extras?.getLong(LocationWidgetExtras.LOCATION_ID, -1L)
+        locationId =
+          intent.extras?.getLong(LocationWidgetExtras.LOCATION_ID, -1L)
             ?: throw IllegalArgumentException(
               "LOCATION_ID extra was not passed to ${DayNightCycleWidget::class.java.simpleName}."
-            )
+            ),
       )
     )
     context.showWidgetPinnedToast()

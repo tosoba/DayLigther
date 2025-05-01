@@ -94,7 +94,7 @@ fun WidgetLocationRoute(
   onNewLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
   backHandler: @Composable () -> Unit,
-  viewModel: WidgetLocationViewModel = hiltViewModel()
+  viewModel: WidgetLocationViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   val selectedLocationId = viewModel.selectedLocationIdFlow.collectAsStateWithLifecycle()
@@ -111,7 +111,7 @@ fun WidgetLocationRoute(
     onEditWidgetLocationClick = viewModel::onEditWidgetLocationClick,
     onNewLocationClick = onNewLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
-    modifier = modifier
+    modifier = modifier,
   )
 
   val context = LocalContext.current
@@ -139,7 +139,7 @@ private fun WidgetLocationScreen(
   onEditWidgetLocationClick: () -> Unit,
   onNewLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
@@ -158,14 +158,14 @@ private fun WidgetLocationScreen(
           }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        modifier = modifier
+        modifier = modifier,
       )
     }
 
     Crossfade(
       targetState = locations,
       modifier = Modifier.fillMaxSize(),
-      label = "widget-location-chart-crossfade"
+      label = "widget-location-chart-crossfade",
     ) { locations ->
       when (locations) {
         is Ready -> {
@@ -176,7 +176,7 @@ private fun WidgetLocationScreen(
 
             LazyVerticalGrid(
               contentPadding = PaddingValues(10.dp),
-              columns = GridCells.Adaptive(175.dp)
+              columns = GridCells.Adaptive(175.dp),
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(
@@ -191,7 +191,7 @@ private fun WidgetLocationScreen(
                   zoom = zoom,
                   isSelected = location.value.id == selectedLocationId,
                   onSelected = onLocationSelected,
-                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp)
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
                 )
               }
 
@@ -227,13 +227,9 @@ private fun WidgetLocationScreen(
               modifier =
                 Modifier.align(Alignment.BottomStart)
                   .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height }
+                  .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height },
             ) {
-              ZoomButtonsRow(
-                zoom = zoom,
-                incrementZoom = { ++zoom },
-                decrementZoom = { --zoom },
-              )
+              ZoomButtonsRow(zoom = zoom, incrementZoom = { ++zoom }, decrementZoom = { --zoom })
             }
 
             androidx.compose.animation.AnimatedVisibility(
@@ -243,7 +239,7 @@ private fun WidgetLocationScreen(
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { addWidgetButtonsHeightPx = it.size.height }
+                  .onGloballyPositioned { addWidgetButtonsHeightPx = it.size.height },
             ) {
               ConfirmLocationSelectionControls(
                 modifier = Modifier.width(IntrinsicSize.Max),
@@ -272,7 +268,7 @@ private fun WidgetLocationScreen(
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(20.dp),
-              onNewLocationClick = onNewLocationClick
+              onNewLocationClick = onNewLocationClick,
             )
 
             TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
@@ -289,7 +285,7 @@ private fun ConfirmLocationSelectionControls(
   onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
   onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit,
   onEditWidgetLocationClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   when (mode) {
     WidgetLocationMode.ADD -> {
@@ -301,10 +297,10 @@ private fun ConfirmLocationSelectionControls(
             icon = {
               Icon(
                 painter = painterResource(commonR.drawable.day_night_cycle),
-                contentDescription = stringResource(R.string.add_day_night_cycle_widget)
+                contentDescription = stringResource(R.string.add_day_night_cycle_widget),
               )
             },
-            onClick = onConfirmDayNightCycleLocationSelectionClick
+            onClick = onConfirmDayNightCycleLocationSelectionClick,
           )
 
           Spacer(modifier = Modifier.height(5.dp))
@@ -315,10 +311,10 @@ private fun ConfirmLocationSelectionControls(
             icon = {
               Icon(
                 imageVector = Icons.Filled.PhotoCamera,
-                contentDescription = stringResource(R.string.add_golden_blue_hour_widget)
+                contentDescription = stringResource(R.string.add_golden_blue_hour_widget),
               )
             },
-            onClick = onConfirmGoldenBlueHourLocationSelectionClick
+            onClick = onConfirmGoldenBlueHourLocationSelectionClick,
           )
         }
       } else {
@@ -329,10 +325,10 @@ private fun ConfirmLocationSelectionControls(
             icon = {
               Icon(
                 painter = painterResource(commonR.drawable.day_night_cycle),
-                contentDescription = stringResource(R.string.add_day_night_cycle_widget)
+                contentDescription = stringResource(R.string.add_day_night_cycle_widget),
               )
             },
-            onClick = onConfirmDayNightCycleLocationSelectionClick
+            onClick = onConfirmDayNightCycleLocationSelectionClick,
           )
 
           Spacer(modifier = Modifier.width(5.dp))
@@ -343,10 +339,10 @@ private fun ConfirmLocationSelectionControls(
             icon = {
               Icon(
                 imageVector = Icons.Filled.PhotoCamera,
-                contentDescription = stringResource(R.string.add_golden_blue_hour_widget)
+                contentDescription = stringResource(R.string.add_golden_blue_hour_widget),
               )
             },
-            onClick = onConfirmGoldenBlueHourLocationSelectionClick
+            onClick = onConfirmGoldenBlueHourLocationSelectionClick,
           )
         }
       }
@@ -358,10 +354,10 @@ private fun ConfirmLocationSelectionControls(
         icon = {
           Icon(
             imageVector = Icons.Filled.Done,
-            contentDescription = stringResource(commonR.string.confirm)
+            contentDescription = stringResource(commonR.string.confirm),
           )
         },
-        onClick = onEditWidgetLocationClick
+        onClick = onEditWidgetLocationClick,
       )
     }
   }
@@ -373,7 +369,7 @@ private fun ConfirmSelectionButton(
   text: String,
   icon: @Composable () -> Unit,
   onClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   ExtendedFloatingActionButton(
     modifier = modifier,
@@ -382,11 +378,11 @@ private fun ConfirmSelectionButton(
         modifier = Modifier.fillMaxWidth().basicMarquee(iterations = Int.MAX_VALUE),
         text = text,
         style = MaterialTheme.typography.bodyLarge,
-        maxLines = 1
+        maxLines = 1,
       )
     },
     icon = icon,
-    onClick = onClick
+    onClick = onClick,
   )
 }
 
@@ -399,16 +395,13 @@ private fun MapCard(
   onSelected: (Long?) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Card(
-    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier = modifier,
-  ) {
+  Card(elevation = CardDefaults.cardElevation(defaultElevation = 6.dp), modifier = modifier) {
     Box(modifier = Modifier.fillMaxSize()) {
       DisabledMapView(
         latitude = location.value.latitude,
         longitude = location.value.longitude,
         zoom = zoom,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
       )
 
       Box(
@@ -428,13 +421,13 @@ private fun MapCard(
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(vertical = 10.dp, horizontal = 5.dp)
+            .padding(vertical = 10.dp, horizontal = 5.dp),
       )
 
       Checkbox(
         checked = isSelected,
         onCheckedChange = { isChecked -> onSelected(if (isChecked) location.value.id else null) },
-        modifier = Modifier.align(Alignment.TopEnd)
+        modifier = Modifier.align(Alignment.TopEnd),
       )
     }
   }
@@ -446,6 +439,6 @@ private fun NoLocationsCard(modifier: Modifier = Modifier, onNewLocationClick: (
     infoText = stringResource(commonR.string.no_saved_locations),
     actionText = stringResource(commonR.string.new_location),
     onButtonClick = onNewLocationClick,
-    modifier = modifier
+    modifier = modifier,
   )
 }

@@ -72,14 +72,14 @@ fun DayLighterMainContent() {
                   navOptions =
                     navController.topLevelNavOptions(
                       saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
-                      restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute)
-                    )
+                      restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute),
+                    ),
                 )
               }
             }
-        }
+        },
       )
-    }
+    },
   ) {
     DayLighterScaffold(navController = navController, drawerState = drawerState)
   }
@@ -91,7 +91,7 @@ fun DayLighterNavigationDrawer(
   drawerState: DrawerState,
   visible: Boolean,
   drawerContent: @Composable () -> Unit,
-  content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
   if (usingPermanentNavigationDrawer && visible) {
     PermanentNavigationDrawer(modifier = modifier, drawerContent = drawerContent, content = content)
@@ -101,7 +101,7 @@ fun DayLighterNavigationDrawer(
       gesturesEnabled = drawerState.isOpen,
       drawerState = drawerState,
       drawerContent = drawerContent,
-      content = content
+      content = content,
     )
   }
 }
@@ -109,7 +109,7 @@ fun DayLighterNavigationDrawer(
 @Composable
 private fun DayLighterDrawerContent(
   currentRoute: String,
-  onRouteSelected: (route: String) -> Unit
+  onRouteSelected: (route: String) -> Unit,
 ) {
   val context = LocalContext.current
   val appWidgetManager = remember { AppWidgetManager.getInstance(context) }
@@ -120,28 +120,28 @@ private fun DayLighterDrawerContent(
       icon = icon,
       label = { Text(label) },
       selected = currentRoute.startsWith(route),
-      onClick = { onRouteSelected(route) }
+      onClick = { onRouteSelected(route) },
     )
   }
 
   ModalDrawerSheet {
     DrawerRouteItem(
       label = stringResource(commonR.string.day_night_cycle),
-      route = dayNightCycleRoute
+      route = dayNightCycleRoute,
     ) {
       Icon(
         painter = painterResource(commonR.drawable.day_night_cycle),
-        contentDescription = stringResource(commonR.string.day_night_cycle)
+        contentDescription = stringResource(commonR.string.day_night_cycle),
       )
     }
 
     DrawerRouteItem(
       label = stringResource(commonR.string.golden_blue_hour),
-      route = goldenBlueHourRoute
+      route = goldenBlueHourRoute,
     ) {
       Icon(
         imageVector = Icons.Filled.PhotoCamera,
-        contentDescription = stringResource(commonR.string.golden_blue_hour)
+        contentDescription = stringResource(commonR.string.golden_blue_hour),
       )
     }
 
@@ -149,7 +149,7 @@ private fun DayLighterDrawerContent(
       DrawerRouteItem(label = stringResource(commonR.string.widgets), route = widgetLocationRoute) {
         Icon(
           imageVector = Icons.Filled.Widgets,
-          contentDescription = stringResource(commonR.string.widgets)
+          contentDescription = stringResource(commonR.string.widgets),
         )
       }
     }
@@ -157,21 +157,21 @@ private fun DayLighterDrawerContent(
     DrawerRouteItem(label = stringResource(commonR.string.locations), route = locationsRoute) {
       Icon(
         imageVector = Icons.Filled.LocationOn,
-        contentDescription = stringResource(commonR.string.locations)
+        contentDescription = stringResource(commonR.string.locations),
       )
     }
 
     DrawerRouteItem(label = stringResource(commonR.string.settings), route = settingsRoute) {
       Icon(
         imageVector = Icons.Filled.Settings,
-        contentDescription = stringResource(commonR.string.settings)
+        contentDescription = stringResource(commonR.string.settings),
       )
     }
 
     DrawerRouteItem(label = stringResource(commonR.string.about), route = aboutRoute) {
       Icon(
         imageVector = Icons.Filled.Info,
-        contentDescription = stringResource(commonR.string.about)
+        contentDescription = stringResource(commonR.string.about),
       )
     }
   }
@@ -190,7 +190,7 @@ private fun DayLighterScaffold(navController: NavHostController, drawerState: Dr
       navController = navController,
       drawerState = drawerState,
       modifier =
-        Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing)
+        Modifier.padding(it).consumeWindowInsets(it).windowInsetsPadding(WindowInsets.safeDrawing),
     )
   }
 }
@@ -199,7 +199,7 @@ private fun DayLighterScaffold(navController: NavHostController, drawerState: Dr
 private fun DayLighterNavHost(
   navController: NavHostController,
   drawerState: DrawerState,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   fun navigateToNewLocation() {
     navController.navigate(route = locationRoute, navOptions = nextLevelNavOptions())
@@ -238,11 +238,11 @@ private fun DayLighterNavHost(
         WIDGET_LOCATION_PATH_SEGMENT -> widgetLocationRoute
         else -> dayNightCycleRoute
       },
-    modifier = modifier
+    modifier = modifier,
   ) {
     composable(
       route = dayNightCycleRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = dayNightCycleDeepLinkUriPattern })
+      deepLinks = listOf(navDeepLink { uriPattern = dayNightCycleDeepLinkUriPattern }),
     ) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
@@ -250,13 +250,13 @@ private fun DayLighterNavHost(
         onDrawerMenuClick = onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
     composable(
       route = goldenBlueHourRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = goldenBlueHourDeepLinkUriPattern })
+      deepLinks = listOf(navDeepLink { uriPattern = goldenBlueHourDeepLinkUriPattern }),
     ) {
       DayRoute(
         modifier = Modifier.fillMaxSize(),
@@ -264,19 +264,19 @@ private fun DayLighterNavHost(
         onDrawerMenuClick = onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
     composable(
       route = widgetLocationRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern })
+      deepLinks = listOf(navDeepLink { uriPattern = widgetLocationDeepLinkUriPattern }),
     ) {
       WidgetLocationRoute(
         modifier = Modifier.fillMaxSize(),
         onNewLocationClick = ::navigateToNewLocation,
         onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
@@ -286,7 +286,7 @@ private fun DayLighterNavHost(
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
         onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
@@ -294,7 +294,7 @@ private fun DayLighterNavHost(
       SettingsRoute(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
@@ -302,20 +302,20 @@ private fun DayLighterNavHost(
       AboutScreen(
         modifier = Modifier.fillMaxSize(),
         onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() }
+        backHandler = { backHandler() },
       )
     }
 
     composable(
       route = locationRoute,
-      deepLinks = listOf(navDeepLink { uriPattern = newLocationDeepLinkUriPattern })
+      deepLinks = listOf(navDeepLink { uriPattern = newLocationDeepLinkUriPattern }),
     ) {
       LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }
 
     composable(
       route = editLocationRoute,
-      arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType })
+      arguments = listOf(navArgument(locationIdParam) { type = NavType.LongType }),
     ) {
       LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }
@@ -333,7 +333,7 @@ private fun NavOptionsBuilder.fadeInAndOut() {
 
 private fun NavController.topLevelNavOptions(
   saveCurrentRouteState: Boolean,
-  restoreDestinationState: Boolean
+  restoreDestinationState: Boolean,
 ): NavOptions = navOptions {
   popUpTo(graph.findStartDestination().id) { saveState = saveCurrentRouteState }
   launchSingleTop = true

@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 class DayScreenEditLocationButtonIsNotDisplayedTests(
   private val changeFlow: Flow<StableLoadable<LocationSunriseSunsetChange>>,
   private val width: TestWidthClass,
-  private val height: TestHeightClass
+  private val height: TestHeightClass,
 ) {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -41,7 +41,7 @@ class DayScreenEditLocationButtonIsNotDisplayedTests(
         TestDayScreen(
           modifier = Modifier.fillMaxSize(),
           locations = Ready(listOf(testLocation())),
-          sunriseSunsetChangeInLocationAt = { changeFlow }
+          sunriseSunsetChangeInLocationAt = { changeFlow },
         )
       }
 

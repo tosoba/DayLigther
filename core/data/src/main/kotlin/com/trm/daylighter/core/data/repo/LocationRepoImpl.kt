@@ -26,7 +26,7 @@ constructor(
       latitude = latitude,
       longitude = longitude,
       name = name,
-      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
+      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude),
     )
   }
 
@@ -58,14 +58,14 @@ constructor(
     id: Long,
     latitude: Double,
     longitude: Double,
-    name: String
+    name: String,
   ) {
     locationDao.updateLocationLatLngById(
       id = id,
       latitude = latitude,
       longitude = longitude,
       name = name,
-      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude)
+      zoneId = getTimeZoneId(latitude = latitude, longitude = longitude),
     )
   }
 
@@ -75,12 +75,11 @@ constructor(
           minDegreesLatitude = latitude - 1.0,
           minDegreesLongitude = longitude - 1.0,
           maxDegreesLatitude = latitude + 1.0,
-          maxDegreesLongitude = longitude + 1.0
+          maxDegreesLongitude = longitude + 1.0,
         )
         .getOverlappingTimeZone(degreesLatitude = latitude, degreesLongitude = longitude)
         ?.zoneId
-        ?.let(ZoneId::of)
-        ?: ZoneId.systemDefault()
+        ?.let(ZoneId::of) ?: ZoneId.systemDefault()
     }
 
   override suspend fun getNonDefaultLocationOffsetById(id: Long): Int? =

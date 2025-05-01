@@ -43,7 +43,7 @@ constructor(
           is SaveLocationRequest.Specified -> {
             emitSpecifiedLocation(
               latitude = saveLocationType.latitude,
-              longitude = saveLocationType.longitude
+              longitude = saveLocationType.longitude,
             )
           }
           is SaveLocationRequest.User -> {
@@ -66,7 +66,7 @@ constructor(
               latitude = latitude,
               longitude = longitude,
               zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
-              uuid = UUID.randomUUID()
+              uuid = UUID.randomUUID(),
             )
         }
       }
@@ -83,7 +83,7 @@ constructor(
   val loadingFlow: Flow<Boolean> =
     combine(
       prepareSaveLocationFlow.map { it is Loading }.onStart { emit(false) },
-      saveLocationFlow.map { it is Loading }.onStart { emit(false) }
+      saveLocationFlow.map { it is Loading }.onStart { emit(false) },
     ) { isLocationBeingPrepared, isLocationBeingSaved ->
       isLocationBeingPrepared || isLocationBeingSaved
     }
@@ -106,7 +106,7 @@ constructor(
             latitude = location.latitude,
             longitude = location.longitude,
             zoom = MapDefaults.INITIAL_LOCATION_ZOOM,
-            label = location.name
+            label = location.name,
           )
       }
     }
@@ -193,7 +193,7 @@ constructor(
           id = initialLocationId,
           latitude = latitude,
           longitude = longitude,
-          name = name
+          name = name,
         )
       }
 
@@ -223,7 +223,7 @@ constructor(
 
   private suspend fun FlowCollector<Loadable<LocationPreparedToSave>>.emitSpecifiedLocation(
     latitude: Double,
-    longitude: Double
+    longitude: Double,
   ) {
     emit(
       LocationPreparedToSave(latitude = latitude, longitude = longitude, isUser = false)
@@ -243,7 +243,7 @@ constructor(
         LocationPreparedToSave(
             latitude = userLatLng.latitude,
             longitude = userLatLng.longitude,
-            isUser = true
+            isUser = true,
           )
           .asLoadable()
       )

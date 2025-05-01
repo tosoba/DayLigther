@@ -18,7 +18,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class DayScreenNavigationItemsEnabledTests(
   private val width: TestWidthClass,
-  private val height: TestHeightClass
+  private val height: TestHeightClass,
 ) {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 

@@ -29,7 +29,7 @@ class WidgetLocationViewModel
 constructor(
   private val savedStateHandle: SavedStateHandle,
   getAllLocationsFlowUseCase: GetAllLocationsFlowUseCase,
-  private val widgetManager: WidgetManager
+  private val widgetManager: WidgetManager,
 ) : ViewModel() {
   val locations: Flow<Loadable<List<StableValue<Location>>>> =
     getAllLocationsFlowUseCase()
@@ -39,7 +39,7 @@ constructor(
   val selectedLocationIdFlow: StateFlow<Long?> =
     savedStateHandle.getStateFlow(
       SavedState.SELECTED_LOCATION_ID.name,
-      savedStateHandle.get<String>(WidgetLocationDeepLinkParams.LOCATION_ID)?.toLong()
+      savedStateHandle.get<String>(WidgetLocationDeepLinkParams.LOCATION_ID)?.toLong(),
     )
 
   var selectedLocationId: Long?
@@ -93,7 +93,7 @@ constructor(
       editWidget(
         requireNotNull(savedStateHandle.get<String>(WidgetLocationDeepLinkParams.GLANCE_ID))
           .toInt(),
-        locationId
+        locationId,
       )
       _toastMessageResId.emit(R.string.widget_location_updated)
     }

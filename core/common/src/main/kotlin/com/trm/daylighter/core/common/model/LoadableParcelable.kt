@@ -23,7 +23,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
       }
       Ready::class.java.name -> Ready(parcel.readParcelableByClassName<T>(className))
       else -> throw IllegalStateException()
-    },
+    }
   )
 
   override fun writeToParcel(parcel: Parcel, flag: Int) {
@@ -37,6 +37,7 @@ data class LoadableParcelable<out T : Parcelable>(val loadable: Loadable<T>) : P
   companion object CREATOR : Parcelable.Creator<LoadableParcelable<Parcelable>> {
     override fun createFromParcel(parcel: Parcel): LoadableParcelable<Parcelable> =
       LoadableParcelable(parcel)
+
     override fun newArray(size: Int): Array<LoadableParcelable<Parcelable>?> = arrayOfNulls(size)
   }
 }
@@ -48,8 +49,7 @@ private fun <T : Parcelable> Parcel.readParcelableByClassName(className: String)
     readParcelable(clazz.classLoader, clazz)
   } else {
     readParcelable(clazz.classLoader)
-  }
-    ?: throw IllegalStateException()
+  } ?: throw IllegalStateException()
 }
 
 private fun Parcel.readThrowable(): Throwable? =

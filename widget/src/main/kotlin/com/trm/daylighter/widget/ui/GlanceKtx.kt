@@ -29,12 +29,12 @@ import com.trm.daylighter.core.common.di.provider.ClassProvider
 internal fun AppWidgetBox(
   modifier: GlanceModifier = GlanceModifier,
   contentAlignment: Alignment = Alignment.TopStart,
-  content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
   Box(
     modifier = appWidgetBackgroundModifier().then(modifier),
     contentAlignment = contentAlignment,
-    content = content
+    content = content,
   )
 }
 
@@ -43,7 +43,7 @@ internal fun AppWidgetColumn(
   modifier: GlanceModifier = GlanceModifier,
   verticalAlignment: Alignment.Vertical = Alignment.Top,
   horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-  content: @Composable ColumnScope.() -> Unit
+  content: @Composable ColumnScope.() -> Unit,
 ) {
   Column(
     modifier = appWidgetBackgroundModifier().then(modifier),
@@ -58,7 +58,7 @@ internal fun AppWidgetRow(
   modifier: GlanceModifier = GlanceModifier,
   verticalAlignment: Alignment.Vertical = Alignment.Top,
   horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-  content: @Composable RowScope.() -> Unit
+  content: @Composable RowScope.() -> Unit,
 ) {
   Row(
     modifier = appWidgetBackgroundModifier().then(modifier),

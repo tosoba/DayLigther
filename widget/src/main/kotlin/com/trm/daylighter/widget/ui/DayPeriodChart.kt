@@ -63,7 +63,7 @@ private const val WIDGET_PREVIEW_HEIGHT_PX = 190
 internal fun DayPeriodChart(
   change: LocationSunriseSunsetChange,
   chartMode: DayPeriodChartMode,
-  id: GlanceId
+  id: GlanceId,
 ) {
   Box(
     contentAlignment = Alignment.TopEnd,
@@ -74,19 +74,19 @@ internal fun DayPeriodChart(
         } else {
           clickable(widgetDayScreenDeepLinkAction(change.location, chartMode))
         }
-      }
+      },
   ) {
     Image(
       provider = ImageProvider(dayPeriodChartBitmap(change = change, chartMode = chartMode)),
       contentDescription = null,
       contentScale = ContentScale.FillBounds,
-      modifier = GlanceModifier.fillMaxSize()
+      modifier = GlanceModifier.fillMaxSize(),
     )
 
     Column(
       verticalAlignment = Alignment.Vertical.CenterVertically,
       horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius()
+      modifier = GlanceModifier.fillMaxSize().appWidgetBackgroundCornerRadius(),
     ) {
       LocationName(location = change.location)
       Clock(zoneId = change.location.zoneId)
@@ -96,7 +96,7 @@ internal fun DayPeriodChart(
     Column(
       verticalAlignment = Alignment.Vertical.Top,
       horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
-      modifier = GlanceModifier.wrapContentWidth().fillMaxHeight().appWidgetBackgroundCornerRadius()
+      modifier = GlanceModifier.wrapContentWidth().fillMaxHeight().appWidgetBackgroundCornerRadius(),
     ) {
       Image(
         provider = ImageProvider(R.drawable.settings),
@@ -110,10 +110,10 @@ internal fun DayPeriodChart(
                 widgetLocationDeepLinkAction(
                   location = change.location,
                   chartMode = chartMode,
-                  id = id
+                  id = id,
                 )
               )
-          }
+          },
       )
 
       Spacer(GlanceModifier.defaultWeight())
@@ -128,7 +128,7 @@ internal fun DayPeriodChart(
             } else {
               clickable(widgetRefreshBroadcastAction(chartMode = chartMode, id = id))
             }
-          }
+          },
       )
     }
   }
@@ -137,17 +137,14 @@ internal fun DayPeriodChart(
 @Composable
 private fun widgetDayScreenDeepLinkAction(
   location: Location,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ): Action =
   with(LocalContext.current) {
     deepLinkAction(
       uri =
         when (chartMode) {
           DayPeriodChartMode.DAY_NIGHT_CYCLE -> {
-            dayNightCycleDeepLinkUri(
-              locationId = location.id,
-              isDefault = location.isDefault,
-            )
+            dayNightCycleDeepLinkUri(locationId = location.id, isDefault = location.isDefault)
           }
           DayPeriodChartMode.GOLDEN_BLUE_HOUR -> {
             goldenBlueHourDeepLinkUri(locationId = location.id, isDefault = location.isDefault)
@@ -160,7 +157,7 @@ private fun widgetDayScreenDeepLinkAction(
 private fun widgetLocationDeepLinkAction(
   location: Location,
   chartMode: DayPeriodChartMode,
-  id: GlanceId
+  id: GlanceId,
 ): Action {
   val context = LocalContext.current
   val widgetManager = remember { GlanceAppWidgetManager(context) }
@@ -173,7 +170,7 @@ private fun widgetLocationDeepLinkAction(
             DayPeriodChartMode.GOLDEN_BLUE_HOUR -> WidgetTypeParam.GOLDEN_BLUE_HOUR
           },
         glanceId = widgetManager.getAppWidgetId(id),
-        locationId = location.id
+        locationId = location.id,
       )
   )
 }
@@ -197,7 +194,7 @@ private fun widgetRefreshBroadcastAction(chartMode: DayPeriodChartMode, id: Glan
 @Composable
 private fun dayPeriodChartBitmap(
   change: LocationSunriseSunsetChange,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ): Bitmap {
   val context = LocalContext.current
   val bitmap =
@@ -205,7 +202,7 @@ private fun dayPeriodChartBitmap(
       Bitmap.createBitmap(
         width.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_WIDTH_PX,
         height.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_HEIGHT_PX,
-        Bitmap.Config.ARGB_8888
+        Bitmap.Config.ARGB_8888,
       )
     }
 
@@ -221,7 +218,7 @@ private fun dayPeriodChartBitmap(
 private fun Canvas.drawDayPeriods(
   today: SunriseSunset,
   location: Location,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ) {
   val widthPx = width.toFloat()
   val heightPx = height.toFloat()
@@ -231,7 +228,7 @@ private fun Canvas.drawDayPeriods(
     dayPeriodDurationsInSeconds(
       sunriseSunset = today,
       zoneId = location.zoneId,
-      chartMode = chartMode
+      chartMode = chartMode,
     )
   val paints = today.dayPeriodPaintsFor(location = location, chartMode = chartMode)
 
@@ -248,7 +245,7 @@ private fun Canvas.drawDayPeriods(
 private fun dayPeriodDurationsInSeconds(
   sunriseSunset: SunriseSunset,
   zoneId: ZoneId,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ): List<Float> {
   val periodInstants =
     sunriseSunset.run {
@@ -284,7 +281,7 @@ private fun dayPeriodDurationsInSeconds(
 
 private fun SunriseSunset.dayPeriodPaintsFor(
   location: Location,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ): List<Paint> {
   val nightPaint = antiAliasPaint(color = nightColor.toArgb())
   if (isPolarNightAtLocation(location)) return listOf(nightPaint)
@@ -356,7 +353,7 @@ private fun Canvas.drawTimeLine(
   paint: Paint,
   topPx: Float = 0f,
   bottomPx: Float = height.toFloat(),
-  lineWidthDp: Dp = 3.dp
+  lineWidthDp: Dp = 3.dp,
 ) {
   val linePosition = timeXFor(dateTime)
   val lineWidthPx = lineWidthDp.value.toPx

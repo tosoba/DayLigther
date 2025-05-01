@@ -15,7 +15,7 @@ class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer
     @EncodeDefault(EncodeDefault.Mode.NEVER) val data: T? = null,
     @EncodeDefault(EncodeDefault.Mode.NEVER)
     @Serializable(with = JavaSerializableSerializer::class)
-    val error: java.io.Serializable? = null
+    val error: java.io.Serializable? = null,
   )
 
   private val surrogateSerializer = LoadableSurrogate.serializer(valueSerializer)
@@ -29,8 +29,8 @@ class LoadableSerializer<T : Any>(valueSerializer: KSerializer<T>) : KSerializer
         LoadableSurrogate(
           className = value::class.java.name,
           data = if (value is WithData) value.data else null,
-          error = if (value is Failed) value.throwable else null
-        )
+          error = if (value is Failed) value.throwable else null,
+        ),
     )
   }
 

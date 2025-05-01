@@ -72,7 +72,7 @@ private fun LocationsScreen(
   onEditLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
   onDrawerMenuClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
@@ -91,14 +91,14 @@ private fun LocationsScreen(
           }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-        modifier = modifier
+        modifier = modifier,
       )
     }
 
     Crossfade(
       targetState = locations,
       modifier = Modifier.fillMaxSize(),
-      label = "locations-chart-crossfade"
+      label = "locations-chart-crossfade",
     ) { locations ->
       when (locations) {
         is Ready -> {
@@ -109,7 +109,7 @@ private fun LocationsScreen(
 
             LazyVerticalGrid(
               contentPadding = PaddingValues(10.dp),
-              columns = GridCells.Adaptive(175.dp)
+              columns = GridCells.Adaptive(175.dp),
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
                 Spacer(
@@ -151,7 +151,7 @@ private fun LocationsScreen(
               zoom = zoom,
               incrementZoom = { ++zoom },
               decrementZoom = { --zoom },
-              modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp)
+              modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp),
             )
 
             FloatingActionButton(
@@ -159,11 +159,11 @@ private fun LocationsScreen(
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { bottomButtonsHeightPx = it.size.height }
+                  .onGloballyPositioned { bottomButtonsHeightPx = it.size.height },
             ) {
               Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(commonR.string.new_location)
+                contentDescription = stringResource(commonR.string.new_location),
               )
             }
           }
@@ -185,7 +185,7 @@ private fun LocationsScreen(
 
             NoLocationsCard(
               modifier = Modifier.align(Alignment.Center).padding(20.dp),
-              onNewLocationClick = onNewLocationClick
+              onNewLocationClick = onNewLocationClick,
             )
 
             TopAppBar(modifier = Modifier.background(backgroundToTransparentVerticalGradient))
@@ -200,7 +200,7 @@ private fun LocationsScreen(
           locationBeingDeleted = null
         },
         onDismissRequest = { locationBeingDeleted = null },
-        modifier = Modifier.align(Alignment.Center).wrapContentHeight()
+        modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
       )
     }
   }
@@ -212,7 +212,7 @@ private fun NoLocationsCard(modifier: Modifier = Modifier, onNewLocationClick: (
     infoText = stringResource(commonR.string.no_saved_locations),
     actionText = stringResource(commonR.string.new_location),
     onButtonClick = onNewLocationClick,
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -221,13 +221,13 @@ private fun DeleteLocationConfirmationDialog(
   locationBeingDeleted: Location?,
   onConfirmClick: () -> Unit,
   onDismissRequest: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   AnimatedVisibility(
     visible = locationBeingDeleted != null,
     enter = fadeIn(),
     exit = fadeOut(),
-    modifier = modifier
+    modifier = modifier,
   ) {
     AlertDialog(
       onDismissRequest = onDismissRequest,
@@ -255,17 +255,14 @@ private fun MapCard(
   onSetDefaultLocationClick: (Long) -> Unit,
   onEditLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
-  Card(
-    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-    modifier = modifier,
-  ) {
+  Card(elevation = CardDefaults.cardElevation(defaultElevation = 6.dp), modifier = modifier) {
     Box(modifier = Modifier.fillMaxSize()) {
       DisabledMapView(
         latitude = location.value.latitude,
         longitude = location.value.longitude,
-        zoom = zoom
+        zoom = zoom,
       )
 
       LocationNameGradientOverlay()
@@ -278,7 +275,7 @@ private fun MapCard(
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(vertical = 10.dp, horizontal = 5.dp)
+            .padding(vertical = 10.dp, horizontal = 5.dp),
       )
 
       LocationDropDrownMenu(
@@ -298,14 +295,14 @@ private fun LocationDropDrownMenu(
   location: StableValue<Location>,
   onSetDefaultLocationClick: (Long) -> Unit,
   onDeleteLocationClick: (Location) -> Unit,
-  onEditLocationClick: (Long) -> Unit
+  onEditLocationClick: (Long) -> Unit,
 ) {
   Box(modifier = modifier) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
       Icon(
         imageVector = Icons.Default.MoreVert,
-        contentDescription = stringResource(R.string.location_actions)
+        contentDescription = stringResource(R.string.location_actions),
       )
     }
 
@@ -316,21 +313,21 @@ private fun LocationDropDrownMenu(
     DropdownMenu(
       expanded = expanded,
       onDismissRequest = ::hideDropdown,
-      modifier = Modifier.align(Alignment.BottomEnd)
+      modifier = Modifier.align(Alignment.BottomEnd),
     ) {
       DropdownMenuItem(
         text = {
           Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             Text(text = stringResource(R.string.set_as_default))
             if (location.value.isDefault) {
               Spacer(modifier = Modifier.width(3.dp))
               Icon(
                 imageVector = Icons.Filled.Done,
-                contentDescription = stringResource(R.string.location_is_default)
+                contentDescription = stringResource(R.string.location_is_default),
               )
             }
           }
@@ -340,21 +337,21 @@ private fun LocationDropDrownMenu(
             onSetDefaultLocationClick(location.value.id)
             hideDropdown()
           }
-        }
+        },
       )
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.edit)) },
         onClick = {
           onEditLocationClick(location.value.id)
           hideDropdown()
-        }
+        },
       )
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.delete)) },
         onClick = {
           onDeleteLocationClick(location.value)
           hideDropdown()
-        }
+        },
       )
     }
   }

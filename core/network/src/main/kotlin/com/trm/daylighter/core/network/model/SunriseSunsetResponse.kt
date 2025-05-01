@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SunriseSunsetResponse(
   @SerialName("results") val content: SunriseSunsetResult?,
-  @SerialName("status") val status: String?
+  @SerialName("status") val status: String?,
 )

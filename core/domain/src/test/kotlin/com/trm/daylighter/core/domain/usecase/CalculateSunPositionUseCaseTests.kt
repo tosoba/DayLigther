@@ -77,7 +77,7 @@ class CalculateSunPositionUseCaseTests {
                 date = date,
                 sunPosition = sunPosition,
                 halfDay = halfDay,
-                timeZone = TimeZone.getTimeZone(zoneId)
+                timeZone = TimeZone.getTimeZone(zoneId),
               )
             }
           }
@@ -93,7 +93,7 @@ class CalculateSunPositionUseCaseTests {
     date: LocalDateTime,
     lat: Double,
     lng: Double,
-    zoneId: ZoneId?
+    zoneId: ZoneId?,
   ) {
     val useCase = CalculateSunPositionTimestampUseCase()
     HalfDay.values().forEach { halfDay ->
@@ -105,7 +105,7 @@ class CalculateSunPositionUseCaseTests {
             date = date,
             sunPosition = sunPosition,
             halfDay = halfDay,
-            timeZone = TimeZone.getTimeZone(zoneId)
+            timeZone = TimeZone.getTimeZone(zoneId),
           )
         println(
           "${halfDay.name} - ${sunPosition.name} ${result?.format(DateTimeFormatter.ISO_DATE_TIME)}"

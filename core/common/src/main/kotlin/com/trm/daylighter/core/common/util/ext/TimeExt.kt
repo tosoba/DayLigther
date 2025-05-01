@@ -71,7 +71,7 @@ fun formatTimeMillis(millis: Long): String =
     "%02d:%02d:%02d",
     TimeUnit.MILLISECONDS.toHours(millis),
     TimeUnit.MILLISECONDS.toMinutes(millis) % 60,
-    TimeUnit.MILLISECONDS.toSeconds(millis) % 60
+    TimeUnit.MILLISECONDS.toSeconds(millis) % 60,
   )
 
 fun ZoneId.currentDayMode(): DayMode =

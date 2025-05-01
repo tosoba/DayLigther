@@ -20,7 +20,7 @@ fun BoxScope.LocationNameGradientOverlay() {
         .background(
           Brush.verticalGradient(
             .6f to Color.Transparent,
-            1f to MaterialTheme.colorScheme.background
+            1f to MaterialTheme.colorScheme.background,
           )
         )
   )
@@ -35,6 +35,6 @@ fun LocationNameLabel(name: String, modifier: Modifier = Modifier) {
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,
     textAlign = TextAlign.Center,
-    modifier = modifier
+    modifier = modifier,
   )
 }

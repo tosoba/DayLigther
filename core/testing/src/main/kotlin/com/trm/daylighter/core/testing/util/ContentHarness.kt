@@ -24,7 +24,7 @@ fun ComposeContentTestRule.setContentHarness(size: DpSize, composable: @Composab
           Configuration().apply {
             screenWidthDp = size.width.value.toInt()
             screenHeightDp = size.height.value.toInt()
-          }
+          },
       ) {
         composable()
       }

@@ -69,7 +69,7 @@ fun EditTextPrefAlertDialog(
             AnimatedVisibility(
               visible = validationMsg != null,
               enter = fadeIn(),
-              exit = fadeOut()
+              exit = fadeOut(),
             ) {
               Text(text = validationMsg ?: "")
             }
@@ -80,7 +80,7 @@ fun EditTextPrefAlertDialog(
             validationMsg = null
             textValueChanged = true
             onValueChange(trimmed)
-          }
+          },
         )
       },
       confirmButton = {
@@ -97,11 +97,11 @@ fun EditTextPrefAlertDialog(
                 textValueChanged = false
                 hide()
               }
-            }
+            },
           ) {
             Text(
               text = stringResource(android.R.string.ok),
-              style = MaterialTheme.typography.bodyLarge
+              style = MaterialTheme.typography.bodyLarge,
             )
           }
         }
@@ -117,11 +117,11 @@ fun EditTextPrefAlertDialog(
               textValueChanged = false
               validationMsg = null
               hide()
-            }
+            },
           ) {
             Text(
               text = stringResource(android.R.string.cancel),
-              style = MaterialTheme.typography.bodyLarge
+              style = MaterialTheme.typography.bodyLarge,
             )
           }
         }
@@ -132,17 +132,13 @@ fun EditTextPrefAlertDialog(
 }
 
 @Composable
-fun AlertDialogHeader(
-  dialogTitle: String?,
-  dialogMessage: String?,
-  modifier: Modifier = Modifier,
-) {
+fun AlertDialogHeader(dialogTitle: String?, dialogMessage: String?, modifier: Modifier = Modifier) {
   Column(modifier = modifier) {
     if (dialogTitle != null) {
       Text(
         text = dialogTitle,
         style = MaterialTheme.typography.titleLarge,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
       )
     }
     if (dialogMessage != null) {

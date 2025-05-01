@@ -10,7 +10,7 @@ class GeocodingRepoImpl
 @Inject
 constructor(
   private val endpoint: NominatimEndpoint,
-  private val preferenceDataSource: PreferenceDataSource
+  private val preferenceDataSource: PreferenceDataSource,
 ) : GeocodingRepo {
   override suspend fun getLocationDisplayName(lat: Double, lng: Double): String? {
     val email =

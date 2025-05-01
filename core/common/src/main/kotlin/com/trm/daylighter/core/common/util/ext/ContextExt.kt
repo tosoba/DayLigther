@@ -46,7 +46,7 @@ fun Context.goToUrlInBrowser(url: String) {
 fun Context.copyToClipboard(
   text: String,
   label: String? = null,
-  showMessage: (() -> Unit)? = null
+  showMessage: (() -> Unit)? = null,
 ) {
   ContextCompat.getSystemService(this, ClipboardManager::class.java)
     ?.setPrimaryClip(ClipData.newPlainText(label, text))
@@ -60,7 +60,7 @@ fun Context.copyToClipboard(
 fun Context.checkPermissions(
   permissions: Array<String>,
   onNotGranted: () -> Unit,
-  onGranted: () -> Unit
+  onGranted: () -> Unit,
 ) {
   if (
     permissions.all { permission ->
@@ -107,9 +107,8 @@ suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult =
 sealed interface CheckLocationSettingsResult {
   data object Enabled : CheckLocationSettingsResult
 
-  data class DisabledResolvable(
-    val intentSenderRequest: IntentSenderRequest,
-  ) : CheckLocationSettingsResult
+  data class DisabledResolvable(val intentSenderRequest: IntentSenderRequest) :
+    CheckLocationSettingsResult
 
   data object DisabledNonResolvable : CheckLocationSettingsResult
 }
@@ -125,7 +124,7 @@ suspend fun Context.getCurrentUserLocation(): Location? {
         .setDurationMillis(5_000L)
         .setMaxUpdateAgeMillis(60_000L)
         .build(),
-      cancellationTokenSource.token
+      cancellationTokenSource.token,
     )
     .await(cancellationTokenSource)
 }

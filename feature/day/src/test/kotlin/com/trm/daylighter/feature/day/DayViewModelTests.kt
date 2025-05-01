@@ -94,10 +94,10 @@ class DayViewModelTests {
               initialState =
                 mapOf(
                   DayNightCycleDeepLinkParams.LOCATION_ID to "5",
-                  DayNightCycleDeepLinkParams.DEFAULT to "false"
+                  DayNightCycleDeepLinkParams.DEFAULT to "false",
                 )
             ),
-          getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase
+          getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase,
         )
         .initialLocationIndexFlow
         .test {
@@ -124,10 +124,10 @@ class DayViewModelTests {
               initialState =
                 mapOf(
                   GoldenBlueHourDeepLinkParams.LOCATION_ID to "5",
-                  GoldenBlueHourDeepLinkParams.DEFAULT to "false"
+                  GoldenBlueHourDeepLinkParams.DEFAULT to "false",
                 )
             ),
-          getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase
+          getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase,
         )
         .initialLocationIndexFlow
         .test {
@@ -206,7 +206,7 @@ class DayViewModelTests {
                 mockk<SunriseSunset>().apply sunriseSunset@{
                   every { this@sunriseSunset.date } answers { LocalDate.now().minusDays(1L) }
                 },
-              yesterday = mockk()
+              yesterday = mockk(),
             )
         }
 
@@ -215,7 +215,7 @@ class DayViewModelTests {
             mockk<GetAllLocationsFlowUseCase>().apply {
               every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
             },
-          calculateSunriseSunsetChangeUseCase = calculateSunriseSunsetChangeUseCase
+          calculateSunriseSunsetChangeUseCase = calculateSunriseSunsetChangeUseCase,
         )
         .sunriseSunsetChangeInLocationAt(0)
         .test {
@@ -288,7 +288,7 @@ class DayViewModelTests {
       savedStateHandle = savedStateHandle,
       getAllLocationsFlowUseCase = getAllLocationsFlowUseCase,
       calculateSunriseSunsetChangeUseCase = calculateSunriseSunsetChangeUseCase,
-      getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase
+      getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase,
     )
 
   private fun emptyLocationsFlowUseCase(): GetAllLocationsFlowUseCase =

@@ -116,7 +116,7 @@ fun DayRoute(
     onDrawerMenuClick = onDrawerMenuClick,
     onNewLocationClick = onNewLocationClick,
     onEditLocationClick = onEditLocationClick,
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -223,13 +223,13 @@ internal fun DayScreen(
       Crossfade(
         targetState = locations is WithData,
         modifier = Modifier.fillMaxSize(),
-        label = "day-chart-crossfade"
+        label = "day-chart-crossfade",
       ) { pagerVisible ->
         if (pagerVisible) {
           HorizontalPager(
             state = pagerState,
             beyondBoundsPageCount = 2,
-            modifier = Modifier.fillMaxSize().testTag(DayTestTags.LOCATIONS_CHART_PAGER.name)
+            modifier = Modifier.fillMaxSize().testTag(DayTestTags.LOCATIONS_CHART_PAGER.name),
           ) {
             DayPeriodChart(
               change = currentChange,
@@ -237,13 +237,13 @@ internal fun DayScreen(
               chartMode = chartMode,
               dayMode = dayMode,
               now = now,
-              appBarHeightPx = appBarHeightPx
+              appBarHeightPx = appBarHeightPx,
             )
           }
 
           Row(
             modifier = Modifier.padding(16.dp).align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
           ) {
             repeat(
               when (locations) {
@@ -275,14 +275,14 @@ internal fun DayScreen(
                   .alpha(.15f)
                   .enumTestTag(DayTestTags.WITHOUT_DATA_LOCATIONS_CHART),
               chartMode = chartMode,
-              appBarHeightPx = appBarHeightPx
+              appBarHeightPx = appBarHeightPx,
             )
 
             AnimatedVisibility(
               visible = locations is Loading,
               enter = fadeIn(),
               exit = fadeOut(),
-              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+              modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
             ) {
               LinearProgressIndicator(
                 modifier =
@@ -295,13 +295,13 @@ internal fun DayScreen(
               visible = locations is Empty,
               enter = fadeIn(),
               exit = fadeOut(),
-              modifier = Modifier.align(Alignment.Center).padding(20.dp)
+              modifier = Modifier.align(Alignment.Center).padding(20.dp),
             ) {
               InfoButtonCard(
                 infoText = stringResource(commonR.string.no_saved_locations),
                 actionText = stringResource(commonR.string.new_location),
                 onButtonClick = onNewLocationClick,
-                modifier = Modifier.enumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD)
+                modifier = Modifier.enumTestTag(DayTestTags.EMPTY_LOCATIONS_CARD),
               )
             }
           }
@@ -319,7 +319,7 @@ internal fun DayScreen(
         if (showNavigationIcon) {
           DrawerMenuIconButton(
             onClick = onDrawerMenuClick,
-            modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+            modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON),
           )
         }
       },
@@ -336,7 +336,7 @@ internal fun DayScreen(
         Modifier.constrainAs(topAppBar) {
             linkTo(
               start = if (usingNavigationBar) mainContent.start else navigation.end,
-              end = mainContent.end
+              end = mainContent.end,
             )
             top.linkTo(parent.top)
             width = Dimension.fillToConstraints
@@ -345,7 +345,7 @@ internal fun DayScreen(
           .onGloballyPositioned { coordinates ->
             appBarHeightPx = coordinates.size.height.toFloat()
           }
-          .enumTestTag(DayTestTags.TOP_APP_BAR)
+          .enumTestTag(DayTestTags.TOP_APP_BAR),
     )
 
     fun onEditLocationClick() {
@@ -361,7 +361,7 @@ internal fun DayScreen(
             SunriseSunsetNavigationBarContent(
               dayMode = dayMode,
               itemsEnabled = currentChange.value is Ready,
-              onDayModeChange = { dayMode = it }
+              onDayModeChange = { dayMode = it },
             )
           },
           modifier =
@@ -369,7 +369,7 @@ internal fun DayScreen(
                 linkTo(mainContent.bottom, parent.bottom)
                 linkTo(parent.start, parent.end)
               }
-              .enumTestTag(DayTestTags.NAVIGATION_BAR)
+              .enumTestTag(DayTestTags.NAVIGATION_BAR),
         )
       } else {
         NavigationRail(
@@ -377,7 +377,7 @@ internal fun DayScreen(
             if (!usingPermanentNavigationDrawer) {
               DrawerMenuIconButton(
                 onClick = onDrawerMenuClick,
-                modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON)
+                modifier = Modifier.enumTestTag(DayTestTags.DRAWER_MENU_ICON_BUTTON),
               )
             }
           },
@@ -391,14 +391,14 @@ internal fun DayScreen(
                   visible = currentChange.value is Ready,
                   enter = fadeIn(),
                   exit = fadeOut(),
-                  modifier = Modifier.padding(bottom = 8.dp)
+                  modifier = Modifier.padding(bottom = 8.dp),
                 ) {
                   EditLocationButton(
                     onClick = ::onEditLocationClick,
-                    modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
+                    modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON),
                   )
                 }
-              }
+              },
             )
           },
           modifier =
@@ -436,7 +436,7 @@ internal fun DayScreen(
             } else {
               this
             }
-          }
+          },
       )
     }
 
@@ -449,11 +449,11 @@ internal fun DayScreen(
           Modifier.constrainAs(editLocationButton) {
             bottom.linkTo(navigation.top, 16.dp)
             end.linkTo(parent.end, 16.dp)
-          }
+          },
       ) {
         EditLocationButton(
           onClick = ::onEditLocationClick,
-          modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON)
+          modifier = Modifier.enumTestTag(DayTestTags.EDIT_LOCATION_BUTTON),
         )
       }
     }
@@ -465,7 +465,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
   FloatingActionButton(onClick = onClick, modifier = modifier) {
     Icon(
       imageVector = Icons.Filled.Edit,
-      contentDescription = stringResource(R.string.edit_location)
+      contentDescription = stringResource(R.string.edit_location),
     )
   }
 }
@@ -479,7 +479,7 @@ private fun DayTopAppBar(
   colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
   leading: @Composable () -> Unit = {},
-  trailing: @Composable () -> Unit = {}
+  trailing: @Composable () -> Unit = {},
 ) {
   CenterAlignedTopAppBar(
     modifier = modifier,
@@ -500,9 +500,9 @@ private fun DayTopAppBar(
                       0f to Color.Transparent,
                       0.05f to Color.Black,
                       0.95f to Color.Black,
-                      1f to Color.Transparent
+                      1f to Color.Transparent,
                     ),
-                  blendMode = BlendMode.DstIn
+                  blendMode = BlendMode.DstIn,
                 )
               }
         ) {
@@ -512,7 +512,7 @@ private fun DayTopAppBar(
             modifier =
               Modifier.basicMarquee(iterations = Int.MAX_VALUE)
                 .align(Alignment.Center)
-                .padding(10.dp)
+                .padding(10.dp),
           )
         }
         trailing()
@@ -542,7 +542,7 @@ private fun DayTopAppBarTitle(
     style = appBarTextStyle(),
     maxLines = 1,
     textAlign = TextAlign.Center,
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -561,7 +561,7 @@ private fun ClockAndDayLengthCard(
     shape = CardDefaults.shape,
     color = dayPeriod.value.color(),
     shadowElevation = 6.dp,
-    modifier = modifier
+    modifier = modifier,
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
@@ -576,7 +576,7 @@ private fun ClockAndDayLengthCard(
               end.linkTo(parent.end)
             },
           zoneId = location.zoneId,
-          dayPeriod = dayPeriod.value
+          dayPeriod = dayPeriod.value,
         )
 
         NowTimezoneDiffText(
@@ -588,7 +588,7 @@ private fun ClockAndDayLengthCard(
               }
               .basicMarquee(iterations = Int.MAX_VALUE),
           zoneId = location.zoneId,
-          dayPeriod = dayPeriod.value
+          dayPeriod = dayPeriod.value,
         )
 
         NextDayPeriodTimer(
@@ -602,7 +602,7 @@ private fun ClockAndDayLengthCard(
           dayMode = location.zoneId.currentDayMode(),
           chartMode = chartMode,
           today = today,
-          zoneId = location.zoneId
+          zoneId = location.zoneId,
         )
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
@@ -615,7 +615,7 @@ private fun ClockAndDayLengthCard(
                 start.linkTo(parent.start, 5.dp)
                 end.linkTo(parent.end, 5.dp)
               },
-            color = dayPeriod.value.textColor()
+            color = dayPeriod.value.textColor(),
           )
 
           DayLengthInfo(
@@ -643,14 +643,14 @@ private fun NextDayPeriodTimer(
   dayMode: DayMode,
   chartMode: DayPeriodChartMode,
   today: SunriseSunset,
-  zoneId: ZoneId
+  zoneId: ZoneId,
 ) {
   val nextPeriod =
     rememberNextDayPeriod(
       dayPeriod = dayPeriod,
       dayMode = dayMode,
       chartMode = chartMode,
-      today = today
+      today = today,
     )
   val timerPositive =
     remember(nextPeriod) { nextPeriod != null && nextPeriod.timestamp.secondsUntilNow(zoneId) > 0 }
@@ -677,7 +677,7 @@ private fun NextDayPeriodTimer(
     AnimatedVisibility(
       visible = nextPeriod != null && timerPositive,
       enter = fadeIn(),
-      exit = fadeOut()
+      exit = fadeOut(),
     ) {
       var timerText by remember(nextPeriod) { mutableStateOf(buildNextPeriodInText(nextPeriod)) }
 
@@ -711,7 +711,7 @@ private fun NextDayPeriodTimer(
           ),
         textAlign = TextAlign.Center,
         maxLines = 3,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
       )
     }
   }
@@ -817,7 +817,7 @@ private fun rememberNextDayPeriod(
 
 private fun dayPeriodFlow(
   change: Loadable<LocationSunriseSunsetChange>,
-  chartMode: DayPeriodChartMode
+  chartMode: DayPeriodChartMode,
 ): Flow<DayPeriod> = flow {
   while (currentCoroutineContext().isActive) {
     emit(
@@ -825,7 +825,7 @@ private fun dayPeriodFlow(
         .map { (location, today) ->
           today.currentPeriodIn(
             location = location,
-            useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR
+            useGoldenBlueHour = chartMode == DayPeriodChartMode.GOLDEN_BLUE_HOUR,
           )
         }
         .dataOrElse(DayPeriod.DAY)
@@ -868,13 +868,13 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
             height < 650 -> 20f
             height > 1_000 -> 28f
             else -> 24f
-          }
+          },
         )
         onZoneIdOrDayPeriodUpdate()
       }
     },
     update = { it.onZoneIdOrDayPeriodUpdate() },
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -882,7 +882,7 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
 private fun NowTimezoneDiffText(
   zoneId: ZoneId,
   dayPeriod: DayPeriod,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
   val height = LocalConfiguration.current.screenHeightDp
@@ -901,9 +901,9 @@ private fun NowTimezoneDiffText(
             height < 650 -> 12
             height > 1_000 -> 16
             else -> 14
-          }.sp
+          }.sp,
       ),
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
@@ -911,7 +911,7 @@ private fun NowTimezoneDiffText(
 private fun DayLengthInfo(
   change: LocationSunriseSunsetChange,
   dayPeriod: DayPeriod,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val (location, today, yesterday) = change
   val todayLengthSeconds = today.dayLengthSecondsAtLocation(location)
@@ -920,7 +920,7 @@ private fun DayLengthInfo(
   val diffPrefix =
     dayLengthDiffPrefix(
       todayLengthSeconds = todayLengthSeconds,
-      yesterdayLengthSeconds = yesterdayLengthSeconds
+      yesterdayLengthSeconds = yesterdayLengthSeconds,
     )
 
   ConstraintLayout(modifier = modifier) {
@@ -935,7 +935,7 @@ private fun DayLengthInfo(
             bottom.linkTo(lengthText.top)
             start.linkTo(parent.start, 5.dp)
             end.linkTo(parent.end, 5.dp)
-          }
+          },
       )
 
       DayLengthIcon(
@@ -961,7 +961,7 @@ private fun DayLengthInfo(
             bottom.linkTo(diffText.top)
             start.linkTo(icon.end, 5.dp)
             end.linkTo(parent.end, 5.dp)
-          }
+          },
       )
 
       DayLengthDiffText(
@@ -973,7 +973,7 @@ private fun DayLengthInfo(
             top.linkTo(lengthText.bottom)
             bottom.linkTo(longerShorterText.top)
             end.linkTo(lengthText.end)
-          }
+          },
       )
 
       LongerShorterText(
@@ -985,7 +985,7 @@ private fun DayLengthInfo(
             bottom.linkTo(parent.bottom)
           },
         diffPrefix = diffPrefix,
-        dayPeriod = dayPeriod
+        dayPeriod = dayPeriod,
       )
     } else {
       DayLengthLabelText(
@@ -996,7 +996,7 @@ private fun DayLengthInfo(
             start.linkTo(icon.end)
             end.linkTo(parent.end, 5.dp)
             bottom.linkTo(lengthText.top)
-          }
+          },
       )
 
       DayLengthIcon(
@@ -1019,7 +1019,7 @@ private fun DayLengthInfo(
           Modifier.constrainAs(lengthText) {
             top.linkTo(dayLengthLabelText.bottom)
             start.linkTo(icon.end, 5.dp)
-          }
+          },
       )
 
       DayLengthDiffText(
@@ -1031,7 +1031,7 @@ private fun DayLengthInfo(
             top.linkTo(dayLengthLabelText.bottom)
             start.linkTo(lengthText.end, 5.dp)
             end.linkTo(parent.end, 5.dp)
-          }
+          },
       )
 
       LongerShorterText(
@@ -1044,7 +1044,7 @@ private fun DayLengthInfo(
             start.linkTo(icon.end, 5.dp)
           },
         diffPrefix = diffPrefix,
-        dayPeriod = dayPeriod
+        dayPeriod = dayPeriod,
       )
     }
   }
@@ -1068,23 +1068,20 @@ private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifi
             height < 650 -> 12
             height > 1_000 -> 16
             else -> 14
-          }.sp
+          }.sp,
       ),
-    modifier = modifier
+    modifier = modifier,
   )
 }
 
 @Composable
-private fun DayLengthIcon(
-  modifier: Modifier = Modifier,
-  dayPeriod: DayPeriod,
-) {
+private fun DayLengthIcon(modifier: Modifier = Modifier, dayPeriod: DayPeriod) {
   Box(modifier = modifier) {
     Icon(
       modifier = Modifier.offset(x = 1.dp, y = 1.dp),
       painter = painterResource(commonR.drawable.day_length_shadow),
       tint = Color.Unspecified,
-      contentDescription = null
+      contentDescription = null,
     )
 
     Icon(
@@ -1095,7 +1092,7 @@ private fun DayLengthIcon(
             else commonR.drawable.day_length_white
         ),
       tint = Color.Unspecified,
-      contentDescription = stringResource(R.string.day_length)
+      contentDescription = stringResource(R.string.day_length),
     )
   }
 }
@@ -1104,7 +1101,7 @@ private fun DayLengthIcon(
 private fun DayLengthText(
   todayLengthSeconds: Long,
   dayPeriod: DayPeriod,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val height = LocalConfiguration.current.screenHeightDp
   Text(
@@ -1120,7 +1117,7 @@ private fun DayLengthText(
             else -> 18
           }.sp,
         shadow =
-          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+          Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
       ),
     modifier = modifier,
   )
@@ -1131,7 +1128,7 @@ private fun DayLengthDiffText(
   diffPrefix: String,
   dayLengthDiffTime: LocalTime,
   dayPeriod: DayPeriod,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val height = LocalConfiguration.current.screenHeightDp
   val fontSize =
@@ -1151,7 +1148,7 @@ private fun DayLengthDiffText(
           else -> throw IllegalArgumentException()
         },
       shadowElevation = 3.dp,
-      modifier = modifier
+      modifier = modifier,
     ) {
       Text(
         text = formatTimeDifference(prefix = diffPrefix, diff = dayLengthDiffTime),
@@ -1161,7 +1158,7 @@ private fun DayLengthDiffText(
             fontSize = fontSize,
             fontWeight = FontWeight.Medium,
           ),
-        modifier = Modifier.padding(horizontal = 1.dp)
+        modifier = Modifier.padding(horizontal = 1.dp),
       )
     }
   } else {
@@ -1173,9 +1170,9 @@ private fun DayLengthDiffText(
           fontSize = fontSize,
           fontWeight = FontWeight.Medium,
           shadow =
-            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f)
+            Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
         ),
-      modifier = modifier
+      modifier = modifier,
     )
   }
 }
@@ -1184,7 +1181,7 @@ private fun DayLengthDiffText(
 private fun LongerShorterText(
   modifier: Modifier = Modifier,
   diffPrefix: String,
-  dayPeriod: DayPeriod
+  dayPeriod: DayPeriod,
 ) {
   val height = LocalConfiguration.current.screenHeightDp
   AnimatedVisibility(modifier = modifier, visible = diffPrefix == "+" || diffPrefix == "-") {
@@ -1208,7 +1205,7 @@ private fun LongerShorterText(
               height < 650 -> 12
               height > 1_000 -> 16
               else -> 14
-            }.sp
+            }.sp,
         ),
     )
   }
@@ -1218,7 +1215,7 @@ private fun LongerShorterText(
 private fun RowScope.SunriseSunsetNavigationBarContent(
   itemsEnabled: Boolean,
   dayMode: DayMode,
-  onDayModeChange: (DayMode) -> Unit
+  onDayModeChange: (DayMode) -> Unit,
 ) {
   NavigationBarItem(
     modifier = Modifier.enumTestTag(DayTestTags.NAVIGATION_SUNRISE_ITEM),
@@ -1229,15 +1226,15 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
       Icon(
         painter = painterResource(R.drawable.sunrise),
         contentDescription = stringResource(commonR.string.sunrise),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunrise),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
-    }
+    },
   )
   NavigationBarItem(
     modifier = Modifier.enumTestTag(DayTestTags.NAVIGATION_SUNSET_ITEM),
@@ -1248,15 +1245,15 @@ private fun RowScope.SunriseSunsetNavigationBarContent(
       Icon(
         painter = painterResource(R.drawable.sunset),
         contentDescription = stringResource(commonR.string.sunset),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunset),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
-    }
+    },
   )
 }
 
@@ -1265,7 +1262,7 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
   itemsEnabled: Boolean,
   dayMode: DayMode,
   onDayModeChange: (DayMode) -> Unit,
-  footer: @Composable () -> Unit
+  footer: @Composable () -> Unit,
 ) {
   Spacer(modifier = Modifier.weight(1f))
 
@@ -1278,15 +1275,15 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
       Icon(
         painter = painterResource(R.drawable.sunrise),
         contentDescription = stringResource(commonR.string.sunrise),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunrise),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
-    }
+    },
   )
 
   NavigationRailItem(
@@ -1298,15 +1295,15 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
       Icon(
         painter = painterResource(R.drawable.sunset),
         contentDescription = stringResource(commonR.string.sunset),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
     },
     label = {
       Text(
         text = stringResource(commonR.string.sunset),
-        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled)
+        modifier = Modifier.navigationItemEnabledAlpha(itemsEnabled),
       )
-    }
+    },
   )
 
   Spacer(modifier = Modifier.weight(1f))

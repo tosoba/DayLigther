@@ -15,7 +15,7 @@ object MapDefaults {
         arrayOf(
           "https://a.tile.openstreetmap.org/",
           "https://b.tile.openstreetmap.org/",
-          "https://c.tile.openstreetmap.org/"
+          "https://c.tile.openstreetmap.org/",
         ),
         "© OpenStreetMap contributors",
         TileSourcePolicy(
@@ -23,8 +23,8 @@ object MapDefaults {
           TileSourcePolicy.FLAG_NO_BULK or
             TileSourcePolicy.FLAG_NO_PREVENTIVE or
             TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or
-            TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-        )
+            TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED,
+        ),
       )
 
   const val INITIAL_LOCATION_ZOOM = 12.0

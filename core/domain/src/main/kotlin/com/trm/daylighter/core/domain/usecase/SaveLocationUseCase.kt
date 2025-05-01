@@ -9,7 +9,7 @@ class SaveLocationUseCase
 constructor(
   private val locationRepo: LocationRepo,
   private val widgetManager: WidgetManager,
-  private val sendLocationSavedEventUseCase: SendLocationSavedEventUseCase
+  private val sendLocationSavedEventUseCase: SendLocationSavedEventUseCase,
 ) {
   suspend operator fun invoke(latitude: Double, longitude: Double, name: String) {
     locationRepo.saveLocation(latitude = latitude, longitude = longitude, name = name)
@@ -21,7 +21,7 @@ constructor(
       id = id,
       latitude = latitude,
       longitude = longitude,
-      name = name
+      name = name,
     )
     widgetManager.updateAllLocationWidgets()
     sendLocationSavedEventUseCase(id)

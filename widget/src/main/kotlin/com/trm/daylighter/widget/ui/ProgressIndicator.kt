@@ -11,7 +11,7 @@ import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 internal fun ProgressIndicator(chartMode: DayPeriodChartMode) {
   AppWidgetBox(
     modifier = GlanceModifier.fillMaxSize().chartBackground(chartMode),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     CircularProgressIndicator(color = GlanceTheme.colors.onPrimary)
   }

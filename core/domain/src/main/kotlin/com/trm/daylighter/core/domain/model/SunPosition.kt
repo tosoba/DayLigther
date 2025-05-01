@@ -6,5 +6,5 @@ enum class SunPosition(val degrees: Double) {
   GOLDEN_HOUR_BELOW(-4.0),
   CIVIL(-6.0),
   NAUTICAL(-12.0),
-  ASTRONOMICAL(-18.0)
+  ASTRONOMICAL(-18.0),
 }

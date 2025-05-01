@@ -70,7 +70,7 @@ interface LocationDao {
     latitude: Double,
     longitude: Double,
     name: String,
-    zoneId: ZoneId
+    zoneId: ZoneId,
   )
 
   @Query(

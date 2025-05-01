@@ -12,6 +12,4 @@ val backgroundToTransparentVerticalGradient: Brush
 
 val surfaceToTransparentVerticalGradient: Brush
   @Composable
-  get() =
-    Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)
-
+  get() = Brush.verticalGradient(0f to MaterialTheme.colorScheme.surface, 1f to Color.Transparent)

@@ -11,9 +11,7 @@ class NominatimEndpointTests {
 
   @Test
   fun getAddress() = runTest {
-    println(
-      endpoint.getAddress(lat = WARSAW_LAT, lon = WARSAW_LNG, email = "trmhorizon@gmail.com")
-    )
+    println(endpoint.getAddress(lat = WARSAW_LAT, lon = WARSAW_LNG, email = "trmhorizon@gmail.com"))
   }
 
   companion object {

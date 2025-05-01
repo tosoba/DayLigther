@@ -104,4 +104,3 @@ baselineProfile {
   // Instead enable generation directly for the release build variant.
   automaticGenerationDuringBuild = false
 }
-

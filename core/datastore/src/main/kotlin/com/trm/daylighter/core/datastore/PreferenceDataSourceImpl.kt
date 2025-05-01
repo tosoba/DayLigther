@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.map
 
 class PreferenceDataSourceImpl
 @Inject
-constructor(
-  @ApplicationContext private val context: Context,
-) : PreferenceDataSource {
+constructor(@ApplicationContext private val context: Context) : PreferenceDataSource {
   private val geocodingEmailKey = stringPreferencesKey(PreferencesDataStoreKeys.GEOCODING_EMAIL)
 
   override fun isGeocodingEmailPreferenceSetFlow(): Flow<Boolean> =

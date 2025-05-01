@@ -33,7 +33,7 @@ fun rememberMapViewWithLifecycle(onPause: (MapView) -> Unit = {}): MapView {
 @Composable
 fun rememberMapLifecycleObserver(
   mapView: MapView,
-  onPause: (MapView) -> Unit
+  onPause: (MapView) -> Unit,
 ): LifecycleEventObserver {
   val onPauseHandler = rememberUpdatedState(newValue = onPause)
   return remember(mapView) {
@@ -60,7 +60,7 @@ fun DisabledMapView(
   latitude: Double,
   longitude: Double,
   zoom: Double,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val mapView = rememberMapViewWithLifecycle()
   val darkMode = isSystemInDarkTheme()
@@ -70,6 +70,6 @@ fun DisabledMapView(
     update = {
       it.setDefaultDisabledConfig(darkMode = darkMode)
       it.setPosition(latitude = latitude, longitude = longitude, zoom = zoom)
-    }
+    },
   )
 }

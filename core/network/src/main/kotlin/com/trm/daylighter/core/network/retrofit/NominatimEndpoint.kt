@@ -10,7 +10,7 @@ interface NominatimEndpoint {
     @Query("lat") lat: Double,
     @Query("lon") lon: Double,
     @Query("email") email: String,
-    @Query("zoom") zoom: Int? = null
+    @Query("zoom") zoom: Int? = null,
   ): AddressResponse
 
   companion object {

@@ -30,7 +30,7 @@ android {
       buildConfigField(
         "String",
         "APP_BUILD_TYPE_SUFFIX",
-        "\"${DayLighterBuildType.BENCHMARK.applicationIdSuffix ?: ""}\""
+        "\"${DayLighterBuildType.BENCHMARK.applicationIdSuffix ?: ""}\"",
       )
     }
   }

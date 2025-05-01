@@ -27,7 +27,7 @@ internal class SaveLocationState(
     val Saver: Saver<SaveLocationState, *> =
       listSaver(
         save = { listOf(it.latitude, it.longitude) },
-        restore = { SaveLocationState(it[0], it[1]) }
+        restore = { SaveLocationState(it[0], it[1]) },
       )
   }
 }

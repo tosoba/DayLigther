@@ -30,7 +30,7 @@ internal fun Context.showWidgetPinnedToast() {
 
 internal inline fun <reified T : GlanceAppWidgetReceiver> Context.updateWidgetIntent(
   widgetId: Int,
-  locationId: Long? = null
+  locationId: Long? = null,
 ): Intent =
   actionIntent<T>(LocationWidgetActions.UPDATE_WIDGET)
     .putExtra(LocationWidgetExtras.WIDGET_ID, widgetId)
@@ -54,5 +54,5 @@ internal inline fun <reified T : BroadcastReceiver> Context.widgetPinSuccessCall
     this,
     0,
     Intent(this, T::class.java).putExtra(LocationWidgetExtras.LOCATION_ID, locationId),
-    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
   )
