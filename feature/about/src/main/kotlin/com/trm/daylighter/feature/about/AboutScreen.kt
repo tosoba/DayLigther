@@ -1,6 +1,5 @@
 package com.trm.daylighter.feature.about
 
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
@@ -28,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.util.ext.copyToClipboard
 import com.trm.daylighter.core.common.util.ext.goToUrlInBrowser
 import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
@@ -52,7 +50,7 @@ fun AboutScreen(
         if (!usingPermanentNavigationDrawer) {
           DrawerMenuIconButton(onClick = onDrawerMenuClick)
         }
-      }
+      },
     )
 
     Column(
@@ -67,7 +65,7 @@ fun AboutScreen(
       Text(
         text = stringResource(R.string.repository),
         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
       )
 
       ImageTextRow(
@@ -76,13 +74,13 @@ fun AboutScreen(
         contentDescription = stringResource(R.string.github),
         modifier =
           Modifier.clickable { context.goToUrlInBrowser("https://github.com/tosoba/DayLigther") }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp),
       )
 
       Text(
         text = stringResource(R.string.credits),
         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
       )
 
       ImageTextRow(
@@ -91,69 +89,10 @@ fun AboutScreen(
         contentDescription = stringResource(R.string.open_street_map),
         modifier =
           Modifier.clickable { context.goToUrlInBrowser("https://www.openstreetmap.org/") }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp),
       )
 
       Spacer(modifier = Modifier.height(10.dp))
-
-      Text(
-        text = stringResource(R.string.support_me),
-        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp)
-      )
-
-      Spacer(modifier = Modifier.height(5.dp))
-
-      Text(
-        text = stringResource(R.string.support_me_info),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(horizontal = 20.dp)
-      )
-
-      Spacer(modifier = Modifier.height(10.dp))
-
-      var currentToast: Toast? = null
-      val addressCopied = stringResource(R.string.address_copied)
-      fun showMessageOnCopy() {
-        currentToast?.cancel()
-        currentToast = Toast.makeText(context, addressCopied, Toast.LENGTH_SHORT).apply { show() }
-      }
-
-      val bitcoinAddress = stringResource(R.string.bitcoin_address)
-      ImageTextRow(
-        imagePainter = painterResource(R.drawable.bitcoin),
-        text = bitcoinAddress,
-        contentDescription = stringResource(R.string.bitcoin),
-        modifier =
-          Modifier.clickable {
-              context.copyToClipboard(text = bitcoinAddress, showMessage = ::showMessageOnCopy)
-            }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-      )
-
-      val ethereumAddress = stringResource(R.string.ethereum_address)
-      ImageTextRow(
-        imagePainter = painterResource(R.drawable.ethereum),
-        text = ethereumAddress,
-        contentDescription = stringResource(R.string.ethereum),
-        modifier =
-          Modifier.clickable {
-              context.copyToClipboard(text = ethereumAddress, showMessage = ::showMessageOnCopy)
-            }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-      )
-
-      val xrpAddress = stringResource(R.string.xrp_address)
-      ImageTextRow(
-        imagePainter = painterResource(R.drawable.xrp),
-        text = xrpAddress,
-        contentDescription = stringResource(R.string.xrp),
-        modifier =
-          Modifier.clickable {
-              context.copyToClipboard(text = xrpAddress, showMessage = ::showMessageOnCopy)
-            }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-      )
     }
   }
 }
@@ -164,13 +103,13 @@ private fun ImageTextRow(
   modifier: Modifier = Modifier,
   text: String,
   contentDescription: String? = null,
-  imagePainter: Painter
+  imagePainter: Painter,
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
     Image(
       painter = imagePainter,
       contentDescription = contentDescription,
-      modifier = Modifier.size(30.dp)
+      modifier = Modifier.size(30.dp),
     )
 
     Spacer(modifier = Modifier.width(10.dp))
@@ -178,7 +117,7 @@ private fun ImageTextRow(
     Text(
       text = text,
       style = MaterialTheme.typography.bodyLarge,
-      modifier = Modifier.weight(1f).basicMarquee(iterations = Int.MAX_VALUE)
+      modifier = Modifier.weight(1f).basicMarquee(iterations = Int.MAX_VALUE),
     )
   }
 }
