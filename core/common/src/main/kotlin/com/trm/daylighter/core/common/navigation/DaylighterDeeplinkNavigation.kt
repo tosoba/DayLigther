@@ -57,6 +57,6 @@ enum class WidgetTypeParam {
 
   companion object {
     fun fromName(name: String): WidgetTypeParam =
-      requireNotNull(WidgetTypeParam.values().find { it.name.lowercase() == name.lowercase() })
+      requireNotNull(entries.find { it.name.lowercase() == name.lowercase() })
   }
 }

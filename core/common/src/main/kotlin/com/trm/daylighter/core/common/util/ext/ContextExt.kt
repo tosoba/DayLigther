@@ -12,13 +12,13 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Point
 import android.location.Location
-import android.net.Uri
 import android.os.Build
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -36,7 +36,7 @@ fun Context.getActivity(): Activity? =
 
 fun Context.goToUrlInBrowser(url: String) {
   try {
-    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
   } catch (ex: ActivityNotFoundException) {
     Toast.makeText(this, getString(commonR.string.browser_app_was_not_found), Toast.LENGTH_SHORT)
       .show()

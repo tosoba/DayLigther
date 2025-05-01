@@ -1139,7 +1139,7 @@ private fun dayNightCycleChartSegments(
 
       if (accumulatedSweepAngle > 0f) {
         add(
-          removeLast().let {
+          removeAt(lastIndex).let {
             it.copy(sweepAngleDegrees = it.sweepAngleDegrees + accumulatedSweepAngle)
           }
         )
@@ -1267,7 +1267,7 @@ private fun goldenBlueHourChartSegments(
 
       if (accumulatedSweepAngle > 0f) {
         add(
-          removeLast().let {
+          removeAt(lastIndex).let {
             it.copy(sweepAngleDegrees = it.sweepAngleDegrees + accumulatedSweepAngle)
           }
         )

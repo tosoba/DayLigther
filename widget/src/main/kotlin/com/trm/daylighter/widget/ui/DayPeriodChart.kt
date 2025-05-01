@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -199,10 +200,9 @@ private fun dayPeriodChartBitmap(
   val context = LocalContext.current
   val bitmap =
     with(LocalSize.current) {
-      Bitmap.createBitmap(
+      createBitmap(
         width.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_WIDTH_PX,
         height.value.toPx.toInt().takeIf { it > 0 } ?: WIDGET_PREVIEW_HEIGHT_PX,
-        Bitmap.Config.ARGB_8888,
       )
     }
 

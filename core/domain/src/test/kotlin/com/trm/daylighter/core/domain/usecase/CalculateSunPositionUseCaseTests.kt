@@ -67,9 +67,9 @@ class CalculateSunPositionUseCaseTests {
     val start = System.currentTimeMillis()
 
     val results =
-      HalfDay.values()
+      HalfDay.entries
         .flatMap { halfDay ->
-          SunPosition.values().map { sunPosition ->
+          SunPosition.entries.map { sunPosition ->
             async(Dispatchers.Default) {
               useCase(
                 latitude = lat,
@@ -96,8 +96,8 @@ class CalculateSunPositionUseCaseTests {
     zoneId: ZoneId?,
   ) {
     val useCase = CalculateSunPositionTimestampUseCase()
-    HalfDay.values().forEach { halfDay ->
-      SunPosition.values().forEach { sunPosition ->
+    HalfDay.entries.forEach { halfDay ->
+      SunPosition.entries.forEach { sunPosition ->
         val result =
           useCase(
             latitude = lat,
