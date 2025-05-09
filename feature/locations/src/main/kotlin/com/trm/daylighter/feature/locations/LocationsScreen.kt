@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
@@ -247,7 +246,6 @@ private fun DeleteLocationConfirmationDialog(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MapCard(
   location: StableValue<Location>,

@@ -16,7 +16,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -411,7 +410,7 @@ private fun LocationInfoDialog(onDismissRequest: () -> Unit) {
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationAppBar(
   mapPosition: MapPosition,
@@ -603,7 +602,6 @@ private fun ModalSheetContent(
   ToastMessageEffect(message = nameFailureMessage)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ModalSheetButtonsRow(
   geocodeButtonText: String,
@@ -631,7 +629,6 @@ private fun ModalSheetButtonsRow(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ModalSheetButtons(
   geocodeButtonText: String,

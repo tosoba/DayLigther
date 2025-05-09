@@ -26,5 +26,5 @@ dependencies {
   api(libs.kotlinx.coroutines.test)
 
   testImplementation(libs.dagger.dagger)
-  kaptTest(libs.dagger.compiler)
+  kspTest(libs.dagger.compiler)
 }

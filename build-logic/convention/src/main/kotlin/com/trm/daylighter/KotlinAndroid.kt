@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.provideDelegate
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 /** Configure base Kotlin with Android options */
-internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *>) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, *, *, *, *, *>) {
   commonExtension.apply {
     compileSdk = 35
 
@@ -29,8 +29,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, 
       val warningsAsErrors: String? by project
       allWarningsAsErrors = warningsAsErrors.toBoolean()
 
-      freeCompilerArgs =
-        freeCompilerArgs +
+      freeCompilerArgs +=
           listOf(
             "-opt-in=kotlin.RequiresOptIn",
             // Enable experimental coroutines APIs, including Flow
@@ -48,6 +47,6 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, 
   dependencies { add("coreLibraryDesugaring", libs.findLibrary("android.desugarJdkLibs").get()) }
 }
 
-fun CommonExtension<*, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
+fun CommonExtension<*, *, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
   (this as ExtensionAware).extensions.configure("kotlinOptions", block)
 }

@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -363,7 +362,6 @@ private fun ConfirmLocationSelectionControls(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ConfirmSelectionButton(
   text: String,
@@ -386,7 +384,6 @@ private fun ConfirmSelectionButton(
   )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MapCard(
   location: StableValue<Location>,

@@ -177,7 +177,6 @@ private fun DayLighterDrawerContent(
   }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DayLighterScaffold(navController: NavHostController, drawerState: DrawerState) {
   Scaffold(

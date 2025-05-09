@@ -12,7 +12,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -36,10 +35,7 @@ abstract class NetworkModule {
     ): SunriseSunsetEndpoint =
       Retrofit.Builder()
         .client(okHttpClient)
-        .addConverterFactory(
-          @OptIn(ExperimentalSerializationApi::class)
-          networkJson.asConverterFactory("application/json".toMediaType())
-        )
+        .addConverterFactory(networkJson.asConverterFactory("application/json".toMediaType()))
         .baseUrl(SunriseSunsetEndpoint.BASE_URL)
         .build()
         .create(SunriseSunsetEndpoint::class.java)
@@ -49,10 +45,7 @@ abstract class NetworkModule {
     fun nominatimEndpoint(okHttpClient: OkHttpClient, networkJson: Json): NominatimEndpoint =
       Retrofit.Builder()
         .client(okHttpClient)
-        .addConverterFactory(
-          @OptIn(ExperimentalSerializationApi::class)
-          networkJson.asConverterFactory("application/json".toMediaType())
-        )
+        .addConverterFactory(networkJson.asConverterFactory("application/json".toMediaType()))
         .baseUrl(NominatimEndpoint.BASE_URL)
         .build()
         .create(NominatimEndpoint::class.java)
@@ -61,7 +54,6 @@ abstract class NetworkModule {
     @Singleton
     fun networkJson(): Json = Json {
       ignoreUnknownKeys = true
-      @OptIn(ExperimentalSerializationApi::class)
       explicitNulls = false
     }
 

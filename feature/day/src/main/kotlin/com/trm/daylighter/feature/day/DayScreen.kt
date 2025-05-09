@@ -8,7 +8,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
@@ -126,7 +125,7 @@ private val usingNavigationBar: Boolean
     LocalWidthSizeClass.current == WindowWidthSizeClass.Compact ||
       LocalHeightSizeClass.current == WindowHeightSizeClass.Expanded
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DayScreen(
   chartMode: DayPeriodChartMode,
@@ -228,7 +227,7 @@ internal fun DayScreen(
         if (pagerVisible) {
           HorizontalPager(
             state = pagerState,
-            beyondBoundsPageCount = 2,
+            beyondViewportPageCount = 2,
             modifier = Modifier.fillMaxSize().testTag(DayTestTags.LOCATIONS_CHART_PAGER.name),
           ) {
             DayPeriodChart(
@@ -470,7 +469,7 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -546,7 +545,6 @@ private fun DayTopAppBarTitle(
   )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ClockAndDayLengthCard(
   change: StableLoadable<LocationSunriseSunsetChange>,
@@ -1312,4 +1310,4 @@ private fun ColumnScope.SunriseSunsetNavigationRailContent(
 }
 
 private fun Modifier.navigationItemEnabledAlpha(itemsEnabled: Boolean) =
-  this then alpha(if (!itemsEnabled) .5f else 1f)
+  alpha(if (!itemsEnabled) .5f else 1f)

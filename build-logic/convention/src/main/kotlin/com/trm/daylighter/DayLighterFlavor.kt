@@ -24,7 +24,7 @@ enum class DayLighterFlavor(
 }
 
 fun Project.configureFlavors(
-  commonExtension: CommonExtension<*, *, *, *, *>,
+  commonExtension: CommonExtension<*, *, *, *, *, *>,
   flavorConfigurationBlock: ProductFlavor.(flavor: DayLighterFlavor) -> Unit = {},
 ) {
   commonExtension.apply {

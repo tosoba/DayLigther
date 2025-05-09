@@ -8,17 +8,13 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 
 /** Configure Compose-specific options */
-internal fun Project.configureAndroidCompose(commonExtension: CommonExtension<*, *, *, *, *>) {
+internal fun Project.configureAndroidCompose(commonExtension: CommonExtension<*, *, *, *, *, *>) {
   val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
   commonExtension.apply {
     buildFeatures { compose = true }
 
-    composeOptions {
-      kotlinCompilerExtensionVersion = libs.findVersion("androidxComposeCompiler").get().toString()
-    }
-
-    kotlinOptions { freeCompilerArgs = freeCompilerArgs + buildComposeMetricsParameters() }
+    kotlinOptions { freeCompilerArgs += buildComposeMetricsParameters() }
 
     dependencies {
       val bom = libs.findLibrary("androidx-compose-bom").get()

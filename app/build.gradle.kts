@@ -5,6 +5,7 @@ plugins {
   id("daylighter.android.application.compose")
   id("daylighter.android.hilt")
   alias(libs.plugins.baselineprofile)
+  alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -54,8 +55,6 @@ android {
   }
 
   buildFeatures { compose = true }
-
-  composeOptions { kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get() }
 
   packaging {
     resources {
