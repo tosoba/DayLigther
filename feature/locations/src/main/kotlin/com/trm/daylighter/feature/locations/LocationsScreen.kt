@@ -94,11 +94,7 @@ private fun LocationsScreen(
       )
     }
 
-    Crossfade(
-      targetState = locations,
-      modifier = Modifier.fillMaxSize(),
-      label = "locations-chart-crossfade",
-    ) { locations ->
+    Crossfade(targetState = locations, modifier = Modifier.fillMaxSize()) { locations ->
       when (locations) {
         is Ready -> {
           var topAppBarHeightPx by remember { mutableIntStateOf(0) }

@@ -219,11 +219,8 @@ internal fun DayScreen(
           width = Dimension.fillToConstraints
         }
     ) {
-      Crossfade(
-        targetState = locations is WithData,
-        modifier = Modifier.fillMaxSize(),
-        label = "day-chart-crossfade",
-      ) { pagerVisible ->
+      Crossfade(targetState = locations is WithData, modifier = Modifier.fillMaxSize()) {
+        pagerVisible ->
         if (pagerVisible) {
           HorizontalPager(
             state = pagerState,
@@ -604,7 +601,7 @@ private fun ClockAndDayLengthCard(
         )
 
         if (chartMode == DayPeriodChartMode.DAY_NIGHT_CYCLE) {
-          Divider(
+          HorizontalDivider(
             modifier =
               Modifier.constrainAs(divider) {
                 width = Dimension.fillToConstraints
