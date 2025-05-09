@@ -1,5 +1,6 @@
 package com.trm.daylighter.widget.location.goldenblue
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -16,7 +17,7 @@ import com.trm.daylighter.widget.util.ext.updateWidget
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@AndroidEntryPoint(BroadcastReceiver::class)
 class GoldenBlueHourWidgetReceiver : GlanceAppWidgetReceiver() {
   @Inject
   internal lateinit var getDefaultLocationSunriseSunsetChangeUseCase:
