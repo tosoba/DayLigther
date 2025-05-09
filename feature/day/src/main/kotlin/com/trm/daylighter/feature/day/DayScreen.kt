@@ -15,8 +15,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -252,10 +250,8 @@ internal fun DayScreen(
                   Modifier.padding(2.dp)
                     .clip(CircleShape)
                     .background(
-                      LocalContentColor.current.copy(
-                        alpha =
-                          if (pagerState.currentPage == it) LocalContentAlpha.current
-                          else ContentAlpha.disabled
+                      MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = if (pagerState.currentPage == it) 1.0f else 0.38f
                       )
                     )
                     .size(10.dp)
