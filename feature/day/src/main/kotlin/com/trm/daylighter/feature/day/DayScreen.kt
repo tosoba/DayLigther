@@ -33,10 +33,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -426,13 +426,18 @@ internal fun DayScreen(
         change = currentChange,
         chartMode = chartMode,
         modifier =
-          Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.4f).run {
-            if (!constrainClockAndDayLengthCardToAppBarBottom) {
-              onGloballyPositioned { trailingSpacerWidthPx = it.size.width }
-            } else {
-              this
-            }
-          },
+          Modifier.widthIn(
+              max =
+                with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } *
+                  0.4f
+            )
+            .run {
+              if (!constrainClockAndDayLengthCardToAppBarBottom) {
+                onGloballyPositioned { trailingSpacerWidthPx = it.size.width }
+              } else {
+                this
+              }
+            },
       )
     }
 
@@ -689,7 +694,8 @@ private fun NextDayPeriodTimer(
         }
       }
 
-      val height = LocalConfiguration.current.screenHeightDp
+      val height =
+        with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
       Text(
         text = timerText,
         style =
@@ -699,8 +705,8 @@ private fun NextDayPeriodTimer(
               Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
             fontSize =
               when {
-                height < 650 -> 12
-                height > 1_000 -> 16
+                height < 650.dp -> 12
+                height > 1_000.dp -> 16
                 else -> 14
               }.sp,
           ),
@@ -833,7 +839,7 @@ private fun dayPeriodFlow(
 private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
   val textStyle = MaterialTheme.typography.labelLarge
   val resolver = LocalFontFamilyResolver.current
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
 
   fun TextClock.onZoneIdOrDayPeriodUpdate() {
     timeZone = zoneId.id
@@ -860,8 +866,8 @@ private fun Clock(zoneId: ZoneId, dayPeriod: DayPeriod, modifier: Modifier = Mod
         setTextSize(
           TypedValue.COMPLEX_UNIT_SP,
           when {
-            height < 650 -> 20f
-            height > 1_000 -> 28f
+            height < 650.dp -> 20f
+            height > 1_000.dp -> 28f
             else -> 24f
           },
         )
@@ -880,7 +886,7 @@ private fun NowTimezoneDiffText(
   modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
 
   Text(
     text = context.timeZoneDiffLabelBetween(ZonedDateTime.now(), ZonedDateTime.now(zoneId)),
@@ -893,8 +899,8 @@ private fun NowTimezoneDiffText(
           Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
         fontSize =
           when {
-            height < 650 -> 12
-            height > 1_000 -> 16
+            height < 650.dp -> 12
+            height > 1_000.dp -> 16
             else -> 14
           }.sp,
       ),
@@ -1047,7 +1053,7 @@ private fun DayLengthInfo(
 
 @Composable
 private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifier) {
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
 
   Text(
     text = "${stringResource(R.string.day_length)}:",
@@ -1060,8 +1066,8 @@ private fun DayLengthLabelText(dayPeriod: DayPeriod, modifier: Modifier = Modifi
           Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
         fontSize =
           when {
-            height < 650 -> 12
-            height > 1_000 -> 16
+            height < 650.dp -> 12
+            height > 1_000.dp -> 16
             else -> 14
           }.sp,
       ),
@@ -1098,7 +1104,7 @@ private fun DayLengthText(
   dayPeriod: DayPeriod,
   modifier: Modifier = Modifier,
 ) {
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
   Text(
     text = formatTimeMillis(todayLengthSeconds * 1_000L),
     color = dayPeriod.textColor(),
@@ -1107,8 +1113,8 @@ private fun DayLengthText(
         fontWeight = FontWeight.Medium,
         fontSize =
           when {
-            height < 650 -> 15
-            height > 1_000 -> 20
+            height < 650.dp -> 15
+            height > 1_000.dp -> 20
             else -> 18
           }.sp,
         shadow =
@@ -1125,11 +1131,11 @@ private fun DayLengthDiffText(
   dayPeriod: DayPeriod,
   modifier: Modifier = Modifier,
 ) {
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
   val fontSize =
     when {
-      height < 650 -> 15
-      height > 1_000 -> 20
+      height < 650.dp -> 15
+      height > 1_000.dp -> 20
       else -> 18
     }.sp
 
@@ -1178,7 +1184,7 @@ private fun LongerShorterText(
   diffPrefix: String,
   dayPeriod: DayPeriod,
 ) {
-  val height = LocalConfiguration.current.screenHeightDp
+  val height = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.height.toDp() }
   AnimatedVisibility(modifier = modifier, visible = diffPrefix == "+" || diffPrefix == "-") {
     SingleLineAutoSizeText(
       text =
@@ -1197,8 +1203,8 @@ private fun LongerShorterText(
             Shadow(color = dayPeriod.textShadowColor(), offset = Offset(1f, 1f), blurRadius = 1f),
           fontSize =
             when {
-              height < 650 -> 12
-              height > 1_000 -> 16
+              height < 650.dp -> 12
+              height > 1_000.dp -> 16
               else -> 14
             }.sp,
         ),
