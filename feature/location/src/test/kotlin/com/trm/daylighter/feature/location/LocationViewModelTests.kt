@@ -625,7 +625,7 @@ class LocationViewModelTests {
   fun `WHEN get location display name is called and exception is thrown THEN location name failure message flow emits null, geocoding error, null`() =
     runTest {
       with(
-        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { throws(IOException()) })
+        viewModel(getLocationDisplayNameUseCase = getLocationDisplayName { throws(Exception()) })
       ) {
         locationNameFailureMessageFlow.test(timeout = 5_000.milliseconds) {
           runCurrent()
