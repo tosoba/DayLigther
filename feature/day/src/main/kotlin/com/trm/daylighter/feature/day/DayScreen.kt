@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -251,7 +252,7 @@ internal fun DayScreen(
                         alpha = if (pagerState.currentPage == it) 1.0f else 0.38f
                       )
                     )
-                    .size(10.dp)
+                    .size(12.dp)
               )
             }
           }
@@ -284,7 +285,7 @@ internal fun DayScreen(
               visible = locations is Empty,
               enter = fadeIn(),
               exit = fadeOut(),
-              modifier = Modifier.align(Alignment.Center).padding(20.dp),
+              modifier = Modifier.align(Alignment.Center).padding(16.dp),
             ) {
               InfoButtonCard(
                 infoText = stringResource(commonR.string.no_saved_locations),
@@ -313,7 +314,6 @@ internal fun DayScreen(
           )
         }
       },
-      leading = { Spacer(modifier = Modifier.width(if (showNavigationIcon) 15.dp else 5.dp)) },
       trailing = {
         Spacer(
           modifier =
@@ -473,7 +473,6 @@ private fun DayTopAppBar(
   modifier: Modifier = Modifier,
   colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
-  leading: @Composable () -> Unit = {},
   trailing: @Composable () -> Unit = {},
 ) {
   CenterAlignedTopAppBar(
@@ -482,7 +481,6 @@ private fun DayTopAppBar(
     navigationIcon = navigationIcon,
     title = {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        leading()
         Box(
           modifier =
             Modifier.weight(1f)
@@ -507,7 +505,7 @@ private fun DayTopAppBar(
             modifier =
               Modifier.basicMarquee(iterations = Int.MAX_VALUE)
                 .align(Alignment.Center)
-                .padding(10.dp),
+                .padding(12.dp),
           )
         }
         trailing()
@@ -577,8 +575,8 @@ private fun ClockAndDayLengthCard(
           modifier =
             Modifier.constrainAs(timezoneDiff) {
                 top.linkTo(clock.bottom)
-                start.linkTo(parent.start, 5.dp)
-                end.linkTo(parent.end, 5.dp)
+                start.linkTo(parent.start, 4.dp)
+                end.linkTo(parent.end, 4.dp)
               }
               .basicMarquee(iterations = Int.MAX_VALUE),
           zoneId = location.zoneId,
@@ -589,8 +587,8 @@ private fun ClockAndDayLengthCard(
           modifier =
             Modifier.constrainAs(nextPeriodTimer) {
               top.linkTo(timezoneDiff.bottom)
-              start.linkTo(parent.start, 5.dp)
-              end.linkTo(parent.end, 5.dp)
+              start.linkTo(parent.start, 4.dp)
+              end.linkTo(parent.end, 4.dp)
             },
           dayPeriod = dayPeriod.value,
           dayMode = location.zoneId.currentDayMode(),
@@ -606,8 +604,8 @@ private fun ClockAndDayLengthCard(
                 width = Dimension.fillToConstraints
 
                 top.linkTo(nextPeriodTimer.bottom)
-                start.linkTo(parent.start, 5.dp)
-                end.linkTo(parent.end, 5.dp)
+                start.linkTo(parent.start, 4.dp)
+                end.linkTo(parent.end, 4.dp)
               },
             color = dayPeriod.value.textColor(),
           )
@@ -616,8 +614,8 @@ private fun ClockAndDayLengthCard(
             modifier =
               Modifier.constrainAs(lengthInfo) {
                 top.linkTo(divider.bottom)
-                start.linkTo(parent.start, 5.dp)
-                end.linkTo(parent.end, 5.dp)
+                start.linkTo(parent.start, 4.dp)
+                end.linkTo(parent.end, 4.dp)
               },
             change = it.data,
             dayPeriod = dayPeriod.value,
@@ -651,20 +649,20 @@ private fun NextDayPeriodTimer(
   val `in` = stringResource(R.string.`in`)
 
   fun buildNextPeriodInText(nextPeriod: NextDayPeriod?): AnnotatedString = buildAnnotatedString {
-    pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-    append(
-      nextPeriod
-        ?.label
-        ?.replaceFirstChar { if (it.isLowerCase()) it.titlecaseChar() else it }
-        .orEmpty()
-    )
-    pop()
+    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
+      append(
+        nextPeriod
+          ?.label
+          ?.replaceFirstChar { if (it.isLowerCase()) it.titlecaseChar() else it }
+          .orEmpty()
+      )
+    }
     append(" ")
     append(`in`)
     append(": ")
-    pushStyle(SpanStyle(fontWeight = FontWeight.SemiBold))
-    append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId).orEmpty())
-    pop()
+    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
+      append(nextPeriod?.timestamp?.formatTimeUntilNow(zoneId).orEmpty())
+    }
   }
 
   Box(modifier = modifier) {
@@ -684,7 +682,7 @@ private fun NextDayPeriodTimer(
                 delay(1_000L)
               }
             }
-            .collect { timerText = it }
+            .collect { text -> timerText = text }
         }
       }
 
@@ -928,8 +926,8 @@ private fun DayLengthInfo(
           Modifier.constrainAs(dayLengthLabelText) {
             top.linkTo(parent.top)
             bottom.linkTo(lengthText.top)
-            start.linkTo(parent.start, 5.dp)
-            end.linkTo(parent.end, 5.dp)
+            start.linkTo(parent.start, 4.dp)
+            end.linkTo(parent.end, 4.dp)
           },
       )
 
@@ -954,8 +952,8 @@ private fun DayLengthInfo(
           Modifier.constrainAs(lengthText) {
             top.linkTo(dayLengthLabelText.bottom)
             bottom.linkTo(diffText.top)
-            start.linkTo(icon.end, 5.dp)
-            end.linkTo(parent.end, 5.dp)
+            start.linkTo(icon.end, 4.dp)
+            end.linkTo(parent.end, 4.dp)
           },
       )
 
@@ -974,9 +972,9 @@ private fun DayLengthInfo(
       LongerShorterText(
         modifier =
           Modifier.constrainAs(longerShorterText) {
-            top.linkTo(diffText.bottom, 5.dp)
-            start.linkTo(parent.start, 5.dp)
-            end.linkTo(parent.end, 5.dp)
+            top.linkTo(diffText.bottom, 4.dp)
+            start.linkTo(parent.start, 4.dp)
+            end.linkTo(parent.end, 4.dp)
             bottom.linkTo(parent.bottom)
           },
         diffPrefix = diffPrefix,
@@ -989,7 +987,7 @@ private fun DayLengthInfo(
           Modifier.constrainAs(dayLengthLabelText) {
             top.linkTo(parent.top)
             start.linkTo(icon.end)
-            end.linkTo(parent.end, 5.dp)
+            end.linkTo(parent.end, 4.dp)
             bottom.linkTo(lengthText.top)
           },
       )
@@ -1013,7 +1011,7 @@ private fun DayLengthInfo(
         modifier =
           Modifier.constrainAs(lengthText) {
             top.linkTo(dayLengthLabelText.bottom)
-            start.linkTo(icon.end, 5.dp)
+            start.linkTo(icon.end, 4.dp)
           },
       )
 
@@ -1024,8 +1022,8 @@ private fun DayLengthInfo(
         modifier =
           Modifier.constrainAs(diffText) {
             top.linkTo(dayLengthLabelText.bottom)
-            start.linkTo(lengthText.end, 5.dp)
-            end.linkTo(parent.end, 5.dp)
+            start.linkTo(lengthText.end, 4.dp)
+            end.linkTo(parent.end, 4.dp)
           },
       )
 
@@ -1035,8 +1033,8 @@ private fun DayLengthInfo(
             width = Dimension.fillToConstraints
 
             top.linkTo(lengthText.bottom)
-            end.linkTo(parent.end, 5.dp)
-            start.linkTo(icon.end, 5.dp)
+            end.linkTo(parent.end, 4.dp)
+            start.linkTo(icon.end, 4.dp)
           },
         diffPrefix = diffPrefix,
         dayPeriod = dayPeriod,

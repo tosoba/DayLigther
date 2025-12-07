@@ -74,7 +74,7 @@ private fun LocationsScreen(
     var locationBeingDeleted: Location? by rememberSaveable { mutableStateOf(null) }
     var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
-    val bottomButtonsPaddingDp = 20.dp
+    val bottomButtonsPaddingDp = 16.dp
     var bottomButtonsHeightPx by remember { mutableIntStateOf(0) }
 
     @Composable
@@ -100,7 +100,7 @@ private fun LocationsScreen(
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             LazyVerticalGrid(
-              contentPadding = PaddingValues(10.dp),
+              contentPadding = PaddingValues(12.dp),
               columns = GridCells.Adaptive(175.dp),
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
@@ -112,7 +112,7 @@ private fun LocationsScreen(
 
               items(locations.data, key = { it.value.id }) { location ->
                 MapCard(
-                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(4.dp),
                   location = location,
                   zoom = zoom,
                   onSetDefaultLocationClick = onSetDefaultLocationClick,
@@ -176,7 +176,7 @@ private fun LocationsScreen(
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             NoLocationsCard(
-              modifier = Modifier.align(Alignment.Center).padding(20.dp),
+              modifier = Modifier.align(Alignment.Center).padding(16.dp),
               onNewLocationClick = onNewLocationClick,
             )
 
@@ -266,7 +266,7 @@ private fun MapCard(
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(vertical = 10.dp, horizontal = 5.dp),
+            .padding(vertical = 12.dp, horizontal = 4.dp),
       )
 
       LocationDropDrownMenu(

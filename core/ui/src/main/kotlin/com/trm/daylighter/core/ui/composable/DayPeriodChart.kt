@@ -84,10 +84,10 @@ private val DrawScope.chartTextPaddingPx: Float
   get() = 8.dp.toPx()
 
 private val segmentEndingEdgeLabelPaddingPx: Float
-  @Composable get() = with(LocalDensity.current) { 20.dp.toPx() }
+  @Composable get() = with(LocalDensity.current) { 16.dp.toPx() }
 
 private val segmentEndingEdgeLineExtraLengthPx: Float
-  @Composable get() = with(LocalDensity.current) { 20.dp.toPx() }
+  @Composable get() = with(LocalDensity.current) { 16.dp.toPx() }
 
 private val horizonLineExtraLengthPx: Float
   @Composable get() = with(LocalDensity.current) { 1_000_000.dp.toPx() }

@@ -282,7 +282,7 @@ private fun LocationScreen(
       modalSheet = {
         if (sheetVisible && LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
           ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
-            ModalSheetContent(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth())
+            ModalSheetContent(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth())
           }
         }
       },
@@ -327,7 +327,7 @@ private fun LocationScreen(
       drawerContent = {
         ModalDrawerSheet {
           ModalSheetContent(
-            modifier = Modifier.padding(20.dp).fillMaxHeight().verticalScroll(rememberScrollState())
+            modifier = Modifier.padding(16.dp).fillMaxHeight().verticalScroll(rememberScrollState())
           )
         }
       },
@@ -358,10 +358,10 @@ private fun LocationScaffold(
       MapView(mapView, mapPosition, modifier = Modifier.fillMaxSize())
       MarkerIcon(modifier = Modifier.align(Alignment.Center))
 
-      Column(modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)) {
+      Column(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
         UserLocationButton(visible = !isLoading, onUserLocationClick = onUserLocationClick)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         SaveSpecifiedLocationButton(
           imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel
@@ -429,13 +429,13 @@ private fun LocationAppBar(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
-        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 10.dp),
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 12.dp),
       )
     },
     navigationIcon = {
       SmallFloatingActionButton(
         onClick = onBackClick,
-        modifier = Modifier.padding(start = 5.dp, top = 5.dp),
+        modifier = Modifier.padding(start = 4.dp, top = 4.dp),
       ) {
         Icon(
           imageVector = Icons.Filled.ArrowBack,
@@ -447,7 +447,7 @@ private fun LocationAppBar(
     actions = {
       SmallFloatingActionButton(
         onClick = onInfoClick,
-        modifier = Modifier.padding(end = 5.dp, top = 5.dp),
+        modifier = Modifier.padding(end = 4.dp, top = 4.dp),
       ) {
         Icon(
           imageVector = Icons.Filled.Info,
@@ -531,7 +531,7 @@ private fun ModalSheetContent(
       text = headerLabel,
       style = MaterialTheme.typography.headlineMedium,
       maxLines = 2,
-      modifier = Modifier.padding(10.dp).fillMaxWidth(),
+      modifier = Modifier.padding(12.dp).fillMaxWidth(),
     )
 
     TextField(
@@ -549,12 +549,12 @@ private fun ModalSheetContent(
           )
         }
       },
-      modifier = Modifier.padding(10.dp).fillMaxWidth(),
+      modifier = Modifier.padding(12.dp).fillMaxWidth(),
     )
 
     LoadingProgressIndicator(
       visible = isNameLoading,
-      modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
+      modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth(),
     )
 
     AnimatedVisibility(
@@ -563,7 +563,7 @@ private fun ModalSheetContent(
       exit = fadeOut(),
     ) {
       Text(
-        modifier = Modifier.padding(horizontal = 10.dp),
+        modifier = Modifier.padding(horizontal = 12.dp),
         text =
           when (nameError) {
             LocationNameError.BLANK -> stringResource(R.string.location_name_cannot_be_blank)
@@ -594,7 +594,7 @@ private fun ModalSheetContent(
     Spacer(
       modifier =
         Modifier.height(
-          10.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
+          12.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
         )
     )
   }
@@ -608,7 +608,7 @@ private fun ModalSheetButtonsRow(
   onGeocodeClick: () -> Unit,
   onSaveClick: () -> Unit,
 ) {
-  Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+  Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
     OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
       Text(
         text = geocodeButtonText,
@@ -617,7 +617,7 @@ private fun ModalSheetButtonsRow(
       )
     }
 
-    Spacer(modifier = Modifier.width(5.dp))
+    Spacer(modifier = Modifier.width(4.dp))
 
     OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
       Text(
@@ -637,7 +637,7 @@ private fun ModalSheetButtons(
 ) {
   OutlinedButton(
     onClick = onGeocodeClick,
-    modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp),
+    modifier = Modifier.fillMaxWidth().padding(top = 12.dp, start = 12.dp, end = 12.dp),
   ) {
     Text(
       text = geocodeButtonText,
@@ -646,11 +646,11 @@ private fun ModalSheetButtons(
     )
   }
 
-  Spacer(modifier = Modifier.height(5.dp))
+  Spacer(modifier = Modifier.height(4.dp))
 
   OutlinedButton(
     onClick = onSaveClick,
-    modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
+    modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
   ) {
     Text(
       text = stringResource(R.string.save),

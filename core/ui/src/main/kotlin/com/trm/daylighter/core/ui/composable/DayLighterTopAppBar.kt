@@ -43,7 +43,7 @@ fun DayLighterTopAppBar(
         modifier =
           Modifier.fillMaxWidth()
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 12.dp),
       )
     },
     actions = actions,

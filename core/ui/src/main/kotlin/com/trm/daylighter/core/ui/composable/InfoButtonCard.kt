@@ -27,10 +27,10 @@ fun InfoButtonCard(
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.padding(20.dp),
+      modifier = Modifier.padding(16.dp),
     ) {
       Text(text = infoText, fontSize = 20.sp, textAlign = TextAlign.Center)
-      Spacer(modifier = Modifier.height(10.dp))
+      Spacer(modifier = Modifier.height(12.dp))
       OutlinedButton(onClick = onButtonClick) { Text(text = actionText) }
     }
   }

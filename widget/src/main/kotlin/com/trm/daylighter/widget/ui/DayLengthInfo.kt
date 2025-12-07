@@ -79,7 +79,7 @@ internal fun DayLengthInfo(change: LocationSunriseSunsetChange) {
             },
         )
 
-        Spacer(modifier = GlanceModifier.width(5.dp))
+        Spacer(modifier = GlanceModifier.width(4.dp))
 
         if (diffPrefix == "+" || diffPrefix == "-") {
           Box(

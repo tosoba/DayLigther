@@ -103,7 +103,7 @@ internal fun DayPeriodChart(
         provider = ImageProvider(R.drawable.settings),
         contentDescription = stringResource(commonR.string.settings),
         modifier =
-          GlanceModifier.padding(5.dp).run {
+          GlanceModifier.padding(4.dp).run {
             if (LocalIsPreviewProvider.current) {
               this
             } else
@@ -123,7 +123,7 @@ internal fun DayPeriodChart(
         provider = ImageProvider(R.drawable.refresh),
         contentDescription = stringResource(commonR.string.refresh),
         modifier =
-          GlanceModifier.padding(5.dp).run {
+          GlanceModifier.padding(4.dp).run {
             if (LocalIsPreviewProvider.current) {
               this
             } else {

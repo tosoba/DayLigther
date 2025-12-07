@@ -51,14 +51,14 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
         Modifier.fillMaxWidth()
           .weight(1f)
           .verticalScroll(rememberScrollState())
-          .padding(vertical = 10.dp)
+          .padding(vertical = 12.dp)
     ) {
       val context = LocalContext.current
 
       Text(
         text = stringResource(R.string.repository),
         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
       )
 
       ImageTextRow(
@@ -67,13 +67,13 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
         contentDescription = stringResource(R.string.github),
         modifier =
           Modifier.clickable { context.goToUrlInBrowser("https://github.com/tosoba/DayLigther") }
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
       )
 
       Text(
         text = stringResource(R.string.credits),
         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
       )
 
       ImageTextRow(
@@ -82,10 +82,10 @@ fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
         contentDescription = stringResource(R.string.open_street_map),
         modifier =
           Modifier.clickable { context.goToUrlInBrowser("https://www.openstreetmap.org/") }
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
       )
 
-      Spacer(modifier = Modifier.height(10.dp))
+      Spacer(modifier = Modifier.height(12.dp))
     }
   }
 }
@@ -101,10 +101,10 @@ private fun ImageTextRow(
     Image(
       painter = imagePainter,
       contentDescription = contentDescription,
-      modifier = Modifier.size(30.dp),
+      modifier = Modifier.size(32.dp),
     )
 
-    Spacer(modifier = Modifier.width(10.dp))
+    Spacer(modifier = Modifier.width(12.dp))
 
     Text(
       text = text,

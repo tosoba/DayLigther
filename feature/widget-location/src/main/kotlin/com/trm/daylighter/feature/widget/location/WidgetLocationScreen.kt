@@ -140,7 +140,7 @@ private fun WidgetLocationScreen(
   Box(modifier = modifier) {
     var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
-    val bottomButtonsPaddingDp = 20.dp
+    val bottomButtonsPaddingDp = 16.dp
     var addWidgetButtonsHeightPx by remember { mutableIntStateOf(0) }
     var zoomButtonsRowHeightPx by remember { mutableIntStateOf(0) }
 
@@ -167,7 +167,7 @@ private fun WidgetLocationScreen(
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             LazyVerticalGrid(
-              contentPadding = PaddingValues(10.dp),
+              contentPadding = PaddingValues(12.dp),
               columns = GridCells.Adaptive(175.dp),
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
@@ -183,7 +183,7 @@ private fun WidgetLocationScreen(
                   zoom = zoom,
                   isSelected = location.value.id == selectedLocationId,
                   onSelected = onLocationSelected,
-                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(5.dp),
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(4.dp),
                 )
               }
 
@@ -259,7 +259,7 @@ private fun WidgetLocationScreen(
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             NoLocationsCard(
-              modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(20.dp),
+              modifier = Modifier.align(Alignment.Center).wrapContentSize().padding(16.dp),
               onNewLocationClick = onNewLocationClick,
             )
 
@@ -295,7 +295,7 @@ private fun ConfirmLocationSelectionControls(
             onClick = onConfirmDayNightCycleLocationSelectionClick,
           )
 
-          Spacer(modifier = Modifier.height(5.dp))
+          Spacer(modifier = Modifier.height(16.dp))
 
           ConfirmSelectionButton(
             modifier = Modifier.fillMaxWidth(),
@@ -323,7 +323,7 @@ private fun ConfirmLocationSelectionControls(
             onClick = onConfirmDayNightCycleLocationSelectionClick,
           )
 
-          Spacer(modifier = Modifier.width(5.dp))
+          Spacer(modifier = Modifier.width(16.dp))
 
           ConfirmSelectionButton(
             modifier = Modifier.weight(1f),
@@ -411,7 +411,7 @@ private fun MapCard(
           Modifier.fillMaxWidth()
             .align(Alignment.BottomCenter)
             .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(vertical = 10.dp, horizontal = 5.dp),
+            .padding(vertical = 12.dp, horizontal = 4.dp),
       )
 
       Checkbox(

@@ -11,6 +11,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,7 @@ fun ZoomButtonsRow(
       )
     }
 
-    Spacer(modifier = Modifier.width(10.dp))
+    Spacer(modifier = Modifier.width(12.dp))
 
     ZoomButton(
       enabled = zoom > MapDefaults.MIN_ZOOM,
@@ -64,7 +65,8 @@ fun ZoomButton(
       FloatingActionButtonDefaults.containerColor.run { if (enabled) this else copy(alpha = .95f) },
     elevation =
       FloatingActionButtonDefaults.run { if (enabled) elevation() else bottomAppBarFabElevation() },
-    interactionSource = if (enabled) MutableInteractionSource() else NoRippleInteractionSource(),
+    interactionSource =
+      remember(enabled) { if (enabled) MutableInteractionSource() else NoRippleInteractionSource() },
   ) {
     icon()
   }
