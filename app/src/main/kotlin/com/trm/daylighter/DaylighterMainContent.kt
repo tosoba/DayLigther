@@ -63,20 +63,17 @@ fun DayLighterMainContent() {
       DayLighterDrawerContent(
         currentRoute = currentRoute,
         onRouteSelected = { destinationRoute ->
-          scope
-            .launch { drawerState.animateTo(DrawerValue.Closed, TweenSpec(durationMillis = 150)) }
-            .invokeOnCompletion {
-              if (destinationRoute != currentRoute) {
-                navController.navigate(
-                  route = destinationRoute,
-                  navOptions =
-                    navController.topLevelNavOptions(
-                      saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
-                      restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute),
-                    ),
-                )
-              }
-            }
+          scope.launch { drawerState.close() }
+          if (destinationRoute != currentRoute) {
+            navController.navigate(
+              route = destinationRoute,
+              navOptions =
+                navController.topLevelNavOptions(
+                  saveCurrentRouteState = !currentRoute.startsWith(widgetLocationRoute),
+                  restoreDestinationState = !destinationRoute.startsWith(widgetLocationRoute),
+                ),
+            )
+          }
         },
       )
     },
