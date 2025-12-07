@@ -2,7 +2,6 @@ package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -45,10 +44,6 @@ import com.trm.daylighter.feature.widget.location.widgetLocationRoute
 import kotlinx.coroutines.launch
 
 @Composable
-private fun NavController.currentRoute(): String =
-  currentBackStackEntryAsState().value?.destination?.route ?: dayNightCycleRoute
-
-@Composable
 fun DayLighterMainContent() {
   val navController = rememberNavController()
   val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -83,7 +78,11 @@ fun DayLighterMainContent() {
 }
 
 @Composable
-fun DayLighterNavigationDrawer(
+private fun NavController.currentRoute(): String =
+  currentBackStackEntryAsState().value?.destination?.route ?: dayNightCycleRoute
+
+@Composable
+private fun DayLighterNavigationDrawer(
   modifier: Modifier = Modifier,
   drawerState: DrawerState,
   visible: Boolean,
@@ -206,18 +205,14 @@ private fun DayLighterNavHost(
   }
 
   val scope = rememberCoroutineScope()
-  val onDrawerMenuClick =
-    remember(drawerState) {
-      fun() {
-        scope.launch { with(drawerState) { if (isOpen) close() else open() } }
-      }
-    }
 
-  @Composable
-  fun backHandler() {
-    BackHandler(enabled = drawerState.isOpen) {
-      scope.launch { drawerState.animateTo(DrawerValue.Closed, TweenSpec(durationMillis = 150)) }
-    }
+  fun onDrawerMenuClick() {
+    scope.launch { with(drawerState) { if (isOpen) close() else open() } }
+  }
+
+  val currentRoute = navController.currentRoute()
+  BackHandler(enabled = !currentRoute.startsWith(locationRoute) && drawerState.isOpen) {
+    scope.launch { drawerState.close() }
   }
 
   val context = LocalContext.current
@@ -243,10 +238,9 @@ private fun DayLighterNavHost(
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         chartMode = DayPeriodChartMode.DAY_NIGHT_CYCLE,
-        onDrawerMenuClick = onDrawerMenuClick,
+        onDrawerMenuClick = ::onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
-        backHandler = { backHandler() },
       )
     }
 
@@ -257,10 +251,9 @@ private fun DayLighterNavHost(
       DayRoute(
         modifier = Modifier.fillMaxSize(),
         chartMode = DayPeriodChartMode.GOLDEN_BLUE_HOUR,
-        onDrawerMenuClick = onDrawerMenuClick,
+        onDrawerMenuClick = ::onDrawerMenuClick,
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
-        backHandler = { backHandler() },
       )
     }
 
@@ -271,8 +264,7 @@ private fun DayLighterNavHost(
       WidgetLocationRoute(
         modifier = Modifier.fillMaxSize(),
         onNewLocationClick = ::navigateToNewLocation,
-        onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() },
+        onDrawerMenuClick = ::onDrawerMenuClick,
       )
     }
 
@@ -281,24 +273,18 @@ private fun DayLighterNavHost(
         modifier = Modifier.fillMaxSize(),
         onNewLocationClick = ::navigateToNewLocation,
         onEditLocationClick = ::navigateToEditLocation,
-        onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() },
+        onDrawerMenuClick = ::onDrawerMenuClick,
       )
     }
 
     composable(route = settingsRoute) {
-      SettingsRoute(
-        modifier = Modifier.fillMaxSize(),
-        onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() },
-      )
+      SettingsRoute(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = ::onDrawerMenuClick)
     }
 
     composable(route = aboutRoute) {
       AboutScreen(
         modifier = Modifier.fillMaxSize(),
-        onDrawerMenuClick = onDrawerMenuClick,
-        backHandler = { backHandler() },
+        onDrawerMenuClick = ::onDrawerMenuClick,
       )
     }
 
@@ -318,15 +304,6 @@ private fun DayLighterNavHost(
   }
 }
 
-private fun NavOptionsBuilder.fadeInAndOut() {
-  anim {
-    enter = android.R.anim.fade_in
-    exit = android.R.anim.fade_out
-    popEnter = android.R.anim.fade_in
-    popExit = android.R.anim.fade_out
-  }
-}
-
 private fun NavController.topLevelNavOptions(
   saveCurrentRouteState: Boolean,
   restoreDestinationState: Boolean,
@@ -340,4 +317,13 @@ private fun NavController.topLevelNavOptions(
 private fun nextLevelNavOptions(): NavOptions = navOptions {
   launchSingleTop = true
   fadeInAndOut()
+}
+
+private fun NavOptionsBuilder.fadeInAndOut() {
+  anim {
+    enter = android.R.anim.fade_in
+    exit = android.R.anim.fade_out
+    popEnter = android.R.anim.fade_in
+    popExit = android.R.anim.fade_out
+  }
 }

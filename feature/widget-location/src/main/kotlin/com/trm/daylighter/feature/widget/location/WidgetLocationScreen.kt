@@ -92,13 +92,10 @@ fun WidgetLocationRoute(
   modifier: Modifier = Modifier,
   onNewLocationClick: () -> Unit,
   onDrawerMenuClick: () -> Unit,
-  backHandler: @Composable () -> Unit,
   viewModel: WidgetLocationViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   val selectedLocationId = viewModel.selectedLocationIdFlow.collectAsStateWithLifecycle()
-
-  backHandler()
 
   WidgetLocationScreen(
     locations = locations.value,

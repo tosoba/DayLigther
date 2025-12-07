@@ -35,13 +35,7 @@ const val aboutRoute = "about_route"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(
-  modifier: Modifier = Modifier,
-  onDrawerMenuClick: () -> Unit,
-  backHandler: @Composable () -> Unit,
-) {
-  backHandler()
-
+fun AboutScreen(modifier: Modifier = Modifier, onDrawerMenuClick: () -> Unit) {
   Column(modifier = modifier) {
     DayLighterTopAppBar(
       title = stringResource(commonR.string.about),

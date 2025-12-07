@@ -94,15 +94,12 @@ fun DayRoute(
   onDrawerMenuClick: () -> Unit,
   onNewLocationClick: () -> Unit,
   onEditLocationClick: (Long) -> Unit,
-  backHandler: @Composable () -> Unit,
   modifier: Modifier = Modifier,
   viewModel: DayViewModel = hiltViewModel(),
 ) {
   val locations = viewModel.locationsFlow.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   val initialLocationIndex =
     viewModel.initialLocationIndexFlow.collectAsStateWithLifecycle(initialValue = 0)
-
-  backHandler()
 
   DayScreen(
     chartMode = chartMode,
