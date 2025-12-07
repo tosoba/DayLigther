@@ -302,7 +302,8 @@ internal fun DayScreen(
     }
 
     var trailingSpacerWidthPx: Int? by remember { mutableStateOf(0) }
-    val showNavigationIcon = !usingPermanentNavigationDrawer && usingNavigationBar
+    val showNavigationIcon =
+      !usingPermanentNavigationDrawer && (usingNavigationBar || locations is Empty)
     DayTopAppBar(
       change = currentChange,
       chartMode = chartMode,
