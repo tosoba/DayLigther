@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -50,7 +51,6 @@ fun DayLighterMainContent() {
   val currentRoute = navController.currentRoute()
 
   DayLighterNavigationDrawer(
-    modifier = Modifier.statusBarsPadding(),
     drawerState = drawerState,
     visible = !currentRoute.startsWith(locationRoute),
     drawerContent = {
@@ -121,6 +121,8 @@ private fun DayLighterDrawerContent(
   }
 
   ModalDrawerSheet {
+    Spacer(modifier = Modifier.height(16.dp))
+
     DrawerRouteItem(
       label = stringResource(commonR.string.day_night_cycle),
       route = dayNightCycleRoute,
@@ -170,13 +172,14 @@ private fun DayLighterDrawerContent(
         contentDescription = stringResource(commonR.string.about),
       )
     }
+
+    Spacer(modifier = Modifier.height(16.dp))
   }
 }
 
 @Composable
 private fun DayLighterScaffold(navController: NavHostController, drawerState: DrawerState) {
   Scaffold(
-    modifier = Modifier.statusBarsPadding(),
     containerColor = MaterialTheme.colorScheme.background,
     contentColor = MaterialTheme.colorScheme.onBackground,
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -282,10 +285,7 @@ private fun DayLighterNavHost(
     }
 
     composable(route = aboutRoute) {
-      AboutScreen(
-        modifier = Modifier.fillMaxSize(),
-        onDrawerMenuClick = ::onDrawerMenuClick,
-      )
+      AboutScreen(modifier = Modifier.fillMaxSize(), onDrawerMenuClick = ::onDrawerMenuClick)
     }
 
     composable(
