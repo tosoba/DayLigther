@@ -120,7 +120,10 @@ private fun DayLighterDrawerContent(
     )
   }
 
-  ModalDrawerSheet {
+  ModalDrawerSheet(
+    windowInsets =
+      WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
+  ) {
     Spacer(modifier = Modifier.height(16.dp))
 
     DrawerRouteItem(
