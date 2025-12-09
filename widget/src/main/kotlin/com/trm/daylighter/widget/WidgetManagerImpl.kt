@@ -20,7 +20,7 @@ import javax.inject.Inject
 class WidgetManagerImpl
 @Inject
 constructor(
-  @ApplicationContext private val context: Context,
+  @param:ApplicationContext private val context: Context,
   private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {
@@ -45,7 +45,7 @@ constructor(
           context.widgetPinSuccessCallback<DayNightCycleWidgetPinnedReceiver>(locationId),
       )
 
-  override suspend fun editDayNightCycleWidget(widgetId: Int, locationId: Long) {
+  override fun editDayNightCycleWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
       context.updateWidgetIntent<DayNightCycleWidgetReceiver>(
         widgetId = widgetId,
@@ -71,7 +71,7 @@ constructor(
           context.widgetPinSuccessCallback<GoldenBlueHourWidgetPinnedReceiver>(locationId),
       )
 
-  override suspend fun editGoldenBlueHourWidget(widgetId: Int, locationId: Long) {
+  override fun editGoldenBlueHourWidget(widgetId: Int, locationId: Long) {
     context.sendBroadcast(
       context.updateWidgetIntent<GoldenBlueHourWidgetReceiver>(
         widgetId = widgetId,

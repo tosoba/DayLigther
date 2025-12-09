@@ -31,7 +31,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.wrapContentWidth
 import com.trm.daylighter.core.common.R as commonR
-import com.trm.daylighter.core.common.navigation.WidgetTypeParam
+import com.trm.daylighter.core.common.navigation.WidgetType
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkUri
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkUri
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkUri
@@ -167,10 +167,10 @@ private fun widgetLocationDeepLinkAction(
       context.widgetLocationDeepLinkUri(
         type =
           when (chartMode) {
-            DayPeriodChartMode.DAY_NIGHT_CYCLE -> WidgetTypeParam.DAY_NIGHT_CYCLE
-            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> WidgetTypeParam.GOLDEN_BLUE_HOUR
+            DayPeriodChartMode.DAY_NIGHT_CYCLE -> WidgetType.DAY_NIGHT_CYCLE
+            DayPeriodChartMode.GOLDEN_BLUE_HOUR -> WidgetType.GOLDEN_BLUE_HOUR
           },
-        glanceId = widgetManager.getAppWidgetId(id),
+        widgetId = widgetManager.getAppWidgetId(id),
         locationId = location.id,
       )
   )

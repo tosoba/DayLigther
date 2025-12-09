@@ -91,8 +91,9 @@ const val widgetLocationRoute = "widget_location_route"
 fun WidgetLocationRoute(
   modifier: Modifier = Modifier,
   onNewLocationClick: () -> Unit,
-  onDrawerMenuClick: () -> Unit,
+  onDrawerMenuClick: (() -> Unit)?,
   viewModel: WidgetLocationViewModel = hiltViewModel(),
+  onConfirmEditWidgetLocationClick: () -> Unit = viewModel::onConfirmEditWidgetLocationClick,
 ) {
   val locations = viewModel.locations.collectAsStateWithLifecycle(initialValue = LoadingFirst)
   val selectedLocationId = viewModel.selectedLocationIdFlow.collectAsStateWithLifecycle()
@@ -104,7 +105,7 @@ fun WidgetLocationRoute(
     mode = viewModel.mode,
     onAddDayNightCycleWidget = viewModel::onAddDayNightCycleWidget,
     onAddGoldenBlueHourWidget = viewModel::onAddGoldenBlueHourWidget,
-    onEditWidgetLocationClick = viewModel::onEditWidgetLocationClick,
+    onConfirmEditWidgetLocationClick = onConfirmEditWidgetLocationClick,
     onNewLocationClick = onNewLocationClick,
     onDrawerMenuClick = onDrawerMenuClick,
     modifier = modifier,
@@ -113,8 +114,8 @@ fun WidgetLocationRoute(
   val context = LocalContext.current
   var currentToast: Toast? by remember { mutableStateOf(null) }
   LaunchedEffect(Unit) {
-    viewModel.toastMessageResId.collectLatest { messageResId ->
-      Toast.makeText(context, messageResId, Toast.LENGTH_LONG).also {
+    viewModel.widgetStatus.collectLatest { messageId ->
+      Toast.makeText(context, messageId, Toast.LENGTH_LONG).also {
         it.show()
         currentToast?.cancel()
         currentToast = it
@@ -132,9 +133,9 @@ private fun WidgetLocationScreen(
   mode: WidgetLocationMode,
   onAddDayNightCycleWidget: () -> Unit,
   onAddGoldenBlueHourWidget: () -> Unit,
-  onEditWidgetLocationClick: () -> Unit,
+  onConfirmEditWidgetLocationClick: () -> Unit,
   onNewLocationClick: () -> Unit,
-  onDrawerMenuClick: () -> Unit,
+  onDrawerMenuClick: (() -> Unit)?,
   modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
@@ -149,7 +150,7 @@ private fun WidgetLocationScreen(
       DayLighterTopAppBar(
         title = stringResource(commonR.string.select_widget_location),
         navigationIcon = {
-          if (!usingPermanentNavigationDrawer) {
+          if (!usingPermanentNavigationDrawer && onDrawerMenuClick != null) {
             DrawerMenuIconButton(onClick = onDrawerMenuClick)
           }
         },
@@ -238,7 +239,7 @@ private fun WidgetLocationScreen(
                 mode = mode,
                 onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
                 onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
-                onEditWidgetLocationClick = onEditWidgetLocationClick,
+                onConfirmEditWidgetLocationClick = onConfirmEditWidgetLocationClick,
               )
             }
           }
@@ -276,7 +277,7 @@ private fun ConfirmLocationSelectionControls(
   mode: WidgetLocationMode,
   onConfirmDayNightCycleLocationSelectionClick: () -> Unit,
   onConfirmGoldenBlueHourLocationSelectionClick: () -> Unit,
-  onEditWidgetLocationClick: () -> Unit,
+  onConfirmEditWidgetLocationClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   when (mode) {
@@ -349,7 +350,7 @@ private fun ConfirmLocationSelectionControls(
             contentDescription = stringResource(commonR.string.confirm),
           )
         },
-        onClick = onEditWidgetLocationClick,
+        onClick = onConfirmEditWidgetLocationClick,
       )
     }
   }

@@ -1,11 +1,10 @@
 package com.trm.daylighter.feature.widget.location
 
+import android.appwidget.AppWidgetManager
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.trm.daylighter.core.common.navigation.WidgetLocationDeepLinkParams
-import com.trm.daylighter.core.common.navigation.WidgetTypeParam
-import com.trm.daylighter.core.domain.model.Loadable
-import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.common.navigation.WidgetLocationRouteParams
+import com.trm.daylighter.core.common.navigation.WidgetType
 import com.trm.daylighter.core.domain.usecase.GetAllLocationsFlowUseCase
 import com.trm.daylighter.core.domain.widget.WidgetManager
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
@@ -32,7 +31,7 @@ class WidgetLocationViewModelTests {
   fun `GIVEN SavedStateHandle with location id THEN mode should be EDIT`() {
     assertEquals(
       WidgetLocationMode.EDIT,
-      viewModel(SavedStateHandle(mapOf(WidgetLocationDeepLinkParams.LOCATION_ID to "63"))).mode,
+      viewModel(SavedStateHandle(mapOf(WidgetLocationRouteParams.LOCATION_ID to "63"))).mode,
     )
   }
 
@@ -65,7 +64,7 @@ class WidgetLocationViewModelTests {
             },
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
           onAddDayNightCycleWidget()
           assertEquals(R.string.failed_to_add_widget, awaitItem())
@@ -89,7 +88,7 @@ class WidgetLocationViewModelTests {
             },
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
           onAddGoldenBlueHourWidget()
           assertEquals(R.string.failed_to_add_widget, awaitItem())
@@ -113,7 +112,7 @@ class WidgetLocationViewModelTests {
             },
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
           onAddDayNightCycleWidget()
           expectNoEvents()
@@ -136,7 +135,7 @@ class WidgetLocationViewModelTests {
             },
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
           onAddGoldenBlueHourWidget()
           expectNoEvents()
@@ -151,11 +150,11 @@ class WidgetLocationViewModelTests {
     viewModel(
         savedStateHandle =
           SavedStateHandle(
-            mapOf(WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.DAY_NIGHT_CYCLE.name)
+            mapOf(WidgetLocationRouteParams.WIDGET_TYPE to WidgetType.DAY_NIGHT_CYCLE.name)
           ),
         widgetManager = widgetManager,
       )
-      .onEditWidgetLocationClick()
+      .onConfirmEditWidgetLocationClick()
 
     coVerify(exactly = 0) { widgetManager.editDayNightCycleWidget(any(), any()) }
   }
@@ -167,11 +166,11 @@ class WidgetLocationViewModelTests {
     viewModel(
         savedStateHandle =
           SavedStateHandle(
-            mapOf(WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.GOLDEN_BLUE_HOUR.name)
+            mapOf(WidgetLocationRouteParams.WIDGET_TYPE to WidgetType.GOLDEN_BLUE_HOUR.name)
           ),
         widgetManager = widgetManager,
       )
-      .onEditWidgetLocationClick()
+      .onConfirmEditWidgetLocationClick()
 
     coVerify(exactly = 0) { widgetManager.editGoldenBlueHourWidget(any(), any()) }
   }
@@ -190,17 +189,17 @@ class WidgetLocationViewModelTests {
           savedStateHandle =
             SavedStateHandle(
               mapOf(
-                WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.DAY_NIGHT_CYCLE.name,
-                WidgetLocationDeepLinkParams.GLANCE_ID to "72",
+                WidgetLocationRouteParams.WIDGET_TYPE to WidgetType.DAY_NIGHT_CYCLE.name,
+                AppWidgetManager.EXTRA_APPWIDGET_ID to "72",
                 WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId,
               )
             ),
           widgetManager = widgetManager,
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
-          onEditWidgetLocationClick()
+          onConfirmEditWidgetLocationClick()
           assertEquals(R.string.widget_location_updated, awaitItem())
           cancelAndIgnoreRemainingEvents()
         }
@@ -223,17 +222,17 @@ class WidgetLocationViewModelTests {
           savedStateHandle =
             SavedStateHandle(
               mapOf(
-                WidgetLocationDeepLinkParams.WIDGET_TYPE to WidgetTypeParam.GOLDEN_BLUE_HOUR.name,
-                WidgetLocationDeepLinkParams.GLANCE_ID to "72",
+                WidgetLocationRouteParams.WIDGET_TYPE to WidgetType.GOLDEN_BLUE_HOUR.name,
+                AppWidgetManager.EXTRA_APPWIDGET_ID to "72",
                 WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to selectedLocationId,
               )
             ),
           widgetManager = widgetManager,
         )
       ) {
-        toastMessageResId.test {
+        widgetStatus.test {
           runCurrent()
-          onEditWidgetLocationClick()
+          onConfirmEditWidgetLocationClick()
           assertEquals(R.string.widget_location_updated, awaitItem())
           cancelAndIgnoreRemainingEvents()
         }
@@ -251,8 +250,7 @@ class WidgetLocationViewModelTests {
   ): WidgetLocationViewModel =
     WidgetLocationViewModel(savedStateHandle, getAllLocationsFlowUseCase, widgetManager)
 
-  private fun emptyLocationsFlowUseCase(): GetAllLocationsFlowUseCase =
-    mockk<GetAllLocationsFlowUseCase>().apply {
-      every { this@apply() } returns emptyFlow<Loadable<List<Location>>>()
-    }
+  private fun emptyLocationsFlowUseCase(): GetAllLocationsFlowUseCase = mockk {
+    every { this@mockk.invoke() } returns emptyFlow()
+  }
 }

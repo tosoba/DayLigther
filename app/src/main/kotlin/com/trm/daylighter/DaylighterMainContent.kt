@@ -15,7 +15,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,6 +25,8 @@ import com.trm.daylighter.core.common.navigation.WIDGET_LOCATION_PATH_SEGMENT
 import com.trm.daylighter.core.common.navigation.dayNightCycleDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.goldenBlueHourDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
+import com.trm.daylighter.core.common.navigation.nextLevelNavOptions
+import com.trm.daylighter.core.common.navigation.topLevelNavOptions
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
 import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
@@ -304,29 +305,5 @@ private fun DayLighterNavHost(
     ) {
       LocationRoute(modifier = Modifier.fillMaxSize(), onBackClick = navController::popBackStack)
     }
-  }
-}
-
-private fun NavController.topLevelNavOptions(
-  saveCurrentRouteState: Boolean,
-  restoreDestinationState: Boolean,
-): NavOptions = navOptions {
-  popUpTo(graph.findStartDestination().id) { saveState = saveCurrentRouteState }
-  launchSingleTop = true
-  this.restoreState = restoreDestinationState
-  fadeInAndOut()
-}
-
-private fun nextLevelNavOptions(): NavOptions = navOptions {
-  launchSingleTop = true
-  fadeInAndOut()
-}
-
-private fun NavOptionsBuilder.fadeInAndOut() {
-  anim {
-    enter = android.R.anim.fade_in
-    exit = android.R.anim.fade_out
-    popEnter = android.R.anim.fade_in
-    popExit = android.R.anim.fade_out
   }
 }

@@ -2,12 +2,10 @@ package com.trm.daylighter.feature.day
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.trm.daylighter.core.common.navigation.DayNightCycleDeepLinkParams
-import com.trm.daylighter.core.common.navigation.GoldenBlueHourDeepLinkParams
+import com.trm.daylighter.core.common.navigation.DayNightCycleRouteParams
+import com.trm.daylighter.core.common.navigation.GoldenBlueHourRouteParams
 import com.trm.daylighter.core.domain.model.Empty
-import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
-import com.trm.daylighter.core.domain.model.Location
 import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
 import com.trm.daylighter.core.domain.model.Ready
 import com.trm.daylighter.core.domain.model.SunriseSunset
@@ -54,9 +52,7 @@ class DayViewModelTests {
   @Test
   fun `GIVEN day night deeplink saved state for default location THEN initialLocationIndexFlow should emit 0`() =
     runTest {
-      viewModel(
-          SavedStateHandle(initialState = mapOf(DayNightCycleDeepLinkParams.DEFAULT to "true"))
-        )
+      viewModel(SavedStateHandle(initialState = mapOf(DayNightCycleRouteParams.DEFAULT to "true")))
         .initialLocationIndexFlow
         .test {
           runCurrent()
@@ -68,9 +64,7 @@ class DayViewModelTests {
   @Test
   fun `GIVEN golden blue hour deeplink saved state for default location THEN initialLocationIndexFlow should emit 0`() =
     runTest {
-      viewModel(
-          SavedStateHandle(initialState = mapOf(GoldenBlueHourDeepLinkParams.DEFAULT to "true"))
-        )
+      viewModel(SavedStateHandle(initialState = mapOf(GoldenBlueHourRouteParams.DEFAULT to "true")))
         .initialLocationIndexFlow
         .test {
           runCurrent()
@@ -93,8 +87,8 @@ class DayViewModelTests {
             SavedStateHandle(
               initialState =
                 mapOf(
-                  DayNightCycleDeepLinkParams.LOCATION_ID to "5",
-                  DayNightCycleDeepLinkParams.DEFAULT to "false",
+                  DayNightCycleRouteParams.LOCATION_ID to "5",
+                  DayNightCycleRouteParams.DEFAULT to "false",
                 )
             ),
           getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase,
@@ -123,8 +117,8 @@ class DayViewModelTests {
             SavedStateHandle(
               initialState =
                 mapOf(
-                  GoldenBlueHourDeepLinkParams.LOCATION_ID to "5",
-                  GoldenBlueHourDeepLinkParams.DEFAULT to "false",
+                  GoldenBlueHourRouteParams.LOCATION_ID to "5",
+                  GoldenBlueHourRouteParams.DEFAULT to "false",
                 )
             ),
           getNonDefaultLocationOffsetByIdUseCase = getNonDefaultLocationOffsetByIdUseCase,
@@ -292,9 +286,7 @@ class DayViewModelTests {
     )
 
   private fun emptyLocationsFlowUseCase(): GetAllLocationsFlowUseCase =
-    mockk<GetAllLocationsFlowUseCase>().apply {
-      every { this@apply() } returns emptyFlow<Loadable<List<Location>>>()
-    }
+    mockk<GetAllLocationsFlowUseCase> { every { this@mockk() } returns emptyFlow() }
 
   private fun calculateSunriseSunsetChangeUseCase(): CalculateSunriseSunsetChangeUseCase =
     CalculateSunriseSunsetChangeUseCase(

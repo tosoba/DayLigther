@@ -15,7 +15,15 @@ dependencies {
   implementation(project(":core:data"))
   implementation(project(":core:domain"))
   implementation(project(":core:ui"))
+
+  implementation(project(":feature:location"))
+  implementation(project(":feature:widget-location"))
+
   implementation(project(":work"))
+
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.hilt.navigation.compose)
+  implementation(libs.androidx.navigation.compose)
 
   implementation(libs.material)
   implementation(libs.glance.appwidget)

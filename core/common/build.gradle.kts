@@ -8,6 +8,8 @@ android { namespace = "com.trm.daylighter.core.common" }
 dependencies {
   implementation(project(":core:domain"))
 
+  implementation(libs.androidx.navigation.compose)
+
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.play.services)
 

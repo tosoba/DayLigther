@@ -13,8 +13,9 @@ dependencies {
   implementation(project(":core:common"))
   implementation(project(":core:domain"))
 
-  implementation(libs.androidx.browser)
   implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.core.splashscreen)
+
   implementation(libs.coil.kt)
   implementation(libs.coil.kt.compose)
 

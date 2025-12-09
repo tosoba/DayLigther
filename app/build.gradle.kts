@@ -77,6 +77,7 @@ dependencies {
   implementation(project(":feature:locations"))
   implementation(project(":feature:settings"))
   implementation(project(":feature:widget-location"))
+
   implementation(project(":widget"))
   implementation(project(":work"))
 

@@ -3,8 +3,8 @@ package com.trm.daylighter.feature.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.trm.daylighter.core.common.navigation.DayNightCycleDeepLinkParams
-import com.trm.daylighter.core.common.navigation.GoldenBlueHourDeepLinkParams
+import com.trm.daylighter.core.common.navigation.DayNightCycleRouteParams
+import com.trm.daylighter.core.common.navigation.GoldenBlueHourRouteParams
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
 import com.trm.daylighter.core.domain.model.LoadingFirst
@@ -40,16 +40,16 @@ constructor(
     flow {
         when {
           isStartedFromDeeplink(
-            locationIdParam = DayNightCycleDeepLinkParams.LOCATION_ID,
-            defaultParam = DayNightCycleDeepLinkParams.DEFAULT,
+            locationIdParam = DayNightCycleRouteParams.LOCATION_ID,
+            defaultParam = DayNightCycleRouteParams.DEFAULT,
           ) -> {
-            emit(getNonDefaultLocationOffset(DayNightCycleDeepLinkParams.LOCATION_ID))
+            emit(getNonDefaultLocationOffset(DayNightCycleRouteParams.LOCATION_ID))
           }
           isStartedFromDeeplink(
-            locationIdParam = GoldenBlueHourDeepLinkParams.LOCATION_ID,
-            defaultParam = GoldenBlueHourDeepLinkParams.DEFAULT,
+            locationIdParam = GoldenBlueHourRouteParams.LOCATION_ID,
+            defaultParam = GoldenBlueHourRouteParams.DEFAULT,
           ) -> {
-            emit(getNonDefaultLocationOffset(GoldenBlueHourDeepLinkParams.LOCATION_ID))
+            emit(getNonDefaultLocationOffset(GoldenBlueHourRouteParams.LOCATION_ID))
           }
           else -> {
             emit(0)
