@@ -14,13 +14,12 @@ import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
@@ -54,8 +53,8 @@ constructor(
       if (savedStateHandle.contains(AppWidgetManager.EXTRA_APPWIDGET_ID)) WidgetLocationMode.EDIT
       else WidgetLocationMode.ADD
 
-  private val _widgetStatus = MutableSharedFlow<Int>()
-  val widgetStatus: SharedFlow<Int> = _widgetStatus.asSharedFlow()
+  private val _widgetStatus = Channel<Int>(Channel.BUFFERED)
+  val widgetStatus: Flow<Int> = _widgetStatus.receiveAsFlow()
 
   fun onAddDayNightCycleWidget() {
     addSelectedLocationWidget(addWidget = widgetManager::addDayNightCycleWidget)
@@ -81,7 +80,7 @@ constructor(
   private fun addSelectedLocationWidget(addWidget: suspend (Long) -> Boolean) {
     val locationId = selectedLocationId ?: return
     viewModelScope.launch {
-      if (!addWidget(locationId)) _widgetStatus.emit(R.string.failed_to_add_widget)
+      if (!addWidget(locationId)) _widgetStatus.send(R.string.failed_to_add_widget)
     }
   }
 
@@ -91,7 +90,7 @@ constructor(
       requireNotNull(savedStateHandle.get<String>(AppWidgetManager.EXTRA_APPWIDGET_ID)).toInt(),
       locationId,
     )
-    _widgetStatus.tryEmit(R.string.widget_location_updated)
+    _widgetStatus.trySend(R.string.widget_location_updated)
   }
 
   internal enum class SavedState {

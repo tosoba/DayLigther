@@ -50,7 +50,7 @@ class LocationViewModelTests {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 41L)),
           getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null },
+            mockk<GetLocationByIdUseCase> { coEvery { this@mockk(any()) } returns null },
         )
         .screenMode,
     )
@@ -72,7 +72,7 @@ class LocationViewModelTests {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 33L)),
           getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase>().apply { coEvery { this@apply(any()) } returns null },
+            mockk<GetLocationByIdUseCase> { coEvery { this@mockk(any()) } returns null },
         )
         .mapPositionFlow
         .test {
@@ -98,9 +98,7 @@ class LocationViewModelTests {
       viewModel(
           savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 61L)),
           getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase>().apply {
-              coEvery { this@apply(any()) } returns expectedLocation
-            },
+            mockk<GetLocationByIdUseCase> { coEvery { this@mockk(any()) } returns expectedLocation },
         )
         .mapPositionFlow
         .test {
@@ -201,9 +199,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           getCurrentUserLatLngUseCase =
-            mockk<GetCurrentUserLatLngUseCase>().apply {
-              coEvery { this@apply() } returns LatLng(0.0, 0.0)
-            }
+            mockk<GetCurrentUserLatLngUseCase> { coEvery { this@mockk() } returns LatLng(0.0, 0.0) }
         )
       ) {
         loadingFlow.test {
@@ -224,9 +220,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           getCurrentUserLatLngUseCase =
-            mockk<GetCurrentUserLatLngUseCase>().apply {
-              coEvery { this@apply() } returns userLocation
-            }
+            mockk<GetCurrentUserLatLngUseCase> { coEvery { this@mockk() } returns userLocation }
         )
       ) {
         locationPreparedToSaveFlow.test {
@@ -253,9 +247,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           getCurrentUserLatLngUseCase =
-            mockk<GetCurrentUserLatLngUseCase>().apply {
-              coEvery { this@apply() } returns userLocation
-            }
+            mockk<GetCurrentUserLatLngUseCase> { coEvery { this@mockk() } returns userLocation }
         )
       ) {
         locationPreparedToSaveFlow.test {
@@ -279,7 +271,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           getCurrentUserLatLngUseCase =
-            mockk<GetCurrentUserLatLngUseCase>().apply { coEvery { this@apply() } returns null }
+            mockk<GetCurrentUserLatLngUseCase> { coEvery { this@mockk() } returns null }
         )
       ) {
         userLocationNotFoundFlow.test(timeout = 5_000.milliseconds) {
@@ -339,8 +331,8 @@ class LocationViewModelTests {
       with(
         viewModel(
           getCurrentUserLatLngUseCase =
-            mockk<GetCurrentUserLatLngUseCase>().apply {
-              coEvery { this@apply() } coAnswers
+            mockk<GetCurrentUserLatLngUseCase> {
+              coEvery { this@mockk() } coAnswers
                 {
                   delay(5_000L)
                   LatLng(0.0, 0.0)
@@ -367,9 +359,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           saveLocationUseCase =
-            mockk<SaveLocationUseCase>().apply {
-              coEvery { this@apply(any(), any(), any()) } returns Unit
-            }
+            mockk<SaveLocationUseCase> { coEvery { this@mockk(any(), any(), any()) } returns Unit }
         )
       ) {
         locationSavedFlow.test {
@@ -387,9 +377,7 @@ class LocationViewModelTests {
       with(
         viewModel(
           saveLocationUseCase =
-            mockk<SaveLocationUseCase>().apply {
-              coEvery { this@apply(any(), any(), any()) } returns Unit
-            }
+            mockk<SaveLocationUseCase> { coEvery { this@mockk(any(), any(), any()) } returns Unit }
         )
       ) {
         loadingFlow.test {
@@ -640,8 +628,8 @@ class LocationViewModelTests {
 
   private fun getLocationDisplayName(repoResponse: MockKStubScope<String?, String?>.() -> Unit) =
     GetLocationDisplayNameUseCase(
-      mockk<GeocodingRepo>().apply {
-        coEvery { this@apply.getLocationDisplayName(any(), any()) }.repoResponse()
+      mockk<GeocodingRepo> {
+        coEvery { this@mockk.getLocationDisplayName(any(), any()) }.repoResponse()
       }
     )
 
@@ -653,7 +641,7 @@ class LocationViewModelTests {
     getLocationDisplayNameUseCase: GetLocationDisplayNameUseCase = mockk(),
     setGeocodingEmailUseCase: SetGeocodingEmailUseCase = mockk(),
     getGeocodingEmailFlowUseCase: GetGeocodingEmailFlowUseCase =
-      mockk<GetGeocodingEmailFlowUseCase>().apply { every { this@apply() } returns flowOf(null) },
+      mockk<GetGeocodingEmailFlowUseCase> { every { this@mockk() } returns flowOf(null) },
   ): LocationViewModel =
     LocationViewModel(
       savedStateHandle,

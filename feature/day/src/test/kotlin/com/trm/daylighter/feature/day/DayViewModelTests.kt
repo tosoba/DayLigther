@@ -78,8 +78,8 @@ class DayViewModelTests {
     runTest {
       val expectedOffset = Random.nextInt()
       val getNonDefaultLocationOffsetByIdUseCase =
-        mockk<GetNonDefaultLocationOffsetByIdUseCase>().apply {
-          coEvery { this@apply(any()) } returns expectedOffset
+        mockk<GetNonDefaultLocationOffsetByIdUseCase> {
+          coEvery { this@mockk(any()) } returns expectedOffset
         }
 
       viewModel(
@@ -108,8 +108,8 @@ class DayViewModelTests {
     runTest {
       val expectedOffset = Random.nextInt()
       val getNonDefaultLocationOffsetByIdUseCase =
-        mockk<GetNonDefaultLocationOffsetByIdUseCase>().apply {
-          coEvery { this@apply(any()) } returns expectedOffset
+        mockk<GetNonDefaultLocationOffsetByIdUseCase> {
+          coEvery { this@mockk(any()) } returns expectedOffset
         }
 
       viewModel(
@@ -138,9 +138,7 @@ class DayViewModelTests {
     runTest {
       viewModel(
           getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Empty)
-            }
+            mockk<GetAllLocationsFlowUseCase> { every { this@mockk() } returns flowOf(Empty) }
         )
         .sunriseSunsetChangeInLocationAt(0)
         .test {
@@ -156,8 +154,8 @@ class DayViewModelTests {
     runTest {
       viewModel(
           getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Ready(emptyList()))
+            mockk<GetAllLocationsFlowUseCase> {
+              every { this@mockk() } returns flowOf(Ready(emptyList()))
             }
         )
         .sunriseSunsetChangeInLocationAt(0)
@@ -175,8 +173,8 @@ class DayViewModelTests {
     runTest {
       viewModel(
           getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+            mockk<GetAllLocationsFlowUseCase> {
+              every { this@mockk() } returns flowOf(Ready(listOf(testLocation())))
             }
         )
         .sunriseSunsetChangeInLocationAt(0)
@@ -193,11 +191,11 @@ class DayViewModelTests {
   fun `GIVEN single ready location WHEN day of month changes THEN sunriseSunsetChangeInLocationAt 0 should emit Ready after LoadingFirst and then another Ready`() {
     runTest {
       val calculateSunriseSunsetChangeUseCase =
-        mockk<CalculateSunriseSunsetChangeUseCase>().apply useCase@{
-          every { this@useCase(any()) } returns
+        mockk<CalculateSunriseSunsetChangeUseCase> {
+          every { this@mockk(any()) } returns
             SunriseSunsetChange(
               today =
-                mockk<SunriseSunset>().apply sunriseSunset@{
+                mockk<SunriseSunset> sunriseSunset@{
                   every { this@sunriseSunset.date } answers { LocalDate.now().minusDays(1L) }
                 },
               yesterday = mockk(),
@@ -206,8 +204,8 @@ class DayViewModelTests {
 
       viewModel(
           getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+            mockk<GetAllLocationsFlowUseCase> {
+              every { this@mockk() } returns flowOf(Ready(listOf(testLocation())))
             },
           calculateSunriseSunsetChangeUseCase = calculateSunriseSunsetChangeUseCase,
         )
@@ -229,9 +227,7 @@ class DayViewModelTests {
     runTest {
       viewModel(
           getAllLocationsFlowUseCase =
-            mockk<GetAllLocationsFlowUseCase>().apply {
-              every { this@apply() } returns flowOf(Empty)
-            }
+            mockk<GetAllLocationsFlowUseCase> { every { this@mockk() } returns flowOf(Empty) }
         )
         .currentTimeInLocationAt(0)
         .test {
@@ -252,8 +248,8 @@ class DayViewModelTests {
       runTest {
         viewModel(
             getAllLocationsFlowUseCase =
-              mockk<GetAllLocationsFlowUseCase>().apply {
-                every { this@apply() } returns flowOf(Ready(listOf(testLocation())))
+              mockk<GetAllLocationsFlowUseCase> {
+                every { this@mockk() } returns flowOf(Ready(listOf(testLocation())))
               }
           )
           .currentTimeInLocationAt(0)

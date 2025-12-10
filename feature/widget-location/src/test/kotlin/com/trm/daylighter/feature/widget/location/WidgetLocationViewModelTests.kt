@@ -12,6 +12,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runCurrent
@@ -28,10 +29,10 @@ class WidgetLocationViewModelTests {
   }
 
   @Test
-  fun `GIVEN SavedStateHandle with location id THEN mode should be EDIT`() {
+  fun `GIVEN SavedStateHandle with widget id THEN mode should be EDIT`() {
     assertEquals(
       WidgetLocationMode.EDIT,
-      viewModel(SavedStateHandle(mapOf(WidgetLocationRouteParams.LOCATION_ID to "63"))).mode,
+      viewModel(SavedStateHandle(mapOf(AppWidgetManager.EXTRA_APPWIDGET_ID to "63"))).mode,
     )
   }
 
@@ -59,8 +60,8 @@ class WidgetLocationViewModelTests {
               mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 67L)
             ),
           widgetManager =
-            mockk<WidgetManager>().apply {
-              coEvery { this@apply.addDayNightCycleWidget(any()) } returns false
+            mockk<WidgetManager> {
+              coEvery { this@mockk.addDayNightCycleWidget(any()) } returns false
             },
         )
       ) {
@@ -83,8 +84,8 @@ class WidgetLocationViewModelTests {
               mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 67L)
             ),
           widgetManager =
-            mockk<WidgetManager>().apply {
-              coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns false
+            mockk<WidgetManager> {
+              coEvery { this@mockk.addGoldenBlueHourWidget(any()) } returns false
             },
         )
       ) {
@@ -107,8 +108,8 @@ class WidgetLocationViewModelTests {
               mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 64L)
             ),
           widgetManager =
-            mockk<WidgetManager>().apply {
-              coEvery { this@apply.addDayNightCycleWidget(any()) } returns true
+            mockk<WidgetManager> {
+              coEvery { this@mockk.addDayNightCycleWidget(any()) } returns true
             },
         )
       ) {
@@ -130,8 +131,8 @@ class WidgetLocationViewModelTests {
               mapOf(WidgetLocationViewModel.SavedState.SELECTED_LOCATION_ID.name to 64L)
             ),
           widgetManager =
-            mockk<WidgetManager>().apply {
-              coEvery { this@apply.addGoldenBlueHourWidget(any()) } returns true
+            mockk<WidgetManager> {
+              coEvery { this@mockk.addGoldenBlueHourWidget(any()) } returns true
             },
         )
       ) {
@@ -180,8 +181,8 @@ class WidgetLocationViewModelTests {
     runTest {
       val selectedLocationId = 59L
       val widgetManager =
-        mockk<WidgetManager>().apply {
-          coEvery { this@apply.editDayNightCycleWidget(any(), any()) } returns Unit
+        mockk<WidgetManager> {
+          every { this@mockk.editDayNightCycleWidget(any(), any()) } returns Unit
         }
 
       with(
@@ -205,7 +206,7 @@ class WidgetLocationViewModelTests {
         }
       }
 
-      coVerify(exactly = 1) { widgetManager.editDayNightCycleWidget(any(), eq(selectedLocationId)) }
+      verify(exactly = 1) { widgetManager.editDayNightCycleWidget(any(), eq(selectedLocationId)) }
     }
 
   @Test
@@ -213,8 +214,8 @@ class WidgetLocationViewModelTests {
     runTest {
       val selectedLocationId = 59L
       val widgetManager =
-        mockk<WidgetManager>().apply {
-          coEvery { this@apply.editGoldenBlueHourWidget(any(), any()) } returns Unit
+        mockk<WidgetManager> {
+          every { this@mockk.editGoldenBlueHourWidget(any(), any()) } returns Unit
         }
 
       with(
@@ -238,9 +239,7 @@ class WidgetLocationViewModelTests {
         }
       }
 
-      coVerify(exactly = 1) {
-        widgetManager.editGoldenBlueHourWidget(any(), eq(selectedLocationId))
-      }
+      verify(exactly = 1) { widgetManager.editGoldenBlueHourWidget(any(), eq(selectedLocationId)) }
     }
 
   private fun viewModel(
