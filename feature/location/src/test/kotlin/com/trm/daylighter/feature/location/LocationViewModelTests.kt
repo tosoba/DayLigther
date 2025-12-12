@@ -16,45 +16,26 @@ import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.core.domain.usecase.SetGeocodingEmailUseCase
 import com.trm.daylighter.core.testing.rule.MainDispatcherRule
 import com.trm.daylighter.feature.location.model.LocationPreparedToSave
-import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
 import io.mockk.MockKStubScope
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import java.io.IOException
-import java.time.LocalDateTime
-import java.time.ZoneId
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
+import java.time.LocalDateTime
+import java.time.ZoneId
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 class LocationViewModelTests {
   @get:Rule val mainDispatcherRule = MainDispatcherRule()
-
-  @Test
-  fun `GIVEN no initial location id THEN screen mode is add`() {
-    assertEquals(LocationScreenMode.ADD, viewModel().screenMode)
-  }
-
-  @Test
-  fun `GIVEN an initial location id THEN screen mode is edit`() {
-    assertEquals(
-      LocationScreenMode.EDIT,
-      viewModel(
-          savedStateHandle = SavedStateHandle(mapOf(locationIdParam to 41L)),
-          getLocationByIdUseCase =
-            mockk<GetLocationByIdUseCase> { coEvery { this@mockk(any()) } returns null },
-        )
-        .screenMode,
-    )
-  }
 
   @Test
   fun `GIVEN no initial location id THEN map position flow should only emit default map position`() =

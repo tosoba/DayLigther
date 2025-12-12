@@ -97,7 +97,6 @@ import com.trm.daylighter.core.ui.theme.surfaceToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.rememberKeyboardOpen
 import com.trm.daylighter.feature.location.model.LocationNameError
 import com.trm.daylighter.feature.location.model.LocationPreparedToSave
-import com.trm.daylighter.feature.location.model.LocationScreenMode
 import com.trm.daylighter.feature.location.model.MapPosition
 import com.trm.daylighter.feature.location.model.PermissionRequestMode
 import com.trm.daylighter.feature.location.model.UserLocationRequestState
@@ -163,7 +162,6 @@ fun LocationRoute(
     viewModel.isGeocodeEmailPreferenceSetFlow.collectAsStateWithLifecycle(initialValue = false)
 
   LocationScreen(
-    screenMode = viewModel.screenMode,
     mapPosition = mapPosition.value,
     onMapViewPause = viewModel::onMapViewPause,
     locationPreparedToSave = locationPreparedToSave.value,
@@ -193,7 +191,6 @@ fun LocationRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LocationScreen(
-  screenMode: LocationScreenMode,
   mapPosition: MapPosition,
   onMapViewPause: (MapPosition) -> Unit,
   locationPreparedToSave: LocationPreparedToSave?,

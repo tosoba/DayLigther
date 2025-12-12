@@ -5,7 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.exception.LocationDisplayNameNotFound
-import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.domain.model.Failed
+import com.trm.daylighter.core.domain.model.FailedFirst
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.LoadingFirst
+import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.asLoadable
+import com.trm.daylighter.core.domain.model.isFailedWith
 import com.trm.daylighter.core.domain.usecase.GetCurrentUserLatLngUseCase
 import com.trm.daylighter.core.domain.usecase.GetGeocodingEmailFlowUseCase
 import com.trm.daylighter.core.domain.usecase.GetLocationByIdUseCase
@@ -13,15 +21,34 @@ import com.trm.daylighter.core.domain.usecase.GetLocationDisplayNameUseCase
 import com.trm.daylighter.core.domain.usecase.SaveLocationUseCase
 import com.trm.daylighter.core.domain.usecase.SetGeocodingEmailUseCase
 import com.trm.daylighter.feature.location.exception.UserLatLngNotFound
-import com.trm.daylighter.feature.location.model.*
+import com.trm.daylighter.feature.location.model.LocationNameRequest
+import com.trm.daylighter.feature.location.model.LocationPreparedToSave
+import com.trm.daylighter.feature.location.model.MapPosition
+import com.trm.daylighter.feature.location.model.SaveLocationRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @HiltViewModel
 class LocationViewModel
@@ -153,9 +180,6 @@ constructor(
   val locationNameReadyFlow: Flow<String> =
     locationNameFlow.map { if (it is Ready) it.data else "" }
   val locationNameLoadingFlow: Flow<Boolean> = locationNameFlow.map { it is Loading }
-
-  val screenMode: LocationScreenMode =
-    if (initialLocationId == null) LocationScreenMode.ADD else LocationScreenMode.EDIT
 
   val isGeocodeEmailPreferenceSetFlow: SharedFlow<Boolean> =
     getGeocodingEmailFlowUseCase()
