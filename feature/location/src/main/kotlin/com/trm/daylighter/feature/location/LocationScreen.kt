@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -21,8 +20,6 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -35,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -191,21 +187,6 @@ private fun LocationScreen(
     )
   }
 
-  val mapView =
-    rememberMapViewWithLifecycle(
-      onPause = {
-        onMapViewPause(
-          MapPosition(
-            latitude = it.mapCenter.latitude,
-            longitude = it.mapCenter.longitude,
-            zoom = it.zoomLevelDouble,
-            orientation = it.mapOrientation,
-            label = mapPosition.label,
-          )
-        )
-      }
-    )
-
   CheckLocationSettingsEffect(
     userLocationRequestState = userLocationRequestState,
     onLocationEnabled = requestGetAndSaveUserLocation,
@@ -221,86 +202,12 @@ private fun LocationScreen(
   var locationNameError by rememberSaveable { mutableStateOf(LocationNameError.NO_ERROR) }
 
   var sheetVisible by rememberSaveable { mutableStateOf(false) }
-  val sheetHeaderLabel =
-    stringResource(
-      id =
-        when (screenMode) {
-          LocationScreenMode.ADD -> commonR.string.new_location
-          LocationScreenMode.EDIT -> R.string.edit_location
-        }
-    )
 
   LaunchedEffect(locationPreparedToSave) {
     if (locationPreparedToSave?.isUser == true) sheetVisible = true
   }
 
-  @Composable
-  fun ModalSheetContent(modifier: Modifier = Modifier) {
-    ModalSheetContent(
-      headerLabel = sheetHeaderLabel,
-      nameValue = locationName,
-      isNameLoading = isLocationNameLoading,
-      nameFailureMessage = locationNameFailureMessage,
-      onNameValueChange = {
-        locationNameError = LocationNameError.NO_ERROR
-        onLocationNameChange(it)
-      },
-      nameError = locationNameError,
-      geocodeButtonText = geocodeButtonText,
-      onGeocodeClick = { onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude) },
-      onSaveClick = {
-        if (locationName.isBlank()) {
-          locationNameError = LocationNameError.BLANK
-        } else {
-          locationNameError = LocationNameError.NO_ERROR
-          sheetVisible = false
-          onSaveLocationClick(saveLocationState.latitude, saveLocationState.longitude, locationName)
-        }
-      },
-      modifier = modifier,
-    )
-  }
-
   var isInfoDialogShown by rememberSaveable { mutableStateOf(false) }
-
-  @Composable
-  fun LocationScaffold() {
-    LocationScaffold(
-      mapView = mapView,
-      mapPosition = mapPosition,
-      isLoading = isLoading,
-      isInfoDialogShown = isInfoDialogShown,
-      onInfoClick = { isInfoDialogShown = true },
-      onInfoDialogDismissRequest = { isInfoDialogShown = false },
-      saveSpecifiedLocation = { latitude, longitude ->
-        saveSpecifiedLocationClick(latitude, longitude)
-        sheetVisible = true
-      },
-      onUserLocationClick = context::checkLocationPermissions,
-      cancelCurrentSaveLocation = cancelCurrentSaveLocation,
-      onBackClick = onBackClick,
-      modalSheet = {
-        if (sheetVisible && LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-          ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
-            ModalSheetContent(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth())
-          }
-        }
-      },
-      locationPermissionDialog = {
-        LocationPermissionInfoDialog(
-          dialogVisible = userLocationRequestState.permissionInfoDialogVisible,
-          permissionRequestMode = userLocationRequestState.permissionRequestMode,
-          onOkClick = {
-            userLocationRequestState.permissionInfoDialogVisible = false
-            context.checkLocationPermissions()
-          },
-          onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
-          modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
-        )
-      },
-      modifier = modifier,
-    )
-  }
 
   LaunchedEffect(sheetVisible) {
     if (!sheetVisible) {
@@ -309,32 +216,88 @@ private fun LocationScreen(
     }
   }
 
-  if (LocalHeightSizeClass.current != WindowHeightSizeClass.Compact) {
-    LocationScaffold()
-  } else {
-    val drawerState = remember {
-      DrawerState(initialValue = if (sheetVisible) DrawerValue.Open else DrawerValue.Closed)
-    }
-    LaunchedEffect(sheetVisible) { drawerState.run { if (sheetVisible) open() else close() } }
-    LaunchedEffect(drawerState.currentValue) {
-      if (drawerState.isClosed && !drawerState.isAnimationRunning) sheetVisible = false
-    }
-    BackHandler(enabled = drawerState.isOpen) { sheetVisible = false }
-
-    ModalNavigationDrawer(
-      gesturesEnabled = drawerState.isOpen,
-      drawerState = drawerState,
-      drawerContent = {
-        ModalDrawerSheet {
-          ModalSheetContent(
-            modifier = Modifier.padding(16.dp).fillMaxHeight().verticalScroll(rememberScrollState())
+  LocationScaffold(
+    mapView =
+      rememberMapViewWithLifecycle(
+        onPause = {
+          onMapViewPause(
+            MapPosition(
+              latitude = it.mapCenter.latitude,
+              longitude = it.mapCenter.longitude,
+              zoom = it.zoomLevelDouble,
+              orientation = it.mapOrientation,
+              label = mapPosition.label,
+            )
           )
         }
-      },
-    ) {
-      LocationScaffold()
-    }
-  }
+      ),
+    mapPosition = mapPosition,
+    isLoading = isLoading,
+    isInfoDialogShown = isInfoDialogShown,
+    onInfoClick = { isInfoDialogShown = true },
+    onInfoDialogDismissRequest = { isInfoDialogShown = false },
+    saveSpecifiedLocation = { latitude, longitude ->
+      saveSpecifiedLocationClick(latitude, longitude)
+      sheetVisible = true
+    },
+    onUserLocationClick = context::checkLocationPermissions,
+    cancelCurrentSaveLocation = cancelCurrentSaveLocation,
+    onBackClick = onBackClick,
+    modalSheet = {
+      if (sheetVisible) {
+        ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
+          ModalSheetContent(
+            headerLabel =
+              stringResource(
+                when (screenMode) {
+                  LocationScreenMode.ADD -> commonR.string.new_location
+                  LocationScreenMode.EDIT -> R.string.edit_location
+                }
+              ),
+            nameValue = locationName,
+            isNameLoading = isLocationNameLoading,
+            nameFailureMessage = locationNameFailureMessage,
+            onNameValueChange = {
+              locationNameError = LocationNameError.NO_ERROR
+              onLocationNameChange(it)
+            },
+            nameError = locationNameError,
+            geocodeButtonText = geocodeButtonText,
+            onGeocodeClick = {
+              onGeocodeClick(saveLocationState.latitude, saveLocationState.longitude)
+            },
+            onSaveClick = {
+              if (locationName.isBlank()) {
+                locationNameError = LocationNameError.BLANK
+              } else {
+                locationNameError = LocationNameError.NO_ERROR
+                sheetVisible = false
+                onSaveLocationClick(
+                  saveLocationState.latitude,
+                  saveLocationState.longitude,
+                  locationName,
+                )
+              }
+            },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+          )
+        }
+      }
+    },
+    locationPermissionDialog = {
+      LocationPermissionInfoDialog(
+        dialogVisible = userLocationRequestState.permissionInfoDialogVisible,
+        permissionRequestMode = userLocationRequestState.permissionRequestMode,
+        onOkClick = {
+          userLocationRequestState.permissionInfoDialogVisible = false
+          context.checkLocationPermissions()
+        },
+        onDismiss = { userLocationRequestState.permissionInfoDialogVisible = false },
+        modifier = Modifier.align(Alignment.Center).wrapContentHeight(),
+      )
+    },
+    modifier = modifier,
+  )
 }
 
 @Composable
@@ -520,8 +483,6 @@ private fun ModalSheetContent(
   onGeocodeClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val context = LocalContext.current
-
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
@@ -574,10 +535,7 @@ private fun ModalSheetContent(
       )
     }
 
-    if (
-      LocalHeightSizeClass.current == WindowHeightSizeClass.Compact ||
-        LocalWidthSizeClass.current == WindowWidthSizeClass.Compact
-    ) {
+    if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) {
       ModalSheetButtons(
         geocodeButtonText = geocodeButtonText,
         onGeocodeClick = onGeocodeClick,
@@ -591,12 +549,7 @@ private fun ModalSheetContent(
       )
     }
 
-    Spacer(
-      modifier =
-        Modifier.height(
-          12.dp + with(LocalDensity.current) { context.bottomNavigationBarInsetPx.toDp() }
-        )
-    )
+    Spacer(modifier = Modifier.height(12.dp))
   }
 
   ToastMessageEffect(message = nameFailureMessage)
@@ -609,7 +562,10 @@ private fun ModalSheetButtonsRow(
   onSaveClick: () -> Unit,
 ) {
   Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-    OutlinedButton(onClick = onGeocodeClick, modifier = Modifier.weight(.5f)) {
+    OutlinedButton(
+      onClick = onGeocodeClick,
+      modifier = Modifier.height(IntrinsicSize.Max).weight(.5f),
+    ) {
       Text(
         text = geocodeButtonText,
         maxLines = 1,
@@ -619,7 +575,7 @@ private fun ModalSheetButtonsRow(
 
     Spacer(modifier = Modifier.width(8.dp))
 
-    Button(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
+    Button(onClick = onSaveClick, modifier = Modifier.height(IntrinsicSize.Max).weight(.5f)) {
       Text(
         text = stringResource(R.string.save),
         maxLines = 1,
