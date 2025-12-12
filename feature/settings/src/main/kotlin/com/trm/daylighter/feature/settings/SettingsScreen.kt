@@ -26,14 +26,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jamal.composeprefs3.ui.GroupHeader
 import com.jamal.composeprefs3.ui.LocalPrefsDataStore
 import com.jamal.composeprefs3.ui.PrefsScope
 import com.jamal.composeprefs3.ui.PrefsScreen
-import com.jamal.composeprefs3.ui.prefs.*
-import com.trm.daylighter.core.common.R as commonR
+import com.jamal.composeprefs3.ui.prefs.TextPref
 import com.trm.daylighter.core.common.util.ext.isValidEmail
 import com.trm.daylighter.core.datastore.PreferencesDataStoreKeys
 import com.trm.daylighter.core.datastore.preferencesDataStore
@@ -48,6 +47,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import com.trm.daylighter.core.common.R as commonR
 
 const val settingsRoute = "settings_route"
 
