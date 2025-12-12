@@ -12,6 +12,7 @@
     <string name="location_disabled_non_resolvable_message">Location is disabled. You have to enable it manually from location settings.</string>
     <string name="location_not_found">Unable to retrieve your location. Please try again.</string>
     <string name="edit_location">Edit location</string>
+    <string name="enter_location_name">Enter location name</string>
     <string name="name">Name</string>
     <string name="geocode">Geocode</string>
     <string name="enable_geocoding">Enable geocoding</string>

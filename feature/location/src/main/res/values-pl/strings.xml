@@ -12,6 +12,7 @@
     <string name="location_disabled_non_resolvable_message">Lokalizacja jest wyłączona. Musisz włączyć ją ręcznie w ustawieniach lokalizacji.</string>
     <string name="location_not_found">Nie udało się pobrać Twojej lokalizacji. Spróbuj ponownie.</string>
     <string name="edit_location">Edytuj lokalizację</string>
+    <string name="enter_location_name">Wpisz nazwę lokalizacji</string>
     <string name="name">Nazwa</string>
     <string name="geocode">Geokodowanie</string>
     <string name="enable_geocoding">Włącz geokodowanie</string>

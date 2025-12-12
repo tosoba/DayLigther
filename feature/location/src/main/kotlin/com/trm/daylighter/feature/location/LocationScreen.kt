@@ -248,13 +248,7 @@ private fun LocationScreen(
       if (sheetVisible) {
         ModalBottomSheet(onDismissRequest = { sheetVisible = false }) {
           ModalSheetContent(
-            headerLabel =
-              stringResource(
-                when (screenMode) {
-                  LocationScreenMode.ADD -> commonR.string.new_location
-                  LocationScreenMode.EDIT -> R.string.edit_location
-                }
-              ),
+            headerLabel = stringResource(R.string.enter_location_name),
             nameValue = locationName,
             isNameLoading = isLocationNameLoading,
             nameFailureMessage = locationNameFailureMessage,
