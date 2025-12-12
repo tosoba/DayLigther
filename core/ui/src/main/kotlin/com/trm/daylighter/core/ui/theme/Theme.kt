@@ -7,7 +7,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -79,21 +78,18 @@ val DarkColorScheme =
 
 @Composable
 fun DayLighterTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-  val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
   val view = LocalView.current
   if (!view.isInEditMode) {
     SideEffect {
       val activity = view.context as Activity
-
-      activity.window.statusBarColor = colorScheme.background.toArgb()
-      activity.window.navigationBarColor = colorScheme.background.toArgb()
-
       WindowCompat.getInsetsController(activity.window, view).apply {
         isAppearanceLightStatusBars = !darkTheme
         isAppearanceLightNavigationBars = !darkTheme
       }
     }
   }
-
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+  MaterialTheme(
+    colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+    content = content,
+  )
 }
