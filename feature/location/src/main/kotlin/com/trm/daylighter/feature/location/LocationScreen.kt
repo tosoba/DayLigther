@@ -322,10 +322,13 @@ private fun LocationScaffold(
       MapView(mapView, mapPosition, modifier = Modifier.fillMaxSize())
       MarkerIcon(modifier = Modifier.align(Alignment.Center))
 
-      Column(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
+      Column(
+        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+        horizontalAlignment = Alignment.End,
+      ) {
         UserLocationButton(visible = !isLoading, onUserLocationClick = onUserLocationClick)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         SaveSpecifiedLocationButton(
           imageVector = if (!isLoading) Icons.Filled.Done else Icons.Filled.Cancel
@@ -425,9 +428,13 @@ private fun LocationAppBar(
 
 @Composable
 private fun SaveSpecifiedLocationButton(imageVector: ImageVector, onClick: () -> Unit) {
-  FloatingActionButton(onClick = onClick) {
-    Icon(imageVector = imageVector, contentDescription = stringResource(R.string.save_location))
-  }
+  ExtendedFloatingActionButton(
+    text = { Text(stringResource(commonR.string.confirm)) },
+    icon = {
+      Icon(imageVector = imageVector, contentDescription = stringResource(R.string.save_location))
+    },
+    onClick = onClick,
+  )
 }
 
 @Composable
