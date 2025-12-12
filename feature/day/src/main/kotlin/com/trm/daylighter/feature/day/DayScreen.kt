@@ -10,17 +10,49 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,7 +61,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -54,11 +92,29 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
 import com.trm.daylighter.core.common.model.DayPeriod
-import com.trm.daylighter.core.common.util.ext.*
-import com.trm.daylighter.core.domain.model.*
+import com.trm.daylighter.core.common.util.ext.currentDayMode
+import com.trm.daylighter.core.common.util.ext.currentPeriodIn
+import com.trm.daylighter.core.common.util.ext.dayLengthDiffPrefix
+import com.trm.daylighter.core.common.util.ext.dayLengthDiffTime
+import com.trm.daylighter.core.common.util.ext.formatTimeDifference
+import com.trm.daylighter.core.common.util.ext.formatTimeMillis
+import com.trm.daylighter.core.common.util.ext.formatTimeUntilNow
+import com.trm.daylighter.core.common.util.ext.secondsUntilNow
+import com.trm.daylighter.core.common.util.ext.takeIfInstance
+import com.trm.daylighter.core.common.util.ext.timeZoneDiffLabelBetween
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.domain.model.Loadable
+import com.trm.daylighter.core.domain.model.Loading
+import com.trm.daylighter.core.domain.model.LoadingFirst
+import com.trm.daylighter.core.domain.model.Location
+import com.trm.daylighter.core.domain.model.LocationSunriseSunsetChange
+import com.trm.daylighter.core.domain.model.Ready
+import com.trm.daylighter.core.domain.model.SunriseSunset
+import com.trm.daylighter.core.domain.model.WithData
+import com.trm.daylighter.core.domain.model.WithoutData
+import com.trm.daylighter.core.domain.model.dataOrElse
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
@@ -76,15 +132,16 @@ import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import com.trm.daylighter.core.common.R as commonR
 
 const val dayNightCycleRoute = "day_night_cycle_route"
 const val goldenBlueHourRoute = "golden_blue_hour_route"
@@ -305,7 +362,7 @@ internal fun DayScreen(
     DayTopAppBar(
       change = currentChange,
       chartMode = chartMode,
-      colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
       navigationIcon = {
         if (showNavigationIcon) {
           DrawerMenuIconButton(
@@ -471,7 +528,7 @@ private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
   chartMode: DayPeriodChartMode,
   modifier: Modifier = Modifier,
-  colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
+  colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
   trailing: @Composable () -> Unit = {},
 ) {

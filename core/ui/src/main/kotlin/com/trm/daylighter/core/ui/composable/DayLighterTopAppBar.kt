@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 fun DayLighterTopAppBar(
   title: String,
   modifier: Modifier = Modifier,
-  colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
+  colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
   actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -53,7 +53,7 @@ fun DayLighterTopAppBar(
 @Composable
 fun appBarTextStyle(): TextStyle =
   MaterialTheme.typography.titleLarge.copy(
-    fontWeight = FontWeight.SemiBold,
+    fontWeight = FontWeight.Medium,
     shadow =
       Shadow(
         color = MaterialTheme.colorScheme.inverseOnSurface,
