@@ -534,7 +534,7 @@ private fun ModalSheetContent(
       modifier = Modifier.padding(12.dp).fillMaxWidth(),
     )
 
-    TextField(
+    OutlinedTextField(
       value = nameValue,
       onValueChange = onNameValueChange,
       label = { Text(text = stringResource(R.string.name)) },
@@ -570,7 +570,7 @@ private fun ModalSheetContent(
             LocationNameError.NO_ERROR -> ""
           },
         fontSize = 14.sp,
-        color = Color.Red,
+        color = MaterialTheme.colorScheme.error,
       )
     }
 
@@ -617,9 +617,9 @@ private fun ModalSheetButtonsRow(
       )
     }
 
-    Spacer(modifier = Modifier.width(4.dp))
+    Spacer(modifier = Modifier.width(8.dp))
 
-    OutlinedButton(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
+    Button(onClick = onSaveClick, modifier = Modifier.weight(.5f)) {
       Text(
         text = stringResource(R.string.save),
         maxLines = 1,
@@ -646,9 +646,9 @@ private fun ModalSheetButtons(
     )
   }
 
-  Spacer(modifier = Modifier.height(4.dp))
+  Spacer(modifier = Modifier.height(8.dp))
 
-  OutlinedButton(
+  Button(
     onClick = onSaveClick,
     modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
   ) {
