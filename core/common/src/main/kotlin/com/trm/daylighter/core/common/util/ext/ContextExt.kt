@@ -1,10 +1,8 @@
 package com.trm.daylighter.core.common.util.ext
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -20,13 +18,6 @@ import com.trm.daylighter.core.common.R as commonR
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.tasks.await
-
-fun Context.getActivity(): Activity? =
-  when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
-  }
 
 fun Context.goToUrlInBrowser(url: String) {
   try {
@@ -75,7 +66,7 @@ suspend fun Context.checkLocationSettings(): CheckLocationSettingsResult =
                 IntentSenderRequest.Builder(exception.resolution).build()
               )
             )
-          } catch (ex: IntentSender.SendIntentException) {
+          } catch (_: IntentSender.SendIntentException) {
             continuation.resume(CheckLocationSettingsResult.DisabledNonResolvable)
           }
         } else {

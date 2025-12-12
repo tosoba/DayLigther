@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -636,7 +637,7 @@ private fun ToastMessageEffect(@StringRes message: Int?) {
 private fun rememberLocationPermissionsResultLauncher(
   userLocationRequestState: UserLocationRequestState
 ): ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>> {
-  val context = LocalContext.current
+  val activity = requireNotNull(LocalActivity.current)
   return rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
     permissionsMap ->
     val allGranted = permissionsMap.values.all { it }
@@ -646,10 +647,7 @@ private fun rememberLocationPermissionsResultLauncher(
     } else {
       val shouldShowRationale =
         userLocationRequestState.locationPermissions.any { permission ->
-          ActivityCompat.shouldShowRequestPermissionRationale(
-            requireNotNull(context.getActivity()),
-            permission,
-          )
+          ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
         }
       userLocationRequestState.permissionRequestMode =
         if (shouldShowRationale) PermissionRequestMode.PERMISSION_REQUEST_DIALOG

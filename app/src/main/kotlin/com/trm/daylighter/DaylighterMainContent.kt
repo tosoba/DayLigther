@@ -2,6 +2,7 @@ package com.trm.daylighter
 
 import android.appwidget.AppWidgetManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -28,7 +29,6 @@ import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.nextLevelNavOptions
 import com.trm.daylighter.core.common.navigation.topLevelNavOptions
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
-import com.trm.daylighter.core.common.util.ext.getActivity
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.feature.about.AboutScreen
@@ -231,7 +231,7 @@ private fun DayLighterNavHost(
   NavHost(
     navController = navController,
     startDestination =
-      when (context.getActivity()?.intent?.data?.pathSegments?.firstOrNull()) {
+      when (LocalActivity.current?.intent?.data?.pathSegments?.firstOrNull()) {
         GOLDEN_BLUE_HOUR_PATH_SEGMENT -> goldenBlueHourRoute
         WIDGET_LOCATION_PATH_SEGMENT -> widgetLocationRoute
         else -> dayNightCycleRoute
