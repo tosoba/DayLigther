@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -30,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -59,14 +57,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -116,11 +109,11 @@ import com.trm.daylighter.core.domain.model.WithData
 import com.trm.daylighter.core.domain.model.WithoutData
 import com.trm.daylighter.core.domain.model.dataOrElse
 import com.trm.daylighter.core.domain.util.ext.dayLengthSecondsAtLocation
+import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.composable.DrawerMenuIconButton
 import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.SingleLineAutoSizeText
-import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
@@ -356,9 +349,11 @@ internal fun DayScreen(
       }
     }
 
-    var trailingSpacerWidthPx: Int? by remember { mutableStateOf(0) }
     val showNavigationIcon =
       !usingPermanentNavigationDrawer && (usingNavigationBar || locations is Empty)
+    val constrainClockAndDayLengthCardToAppBarBottom =
+      LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
+
     DayTopAppBar(
       change = currentChange,
       chartMode = chartMode,
@@ -371,19 +366,16 @@ internal fun DayScreen(
           )
         }
       },
-      trailing = {
-        Spacer(
-          modifier =
-            Modifier.width(
-              trailingSpacerWidthPx?.let { with(LocalDensity.current) { it.toDp() } } ?: 0.dp
-            )
-        )
-      },
       modifier =
         Modifier.constrainAs(topAppBar) {
             linkTo(
               start = if (usingNavigationBar) mainContent.start else navigation.end,
-              end = mainContent.end,
+              end =
+                if (locations is Ready && !constrainClockAndDayLengthCardToAppBarBottom) {
+                  dayTimeCard.start
+                } else {
+                  mainContent.end
+                },
             )
             top.linkTo(parent.top)
             width = Dimension.fillToConstraints
@@ -458,8 +450,6 @@ internal fun DayScreen(
       }
     }
 
-    val constrainClockAndDayLengthCardToAppBarBottom =
-      LocalHeightSizeClass.current != WindowHeightSizeClass.Compact
     AnimatedVisibility(
       visible = locations is Ready,
       enter = fadeIn(),
@@ -478,17 +468,10 @@ internal fun DayScreen(
         chartMode = chartMode,
         modifier =
           Modifier.widthIn(
-              max =
-                with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } *
-                  0.4f
-            )
-            .run {
-              if (!constrainClockAndDayLengthCardToAppBarBottom) {
-                onGloballyPositioned { trailingSpacerWidthPx = it.size.width }
-              } else {
-                this
-              }
-            },
+            max =
+              with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } *
+                0.4f
+          ),
       )
     }
 
@@ -527,58 +510,15 @@ private fun EditLocationButton(onClick: () -> Unit, modifier: Modifier = Modifie
 private fun DayTopAppBar(
   change: StableLoadable<LocationSunriseSunsetChange>,
   chartMode: DayPeriodChartMode,
+  colors: TopAppBarColors,
   modifier: Modifier = Modifier,
-  colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
   navigationIcon: @Composable () -> Unit = {},
-  trailing: @Composable () -> Unit = {},
 ) {
-  CenterAlignedTopAppBar(
+  DayLighterTopAppBar(
     modifier = modifier,
     colors = colors,
     navigationIcon = navigationIcon,
-    title = {
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Box(
-          modifier =
-            Modifier.weight(1f)
-              .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-              .drawWithContent {
-                drawContent()
-                drawRect(
-                  brush =
-                    Brush.horizontalGradient(
-                      0f to Color.Transparent,
-                      0.05f to Color.Black,
-                      0.95f to Color.Black,
-                      1f to Color.Transparent,
-                    ),
-                  blendMode = BlendMode.DstIn,
-                )
-              }
-        ) {
-          DayTopAppBarTitle(
-            change = change,
-            chartMode = chartMode,
-            modifier =
-              Modifier.basicMarquee(iterations = Int.MAX_VALUE)
-                .align(Alignment.Center)
-                .padding(12.dp),
-          )
-        }
-        trailing()
-      }
-    },
-  )
-}
-
-@Composable
-private fun DayTopAppBarTitle(
-  change: StableLoadable<LocationSunriseSunsetChange>,
-  chartMode: DayPeriodChartMode,
-  modifier: Modifier,
-) {
-  Text(
-    text =
+    title =
       change.value
         .map { (location) -> location.name }
         .dataOrElse(
@@ -589,10 +529,6 @@ private fun DayTopAppBarTitle(
             }
           )
         ),
-    style = appBarTextStyle(),
-    maxLines = 1,
-    textAlign = TextAlign.Center,
-    modifier = modifier,
   )
 }
 

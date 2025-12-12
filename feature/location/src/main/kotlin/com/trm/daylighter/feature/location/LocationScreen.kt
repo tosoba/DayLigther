@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -76,7 +75,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -88,8 +86,8 @@ import com.trm.daylighter.core.common.util.ext.checkLocationSettings
 import com.trm.daylighter.core.common.util.ext.checkPermissions
 import com.trm.daylighter.core.common.util.ext.isValidEmail
 import com.trm.daylighter.core.ui.composable.AlertDialogHeader
+import com.trm.daylighter.core.ui.composable.DayLighterTopAppBar
 import com.trm.daylighter.core.ui.composable.EditTextPrefAlertDialog
-import com.trm.daylighter.core.ui.composable.appBarTextStyle
 import com.trm.daylighter.core.ui.composable.rememberMapViewWithLifecycle
 import com.trm.daylighter.core.ui.local.LocalHeightSizeClass
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
@@ -425,21 +423,11 @@ private fun LocationAppBar(
   onBackClick: () -> Unit,
   onInfoClick: () -> Unit,
 ) {
-  CenterAlignedTopAppBar(
+  DayLighterTopAppBar(
     modifier = Modifier.background(surfaceToTransparentVerticalGradient),
     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-    title = {
-      Text(
-        text =
-          mapPosition.label.takeIf(String::isNotEmpty)
-            ?: stringResource(commonR.string.new_location),
-        style = appBarTextStyle(),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 12.dp),
-      )
-    },
+    title =
+      mapPosition.label.takeIf(String::isNotEmpty) ?: stringResource(commonR.string.new_location),
     navigationIcon = {
       SmallFloatingActionButton(
         onClick = onBackClick,

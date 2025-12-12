@@ -2,7 +2,6 @@ package com.trm.daylighter.core.ui.composable
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,8 +15,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,12 +35,7 @@ fun DayLighterTopAppBar(
         text = title,
         style = appBarTextStyle(),
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-        modifier =
-          Modifier.fillMaxWidth()
-            .basicMarquee(iterations = Int.MAX_VALUE)
-            .padding(horizontal = 12.dp),
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE).padding(horizontal = 12.dp),
       )
     },
     actions = actions,
