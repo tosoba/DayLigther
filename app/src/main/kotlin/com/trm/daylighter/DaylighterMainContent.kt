@@ -118,6 +118,7 @@ private fun DayLighterDrawerContent(
       label = { Text(label) },
       selected = currentRoute.startsWith(route),
       onClick = { onRouteSelected(route) },
+      modifier = Modifier.padding(horizontal = 16.dp),
     )
   }
 
