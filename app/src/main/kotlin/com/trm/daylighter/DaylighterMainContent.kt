@@ -3,13 +3,17 @@ package com.trm.daylighter
 import android.appwidget.AppWidgetManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -29,7 +33,10 @@ import com.trm.daylighter.core.common.navigation.newLocationDeepLinkPattern
 import com.trm.daylighter.core.common.navigation.nextLevelNavOptions
 import com.trm.daylighter.core.common.navigation.topLevelNavOptions
 import com.trm.daylighter.core.common.navigation.widgetLocationDeepLinkPattern
+import com.trm.daylighter.core.domain.model.Empty
+import com.trm.daylighter.core.ui.composable.DayPeriodChart
 import com.trm.daylighter.core.ui.model.DayPeriodChartMode
+import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import com.trm.daylighter.feature.about.AboutScreen
 import com.trm.daylighter.feature.about.aboutRoute
@@ -126,59 +133,81 @@ private fun DayLighterDrawerContent(
     windowInsets =
       WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
   ) {
-    Spacer(modifier = Modifier.height(16.dp))
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+      Spacer(modifier = Modifier.height(16.dp))
 
-    DrawerRouteItem(
-      label = stringResource(commonR.string.day_night_cycle),
-      route = dayNightCycleRoute,
-    ) {
-      Icon(
-        painter = painterResource(commonR.drawable.day_night_cycle),
-        contentDescription = stringResource(commonR.string.day_night_cycle),
-      )
-    }
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+          Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surfaceVariant),
+      ) {
+        DayPeriodChart(change = Empty.asStable(), modifier = Modifier.size(96.dp))
 
-    DrawerRouteItem(
-      label = stringResource(commonR.string.golden_blue_hour),
-      route = goldenBlueHourRoute,
-    ) {
-      Icon(
-        imageVector = Icons.Filled.PhotoCamera,
-        contentDescription = stringResource(commonR.string.golden_blue_hour),
-      )
-    }
+        Text(
+          text = stringResource(R.string.app_name),
+          style = MaterialTheme.typography.headlineSmall,
+        )
 
-    if (appWidgetManager.isRequestPinAppWidgetSupported) {
-      DrawerRouteItem(label = stringResource(commonR.string.widgets), route = widgetLocationRoute) {
+        Spacer(modifier = Modifier.width(16.dp))
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      DrawerRouteItem(
+        label = stringResource(commonR.string.day_night_cycle),
+        route = dayNightCycleRoute,
+      ) {
         Icon(
-          imageVector = Icons.Filled.Widgets,
-          contentDescription = stringResource(commonR.string.widgets),
+          painter = painterResource(commonR.drawable.day_night_cycle),
+          contentDescription = stringResource(commonR.string.day_night_cycle),
         )
       }
-    }
 
-    DrawerRouteItem(label = stringResource(commonR.string.locations), route = locationsRoute) {
-      Icon(
-        imageVector = Icons.Filled.LocationOn,
-        contentDescription = stringResource(commonR.string.locations),
-      )
-    }
+      DrawerRouteItem(
+        label = stringResource(commonR.string.golden_blue_hour),
+        route = goldenBlueHourRoute,
+      ) {
+        Icon(
+          imageVector = Icons.Filled.PhotoCamera,
+          contentDescription = stringResource(commonR.string.golden_blue_hour),
+        )
+      }
 
-    DrawerRouteItem(label = stringResource(commonR.string.settings), route = settingsRoute) {
-      Icon(
-        imageVector = Icons.Filled.Settings,
-        contentDescription = stringResource(commonR.string.settings),
-      )
-    }
+      if (appWidgetManager.isRequestPinAppWidgetSupported) {
+        DrawerRouteItem(
+          label = stringResource(commonR.string.widgets),
+          route = widgetLocationRoute,
+        ) {
+          Icon(
+            imageVector = Icons.Filled.Widgets,
+            contentDescription = stringResource(commonR.string.widgets),
+          )
+        }
+      }
 
-    DrawerRouteItem(label = stringResource(commonR.string.about), route = aboutRoute) {
-      Icon(
-        imageVector = Icons.Filled.Info,
-        contentDescription = stringResource(commonR.string.about),
-      )
-    }
+      DrawerRouteItem(label = stringResource(commonR.string.locations), route = locationsRoute) {
+        Icon(
+          imageVector = Icons.Filled.LocationOn,
+          contentDescription = stringResource(commonR.string.locations),
+        )
+      }
 
-    Spacer(modifier = Modifier.height(16.dp))
+      DrawerRouteItem(label = stringResource(commonR.string.settings), route = settingsRoute) {
+        Icon(
+          imageVector = Icons.Filled.Settings,
+          contentDescription = stringResource(commonR.string.settings),
+        )
+      }
+
+      DrawerRouteItem(label = stringResource(commonR.string.about), route = aboutRoute) {
+        Icon(
+          imageVector = Icons.Filled.Info,
+          contentDescription = stringResource(commonR.string.about),
+        )
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+    }
   }
 }
 
