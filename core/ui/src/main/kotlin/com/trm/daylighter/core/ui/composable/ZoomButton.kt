@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,7 +20,7 @@ import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.ui.util.NoRippleInteractionSource
 
 @Composable
-fun ZoomButtonsRow(
+fun ZoomButtons(
   zoom: Double,
   incrementZoom: () -> Unit,
   decrementZoom: () -> Unit,
@@ -28,24 +28,24 @@ fun ZoomButtonsRow(
 ) {
   Row(modifier = modifier) {
     ZoomButton(
-      enabled = zoom < MapDefaults.MAX_ZOOM,
-      onClick = { if (zoom < MapDefaults.MAX_ZOOM) incrementZoom() },
-    ) {
-      Icon(
-        imageVector = Icons.Filled.ZoomIn,
-        contentDescription = stringResource(commonR.string.zoom_in),
-      )
-    }
-
-    Spacer(modifier = Modifier.width(12.dp))
-
-    ZoomButton(
       enabled = zoom > MapDefaults.MIN_ZOOM,
       onClick = { if (zoom > MapDefaults.MIN_ZOOM) decrementZoom() },
     ) {
       Icon(
         imageVector = Icons.Filled.ZoomOut,
         contentDescription = stringResource(commonR.string.zoom_out),
+      )
+    }
+
+    Spacer(modifier = Modifier.width(16.dp))
+
+    ZoomButton(
+      enabled = zoom < MapDefaults.MAX_ZOOM,
+      onClick = { if (zoom < MapDefaults.MAX_ZOOM) incrementZoom() },
+    ) {
+      Icon(
+        imageVector = Icons.Filled.ZoomIn,
+        contentDescription = stringResource(commonR.string.zoom_in),
       )
     }
   }
@@ -58,11 +58,11 @@ fun ZoomButton(
   onClick: () -> Unit,
   icon: @Composable () -> Unit,
 ) {
-  FloatingActionButton(
+  SmallFloatingActionButton(
     modifier = modifier,
     onClick = onClick,
     containerColor =
-      FloatingActionButtonDefaults.containerColor.run { if (enabled) this else copy(alpha = .95f) },
+      FloatingActionButtonDefaults.containerColor.run { if (enabled) this else copy(alpha = .5f) },
     elevation =
       FloatingActionButtonDefaults.run { if (enabled) elevation() else bottomAppBarFabElevation() },
     interactionSource =

@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,9 +34,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
@@ -74,13 +76,12 @@ import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
-import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
+import com.trm.daylighter.core.ui.composable.ZoomButtons
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
 import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
-import com.trm.daylighter.core.common.R as commonR
 
 const val locationsRoute = "locations_route"
 
@@ -185,23 +186,26 @@ private fun LocationsScreen(
                 }
             )
 
-            ZoomButtonsRow(
-              zoom = zoom,
-              incrementZoom = { ++zoom },
-              decrementZoom = { --zoom },
-              modifier = Modifier.align(Alignment.BottomStart).padding(bottomButtonsPaddingDp),
-            )
-
-            FloatingActionButton(
-              onClick = onNewLocationClick,
+            Column(
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
                   .onGloballyPositioned { bottomButtonsHeightPx = it.size.height },
+              horizontalAlignment = Alignment.End,
             ) {
-              Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(commonR.string.new_location),
+              ZoomButtons(zoom = zoom, incrementZoom = { ++zoom }, decrementZoom = { --zoom })
+
+              Spacer(modifier = Modifier.height(16.dp))
+
+              ExtendedFloatingActionButton(
+                onClick = onNewLocationClick,
+                icon = {
+                  Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(commonR.string.new_location),
+                  )
+                },
+                text = { Text(stringResource(commonR.string.new_location)) },
               )
             }
           }

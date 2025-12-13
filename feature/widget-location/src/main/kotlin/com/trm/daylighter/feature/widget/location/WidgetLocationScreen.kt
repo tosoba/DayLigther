@@ -1,9 +1,8 @@
 package com.trm.daylighter.feature.widget.location
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -60,6 +59,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.MapDefaults
 import com.trm.daylighter.core.domain.model.Empty
 import com.trm.daylighter.core.domain.model.Loadable
@@ -75,7 +75,7 @@ import com.trm.daylighter.core.ui.composable.InfoButtonCard
 import com.trm.daylighter.core.ui.composable.LocationNameGradientOverlay
 import com.trm.daylighter.core.ui.composable.LocationNameLabel
 import com.trm.daylighter.core.ui.composable.MarkerIcon
-import com.trm.daylighter.core.ui.composable.ZoomButtonsRow
+import com.trm.daylighter.core.ui.composable.ZoomButtons
 import com.trm.daylighter.core.ui.local.LocalWidthSizeClass
 import com.trm.daylighter.core.ui.model.StableValue
 import com.trm.daylighter.core.ui.model.asStable
@@ -83,7 +83,6 @@ import com.trm.daylighter.core.ui.theme.backgroundToTransparentVerticalGradient
 import com.trm.daylighter.core.ui.util.ext.fullWidthSpan
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
 import kotlinx.coroutines.flow.collectLatest
-import com.trm.daylighter.core.common.R as commonR
 
 const val widgetLocationRoute = "widget_location_route"
 
@@ -142,8 +141,7 @@ private fun WidgetLocationScreen(
     var zoom by rememberSaveable { mutableDoubleStateOf(MapDefaults.INITIAL_LOCATION_ZOOM) }
 
     val bottomButtonsPaddingDp = 16.dp
-    var addWidgetButtonsHeightPx by remember { mutableIntStateOf(0) }
-    var zoomButtonsRowHeightPx by remember { mutableIntStateOf(0) }
+    var bottomButtonsHeightPx by remember { mutableIntStateOf(0) }
 
     @Composable
     fun TopAppBar(modifier: Modifier = Modifier) {
@@ -193,14 +191,7 @@ private fun WidgetLocationScreen(
                   modifier =
                     Modifier.height(
                       bottomButtonsPaddingDp * 2 +
-                        with(LocalDensity.current) {
-                          if (selectedLocationId == null) {
-                              zoomButtonsRowHeightPx
-                            } else {
-                              addWidgetButtonsHeightPx
-                            }
-                            .toDp()
-                        }
+                        with(LocalDensity.current) { bottomButtonsHeightPx.toDp() }
                     )
                 )
               }
@@ -213,34 +204,24 @@ private fun WidgetLocationScreen(
                 }
             )
 
-            androidx.compose.animation.AnimatedVisibility(
-              visible = selectedLocationId == null,
-              enter = fadeIn(),
-              exit = fadeOut(),
-              modifier =
-                Modifier.align(Alignment.BottomStart)
-                  .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { zoomButtonsRowHeightPx = it.size.height },
-            ) {
-              ZoomButtonsRow(zoom = zoom, incrementZoom = { ++zoom }, decrementZoom = { --zoom })
-            }
-
-            androidx.compose.animation.AnimatedVisibility(
-              visible = selectedLocationId != null,
-              enter = fadeIn(),
-              exit = fadeOut(),
+            AnimatedContent(
+              targetState = selectedLocationId == null,
               modifier =
                 Modifier.align(Alignment.BottomEnd)
                   .padding(bottomButtonsPaddingDp)
-                  .onGloballyPositioned { addWidgetButtonsHeightPx = it.size.height },
+                  .onGloballyPositioned { bottomButtonsHeightPx = it.size.height },
             ) {
-              ConfirmLocationSelectionControls(
-                modifier = Modifier.width(IntrinsicSize.Max),
-                mode = mode,
-                onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
-                onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
-                onConfirmEditWidgetLocationClick = onConfirmEditWidgetLocationClick,
-              )
+              if (it) {
+                ZoomButtons(zoom = zoom, incrementZoom = { ++zoom }, decrementZoom = { --zoom })
+              } else {
+                ConfirmLocationSelectionControls(
+                  modifier = Modifier.width(IntrinsicSize.Max),
+                  mode = mode,
+                  onConfirmDayNightCycleLocationSelectionClick = onAddDayNightCycleWidget,
+                  onConfirmGoldenBlueHourLocationSelectionClick = onAddGoldenBlueHourWidget,
+                  onConfirmEditWidgetLocationClick = onConfirmEditWidgetLocationClick,
+                )
+              }
             }
           }
         }
