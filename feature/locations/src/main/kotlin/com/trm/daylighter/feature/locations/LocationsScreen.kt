@@ -336,7 +336,11 @@ private fun LocationDropDrownMenu(
 ) {
   Box(modifier = modifier) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    IconButton(onClick = { expanded = true }, modifier = Modifier.align(Alignment.BottomEnd)) {
+
+    FilledTonalIconButton(
+      onClick = { expanded = true },
+      modifier = Modifier.align(Alignment.BottomEnd),
+    ) {
       Icon(
         imageVector = Icons.Default.MoreVert,
         contentDescription = stringResource(R.string.location_actions),

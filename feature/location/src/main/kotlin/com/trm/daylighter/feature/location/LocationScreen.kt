@@ -46,6 +46,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -54,7 +55,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -81,6 +81,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.util.ext.CheckLocationSettingsResult
 import com.trm.daylighter.core.common.util.ext.checkLocationSettings
 import com.trm.daylighter.core.common.util.ext.checkPermissions
@@ -104,7 +105,6 @@ import com.trm.daylighter.feature.location.util.restorePosition
 import com.trm.daylighter.feature.location.util.setDefaultConfig
 import org.osmdroid.views.MapView
 import timber.log.Timber
-import com.trm.daylighter.core.common.R as commonR
 
 const val locationRoute = "location_route"
 const val locationIdParam = "location_id"
@@ -429,10 +429,7 @@ private fun LocationAppBar(
     title =
       mapPosition.label.takeIf(String::isNotEmpty) ?: stringResource(commonR.string.new_location),
     navigationIcon = {
-      SmallFloatingActionButton(
-        onClick = onBackClick,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp),
-      ) {
+      FilledTonalIconButton(onClick = onBackClick) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = stringResource(commonR.string.back),
@@ -441,10 +438,7 @@ private fun LocationAppBar(
       }
     },
     actions = {
-      SmallFloatingActionButton(
-        onClick = onInfoClick,
-        modifier = Modifier.padding(end = 4.dp, top = 4.dp),
-      ) {
+      FilledTonalIconButton(onClick = onInfoClick) {
         Icon(
           imageVector = Icons.Filled.Info,
           contentDescription = stringResource(R.string.location_info_dialog_text),
