@@ -85,6 +85,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.trm.daylighter.core.common.R as commonR
 import com.trm.daylighter.core.common.model.DayMode
 import com.trm.daylighter.core.common.model.DayPeriod
 import com.trm.daylighter.core.common.util.ext.currentDayMode
@@ -125,16 +126,15 @@ import com.trm.daylighter.core.ui.util.ext.color
 import com.trm.daylighter.core.ui.util.ext.textColor
 import com.trm.daylighter.core.ui.util.ext.textShadowColor
 import com.trm.daylighter.core.ui.util.usingPermanentNavigationDrawer
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import com.trm.daylighter.core.common.R as commonR
 
 const val dayNightCycleRoute = "day_night_cycle_route"
 const val goldenBlueHourRoute = "golden_blue_hour_route"
@@ -1144,7 +1144,7 @@ private fun DayLengthDiffText(
             fontSize = fontSize,
             fontWeight = FontWeight.Medium,
           ),
-        modifier = Modifier.padding(horizontal = 1.dp),
+        modifier = Modifier.padding(horizontal = 4.dp),
       )
     }
   } else {
