@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -298,9 +299,14 @@ internal fun DayScreen(
                   Modifier.padding(2.dp)
                     .clip(CircleShape)
                     .background(
-                      MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = if (pagerState.currentPage == it) 1.0f else 0.38f
+                      MaterialTheme.colorScheme.tertiary.copy(
+                        alpha = if (pagerState.currentPage == it) 1f else .25f
                       )
+                    )
+                    .border(
+                      width = 1.dp,
+                      color = MaterialTheme.colorScheme.onTertiary,
+                      shape = CircleShape,
                     )
                     .size(12.dp)
               )
