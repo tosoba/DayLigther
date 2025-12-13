@@ -147,7 +147,7 @@ private fun LocationsScreen(
             DayPeriodChart(change = Empty.asStable(), modifier = Modifier.fillMaxSize().alpha(.15f))
 
             LazyVerticalGrid(
-              contentPadding = PaddingValues(12.dp),
+              contentPadding = PaddingValues(8.dp),
               columns = GridCells.Adaptive(175.dp),
             ) {
               item(span = LazyGridItemSpanScope::fullWidthSpan) {
@@ -159,7 +159,7 @@ private fun LocationsScreen(
 
               items(locations.data, key = { it.value.id }) { location ->
                 MapCard(
-                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(4.dp),
+                  modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(8.dp),
                   location = location,
                   zoom = zoom,
                   onSetDefaultLocationClick = onSetDefaultLocationClick,
