@@ -19,7 +19,7 @@ enum class DayLighterFlavor(
   val dimension: FlavorDimension,
   val applicationIdSuffix: String? = null,
 ) {
-  demo(FlavorDimension.contentType),
+  dev(FlavorDimension.contentType),
   prod(FlavorDimension.contentType, ".prod"),
 }
 
