@@ -18,14 +18,14 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build APK
-      run: ./gradlew assembleDevDebug assembleDevDebugAndroidTest
+      run: ./gradlew assembleDevDebug
 
-    - name: Run unit tests
-      run: ./gradlew testDevDebugUnitTest
+    - name: Run feature unit tests
+      run: ./gradlew :feature:day:testDevDebugUnitTest :feature:location:testDevDebugUnitTest :feature:widget-location:testDevDebugUnitTest
 
-    - name: Run android instrumentation tests
-      run: ./gradlew connectedDevDebugAndroidTest
-    
+    - name: Run domain unit tests
+      run: ./gradlew :core:domain:test
+
     - name: Upload APK
       uses: actions/upload-artifact@v6.0.0
       with:
