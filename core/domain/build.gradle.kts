@@ -3,6 +3,8 @@ plugins {
   id("kotlinx-serialization")
 }
 
+kotlin { compilerOptions { freeCompilerArgs.add("-Xannotation-default-target=param-property") } }
+
 dependencies {
   implementation(libs.commons.codec)
   implementation(libs.kotlinx.coroutines.android)

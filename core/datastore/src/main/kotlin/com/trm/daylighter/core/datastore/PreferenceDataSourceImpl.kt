@@ -5,14 +5,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.trm.daylighter.core.domain.repo.PreferenceDataSource
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 class PreferenceDataSourceImpl
 @Inject
-constructor(@param:ApplicationContext private val context: Context) : PreferenceDataSource {
+constructor(@ApplicationContext private val context: Context) : PreferenceDataSource {
   private val geocodingEmailKey = stringPreferencesKey(PreferencesDataStoreKeys.GEOCODING_EMAIL)
 
   override fun isGeocodingEmailPreferenceSetFlow(): Flow<Boolean> =

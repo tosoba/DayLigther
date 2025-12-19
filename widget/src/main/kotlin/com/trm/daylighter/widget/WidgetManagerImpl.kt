@@ -20,7 +20,7 @@ import javax.inject.Inject
 class WidgetManagerImpl
 @Inject
 constructor(
-  @param:ApplicationContext private val context: Context,
+  @ApplicationContext private val context: Context,
   private val getLocationSunriseSunsetChangeByIdUseCase: GetLocationSunriseSunsetChangeByIdUseCase,
 ) : WidgetManager {
   override fun updateAllLocationWidgets() {

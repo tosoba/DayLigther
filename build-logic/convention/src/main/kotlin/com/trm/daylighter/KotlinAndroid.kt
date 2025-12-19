@@ -34,6 +34,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension<*, 
       allWarningsAsErrors.set(warningsAsErrors.toBoolean())
 
       freeCompilerArgs.addAll(
+        "-Xannotation-default-target=param-property",
         "-opt-in=kotlin.RequiresOptIn",
         // Enable experimental coroutines APIs, including Flow
         "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
