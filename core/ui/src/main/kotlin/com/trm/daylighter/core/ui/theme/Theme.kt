@@ -90,6 +90,7 @@ fun DayLighterTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compos
   }
   MaterialTheme(
     colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+    typography = Typography,
     content = content,
   )
 }
