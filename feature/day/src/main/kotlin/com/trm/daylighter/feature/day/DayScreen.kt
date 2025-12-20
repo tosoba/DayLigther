@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -473,10 +472,8 @@ internal fun DayScreen(
         change = currentChange,
         chartMode = chartMode,
         modifier =
-          Modifier.widthIn(
-            max =
-              with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } *
-                0.4f
+          Modifier.fillMaxWidth(
+            if (LocalWidthSizeClass.current == WindowWidthSizeClass.Compact) .4f else .25f
           ),
       )
     }
@@ -551,12 +548,12 @@ private fun ClockAndDayLengthCard(
   Surface(
     shape = CardDefaults.shape,
     color = dayPeriod.value.color(),
-    shadowElevation = 6.dp,
+    shadowElevation = 4.dp,
     modifier = modifier,
   ) {
     change.value.takeIfInstance<WithData<LocationSunriseSunsetChange>>()?.let {
       val (location, today, _) = it.data
-      ConstraintLayout(modifier = Modifier.padding(8.dp)) {
+      ConstraintLayout(modifier = Modifier.padding(vertical = 8.dp)) {
         val (clock, timezoneDiff, nextPeriodTimer, divider, lengthInfo) = createRefs()
 
         Clock(
@@ -574,8 +571,8 @@ private fun ClockAndDayLengthCard(
           modifier =
             Modifier.constrainAs(timezoneDiff) {
                 top.linkTo(clock.bottom)
-                start.linkTo(parent.start, 4.dp)
-                end.linkTo(parent.end, 4.dp)
+                start.linkTo(parent.start, 8.dp)
+                end.linkTo(parent.end, 8.dp)
               }
               .basicMarquee(iterations = Int.MAX_VALUE),
           zoneId = location.zoneId,
@@ -586,8 +583,8 @@ private fun ClockAndDayLengthCard(
           modifier =
             Modifier.constrainAs(nextPeriodTimer) {
               top.linkTo(timezoneDiff.bottom)
-              start.linkTo(parent.start, 4.dp)
-              end.linkTo(parent.end, 4.dp)
+              start.linkTo(parent.start, 8.dp)
+              end.linkTo(parent.end, 8.dp)
             },
           dayPeriod = dayPeriod.value,
           dayMode = location.zoneId.currentDayMode(),
@@ -603,8 +600,8 @@ private fun ClockAndDayLengthCard(
                 width = Dimension.fillToConstraints
 
                 top.linkTo(nextPeriodTimer.bottom)
-                start.linkTo(parent.start, 4.dp)
-                end.linkTo(parent.end, 4.dp)
+                start.linkTo(parent.start, 8.dp)
+                end.linkTo(parent.end, 8.dp)
               },
             color = dayPeriod.value.textColor(),
           )
@@ -613,8 +610,8 @@ private fun ClockAndDayLengthCard(
             modifier =
               Modifier.constrainAs(lengthInfo) {
                 top.linkTo(divider.bottom)
-                start.linkTo(parent.start, 4.dp)
-                end.linkTo(parent.end, 4.dp)
+                start.linkTo(parent.start, 8.dp)
+                end.linkTo(parent.end, 8.dp)
               },
             change = it.data,
             dayPeriod = dayPeriod.value,
